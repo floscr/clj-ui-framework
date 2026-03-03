@@ -1,0 +1,43 @@
+.card {
+  background: var(--bg-1);
+  color: var(--fg-0);
+  border: var(--border-0);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-0);
+  overflow: hidden;
+}
+
+.card-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-1);
+  padding: var(--size-6);
+  padding-bottom: 0;
+}
+
+.card-header h1,
+.card-header h2,
+.card-header h3,
+.card-header h4,
+.card-header h5,
+.card-header h6 {
+  margin: 0;
+}
+
+.card-header p {
+  font-size: var(--font-sm);
+  color: var(--fg-2);
+  margin: 0;
+}
+
+.card-body {
+  padding: var(--size-6);
+}
+
+.card-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--size-2);
+  padding: var(--size-6);
+  padding-top: 0;
+}

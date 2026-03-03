@@ -1,0 +1,49 @@
+.spinner {
+  display: inline-block;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 2px solid var(--bg-2);
+  border-top-color: var(--accent);
+  border-radius: 9999px;
+  animation: spinner-spin 1s linear infinite;
+}
+
+.spinner-sm {
+  width: 1rem;
+  height: 1rem;
+}
+
+.spinner-lg {
+  width: 2rem;
+  height: 2rem;
+  border-width: 3px;
+}
+
+.spinner-overlay {
+  position: relative;
+}
+
+.spinner-overlay > * {
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+.spinner-overlay::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  z-index: 1;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 2px solid var(--bg-2);
+  border-top-color: var(--accent);
+  border-radius: 9999px;
+  animation: spinner-spin 1s linear infinite;
+}
+
+@keyframes spinner-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

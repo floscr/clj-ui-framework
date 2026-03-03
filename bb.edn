@@ -17,8 +17,36 @@
   {:doc "Run all unit tests"
    :requires ([clojure.test :as t]
               [ui.button-test]
+              [ui.alert-test]
+              [ui.badge-test]
+              [ui.card-test]
+              [ui.accordion-test]
+              [ui.table-test]
+              [ui.dialog-test]
+              [ui.spinner-test]
+              [ui.skeleton-test]
+              [ui.progress-test]
+              [ui.switch-test]
+              [ui.tooltip-test]
+              [ui.breadcrumb-test]
+              [ui.pagination-test]
               [ui.theme-test])
-   :task (let [{:keys [fail error]} (t/run-tests 'ui.button-test 'ui.theme-test)]
+   :task (let [{:keys [fail error]} (t/run-tests
+                                      'ui.button-test
+                                      'ui.alert-test
+                                      'ui.badge-test
+                                      'ui.card-test
+                                      'ui.accordion-test
+                                      'ui.table-test
+                                      'ui.dialog-test
+                                      'ui.spinner-test
+                                      'ui.skeleton-test
+                                      'ui.progress-test
+                                      'ui.switch-test
+                                      'ui.tooltip-test
+                                      'ui.breadcrumb-test
+                                      'ui.pagination-test
+                                      'ui.theme-test)]
            (when (pos? (+ fail error))
              (System/exit 1)))}
 

@@ -1,0 +1,26 @@
+.progress {
+  width: 100%;
+  height: 6px;
+  background: var(--bg-2);
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 9999px;
+  transition: width 300ms ease;
+}
+
+.progress-bar--success {
+  background: var(--success);
+}
+
+.progress-bar--warning {
+  background: var(--warning);
+}
+
+.progress-bar--danger {
+  background: var(--danger);
+}
