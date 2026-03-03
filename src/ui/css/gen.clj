@@ -63,7 +63,6 @@
   margin: 0;
   background: var(--bg-0);
   color: var(--fg-0);
-  transition: background-color 0.2s, color 0.2s;
 }")
 
 (defn collect-component-css
