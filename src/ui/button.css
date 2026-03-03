@@ -46,6 +46,28 @@
   filter: brightness(1.1);
 }
 
+.btn-link {
+  background: transparent;
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: var(--size-1);
+  padding: 0;
+  border: none;
+}
+.btn-link:hover:not(:disabled) {
+  filter: brightness(1.2);
+}
+
+/* Link buttons rendered as <a> need reset styles */
+a.btn {
+  text-decoration: none;
+  color: inherit;
+}
+a.btn-link {
+  text-decoration: underline;
+  color: var(--accent);
+}
+
 .btn-sm {
   padding: var(--size-1) var(--size-2);
   font-size: var(--font-xs);

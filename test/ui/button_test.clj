@@ -9,7 +9,8 @@
   (testing "explicit variant"
     (is (= ["btn" "btn-primary"] (button/button-class-list {:variant :primary})))
     (is (= ["btn" "btn-ghost"] (button/button-class-list {:variant :ghost})))
-    (is (= ["btn" "btn-danger"] (button/button-class-list {:variant :danger}))))
+    (is (= ["btn" "btn-danger"] (button/button-class-list {:variant :danger})))
+    (is (= ["btn" "btn-link"] (button/button-class-list {:variant :link}))))
 
   (testing "explicit size"
     (is (= ["btn" "btn-secondary" "btn-sm"] (button/button-class-list {:size :sm})))
@@ -73,4 +74,26 @@
   (testing "multiple children"
     (let [result (button/button {:variant :primary} "A" "B")]
       (is (= "A" (nth result 2)))
-      (is (= "B" (nth result 3))))))
+      (is (= "B" (nth result 3)))))
+
+  (testing "href renders as <a> tag"
+    (let [result (button/button {:variant :primary :href "/about"} "About")]
+      (is (= :a (first result)))
+      (is (= "/about" (get-in result [1 :href])))
+      (is (= "btn btn-primary" (get-in result [1 :class])))
+      (is (= "About" (nth result 2)))))
+
+  (testing "no href renders as <button> tag"
+    (let [result (button/button {:variant :primary} "Click")]
+      (is (= :button (first result)))))
+
+  (testing "link variant"
+    (let [result (button/button {:variant :link} "Learn more")]
+      (is (= :button (first result)))
+      (is (= "btn btn-link" (get-in result [1 :class])))))
+
+  (testing "link variant with href renders as <a>"
+    (let [result (button/button {:variant :link :href "https://example.com"} "Visit")]
+      (is (= :a (first result)))
+      (is (= "https://example.com" (get-in result [1 :href])))
+      (is (= "btn btn-link" (get-in result [1 :class]))))))

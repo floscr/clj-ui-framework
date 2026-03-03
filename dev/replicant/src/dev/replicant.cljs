@@ -13,7 +13,8 @@
             [ui.switch :as switch]
             [ui.tooltip :as tooltip]
             [ui.breadcrumb :as breadcrumb]
-            [ui.pagination :as pagination]))
+            [ui.pagination :as pagination]
+            [ui.form :as form]))
 
 (defn section [title & children]
   [:section {:style {:margin-bottom "2.5rem"}}
@@ -36,7 +37,12 @@
        (button/button {:variant :primary :size s} (str "size " (name s))))]
     [:div {:style {:display "flex" :gap "0.75rem" :flex-wrap "wrap" :align-items "center"}}
      (for [v button-variants]
-       (button/button {:variant v :disabled true} (str (name v) " disabled")))]))
+       (button/button {:variant v :disabled true} (str (name v) " disabled")))]
+    [:div {:style {:display "flex" :gap "0.75rem" :flex-wrap "wrap" :align-items "center"}}
+     (button/button {:variant :primary :href "#"} "Link primary")
+     (button/button {:variant :secondary :href "#"} "Link secondary")
+     (button/button {:variant :link} "Link button")
+     (button/button {:variant :link :href "https://example.com"} "Link with href")]))
 
 ;; ── Alert ───────────────────────────────────────────────────────────
 (defn alert-demo []
@@ -167,6 +173,53 @@
     (pagination/pagination {:current 3 :total 5
                             :on-click (fn [p] (js/console.log (str "Page: " p)))})))
 
+;; ── Form ────────────────────────────────────────────────────────────
+(defn form-demo []
+  (section "Form"
+    [:form {:style {:max-width "480px"}}
+     (form/form-field {:label "Name"}
+       (form/form-input {:type :text :placeholder "Enter your name"}))
+     (form/form-field {:label "Email"}
+       (form/form-input {:type :email :placeholder "you@example.com"}))
+     (form/form-field {:label "Password" :hint "At least 8 characters"}
+       (form/form-input {:type :password :placeholder "Password"}))
+     (form/form-field {:label "Select"}
+       (form/form-select {:placeholder "Select an option"
+                          :options [{:value "a" :label "Option A"}
+                                    {:value "b" :label "Option B"}
+                                    {:value "c" :label "Option C"}]}))
+     (form/form-field {:label "Message"}
+       (form/form-textarea {:placeholder "Your message..."}))
+     (form/form-field {:label "Disabled"}
+       (form/form-input {:type :text :placeholder "Disabled" :disabled true}))
+     (form/form-field {:label "File"}
+       (form/form-file {}))
+     (form/form-field {:label "Date and time"}
+       (form/form-input {:type :datetime-local}))
+     (form/form-field {:label "Date"}
+       (form/form-input {:type :date}))
+     (form/form-checkbox {:label "I agree to the terms"})
+     (form/form-radio-group {:label "Preference"
+                              :radio-name "pref"
+                              :options [{:value "a" :label "Option A"}
+                                        {:value "b" :label "Option B"}
+                                        {:value "c" :label "Option C"}]})
+     (form/form-field {:label "Volume"}
+       (form/form-range {:min 0 :max 100 :value 50}))
+     (button/button {:variant :primary :attrs {:type "submit"}} "Submit")]
+    ;; Input group
+    [:div {:style {:max-width "480px" :margin-top "1.5rem"}}
+     [:h4 {:style {:margin-bottom "0.75rem"}} "Input group"]
+     (form/form-group {}
+       (form/form-group-addon {} "https://")
+       (form/form-input {:placeholder "subdomain"})
+       (button/button {:variant :primary :size :sm} "Go"))]
+    ;; Validation error
+    [:div {:style {:max-width "480px" :margin-top "1.5rem"}}
+     [:h4 {:style {:margin-bottom "0.75rem"}} "Validation error"]
+     (form/form-field {:label "Email" :error "Please enter a valid email address."}
+       (form/form-input {:type :email :error true :value "invalid-email"}))]))
+
 ;; ── Theme toggle ────────────────────────────────────────────────────
 (defn toggle-theme! [_e]
   (let [el (.-documentElement js/document)
@@ -196,7 +249,8 @@
    (switch-demo)
    (tooltip-demo)
    (breadcrumb-demo)
-   (pagination-demo)])
+   (pagination-demo)
+   (form-demo)])
 
 (defn ^:export init! []
   (d/set-dispatch! (fn [_ _]))

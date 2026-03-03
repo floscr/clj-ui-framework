@@ -1,0 +1,258 @@
+(ns ui.form-test
+  (:require [clojure.test :refer [deftest is testing]]
+            [ui.form :as form]))
+
+;; ── form-field ──────────────────────────────────────────────────────
+
+(deftest form-field-class-list-test
+  (testing "default field"
+    (is (= ["form-field"] (form/form-field-class-list {}))))
+  (testing "with error"
+    (is (= ["form-field" "form-field--error"] (form/form-field-class-list {:error true})))))
+
+(deftest form-field-classes-test
+  (testing "default"
+    (is (= "form-field" (form/form-field-classes {}))))
+  (testing "with error"
+    (is (= "form-field form-field--error" (form/form-field-classes {:error true})))))
+
+(deftest form-field-component-test
+  (testing "renders with label and child"
+    (let [result (form/form-field {:label "Name"} [:input {:type "text"}])]
+      (is (= :div (first result)))
+      (is (= "form-field" (get-in result [1 :class])))
+      ;; label
+      (is (= :label (first (nth result 2))))
+      (is (= "Name" (nth (nth result 2) 2)))
+      ;; child input
+      (is (= :input (first (nth result 3))))))
+
+  (testing "renders hint text"
+    (let [result (form/form-field {:label "Password" :hint "At least 8 characters"} [:input])]
+      (is (some #(and (vector? %) (= :small (first %)) (= "form-hint" (get-in % [1 :class])))
+                result))))
+
+  (testing "renders error text"
+    (let [result (form/form-field {:label "Email" :error "Invalid email"} [:input])]
+      (is (= "form-field form-field--error" (get-in result [1 :class])))
+      (is (some #(and (vector? %) (= :small (first %)) (= "form-error" (get-in % [1 :class])))
+                result))))
+
+  (testing "no label renders without label element"
+    (let [result (form/form-field {} [:input])]
+      (is (= :input (first (nth result 2))))))
+
+  (testing "extra class appended"
+    (let [result (form/form-field {:class "extra"} [:input])]
+      (is (= "form-field extra" (get-in result [1 :class]))))))
+
+;; ── form-input ──────────────────────────────────────────────────────
+
+(deftest form-input-class-list-test
+  (testing "default"
+    (is (= ["form-input"] (form/form-input-class-list {}))))
+  (testing "with error"
+    (is (= ["form-input" "form-input--error"] (form/form-input-class-list {:error true})))))
+
+(deftest form-input-component-test
+  (testing "basic text input"
+    (let [result (form/form-input {:type :text :placeholder "Name"})]
+      (is (= :input (first result)))
+      (is (= "form-input" (get-in result [1 :class])))
+      (is (= "text" (get-in result [1 :type])))
+      (is (= "Name" (get-in result [1 :placeholder])))))
+
+  (testing "email type"
+    (let [result (form/form-input {:type :email})]
+      (is (= "email" (get-in result [1 :type])))))
+
+  (testing "password type"
+    (let [result (form/form-input {:type :password})]
+      (is (= "password" (get-in result [1 :type])))))
+
+  (testing "date type"
+    (let [result (form/form-input {:type :date})]
+      (is (= "date" (get-in result [1 :type])))))
+
+  (testing "datetime-local type"
+    (let [result (form/form-input {:type :datetime-local})]
+      (is (= "datetime-local" (get-in result [1 :type])))))
+
+  (testing "default type is text"
+    (let [result (form/form-input {})]
+      (is (= "text" (get-in result [1 :type])))))
+
+  (testing "disabled"
+    (let [result (form/form-input {:disabled true})]
+      (is (true? (get-in result [1 :disabled])))))
+
+  (testing "with value"
+    (let [result (form/form-input {:value "hello"})]
+      (is (= "hello" (get-in result [1 :value])))))
+
+  (testing "error styling"
+    (let [result (form/form-input {:error true})]
+      (is (= "form-input form-input--error" (get-in result [1 :class]))))))
+
+;; ── form-textarea ───────────────────────────────────────────────────
+
+(deftest form-textarea-class-list-test
+  (testing "default"
+    (is (= ["form-textarea"] (form/form-textarea-class-list {}))))
+  (testing "with error"
+    (is (= ["form-textarea" "form-textarea--error"] (form/form-textarea-class-list {:error true})))))
+
+(deftest form-textarea-component-test
+  (testing "basic textarea"
+    (let [result (form/form-textarea {:placeholder "Message"})]
+      (is (= :textarea (first result)))
+      (is (= "form-textarea" (get-in result [1 :class])))
+      (is (= "Message" (get-in result [1 :placeholder])))))
+
+  (testing "disabled"
+    (let [result (form/form-textarea {:disabled true})]
+      (is (true? (get-in result [1 :disabled])))))
+
+  (testing "with value"
+    (let [result (form/form-textarea {:value "hello"})]
+      (is (= "hello" (nth result 2))))))
+
+;; ── form-select ─────────────────────────────────────────────────────
+
+(deftest form-select-component-test
+  (testing "basic select with options"
+    (let [result (form/form-select {:options [{:value "a" :label "Option A"}
+                                              {:value "b" :label "Option B"}]})]
+      (is (= :select (first result)))
+      (is (= "form-select" (get-in result [1 :class])))
+      ;; two options
+      (is (= 4 (count result)))))
+
+  (testing "with placeholder"
+    (let [result (form/form-select {:placeholder "Pick one"
+                                    :options [{:value "a" :label "A"}]})]
+      ;; select + option A + placeholder option
+      (is (some #(and (vector? %) (= "Pick one" (nth % 2 nil)))
+                (rest (rest result))))))
+
+  (testing "disabled"
+    (let [result (form/form-select {:disabled true :options []})]
+      (is (true? (get-in result [1 :disabled])))))
+
+  (testing "string options"
+    (let [result (form/form-select {:options ["Foo" "Bar"]})]
+      (is (= 4 (count result))))))
+
+;; ── form-checkbox ───────────────────────────────────────────────────
+
+(deftest form-checkbox-component-test
+  (testing "basic checkbox"
+    (let [result (form/form-checkbox {:label "Agree"})]
+      (is (= :label (first result)))
+      (is (= "form-field form-field--inline" (get-in result [1 :class])))
+      ;; has input checkbox
+      (let [input (nth result 2)]
+        (is (= :input (first input)))
+        (is (= "checkbox" (get-in input [1 :type])))
+        (is (= "form-checkbox" (get-in input [1 :class]))))
+      ;; has label text
+      (is (= [:span "Agree"] (nth result 3)))))
+
+  (testing "checked"
+    (let [result (form/form-checkbox {:label "Agree" :checked true})
+          input (nth result 2)]
+      (is (true? (get-in input [1 :checked])))))
+
+  (testing "disabled"
+    (let [result (form/form-checkbox {:disabled true})
+          input (nth result 2)]
+      (is (true? (get-in input [1 :disabled]))))))
+
+;; ── form-radio-group ────────────────────────────────────────────────
+
+(deftest form-radio-group-component-test
+  (testing "basic radio group"
+    (let [result (form/form-radio-group {:label "Preference"
+                                         :radio-name "pref"
+                                         :options [{:value "a" :label "A"}
+                                                   {:value "b" :label "B"}
+                                                   {:value "c" :label "C"}]})]
+      (is (= :fieldset (first result)))
+      (is (= "form-fieldset form-fieldset--inline" (get-in result [1 :class])))
+      ;; legend
+      (is (= :legend (first (nth result 2))))
+      (is (= "Preference" (nth (nth result 2) 2)))
+      ;; three radio labels
+      (is (= 6 (count result))))) ; fieldset + attrs + legend + 3 radios
+
+  (testing "radio with selected value"
+    (let [result (form/form-radio-group {:radio-name "pref"
+                                         :radio-value "b"
+                                         :options [{:value "a" :label "A"}
+                                                   {:value "b" :label "B"}]})
+          ;; find the radio for "b"
+          radio-b (nth result 3) ; second radio (after attrs, no legend since no :label)
+          input-b (nth radio-b 1)]
+      (is (true? (get-in input-b [1 :checked])))))
+
+  (testing "string options"
+    (let [result (form/form-radio-group {:radio-name "x" :options ["X" "Y"]})]
+      ;; 2 radios + attrs = 4 elements
+      (is (= 4 (count result))))))
+
+;; ── form-file ───────────────────────────────────────────────────────
+
+(deftest form-file-component-test
+  (testing "basic file input"
+    (let [result (form/form-file {})]
+      (is (= :input (first result)))
+      (is (= "file" (get-in result [1 :type])))
+      (is (= "form-file" (get-in result [1 :class])))))
+
+  (testing "with accept"
+    (let [result (form/form-file {:accept "image/*"})]
+      (is (= "image/*" (get-in result [1 :accept])))))
+
+  (testing "multiple"
+    (let [result (form/form-file {:multiple true})]
+      (is (true? (get-in result [1 :multiple])))))
+
+  (testing "disabled"
+    (let [result (form/form-file {:disabled true})]
+      (is (true? (get-in result [1 :disabled]))))))
+
+;; ── form-range ──────────────────────────────────────────────────────
+
+(deftest form-range-component-test
+  (testing "basic range"
+    (let [result (form/form-range {:min 0 :max 100 :value 50})]
+      (is (= :input (first result)))
+      (is (= "range" (get-in result [1 :type])))
+      (is (= "form-range" (get-in result [1 :class])))
+      (is (= 0 (get-in result [1 :min])))
+      (is (= 100 (get-in result [1 :max])))
+      (is (= 50 (get-in result [1 :value])))))
+
+  (testing "with step"
+    (let [result (form/form-range {:step 5})]
+      (is (= 5 (get-in result [1 :step])))))
+
+  (testing "disabled"
+    (let [result (form/form-range {:disabled true})]
+      (is (true? (get-in result [1 :disabled]))))))
+
+;; ── form-group ──────────────────────────────────────────────────────
+
+(deftest form-group-component-test
+  (testing "basic group"
+    (let [result (form/form-group {} [:input] [:button "Go"])]
+      (is (= :div (first result)))
+      (is (= "form-group" (get-in result [1 :class])))
+      (is (= 4 (count result))))))
+
+(deftest form-group-addon-component-test
+  (testing "basic addon"
+    (let [result (form/form-group-addon {} "https://")]
+      (is (= :span (first result)))
+      (is (= "form-group-addon" (get-in result [1 :class])))
+      (is (= "https://" (nth result 2))))))
