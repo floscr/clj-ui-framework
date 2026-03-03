@@ -42,12 +42,12 @@
 
     (testing "contains button component CSS"
       (is (str/includes? css ".btn {"))
-      (is (str/includes? css ".btn--primary {"))
-      (is (str/includes? css ".btn--secondary {"))
-      (is (str/includes? css ".btn--ghost {"))
-      (is (str/includes? css ".btn--danger {"))
-      (is (str/includes? css ".btn--sm {"))
-      (is (str/includes? css ".btn--lg {"))
+      (is (str/includes? css ".btn-primary {"))
+      (is (str/includes? css ".btn-secondary {"))
+      (is (str/includes? css ".btn-ghost {"))
+      (is (str/includes? css ".btn-danger {"))
+      (is (str/includes? css ".btn-sm {"))
+      (is (str/includes? css ".btn-lg {"))
       (is (str/includes? css ".btn:disabled {")))))
 
 (deftest tokens-roundtrip-test

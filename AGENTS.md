@@ -10,6 +10,7 @@ src/
   ui/
     theme.cljc               # Token helpers (css-var)
     button.cljc              # Button component (reference implementation)
+    button.css               # Button component styles (read by gen.clj)
     css/gen.clj              # EDN → CSS generator (babashka)
 dist/
   theme.css                  # Generated CSS (tokens + component styles)
@@ -126,33 +127,27 @@ Key rules:
 - **`:squint` branch**: `:class` is a string, `:style` is a string-keyed map, events are flat (`:on-click`)
 - **`:clj` branch**: `:class` and `:style` are both strings, no event handlers
 
-### 2. Add CSS to `src/ui/css/gen.clj`
+### 2. Add CSS file `src/ui/COMPONENT.css`
 
-Add a `component-css-card` function and include it in `generate-css`:
+Create a plain CSS file next to the `.cljc` file. The generator automatically reads all `.css` files from `src/ui/`:
 
-```clojure
-(defn component-css-card []
-  (str/join "\n\n"
-    [".card {
+```css
+/* src/ui/card.css */
+.card {
   padding: 1rem;
   border-radius: var(--radius-md);
   background: var(--bg-1);
-}"
-     ".card--elevated {
-  box-shadow: var(--shadow-1);
-}"]))
+}
 
-;; In generate-css, add to the components list:
-(defn generate-css [{:keys [tokens themes]}]
-  (let [...]
-    (str/join "\n\n" [root-block dark-attr dark-media
-                      (component-css-button)
-                      (component-css-card)  ;; <-- add here
-                      ""])))
+.card-elevated {
+  box-shadow: var(--shadow-1);
+}
 ```
 
+No changes needed in `gen.clj` — it collects all `src/ui/*.css` files automatically.
+
 CSS conventions:
-- BEM-lite: `.component`, `.component--variant`, `.component--size`
+- Utility-style flat classes: `.component`, `.component-variant`, `.component-size`
 - Use `var(--token-name)` for all colors, borders, shadows, radii
 - Include hover/focus/disabled states
 - Keep specificity flat — no nesting beyond `:hover:not(:disabled)`
@@ -168,9 +163,9 @@ Test the pure class-generation functions (they run in `:clj` via Babashka):
 
 (deftest card-class-list-test
   (testing "default variant"
-    (is (= ["card" "card--default"] (card/card-class-list {}))))
+    (is (= ["card" "card-default"] (card/card-class-list {}))))
   (testing "explicit variant"
-    (is (= ["card" "card--elevated"] (card/card-class-list {:variant :elevated})))))
+    (is (= ["card" "card-elevated"] (card/card-class-list {:variant :elevated})))))
 ```
 
 Register new test namespaces in `bb.edn`:

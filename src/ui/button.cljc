@@ -11,12 +11,12 @@
 
 (defn button-class-list
   "Generate a vector of CSS class strings for a button given variant and size.
-   Returns e.g. [\"btn\" \"btn--primary\" \"btn--lg\"]."
+   Returns e.g. [\"btn\" \"btn-primary\" \"btn-lg\"]."
   [{:keys [variant size]}]
   (let [v (or (some-> variant kw-name) default-variant)
         s (or (some-> size kw-name) default-size)]
-    (cond-> ["btn" (str "btn--" v)]
-      (not= s "md") (conj (str "btn--" s)))))
+    (cond-> ["btn" (str "btn-" v)]
+      (not= s "md") (conj (str "btn-" s)))))
 
 (defn button-classes
   "Generate CSS class string for a button. Returns a space-joined string."
