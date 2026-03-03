@@ -29,7 +29,7 @@
 
 .tooltip::before {
   content: "";
-  bottom: calc(100% - 5px);
+  bottom: calc(100% - 1px);
   transform: translateX(-50%) translateY(4px);
   border: 6px solid transparent;
   border-top-color: var(--fg-0);
