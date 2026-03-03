@@ -21,6 +21,17 @@
        (map (fn [[k v]] (str "  " (token->css-var k) ": " v ";")))
        (str/join "\n")))
 
+(defn base-css
+  "Generate base body/reset styles."
+  []
+  "body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  margin: 0;
+  background: var(--bg-0);
+  color: var(--fg-0);
+  transition: background-color 0.2s, color 0.2s;
+}")
+
 (defn component-css-button
   "Generate BEM-lite CSS for the button component."
   []
@@ -94,8 +105,9 @@
                          "  :root:not([data-theme=\"light\"]) {\n"
                          (str/replace (tokens->css-block dark-tokens) #"(?m)^  " "    ")
                          "\n  }\n}")
+        base        (base-css)
         components  (component-css-button)]
-    (str/join "\n\n" [root-block dark-attr dark-media components ""])))
+    (str/join "\n\n" [root-block dark-attr dark-media base components ""])))
 
 (defn build-theme!
   "Read tokens from file and write generated CSS to output."

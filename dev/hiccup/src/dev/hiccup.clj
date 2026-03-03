@@ -32,13 +32,14 @@
 
 (defn page []
   (str
+    "<!DOCTYPE html>\n"
     (h/html
       [:html
        [:head
         [:meta {:charset "utf-8"}]
         [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
         [:link {:rel "stylesheet" :href "/theme.css"}]
-        [:style "body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; padding: 2rem; background: var(--bg-0); color: var(--fg-0); margin: 0; transition: background-color 0.2s, color 0.2s; }"]]
+        [:style (h/raw "body { padding: 2rem; }")]]
        [:body
         [:div {:style "max-width: 800px; margin: 0 auto;"}
          [:div {:style "display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;"}
