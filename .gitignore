@@ -1,0 +1,16 @@
+# Build artifacts
+dist/
+
+# Dev target build outputs
+dev/replicant/public/js/
+dev/replicant/public/theme.css
+dev/replicant/.shadow-cljs/
+dev/squint/.compiled/
+dev/squint/public/
+dev/squint/node_modules/
+
+# General
+node_modules/
+.nrepl-port
+.cpcache/
+/.clj-kondo/

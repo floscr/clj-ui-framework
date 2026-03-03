@@ -1,0 +1,107 @@
+(ns ui.css.gen
+  (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
+            [clojure.string :as str]))
+
+(defn read-tokens
+  "Read and parse the tokens EDN file."
+  [path]
+  (edn/read-string (slurp path)))
+
+(defn token->css-var
+  "Convert a token keyword to a CSS variable name."
+  [k]
+  (str "--" (name k)))
+
+(defn tokens->css-block
+  "Generate CSS variable declarations from a token map."
+  [tokens]
+  (->> tokens
+       (sort-by key)
+       (map (fn [[k v]] (str "  " (token->css-var k) ": " v ";")))
+       (str/join "\n")))
+
+(defn component-css-button
+  "Generate BEM-lite CSS for the button component."
+  []
+  (str/join "\n\n"
+    [".btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.25rem;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background-color 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+  font-family: inherit;
+}"
+     ".btn--primary {
+  background: var(--accent);
+  color: var(--fg-on-accent);
+}
+.btn--primary:hover:not(:disabled) {
+  filter: brightness(1.1);
+}"
+     ".btn--secondary {
+  background: var(--bg-1);
+  color: var(--fg-0);
+  border: var(--border-0);
+}
+.btn--secondary:hover:not(:disabled) {
+  background: var(--bg-2);
+}"
+     ".btn--ghost {
+  background: transparent;
+  color: var(--fg-0);
+}
+.btn--ghost:hover:not(:disabled) {
+  background: var(--bg-1);
+}"
+     ".btn--danger {
+  background: var(--danger);
+  color: var(--fg-on-danger);
+}
+.btn--danger:hover:not(:disabled) {
+  filter: brightness(1.1);
+}"
+     ".btn--sm {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  line-height: 1rem;
+}"
+     ".btn--lg {
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  line-height: 1.5rem;
+}"
+     ".btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}"]))
+
+(defn generate-css
+  "Generate the full CSS output from parsed token data."
+  [{:keys [tokens themes]}]
+  (let [dark-tokens (get themes :dark)
+        root-block  (str ":root {\n" (tokens->css-block tokens) "\n}")
+        dark-attr   (str "[data-theme=\"dark\"] {\n" (tokens->css-block dark-tokens) "\n}")
+        dark-media  (str "@media (prefers-color-scheme: dark) {\n"
+                         "  :root:not([data-theme=\"light\"]) {\n"
+                         (str/replace (tokens->css-block dark-tokens) #"(?m)^  " "    ")
+                         "\n  }\n}")
+        components  (component-css-button)]
+    (str/join "\n\n" [root-block dark-attr dark-media components ""])))
+
+(defn build-theme!
+  "Read tokens from file and write generated CSS to output."
+  [{:keys [input output]}]
+  (let [token-data (read-tokens input)
+        css        (generate-css token-data)]
+    (io/make-parents output)
+    (spit output css)
+    (println (str "Generated " output " (" (count (str/split-lines css)) " lines)"))))

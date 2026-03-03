@@ -1,0 +1,16 @@
+{
+  "name": "ui-framework-dev-squint",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "npx squint watch & npx vite --port 3002",
+    "build": "npx squint compile && npx vite build"
+  },
+  "devDependencies": {
+    "squint-cljs": "latest",
+    "vite": "^6.0.0"
+  },
+  "dependencies": {
+    "eucalypt": "latest"
+  }
+}

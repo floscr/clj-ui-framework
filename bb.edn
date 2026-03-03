@@ -1,0 +1,69 @@
+{:paths ["src" "test" "dev/hiccup/src"]
+
+ :tasks
+ {build-theme
+  {:doc "Generate dist/theme.css from tokens.edn and copy to dev targets"
+   :requires ([ui.css.gen :as gen]
+              [clojure.java.io :as io])
+   :task (do (gen/build-theme! {:input "src/theme/tokens.edn"
+                                :output "dist/theme.css"})
+             (let [css (slurp "dist/theme.css")]
+               (spit "dev/replicant/public/theme.css" css)
+               (io/make-parents "dev/squint/public/theme.css")
+               (spit "dev/squint/public/theme.css" css)
+               (println "Copied theme.css to dev targets")))}
+
+  test
+  {:doc "Run all unit tests"
+   :requires ([clojure.test :as t]
+              [ui.button-test]
+              [ui.theme-test])
+   :task (let [{:keys [fail error]} (t/run-tests 'ui.button-test 'ui.theme-test)]
+           (when (pos? (+ fail error))
+             (System/exit 1)))}
+
+  dev-hiccup
+  {:doc "Start hiccup dev server on port 3003"
+   :depends [build-theme]
+   :requires ([dev.hiccup])
+   :task (do (dev.hiccup/start! {:port 3003})
+             (deref (promise)))}
+
+  dev-replicant
+  {:doc "Start replicant dev server on port 3001"
+   :depends [build-theme]
+   :task (shell {:dir "dev/replicant"} "npx shadow-cljs watch app")}
+
+  dev-squint
+  {:doc "Start squint dev server on port 3002"
+   :depends [build-theme]
+   :task (shell {:dir "dev/squint"} "npm run dev")}
+
+  dev
+  {:doc "Start all dev servers"
+   :depends [build-theme]
+   :requires ([dev.hiccup])
+   :task (do (dev.hiccup/start! {:port 3003})
+             (println "Dev servers running:")
+             (println "  Replicant: cd dev/replicant && npx shadow-cljs watch app (port 3001)")
+             (println "  Squint:    cd dev/squint && npm run dev (port 3002)")
+             (println "  Hiccup:    http://localhost:3003")
+             (println "  Test page: dev/index.html")
+             (deref (promise)))}
+
+  dev-all
+  {:doc "Start all dev servers in tmux panes"
+   :depends [build-theme]
+   :task (let [session "ui-dev"]
+           (shell {:continue true} "tmux kill-session -t" session)
+           (shell "tmux new-session -d -s" session "bb dev-hiccup")
+           (shell "tmux split-window -h -t" session "bash -c 'cd dev/replicant && npx shadow-cljs watch app'")
+           (shell "tmux split-window -v -t" session "bash -c 'cd dev/squint && npm run dev'")
+           (shell "tmux select-layout -t" session "tiled")
+           (println "Tmux session 'ui-dev' created with 3 panes:")
+           (println "  Pane 0: Hiccup    → http://localhost:3003")
+           (println "  Pane 1: Replicant → http://localhost:3001")
+           (println "  Pane 2: Squint    → http://localhost:3002")
+           (println)
+           (when-not (zero? (:exit (shell {:continue true} "tmux attach -t" session)))
+             (println "Attach with: tmux attach -t" session)))}}}
