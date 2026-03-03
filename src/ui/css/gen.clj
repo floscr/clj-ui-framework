@@ -21,6 +21,40 @@
        (map (fn [[k v]] (str "  " (token->css-var k) ": " v ";")))
        (str/join "\n")))
 
+(defn format-number
+  "Format a number: strip trailing zeros, max 3 decimal places."
+  [n]
+  (let [s (format "%.3f" (double n))]
+    (-> s
+        (str/replace #"0+$" "")
+        (str/replace #"\.$" ""))))
+
+(defn generate-size-scale
+  "Generate linear size scale: --size-N = base * N."
+  [{:keys [base unit steps]}]
+  (->> (range 1 (inc steps))
+       (map (fn [n]
+              (str "  --size-" n ": " (format-number (* base n)) unit ";")))
+       (str/join "\n")))
+
+(defn generate-font-scale
+  "Generate geometric font scale: --font-{name} = base * ratio^power."
+  [{:keys [base unit ratio steps]}]
+  (->> steps
+       (map (fn [[power label]]
+              (str "  --font-" label ": "
+                   (format-number (* base (Math/pow ratio power)))
+                   unit ";")))
+       (str/join "\n")))
+
+(defn generate-scales
+  "Generate CSS variable declarations for all scales."
+  [scales]
+  (str/join "\n"
+    (cond-> []
+      (:size scales) (conj (generate-size-scale (:size scales)))
+      (:font scales) (conj (generate-font-scale (:font scales))))))
+
 (defn base-css
   "Generate base body/reset styles."
   []
@@ -42,9 +76,12 @@
 
 (defn generate-css
   "Generate the full CSS output from parsed token data."
-  [{:keys [tokens themes]}]
+  [{:keys [tokens themes scales]}]
   (let [dark-tokens (get themes :dark)
-        root-block  (str ":root {\n" (tokens->css-block tokens) "\n}")
+        scale-vars  (when scales (generate-scales scales))
+        root-block  (str ":root {\n" (tokens->css-block tokens)
+                         (when scale-vars (str "\n" scale-vars))
+                         "\n}")
         dark-attr   (str "[data-theme=\"dark\"] {\n" (tokens->css-block dark-tokens) "\n}")
         dark-media  (str "@media (prefers-color-scheme: dark) {\n"
                          "  :root:not([data-theme=\"light\"]) {\n"

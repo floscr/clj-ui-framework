@@ -1,4 +1,16 @@
-{:tokens
+{:scales
+ {:size {:base 0.25 :unit "rem" :steps 16}
+  :font {:base 1 :unit "rem" :ratio 1.25
+         :steps [[-2 "xs"]
+                 [-1 "sm"]
+                 [0  "base"]
+                 [1  "md"]
+                 [2  "lg"]
+                 [3  "xl"]
+                 [4  "2xl"]
+                 [5  "3xl"]]}}
+
+ :tokens
  {:bg-0      "#ffffff"
   :bg-1      "#f5f5f5"
   :bg-2      "#e8e8e8"

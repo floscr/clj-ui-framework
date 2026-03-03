@@ -149,6 +149,8 @@ No changes needed in `gen.clj` — it collects all `src/ui/*.css` files automati
 CSS conventions:
 - Utility-style flat classes: `.component`, `.component-variant`, `.component-size`
 - Use `var(--token-name)` for all colors, borders, shadows, radii
+- Use `var(--size-N)` for spacing/padding/gap/line-height — no raw `rem` values
+- Use `var(--font-*)` for font-size — no raw `rem` values
 - Include hover/focus/disabled states
 - Keep specificity flat — no nesting beyond `:hover:not(:disabled)`
 
@@ -204,9 +206,44 @@ Semantic + scale tokens in `src/theme/tokens.edn`:
 - **Shadows**: `shadow-0/1/2/3` (increasing elevation)
 - **Radii**: `radius-sm/md/lg`
 
+### Algorithmic scales
+
+Defined in `:scales` in `tokens.edn`. Generated into `:root` only (not duplicated in dark theme blocks).
+
+**Size scale** — linear: `--size-N = base × N`
+
+```edn
+:size {:base 0.25 :unit "rem" :steps 16}
+```
+
+Produces `--size-1: 0.25rem` through `--size-16: 4rem`. Use for all spacing, padding, gap, and line-height values.
+
+**Font scale** — geometric: `--font-{label} = base × ratio^power`
+
+```edn
+:font {:base 1 :unit "rem" :ratio 1.25
+       :steps [[-2 "xs"] [-1 "sm"] [0 "base"] [1 "md"] [2 "lg"] [3 "xl"] [4 "2xl"] [5 "3xl"]]}
+```
+
+Produces `--font-xs: 0.64rem` through `--font-3xl: 3.052rem`. Use for all font-size values.
+
+To adjust the entire scale, change `base` or `ratio` — all values recompute on `bb build-theme`.
+
+**Usage in component CSS:**
+
+```css
+.btn {
+  padding: var(--size-2) var(--size-4);
+  font-size: var(--font-sm);
+  line-height: var(--size-5);
+}
+```
+
+**Rule: never use raw `rem` values in component CSS** — always reference a scale variable.
+
 ### Adding tokens
 
-Add to both `:tokens` (light) and `:themes > :dark` in `tokens.edn`. They must have the same keys — the `tokens-roundtrip-test` enforces this.
+Add to both `:tokens` (light) and `:themes > :dark` in `tokens.edn`. They must have the same keys — the `tokens-roundtrip-test` enforces this. Scale config (`:scales`) is theme-independent and lives at the top level.
 
 ### Dark mode
 

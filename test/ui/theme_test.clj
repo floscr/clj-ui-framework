@@ -40,6 +40,21 @@
     (testing "dark media query excludes explicit light theme"
       (is (str/includes? css ":root:not([data-theme=\"light\"])")))
 
+    (testing "contains size scale variables"
+      (doseq [n (range 1 17)]
+        (is (str/includes? css (str "--size-" n ":"))
+            (str "Missing size-" n))))
+
+    (testing "contains font scale variables"
+      (doseq [label ["xs" "sm" "base" "md" "lg" "xl" "2xl" "3xl"]]
+        (is (str/includes? css (str "--font-" label ":"))
+            (str "Missing font-" label))))
+
+    (testing "scales only in :root, not in dark theme blocks"
+      (let [dark-block (second (str/split css #"\[data-theme=\"dark\"\]"))]
+        (is (not (str/includes? dark-block "--size-1:")))
+        (is (not (str/includes? dark-block "--font-base:")))))
+
     (testing "contains button component CSS"
       (is (str/includes? css ".btn {"))
       (is (str/includes? css ".btn-primary {"))
