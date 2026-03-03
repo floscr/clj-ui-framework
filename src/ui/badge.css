@@ -3,9 +3,9 @@
   align-items: center;
   gap: var(--size-1);
   padding: var(--size-1) var(--size-3);
-  font-size: var(--font-xs);
+  font-size: var(--font-sm);
   font-weight: 500;
-  line-height: 1.5;
+  line-height: var(--size-5);
   border-radius: 9999px;
   background: var(--accent);
   color: var(--fg-on-accent);
