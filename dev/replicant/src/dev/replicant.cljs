@@ -77,9 +77,10 @@
 ;; ── Accordion ───────────────────────────────────────────────────────
 (defn accordion-demo []
   (section "Accordion"
-    (accordion/accordion {:title "What is this framework?"} "A cross-target component library.")
-    (accordion/accordion {:title "How do I use it?" :open true} "Just require the namespace and call functions.")
-    (accordion/accordion {:title "Is it accessible?"} "Yes, follows ARIA best practices.")))
+    [:div {:class ["accordion-group"]}
+     (accordion/accordion {:title "What is this framework?"} "A cross-target component library.")
+     (accordion/accordion {:title "How do I use it?" :open true} "Just require the namespace and call functions.")
+     (accordion/accordion {:title "Is it accessible?"} "Yes, follows ARIA best practices.")]))
 
 ;; ── Table ───────────────────────────────────────────────────────────
 (defn table-demo []

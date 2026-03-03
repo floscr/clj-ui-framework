@@ -35,13 +35,17 @@
 .card-body {
 }
 
+.card-body > *:first-child { margin-top: 0; }
+.card-body > *:last-child { margin-bottom: 0; }
+
 .card-footer {
   display: flex;
   justify-content: flex-end;
   gap: var(--size-2);
 }
 
-.card-footer .btn {
+.card-footer .btn,
+.dialog-footer .btn {
   padding: var(--size-2) var(--size-4);
   font-size: var(--font-base);
   line-height: var(--size-5);

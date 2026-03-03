@@ -25,27 +25,24 @@
                      class (str " " class))
            base-attrs (cond-> (merge {:class classes} attrs)
                         open (assoc :open true))]
-       (into [:details base-attrs
-              [:summary {:class "accordion-trigger"} title]
-              [:div {:class "accordion-content"}]]
-             children))
+       [:details base-attrs
+        [:summary {:class "accordion-trigger"} title]
+        (into [:div {:class "accordion-content"}] children)])
 
      :cljs
      (let [cls (accordion-class-list {})
            classes (cond-> cls class (conj class))
            base-attrs (cond-> (merge {:class classes} attrs)
                         open (assoc :open true))]
-       (into [:details base-attrs
-              [:summary {:class ["accordion-trigger"]} title]
-              [:div {:class ["accordion-content"]}]]
-             children))
+       [:details base-attrs
+        [:summary {:class ["accordion-trigger"]} title]
+        (into [:div {:class ["accordion-content"]}] children)])
 
      :clj
      (let [classes (cond-> (accordion-classes {})
                      class (str " " class))
            base-attrs (cond-> (merge {:class classes} attrs)
                         open (assoc :open true))]
-       (into [:details base-attrs
-              [:summary {:class "accordion-trigger"} title]
-              [:div {:class "accordion-content"}]]
-             children))))
+       [:details base-attrs
+        [:summary {:class "accordion-trigger"} title]
+        (into [:div {:class "accordion-content"}] children)])))

@@ -1,3 +1,8 @@
+.accordion-group {
+  display: flex;
+  flex-direction: column;
+}
+
 .accordion {
   border: var(--border-0);
   border-radius: var(--radius-md);
@@ -67,4 +72,6 @@
 
 .accordion-content {
   padding: var(--size-4);
+  font-size: var(--font-sm);
+  color: var(--fg-1);
 }
