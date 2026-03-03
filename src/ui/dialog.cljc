@@ -14,6 +14,9 @@
 (defn dialog
   "Render a dialog element.
 
+   Clicking the backdrop (the area outside the dialog box) will close the
+   dialog automatically when opened via .showModal().
+
    Props:
      :open  - boolean, whether the dialog is open
      :id    - dialog id for targeting
@@ -23,7 +26,10 @@
   #?(:squint
      (let [classes (cond-> (dialog-classes {})
                      class (str " " class))
-           base-attrs (merge {:class classes}
+           base-attrs (merge {:class classes
+                              :on-click (fn [e]
+                                          (when (identical? (.-target e) (.-currentTarget e))
+                                            (.close (.-currentTarget e))))}
                              (when id {:id id})
                              (when open {:open true})
                              attrs)]
@@ -32,7 +38,10 @@
      :cljs
      (let [cls (dialog-class-list {})
            classes (cond-> cls class (conj class))
-           base-attrs (merge {:class classes}
+           base-attrs (merge {:class classes
+                              :on {:click (fn [e]
+                                            (when (identical? (.-target e) (.-currentTarget e))
+                                              (.close (.-currentTarget e))))}}
                              (when id {:id id})
                              (when open {:open true})
                              attrs)]
@@ -41,7 +50,8 @@
      :clj
      (let [classes (cond-> (dialog-classes {})
                      class (str " " class))
-           base-attrs (merge {:class classes}
+           base-attrs (merge {:class classes
+                              :onclick "if(event.target===this)this.close()"}
                              (when id {:id id})
                              (when open {:open true})
                              attrs)]

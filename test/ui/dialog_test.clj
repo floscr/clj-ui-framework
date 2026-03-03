@@ -15,7 +15,12 @@
 
   (testing "open dialog has open attr"
     (let [result (dialog/dialog {:open true} "Content")]
-      (is (true? (get-in result [1 :open]))))))
+      (is (true? (get-in result [1 :open])))))
+
+  (testing "dialog has backdrop close handler"
+    (let [result (dialog/dialog {} "Content")]
+      (is (string? (get-in result [1 :onclick])))
+      (is (clojure.string/includes? (get-in result [1 :onclick]) "close")))))
 
 (deftest dialog-sections-test
   (testing "dialog-header renders header"
