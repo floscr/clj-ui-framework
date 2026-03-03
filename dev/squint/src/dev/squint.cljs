@@ -22,10 +22,10 @@
           (if (= current "dark") "light" "dark"))))
 
 (defn section [title & children]
-  (into [:section {:style {"margin-bottom" "2.5rem"}}
-         [:h3 {:style {"color" "var(--fg-1)" "margin-bottom" "1rem"
-                        "border-bottom" "var(--border-0)" "padding-bottom" "0.5rem"}} title]]
-        children))
+  [:section {:style {"margin-bottom" "2.5rem"}}
+   [:h3 {:style {"color" "var(--fg-1)" "margin-bottom" "1rem"
+                  "border-bottom" "var(--border-0)" "padding-bottom" "0.5rem"}} title]
+   (into [:div {:style {"display" "flex" "flex-direction" "column" "gap" "1rem"}}] children)])
 
 ;; ── Button ──────────────────────────────────────────────────────────
 (def button-variants ["primary" "secondary" "ghost" "danger"])
@@ -97,18 +97,18 @@
     [:p {:style {"color" "var(--fg-2)" "font-size" "var(--font-sm)"}} "Click button to open dialog."]
     (button/button {:variant "primary"
                     :on-click (fn [_]
-                                (when-let [el (js/document.getElementById "demo-dialog-sq")]
+                                (when-let [el (js/document.getElementById "demo-dialog")]
                                   (.showModal el)))}
       "Open dialog")
-    (dialog/dialog {:id "demo-dialog-sq"}
+    (dialog/dialog {:id "demo-dialog"}
       (dialog/dialog-header {} [:h3 "Dialog Title"] [:p "Are you sure you want to continue?"])
       (dialog/dialog-body {} [:p "This action cannot be undone."])
       (dialog/dialog-footer {}
         (button/button {:variant "secondary" :size "sm"
-                        :on-click (fn [_] (.close (js/document.getElementById "demo-dialog-sq")))}
+                        :on-click (fn [_] (.close (js/document.getElementById "demo-dialog")))}
           "Cancel")
         (button/button {:variant "primary" :size "sm"
-                        :on-click (fn [_] (.close (js/document.getElementById "demo-dialog-sq")))}
+                        :on-click (fn [_] (.close (js/document.getElementById "demo-dialog")))}
           "Confirm")))))
 
 ;; ── Spinner ─────────────────────────────────────────────────────────

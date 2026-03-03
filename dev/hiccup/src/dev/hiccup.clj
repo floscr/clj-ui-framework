@@ -70,9 +70,9 @@
 ;; ── Accordion ───────────────────────────────────────────────────────
 (defn accordion-demo []
   (section "Accordion"
-    (accordion/accordion {:title "What is this framework?"} "A cross-target component library for Clojure, ClojureScript, and Squint.")
-    (accordion/accordion {:title "How do I use it?" :open true} "Just require the namespace and call the component functions.")
-    (accordion/accordion {:title "Is it accessible?"} "Yes, components follow ARIA best practices.")))
+    (accordion/accordion {:title "What is this framework?"} "A cross-target component library.")
+    (accordion/accordion {:title "How do I use it?" :open true} "Just require the namespace and call functions.")
+    (accordion/accordion {:title "Is it accessible?"} "Yes, follows ARIA best practices.")))
 
 ;; ── Table ───────────────────────────────────────────────────────────
 (defn table-demo []
