@@ -1,18 +1,20 @@
 .card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-3);
   background: var(--bg-1);
   color: var(--fg-0);
   border: var(--border-0);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-0);
   overflow: hidden;
+  padding: var(--size-6);
 }
 
 .card-header {
   display: flex;
   flex-direction: column;
   gap: var(--size-1);
-  padding: var(--size-6);
-  padding-bottom: 0;
 }
 
 .card-header h1,
@@ -31,13 +33,16 @@
 }
 
 .card-body {
-  padding: var(--size-6);
 }
 
 .card-footer {
   display: flex;
   justify-content: flex-end;
   gap: var(--size-2);
-  padding: var(--size-6);
-  padding-top: 0;
+}
+
+.card-footer .btn {
+  padding: var(--size-2) var(--size-4);
+  font-size: var(--font-base);
+  line-height: var(--size-5);
 }
