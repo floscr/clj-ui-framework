@@ -63,6 +63,17 @@
   margin: 0;
   background: var(--bg-0);
   color: var(--fg-0);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  box-shadow: none;
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+  box-shadow: none;
 }")
 
 (defn collect-component-css

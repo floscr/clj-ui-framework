@@ -9,6 +9,10 @@
   overflow: hidden;
 }
 
+.accordion-trigger:focus-visible {
+  outline-offset: -2px;
+}
+
 .accordion + .accordion {
   margin-top: -1px;
   border-top-left-radius: 0;
@@ -25,7 +29,6 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--size-2);
-  width: 100%;
   padding: var(--size-4);
   font-weight: 500;
   font-size: inherit;
@@ -50,15 +53,20 @@
   background: var(--bg-1);
 }
 
-.accordion-trigger::after {
-  content: "";
+.accordion-trigger-text {
+  flex: 1;
+  text-align: left;
+}
+
+.accordion-chevron {
+  display: block;
   width: 1em;
   height: 1em;
   flex-shrink: 0;
-  background-color: currentColor;
-  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-  mask-size: contain;
-  mask-repeat: no-repeat;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2371717a' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
   transition: transform 150ms ease;
 }
 
@@ -66,7 +74,7 @@
   border-bottom: var(--border-0);
 }
 
-.accordion[open] > .accordion-trigger::after {
+.accordion[open] > .accordion-trigger .accordion-chevron {
   transform: rotate(180deg);
 }
 

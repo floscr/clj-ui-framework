@@ -23,10 +23,10 @@
   border-color: var(--danger);
 }
 
-.form-field--error .form-input:focus,
-.form-field--error .form-textarea:focus,
-.form-field--error .form-select:focus {
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--danger) 20%, transparent);
+.form-field--error .form-input:focus-visible,
+.form-field--error .form-textarea:focus-visible,
+.form-field--error .form-select:focus-visible {
+  outline-color: var(--danger);
 }
 
 /* ── Label ─────────────────────────────────────────────────────── */
@@ -60,12 +60,11 @@
   color: var(--fg-2);
 }
 
-.form-input:focus,
-.form-textarea:focus,
-.form-select:focus {
-  outline: none;
+.form-input:focus-visible,
+.form-textarea:focus-visible,
+.form-select:focus-visible {
   border-color: var(--accent);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 20%, transparent);
+  outline-offset: -1px;
 }
 
 .form-input:disabled,
@@ -81,9 +80,9 @@
   border-color: var(--danger);
 }
 
-.form-input--error:focus,
-.form-textarea--error:focus {
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--danger) 20%, transparent);
+.form-input--error:focus-visible,
+.form-textarea--error:focus-visible {
+  outline-color: var(--danger);
 }
 
 /* ── Textarea ──────────────────────────────────────────────────── */
@@ -148,10 +147,9 @@
   background-repeat: no-repeat;
 }
 
-.form-checkbox:focus,
-.form-radio:focus {
-  outline: none;
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 20%, transparent);
+.form-checkbox:focus-visible,
+.form-radio:focus-visible {
+  outline-offset: 0;
 }
 
 .form-checkbox:disabled,

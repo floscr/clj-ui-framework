@@ -26,7 +26,9 @@
            base-attrs (cond-> (merge {:class classes} attrs)
                         open (assoc :open true))]
        [:details base-attrs
-        [:summary {:class "accordion-trigger"} title]
+        [:summary {:class "accordion-trigger"}
+         [:span {:class "accordion-trigger-text"} title]
+         [:span {:class "accordion-chevron" :aria-hidden "true"}]]
         (into [:div {:class "accordion-content"}] children)])
 
      :cljs
@@ -35,7 +37,9 @@
            base-attrs (cond-> (merge {:class classes} attrs)
                         open (assoc :open true))]
        [:details base-attrs
-        [:summary {:class ["accordion-trigger"]} title]
+        [:summary {:class ["accordion-trigger"]}
+         [:span {:class ["accordion-trigger-text"]} title]
+         [:span {:class ["accordion-chevron"] :aria-hidden "true"}]]
         (into [:div {:class ["accordion-content"]}] children)])
 
      :clj
@@ -44,5 +48,7 @@
            base-attrs (cond-> (merge {:class classes} attrs)
                         open (assoc :open true))]
        [:details base-attrs
-        [:summary {:class "accordion-trigger"} title]
+        [:summary {:class "accordion-trigger"}
+         [:span {:class "accordion-trigger-text"} title]
+         [:span {:class "accordion-chevron" :aria-hidden "true"}]]
         (into [:div {:class "accordion-content"}] children)])))
