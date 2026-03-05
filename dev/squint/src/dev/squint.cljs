@@ -31,7 +31,7 @@
     (set! (.. el -dataset -theme)
           (if (= current "dark") "light" "dark"))
     (js/requestAnimationFrame
-      #(js-delete (.-dataset el) "noTransitions"))))
+      (fn [] (.removeAttribute el "data-no-transitions")))))
 
 (defn section [title & children]
   [:section {:style {"margin-bottom" "2.5rem"}}
