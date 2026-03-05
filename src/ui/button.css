@@ -61,11 +61,9 @@
 /* Link buttons rendered as <a> need reset styles */
 a.btn {
   text-decoration: none;
-  color: inherit;
 }
 a.btn-link {
   text-decoration: underline;
-  color: var(--accent);
 }
 
 .btn-sm {
