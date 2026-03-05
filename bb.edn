@@ -63,47 +63,70 @@
              (shell {:dir "dev/squint"} "npm install")))}
 
   dev-hiccup
-  {:doc "Start hiccup dev server on port 3003"
+  {:doc "Start hiccup dev server (--port PORT, default 3003)"
    :depends [build-theme]
    :requires ([dev.hiccup])
-   :task (do (dev.hiccup/start! {:port 3003})
-             (deref (promise)))}
+   :task (let [port (or (some-> (System/getenv "PORT") parse-long) 3003)]
+           (dev.hiccup/start! {:port port})
+           (deref (promise)))}
 
   dev-replicant
-  {:doc "Start replicant dev server on port 3001"
+  {:doc "Start replicant dev server (PORT env var, default 3001)"
    :depends [build-theme ensure-npm]
-   :task (shell {:dir "dev/replicant"} "npx shadow-cljs watch app")}
+   :requires ([clojure.edn :as edn])
+   :task (let [port (some-> (System/getenv "PORT") parse-long)
+               cfg-path "dev/replicant/shadow-cljs.edn"]
+           (when port
+             (let [cfg (edn/read-string (slurp cfg-path))]
+               (spit cfg-path (pr-str (assoc cfg :dev-http {port "public"})))))
+           (shell {:dir "dev/replicant"} "npx" "shadow-cljs" "watch" "app"))}
 
   dev-squint
-  {:doc "Start squint dev server on port 3002"
+  {:doc "Start squint dev server (PORT env var, default 3002)"
    :depends [build-theme ensure-npm]
-   :task (shell {:dir "dev/squint"} "npm run dev")}
+   :task (let [port (or (some-> (System/getenv "PORT") parse-long) 3002)]
+           (shell {:dir "dev/squint"}
+                  "bash" "-c" (str "npx squint watch & npx vite --port " port)))}
 
   dev
   {:doc "Start all dev servers"
    :depends [build-theme]
    :requires ([dev.hiccup])
-   :task (do (dev.hiccup/start! {:port 3003})
-             (println "Dev servers running:")
-             (println "  Replicant: cd dev/replicant && npx shadow-cljs watch app (port 3001)")
-             (println "  Squint:    cd dev/squint && npm run dev (port 3002)")
-             (println "  Hiccup:    http://localhost:3003")
-             (println "  Test page: dev/index.html")
-             (deref (promise)))}
+   :task (let [port (or (some-> (System/getenv "PORT") parse-long) 3003)]
+           (dev.hiccup/start! {:port port})
+           (println "Dev servers running:")
+           (println (str "  Hiccup:    http://localhost:" port))
+           (println "  Replicant: cd dev/replicant && npx shadow-cljs watch app")
+           (println "  Squint:    cd dev/squint && npm run dev")
+           (println "  Test page: dev/index.html")
+           (deref (promise)))}
 
   dev-all
-  {:doc "Start all dev servers in tmux panes"
+  {:doc "Start all dev servers in tmux panes (bb dev-all [BASE_PORT], default 3000)"
    :depends [build-theme ensure-npm]
-   :task (let [session "ui-dev"]
+   :requires ([clojure.edn :as edn])
+   :task (let [base    (or (some-> (first *command-line-args*) parse-long) 3000)
+               rport   (+ base 1)
+               sport   (+ base 2)
+               hport   (+ base 3)
+               session "ui-dev"
+               ;; Write shadow-cljs.edn with the correct port before launching
+               cfg-path "dev/replicant/shadow-cljs.edn"
+               cfg      (edn/read-string (slurp cfg-path))]
+           (spit cfg-path (pr-str (assoc cfg :dev-http {rport "public"})))
            (shell {:continue true} "tmux kill-session -t" session)
-           (shell "tmux new-session -d -s" session "bb dev-hiccup")
-           (shell "tmux split-window -h -t" session "bash -c 'cd dev/replicant && npx shadow-cljs watch app'")
-           (shell "tmux split-window -v -t" session "bash -c 'cd dev/squint && npm run dev'")
+           (shell "tmux new-session -d -s" session
+                  (str "PORT=" hport " bb dev-hiccup"))
+           (shell "tmux split-window -h -t" session
+                  (str "bash -c 'cd dev/replicant && npx shadow-cljs watch app'"))
+           (shell "tmux split-window -v -t" session
+                  (str "bash -c 'cd dev/squint && npx squint watch"
+                       " & npx vite --port " sport "'"))
            (shell "tmux select-layout -t" session "tiled")
-           (println "Tmux session 'ui-dev' created with 3 panes:")
-           (println "  Pane 0: Hiccup    → http://localhost:3003")
-           (println "  Pane 1: Replicant → http://localhost:3001")
-           (println "  Pane 2: Squint    → http://localhost:3002")
+           (println (str "Tmux session 'ui-dev' created (base port " base "):"))
+           (println (str "  Pane 0: Hiccup    → http://localhost:" hport))
+           (println (str "  Pane 1: Replicant → http://localhost:" rport))
+           (println (str "  Pane 2: Squint    → http://localhost:" sport))
            (println)
            (when-not (zero? (:exit (shell {:continue true} "tmux attach -t" session)))
              (println "Attach with: tmux attach -t" session)))}}}
