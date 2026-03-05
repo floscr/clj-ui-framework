@@ -52,6 +52,16 @@
            (when (pos? (+ fail error))
              (System/exit 1)))}
 
+  ensure-npm
+  {:doc "Install node_modules in dev/replicant and dev/squint if missing"
+   :task (do
+           (when-not (.exists (clojure.java.io/file "dev/replicant/node_modules"))
+             (println "Installing node_modules in dev/replicant...")
+             (shell {:dir "dev/replicant"} "npm install"))
+           (when-not (.exists (clojure.java.io/file "dev/squint/node_modules"))
+             (println "Installing node_modules in dev/squint...")
+             (shell {:dir "dev/squint"} "npm install")))}
+
   dev-hiccup
   {:doc "Start hiccup dev server on port 3003"
    :depends [build-theme]
@@ -61,12 +71,12 @@
 
   dev-replicant
   {:doc "Start replicant dev server on port 3001"
-   :depends [build-theme]
+   :depends [build-theme ensure-npm]
    :task (shell {:dir "dev/replicant"} "npx shadow-cljs watch app")}
 
   dev-squint
   {:doc "Start squint dev server on port 3002"
-   :depends [build-theme]
+   :depends [build-theme ensure-npm]
    :task (shell {:dir "dev/squint"} "npm run dev")}
 
   dev
@@ -83,7 +93,7 @@
 
   dev-all
   {:doc "Start all dev servers in tmux panes"
-   :depends [build-theme]
+   :depends [build-theme ensure-npm]
    :task (let [session "ui-dev"]
            (shell {:continue true} "tmux kill-session -t" session)
            (shell "tmux new-session -d -s" session "bb dev-hiccup")
