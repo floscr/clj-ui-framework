@@ -281,6 +281,28 @@ Toggle with: `document.documentElement.dataset.theme = "dark" | "light"`
 4. **No lazy seq flattening in Eucalypt** — use `into` with `mapcat`/`map` to build hiccup vectors eagerly
 5. **Eucalypt render arg order** — `(eu/render hiccup container)`, hiccup first
 6. **Eucalypt import** — `(:require ["eucalypt" :as eu])`, quoted string for npm package
+7. **Blank page from squint watcher race condition** — The squint watcher can produce truncated/empty `.mjs` files when it detects a file change mid-save. Vite picks up the broken module and the page goes blank with no terminal errors (the crash is browser-side only). This commonly happens during rapid edits or when multiple files change at once.
+
+   **How to detect:** Page is blank, no compile errors in the tmux pane. Verify with:
+   ```sh
+   wc -l dev/squint/.compiled/ui/<module>.mjs  # Should be >1 line
+   ```
+
+   **How to recover:**
+   ```sh
+   # Option A: touch the source file to trigger recompile
+   touch src/ui/<module>.cljc
+   # Then hard-refresh the browser (Ctrl+Shift+R)
+
+   # Option B: restart the squint tmux pane
+   # Kill existing processes and recreate:
+   tmux split-window -v -t ui-dev \
+     "bash -c 'cd dev/squint && npx squint watch & cd dev/squint && npx vite --port 4002'"
+   tmux select-layout -t ui-dev tiled
+   # Then hard-refresh the browser
+   ```
+
+   **After recovering**, always verify the compiled output is complete before committing.
 
 ## Replicant Pitfalls
 
