@@ -102,6 +102,10 @@
            (println "  Test page: dev/index.html")
            (deref (promise)))}
 
+  check-dev
+  {:doc "Check all ui-dev tmux panes for errors and verify dev servers"
+   :task (load-file "scripts/check-dev.bb")}
+
   dev-all
   {:doc "Start all dev servers in tmux panes (bb dev-all [BASE_PORT], default 3000)"
    :depends [build-theme ensure-npm]

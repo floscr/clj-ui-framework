@@ -72,9 +72,10 @@
 ;; ── Helpers ─────────────────────────────────────────────────────────
 
 (defn section [title & children]
-  [:section {:style "margin-bottom: 2.5rem;"}
-   [:h3 {:style "color: var(--fg-1); margin-bottom: 1rem; border-bottom: var(--border-0); padding-bottom: 0.5rem;"} title]
-   (into [:div {:style "display: flex; flex-direction: column; gap: 1rem;"}] children)])
+  (let [id (str/lower-case title)]
+    [:section {:id id :style "margin-bottom: 2.5rem;"}
+     [:h3 {:style "color: var(--fg-1); margin-bottom: 1rem; border-bottom: var(--border-0); padding-bottom: 0.5rem;"} title]
+     (into [:div {:style "display: flex; flex-direction: column; gap: 1rem;"}] children)]))
 
 ;; ── Component Demos ─────────────────────────────────────────────────
 
@@ -370,6 +371,28 @@
 
 ;; ── Navigation Data ─────────────────────────────────────────────────
 
+(def component-nav
+  [{:title "General"
+    :items [{:label "Button" :anchor "button"}
+            {:label "Badge" :anchor "badge"}
+            {:label "Card" :anchor "card"}]}
+   {:title "Forms"
+    :items [{:label "Form" :anchor "form"}
+            {:label "Switch" :anchor "switch"}]}
+   {:title "Data Display"
+    :items [{:label "Table" :anchor "table"}
+            {:label "Accordion" :anchor "accordion"}
+            {:label "Progress" :anchor "progress"}]}
+   {:title "Feedback"
+    :items [{:label "Alert" :anchor "alert"}
+            {:label "Dialog" :anchor "dialog"}
+            {:label "Spinner" :anchor "spinner"}
+            {:label "Skeleton" :anchor "skeleton"}
+            {:label "Tooltip" :anchor "tooltip"}]}
+   {:title "Navigation"
+    :items [{:label "Breadcrumb" :anchor "breadcrumb"}
+            {:label "Pagination" :anchor "pagination"}]}])
+
 (def nav-items
   [{:id :components :label "Components"  :icon-name :package    :href "/"}
    {:id :icons      :label "Icons"       :icon-name :image      :href "/icons"}
@@ -401,6 +424,13 @@
             (sidebar/sidebar-menu-item
               {:href href :icon-name icon-name :active (= id active-page)}
               label))))
+      (sidebar/sidebar-separator)
+      (sidebar/sidebar-group {:label "Components"}
+        (for [{:keys [title items]} component-nav]
+          (sidebar/sidebar-collapsible {:title title :open true}
+            (apply sidebar/sidebar-menu {}
+              (for [{:keys [label anchor]} items]
+                (sidebar/sidebar-menu-item {:href (str "/#" anchor)} label))))))
       (sidebar/sidebar-separator)
       (sidebar/sidebar-group {:label "Targets"}
         (apply sidebar/sidebar-menu {}

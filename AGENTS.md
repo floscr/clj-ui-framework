@@ -205,46 +205,19 @@ If a dev server needs restarting, **tell the user** — don't do it yourself.
 
 ### 7. Check running dev servers before committing — CRITICAL
 
-A tmux session `ui-dev` runs all three dev servers (`bb dev-all`). **Always check every pane for compile errors before committing:**
+A tmux session `ui-dev` runs all three dev servers (`bb dev-all`). **Always run the check script before committing:**
 
 ```sh
-# List panes, then check each for errors
-tmux list-panes -t ui-dev -F "#{pane_index}: #{pane_current_command}"
-for i in $(tmux list-panes -t ui-dev -F "#{pane_index}"); do
-  echo "=== pane $i ==="
-  tmux capture-pane -t "ui-dev:bash.$i" -p -S -30 | grep -v '^$' | tail -10
-done
+bb check-dev
 ```
 
-Look for:
-- **shadow-cljs** (Replicant): `Build failure`, warnings, or `CompilerException`
-- **Vite/Squint**: `ERROR`, `SyntaxError`, or failed imports
-- **Hiccup** (Babashka): stack traces or `Exception`
+This checks all tmux panes for compile errors (shadow-cljs failures, Vite/Squint errors, Babashka exceptions), verifies the hiccup server responds with content, ensures all squint `.mjs` files have content (catches silent empty-file bugs), and confirms replicant JS is compiled.
 
-Do **not** commit if any pane shows errors. Fix them first.
+Do **not** commit if `bb check-dev` exits non-zero. Fix errors first.
 
-### 8. Verify pages load in browser before committing — CRITICAL
-
-Terminal compile checks alone are **not enough**. Squint can produce empty `.mjs` files silently (no errors in the terminal). Use the `fetch` tool to verify each dev server actually serves a working page:
-
+If a compiled squint file is empty (1 line = just the import), touch the source to trigger rewatch:
 ```sh
-# Check hiccup (server-rendered — look for actual HTML content)
-curl -s http://localhost:4003 | grep -c 'sidebar-layout'
-
-# Check squint compiled output is not empty (must be >1 line)
-wc -l dev/squint/.compiled/dev/squint.mjs
-wc -l dev/squint/.compiled/ui/*.mjs | sort -n | head -5
-# Any file with only 1 line is broken — recompile it:
-# touch src/ui/<module>.cljc
-
-# Check replicant compiled JS exists
-ls -la dev/replicant/public/js/cljs-runtime/ui.sidebar.js
-```
-
-If any compiled file is suspiciously small (1 line = just the import), touch the source file to trigger rewatch, or manually compile:
-```sh
-cd dev/squint && npx squint compile ../../src/ui/<module>.cljc
-cd dev/squint && npx squint compile src/dev/squint.cljs
+touch src/ui/<module>.cljc
 ```
 
 ## Theme System

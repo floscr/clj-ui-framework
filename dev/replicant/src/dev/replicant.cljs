@@ -1,5 +1,6 @@
 (ns dev.replicant
-  (:require [replicant.dom :as d]
+  (:require [clojure.string :as str]
+            [replicant.dom :as d]
             [ui.button :as button]
             [ui.alert :as alert]
             [ui.badge :as badge]
@@ -25,10 +26,11 @@
 ;; ── Helpers ─────────────────────────────────────────────────────────
 
 (defn section [title & children]
-  [:section {:style {:margin-bottom "2.5rem"}}
-   [:h3 {:style {:color "var(--fg-1)" :margin-bottom "1rem"
-                  :border-bottom "var(--border-0)" :padding-bottom "0.5rem"}} title]
-   (into [:div {:style {:display "flex" :flex-direction "column" :gap "1rem"}}] children)])
+  (let [id (str/lower-case title)]
+    [:section {:id id :style {:margin-bottom "2.5rem"}}
+     [:h3 {:style {:color "var(--fg-1)" :margin-bottom "1rem"
+                    :border-bottom "var(--border-0)" :padding-bottom "0.5rem"}} title]
+     (into [:div {:style {:display "flex" :flex-direction "column" :gap "1rem"}}] children)]))
 
 (defn page-header [title subtitle]
   [:div {:style {:margin-bottom "2rem"}}
@@ -326,6 +328,28 @@
 
 ;; ── Navigation ──────────────────────────────────────────────────────
 
+(def component-nav
+  [{:title "General"
+    :items [{:label "Button" :anchor "button"}
+            {:label "Badge" :anchor "badge"}
+            {:label "Card" :anchor "card"}]}
+   {:title "Forms"
+    :items [{:label "Form" :anchor "form"}
+            {:label "Switch" :anchor "switch"}]}
+   {:title "Data Display"
+    :items [{:label "Table" :anchor "table"}
+            {:label "Accordion" :anchor "accordion"}
+            {:label "Progress" :anchor "progress"}]}
+   {:title "Feedback"
+    :items [{:label "Alert" :anchor "alert"}
+            {:label "Dialog" :anchor "dialog"}
+            {:label "Spinner" :anchor "spinner"}
+            {:label "Skeleton" :anchor "skeleton"}
+            {:label "Tooltip" :anchor "tooltip"}]}
+   {:title "Navigation"
+    :items [{:label "Breadcrumb" :anchor "breadcrumb"}
+            {:label "Pagination" :anchor "pagination"}]}])
+
 (def nav-items
   [{:id :components :label "Components"  :icon-name :package}
    {:id :icons      :label "Icons"       :icon-name :image}
@@ -334,6 +358,16 @@
 (defn navigate! [page-id]
   (fn [_e]
     (reset! !page page-id)))
+
+(defn navigate-to-section! [anchor]
+  (fn [_e]
+    (when (not= @!page :components)
+      (reset! !page :components))
+    (js/setTimeout
+      (fn []
+        (when-let [el (.getElementById js/document anchor)]
+          (.scrollIntoView el #js {:behavior "smooth" :block "start"})))
+      50)))
 
 (defn toggle-theme! [_e]
   (let [el (.-documentElement js/document)
@@ -377,6 +411,13 @@
               {:icon-name icon-name :active (= id active-page)
                :on-click (navigate! id)}
               label))))
+      (sidebar/sidebar-separator)
+      (sidebar/sidebar-group {:label "Components"}
+        (for [{:keys [title items]} component-nav]
+          (sidebar/sidebar-collapsible {:title title :open true}
+            (apply sidebar/sidebar-menu {}
+              (for [{:keys [label anchor]} items]
+                (sidebar/sidebar-menu-item {:on-click (navigate-to-section! anchor)} label))))))
       (sidebar/sidebar-separator)
       (sidebar/sidebar-group {:label "Targets"}
         (apply sidebar/sidebar-menu {}
