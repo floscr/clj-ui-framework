@@ -1,5 +1,7 @@
 (ns ui.form
-  (:require [clojure.string :as str]))
+  (:require [clojure.string :as str]
+            [ui.icon :as icon]
+            [ui.tooltip :as tooltip]))
 
 ;; In squint, keywords are strings — name is identity
 #?(:squint (defn- kw-name [s] s)
@@ -19,6 +21,12 @@
   [opts]
   (str/join " " (form-field-class-list opts)))
 
+(defn- error-icon
+  "Render a circle-x icon wrapped in a tooltip showing the error text."
+  [error]
+  (tooltip/tooltip {:text error :class "form-error-icon"}
+    (icon/icon {:icon-name :circle-x :size :sm})))
+
 (defn form-field
   "Render a form field wrapper with label, hint, and error support.
 
@@ -37,9 +45,11 @@
              (cond-> (if label
                        [[:label {:class "form-label"} label]]
                        [])
-               true (into children)
-               hint  (conj [:small {:class "form-hint"} hint])
-               error (conj [:small {:class "form-error"} error]))))
+               true (into (if error
+                            [(into [:div {:class "form-field-control"}]
+                                   (conj (vec children) (error-icon error)))]
+                            children))
+               hint (conj [:small {:class "form-hint"} hint]))))
 
      :cljs
      (let [cls (form-field-class-list {:error error})
@@ -49,9 +59,11 @@
              (cond-> (if label
                        [[:label {:class ["form-label"]} label]]
                        [])
-               true (into children)
-               hint  (conj [:small {:class ["form-hint"]} hint])
-               error (conj [:small {:class ["form-error"]} error]))))
+               true (into (if error
+                            [(into [:div {:class ["form-field-control"]}]
+                                   (conj (vec children) (error-icon error)))]
+                            children))
+               hint (conj [:small {:class ["form-hint"]} hint]))))
 
      :clj
      (let [classes (cond-> (form-field-classes {:error error})
@@ -61,9 +73,11 @@
              (cond-> (if label
                        [[:label {:class "form-label"} label]]
                        [])
-               true (into children)
-               hint  (conj [:small {:class "form-hint"} hint])
-               error (conj [:small {:class "form-error"} error]))))))
+               true (into (if error
+                            [(into [:div {:class "form-field-control"}]
+                                   (conj (vec children) (error-icon error)))]
+                            children))
+               hint (conj [:small {:class "form-hint"} hint]))))))
 
 ;; ── Text input ──────────────────────────────────────────────────────
 

@@ -190,8 +190,27 @@ Add the component to all three dev targets so it renders in the visual test page
 ```sh
 bb build-theme   # Regenerate CSS with new component styles
 bb test          # All tests pass
-bb dev-hiccup    # Visual check
 ```
+
+### 6. Check running dev servers before committing — CRITICAL
+
+A tmux session `ui-dev` runs all three dev servers (`bb dev-all`). **Always check every pane for compile errors before committing:**
+
+```sh
+# List panes, then check each for errors
+tmux list-panes -t ui-dev -F "#{pane_index}: #{pane_current_command}"
+for i in $(tmux list-panes -t ui-dev -F "#{pane_index}"); do
+  echo "=== pane $i ==="
+  tmux capture-pane -t "ui-dev:bash.$i" -p -S -30 | grep -v '^$' | tail -10
+done
+```
+
+Look for:
+- **shadow-cljs** (Replicant): `Build failure`, warnings, or `CompilerException`
+- **Vite/Squint**: `ERROR`, `SyntaxError`, or failed imports
+- **Hiccup** (Babashka): stack traces or `Exception`
+
+Do **not** commit if any pane shows errors. Fix them first.
 
 ## Theme System
 

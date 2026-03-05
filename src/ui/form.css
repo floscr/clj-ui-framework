@@ -240,16 +240,63 @@
   cursor: not-allowed;
 }
 
-/* ── Hint & Error text ─────────────────────────────────────────── */
+/* ── Hint text ─────────────────────────────────────────────────── */
 
 .form-hint {
   font-size: var(--font-xs);
   color: var(--fg-2);
 }
 
-.form-error {
-  font-size: var(--font-xs);
+/* ── Error icon with tooltip ───────────────────────────────────── */
+
+.form-field-control {
+  position: relative;
+}
+
+.form-field-control > .form-input,
+.form-field-control > .form-textarea,
+.form-field-control > .form-select {
+  padding-right: var(--size-8);
+}
+
+.tooltip.form-error-icon {
+  position: absolute;
+  right: var(--size-2);
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
   color: var(--danger);
+  cursor: pointer;
+  z-index: 1;
+}
+
+.tooltip.form-error-icon::after {
+  background: color-mix(in srgb, var(--danger) 18%, var(--bg-1));
+  color: var(--fg-0);
+  border: 1px solid color-mix(in srgb, var(--danger) 25%, transparent);
+  white-space: normal;
+  min-width: 12rem;
+  max-width: 20rem;
+  line-height: 1.4;
+  left: auto;
+  right: 0;
+  transform: translateY(4px);
+}
+
+.tooltip.form-error-icon:hover::after {
+  transform: translateY(0);
+}
+
+.tooltip.form-error-icon::before {
+  border-top-color: color-mix(in srgb, var(--danger) 18%, var(--bg-1));
+  left: auto;
+  right: var(--size-1);
+  transform: translateY(4px);
+}
+
+.tooltip.form-error-icon:hover::before {
+  transform: translateY(0);
 }
 
 /* ── Fieldset & Legend ──────────────────────────────────────────── */

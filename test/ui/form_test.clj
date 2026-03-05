@@ -32,11 +32,19 @@
       (is (some #(and (vector? %) (= :small (first %)) (= "form-hint" (get-in % [1 :class])))
                 result))))
 
-  (testing "renders error text"
+  (testing "renders error icon with tooltip"
     (let [result (form/form-field {:label "Email" :error "Invalid email"} [:input])]
       (is (= "form-field form-field--error" (get-in result [1 :class])))
-      (is (some #(and (vector? %) (= :small (first %)) (= "form-error" (get-in % [1 :class])))
-                result))))
+      ;; Children wrapped in form-field-control
+      (let [control (nth result 3)]
+        (is (= :div (first control)))
+        (is (= "form-field-control" (get-in control [1 :class])))
+        ;; Contains the child input
+        (is (= :input (first (nth control 2))))
+        ;; Contains the tooltip with error text
+        (let [tip (nth control 3)]
+          (is (= :span (first tip)))
+          (is (= "Invalid email" (get-in tip [1 :data-tooltip])))))))
 
   (testing "no label renders without label element"
     (let [result (form/form-field {} [:input])]
