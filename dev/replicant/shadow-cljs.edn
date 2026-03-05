@@ -1,5 +1,5 @@
 {:deps true
- :dev-http {3001 "public"}
+ :dev-http {#shadow/env ["SHADOW_HTTP_PORT" :as :int :default 3001] "public"}
  :builds
  {:app
   {:target :browser

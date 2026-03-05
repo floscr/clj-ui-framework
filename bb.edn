@@ -77,13 +77,10 @@
   dev-replicant
   {:doc "Start replicant dev server (PORT env var, default 3001)"
    :depends [build-theme ensure-npm]
-   :requires ([clojure.edn :as edn])
    :task (let [port (some-> (System/getenv "PORT") parse-long)
-               cfg-path "dev/replicant/shadow-cljs.edn"]
-           (when port
-             (let [cfg (edn/read-string (slurp cfg-path))]
-               (spit cfg-path (pr-str (assoc cfg :dev-http {port "public"})))))
-           (shell {:dir "dev/replicant"} "npx" "shadow-cljs" "watch" "app"))}
+               env (cond-> {} port (assoc "SHADOW_HTTP_PORT" (str port)))]
+           (shell {:dir "dev/replicant" :extra-env env}
+                  "npx" "shadow-cljs" "watch" "app"))}
 
   dev-squint
   {:doc "Start squint dev server (PORT env var, default 3002)"
@@ -108,21 +105,16 @@
   dev-all
   {:doc "Start all dev servers in tmux panes (bb dev-all [BASE_PORT], default 3000)"
    :depends [build-theme ensure-npm]
-   :requires ([clojure.edn :as edn])
    :task (let [base    (or (some-> (first *command-line-args*) parse-long) 3000)
                rport   (+ base 1)
                sport   (+ base 2)
                hport   (+ base 3)
-               session "ui-dev"
-               ;; Write shadow-cljs.edn with the correct port before launching
-               cfg-path "dev/replicant/shadow-cljs.edn"
-               cfg      (edn/read-string (slurp cfg-path))]
-           (spit cfg-path (pr-str (assoc cfg :dev-http {rport "public"})))
+               session "ui-dev"]
            (shell {:continue true} "tmux kill-session -t" session)
            (shell "tmux new-session -d -s" session
                   (str "PORT=" hport " bb dev-hiccup"))
            (shell "tmux split-window -h -t" session
-                  (str "bash -c 'cd dev/replicant && npx shadow-cljs watch app'"))
+                  (str "bash -c 'cd dev/replicant && SHADOW_HTTP_PORT=" rport " npx shadow-cljs watch app'"))
            (shell "tmux split-window -v -t" session
                   (str "bash -c 'cd dev/squint && npx squint watch"
                        " & cd dev/squint && npx vite --port " sport "'"))
