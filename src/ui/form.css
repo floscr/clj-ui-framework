@@ -85,6 +85,39 @@
   outline-color: var(--danger);
 }
 
+/* ── Input with icons ──────────────────────────────────────────── */
+
+.form-input-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.form-input-icon {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+  color: var(--fg-2);
+}
+
+.form-input-icon--left {
+  left: var(--size-3);
+}
+
+.form-input-icon--right {
+  right: var(--size-3);
+}
+
+.form-input--icon-left {
+  padding-left: var(--size-8);
+}
+
+.form-input--icon-right {
+  padding-right: var(--size-8);
+}
+
 /* ── Textarea ──────────────────────────────────────────────────── */
 
 .form-textarea {

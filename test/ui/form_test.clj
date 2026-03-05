@@ -1,6 +1,7 @@
 (ns ui.form-test
   (:require [clojure.test :refer [deftest is testing]]
-            [ui.form :as form]))
+            [ui.form :as form]
+            [ui.icon :as icon]))
 
 ;; ── form-field ──────────────────────────────────────────────────────
 
@@ -101,6 +102,41 @@
   (testing "error styling"
     (let [result (form/form-input {:error true})]
       (is (= "form-input form-input--error" (get-in result [1 :class]))))))
+
+(deftest form-input-icon-test
+  (testing "input with icon-left wraps in form-input-wrap"
+    (let [result (form/form-input {:icon-left :search :placeholder "Search..."})]
+      (is (= :div (first result)))
+      (is (= "form-input-wrap" (get-in result [1 :class])))
+      ;; first child: left icon span
+      (let [icon-span (nth result 2)]
+        (is (= :span (first icon-span)))
+        (is (= "form-input-icon form-input-icon--left" (get-in icon-span [1 :class]))))
+      ;; second child: the actual input
+      (let [input (nth result 3)]
+        (is (= :input (first input)))
+        (is (clojure.string/includes? (get-in input [1 :class]) "form-input--icon-left")))))
+
+  (testing "input with icon-right wraps in form-input-wrap"
+    (let [result (form/form-input {:icon-right :check})]
+      (is (= :div (first result)))
+      ;; second child: the input
+      (let [input (nth result 2)]
+        (is (= :input (first input)))
+        (is (clojure.string/includes? (get-in input [1 :class]) "form-input--icon-right")))
+      ;; third child: right icon span
+      (let [icon-span (nth result 3)]
+        (is (= :span (first icon-span)))
+        (is (= "form-input-icon form-input-icon--right" (get-in icon-span [1 :class]))))))
+
+  (testing "input with both icons"
+    (let [result (form/form-input {:icon-left :search :icon-right :x})]
+      (is (= :div (first result)))
+      (is (= 5 (count result)))))  ;; div + attrs + left-icon + input + right-icon
+
+  (testing "input without icons returns bare input"
+    (let [result (form/form-input {:placeholder "Name"})]
+      (is (= :input (first result))))))
 
 ;; ── form-textarea ───────────────────────────────────────────────────
 

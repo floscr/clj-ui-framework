@@ -11,6 +11,12 @@
   color: var(--fg-on-accent);
 }
 
+.badge-icon {
+  width: 0.875em;
+  height: 0.875em;
+  flex-shrink: 0;
+}
+
 .badge-secondary {
   background: var(--bg-2);
   color: var(--fg-0);

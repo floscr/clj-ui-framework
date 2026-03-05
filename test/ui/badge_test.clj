@@ -1,6 +1,7 @@
 (ns ui.badge-test
   (:require [clojure.test :refer [deftest is testing]]
-            [ui.badge :as badge]))
+            [ui.badge :as badge]
+            [ui.icon :as icon]))
 
 (deftest badge-class-list-test
   (testing "default variant (primary)"
@@ -29,3 +30,14 @@
   (testing "extra class gets appended"
     (let [result (badge/badge {:class "extra"} "X")]
       (is (= "badge extra" (get-in result [1 :class]))))))
+
+(deftest badge-icon-test
+  (testing "badge with icon-name renders icon before text"
+    (let [result (badge/badge {:icon-name :check} "Done")]
+      (is (= :span (first result)))
+      (is (= :svg (first (nth result 2))))   ;; icon is first child
+      (is (= "Done" (nth result 3)))))        ;; text is second child
+
+  (testing "badge without icon-name has no icon"
+    (let [result (badge/badge {} "Plain")]
+      (is (= "Plain" (nth result 2))))))

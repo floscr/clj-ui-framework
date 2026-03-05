@@ -78,6 +78,8 @@ a.btn-link {
   line-height: var(--size-6);
 }
 
+/* ── Icon-only button ────────────────────────────────────────── */
+
 .btn-icon {
   padding: var(--size-2);
   line-height: 1;
@@ -95,6 +97,8 @@ a.btn-link {
 .btn-icon-round {
   border-radius: 9999px;
 }
+
+/* ── Disabled ────────────────────────────────────────────────── */
 
 .btn:disabled {
   opacity: 0.5;

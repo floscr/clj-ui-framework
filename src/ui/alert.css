@@ -2,14 +2,25 @@
   container-type: inline-size;
   position: relative;
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--size-3);
   padding: var(--size-4) var(--size-6);
   background: var(--bg-1);
   border: var(--border-0);
   border-radius: var(--radius-md);
   font-size: var(--font-sm);
+}
+
+.alert-icon {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  padding-top: var(--size-1);
+}
+
+.alert-content {
+  flex: 1;
+  min-width: 0;
 }
 
 .alert-title {

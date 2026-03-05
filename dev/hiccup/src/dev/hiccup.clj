@@ -98,7 +98,19 @@
      (button/button {:variant :primary :href "#"} "Link primary")
      (button/button {:variant :secondary :href "#"} "Link secondary")
      (button/button {:variant :link} "Link button")
-     (button/button {:variant :link :href "https://example.com"} "Link with href")]))
+     (button/button {:variant :link :href "https://example.com"} "Link with href")]
+    [:div {:style "display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center;"}
+     (button/button {:variant :primary :icon-left :plus} "Add item")
+     (button/button {:variant :secondary :icon-right :arrow-right} "Next")
+     (button/button {:variant :primary :icon-left :download :icon-right :arrow-down} "Download")
+     (button/button {:variant :ghost :icon-left :edit} "Edit")]
+    [:div {:style "display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center;"}
+     (button/button {:variant :primary :icon :plus})
+     (button/button {:variant :secondary :icon :search})
+     (button/button {:variant :ghost :icon :settings})
+     (button/button {:variant :danger :icon :trash})
+     (button/button {:variant :primary :icon :plus :size :sm})
+     (button/button {:variant :primary :icon :plus :size :lg})]))
 
 (defn alert-demo []
   (section "Alert"
@@ -116,7 +128,12 @@
      (badge/badge {:variant :outline} "Outline")
      (badge/badge {:variant :success} "Success")
      (badge/badge {:variant :warning} "Warning")
-     (badge/badge {:variant :danger} "Danger")]))
+     (badge/badge {:variant :danger} "Danger")]
+    [:div {:style "display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;"}
+     (badge/badge {:icon-name :check :variant :success} "Verified")
+     (badge/badge {:icon-name :star} "Featured")
+     (badge/badge {:icon-name :alert-triangle :variant :warning} "Caution")
+     (badge/badge {:icon-name :clock :variant :secondary} "Pending")]))
 
 (defn card-demo []
   (section "Card"
@@ -271,6 +288,10 @@
        (form/form-input {:type :datetime-local}))
      (form/form-field {:label "Date"}
        (form/form-input {:type :date}))
+     (form/form-field {:label "Search (icon left)"}
+       (form/form-input {:type :text :placeholder "Search..." :icon-left :search}))
+     (form/form-field {:label "URL (both icons)"}
+       (form/form-input {:type :text :placeholder "example.com" :icon-left :globe :icon-right :check}))
      (form/form-checkbox {:label "I agree to the terms"})
      (form/form-radio-group {:label "Preference"
                               :radio-name "pref"

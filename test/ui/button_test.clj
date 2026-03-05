@@ -1,6 +1,7 @@
 (ns ui.button-test
   (:require [clojure.test :refer [deftest is testing]]
-            [ui.button :as button]))
+            [ui.button :as button]
+            [ui.icon :as icon]))
 
 (deftest button-class-list-test
   (testing "default variant and size"
@@ -97,3 +98,39 @@
       (is (= :a (first result)))
       (is (= "https://example.com" (get-in result [1 :href])))
       (is (= "btn btn-link" (get-in result [1 :class]))))))
+
+(deftest button-icon-class-list-test
+  (testing "icon-only adds btn-icon class"
+    (is (= ["btn" "btn-secondary" "btn-icon"] (button/button-class-list {:icon :plus})))
+    (is (= ["btn" "btn-primary" "btn-icon"] (button/button-class-list {:variant :primary :icon :plus}))))
+
+  (testing "icon-only with size"
+    (is (= ["btn" "btn-primary" "btn-sm" "btn-icon"]
+           (button/button-class-list {:variant :primary :size :sm :icon :plus})))))
+
+(deftest button-icon-component-test
+  (testing "icon-only button renders icon child"
+    (let [result (button/button {:variant :primary :icon :plus})]
+      (is (= :button (first result)))
+      (is (= "btn btn-primary btn-icon" (get-in result [1 :class])))
+      ;; third element should be the SVG icon
+      (is (= :svg (first (nth result 2))))))
+
+  (testing "icon-left renders icon before text"
+    (let [result (button/button {:variant :primary :icon-left :plus} "Add")]
+      (is (= :button (first result)))
+      (is (= :svg (first (nth result 2))))   ;; icon is first child
+      (is (= "Add" (nth result 3)))))         ;; text is second child
+
+  (testing "icon-right renders icon after text"
+    (let [result (button/button {:variant :primary :icon-right :arrow-right} "Next")]
+      (is (= :button (first result)))
+      (is (= "Next" (nth result 2)))          ;; text is first child
+      (is (= :svg (first (nth result 3))))))  ;; icon is second child
+
+  (testing "icon-left and icon-right together"
+    (let [result (button/button {:variant :primary :icon-left :plus :icon-right :arrow-right} "Add")]
+      (is (= :svg (first (nth result 2))))    ;; left icon
+      (is (= "Add" (nth result 3)))           ;; text
+      (is (= :svg (first (nth result 4)))))) ;; right icon
+  )

@@ -93,7 +93,8 @@
   (str/join " " (form-input-class-list opts)))
 
 (defn form-input
-  "Render a text input element.
+  "Render a text input element. When :icon-left or :icon-right is provided,
+   wraps in a .form-input-wrap div with absolutely-positioned icons.
 
    Props:
      :type        - :text, :email, :password, :date, :datetime-local, etc.
@@ -101,36 +102,67 @@
      :value       - input value
      :disabled    - boolean
      :error       - boolean, adds error styling
+     :icon-left   - icon name keyword for left icon (e.g. :search)
+     :icon-right  - icon name keyword for right icon (e.g. :check)
      :on-change   - change handler (ignored in :clj target)
      :class       - additional CSS classes
      :attrs       - additional HTML attributes"
-  [{:keys [type placeholder value disabled error on-change class attrs] :as _props}]
-  (let [input-type (or (some-> type kw-name) "text")]
+  [{:keys [type placeholder value disabled error icon-left icon-right on-change class attrs] :as _props}]
+  (let [input-type (or (some-> type kw-name) "text")
+        has-icons  (or icon-left icon-right)]
     #?(:squint
-       (let [classes (cond-> (form-input-classes {:error error})
-                       class (str " " class))]
-         [:input (cond-> (merge {:class classes :type input-type} attrs)
-                   placeholder (assoc :placeholder placeholder)
-                   value       (assoc :value value)
-                   disabled    (assoc :disabled true)
-                   on-change   (assoc :on-change on-change))])
+       (let [input-cls (cond-> (form-input-classes {:error error})
+                         class      (str " " class)
+                         icon-left  (str " form-input--icon-left")
+                         icon-right (str " form-input--icon-right"))
+             input-el [:input (cond-> (merge {:class input-cls :type input-type} attrs)
+                                placeholder (assoc :placeholder placeholder)
+                                value       (assoc :value value)
+                                disabled    (assoc :disabled true)
+                                on-change   (assoc :on-change on-change))]]
+         (if has-icons
+           (into [:div {:class "form-input-wrap"}]
+                 (cond-> []
+                   icon-left  (conj [:span {:class "form-input-icon form-input-icon--left"} (icon/icon {:icon-name icon-left :size :sm})])
+                   true       (conj input-el)
+                   icon-right (conj [:span {:class "form-input-icon form-input-icon--right"} (icon/icon {:icon-name icon-right :size :sm})])))
+           input-el))
 
        :cljs
        (let [cls (form-input-class-list {:error error})
-             classes (cond-> cls class (conj class))]
-         [:input (cond-> (merge {:class classes :type input-type} attrs)
-                   placeholder (assoc :placeholder placeholder)
-                   value       (assoc :value value)
-                   disabled    (assoc :disabled true)
-                   on-change   (assoc-in [:on :change] on-change))])
+             input-cls (cond-> cls
+                         class      (conj class)
+                         icon-left  (conj "form-input--icon-left")
+                         icon-right (conj "form-input--icon-right"))
+             input-el [:input (cond-> (merge {:class input-cls :type input-type} attrs)
+                                placeholder (assoc :placeholder placeholder)
+                                value       (assoc :value value)
+                                disabled    (assoc :disabled true)
+                                on-change   (assoc-in [:on :change] on-change))]]
+         (if has-icons
+           (into [:div {:class ["form-input-wrap"]}]
+                 (cond-> []
+                   icon-left  (conj [:span {:class ["form-input-icon" "form-input-icon--left"]} (icon/icon {:icon-name icon-left :size :sm})])
+                   true       (conj input-el)
+                   icon-right (conj [:span {:class ["form-input-icon" "form-input-icon--right"]} (icon/icon {:icon-name icon-right :size :sm})])))
+           input-el))
 
        :clj
-       (let [classes (cond-> (form-input-classes {:error error})
-                       class (str " " class))]
-         [:input (cond-> (merge {:class classes :type input-type} attrs)
-                   placeholder (assoc :placeholder placeholder)
-                   value       (assoc :value value)
-                   disabled    (assoc :disabled true))]))))
+       (let [input-cls (cond-> (form-input-classes {:error error})
+                         class      (str " " class)
+                         icon-left  (str " form-input--icon-left")
+                         icon-right (str " form-input--icon-right"))
+             input-el [:input (cond-> (merge {:class input-cls :type input-type} attrs)
+                                placeholder (assoc :placeholder placeholder)
+                                value       (assoc :value value)
+                                disabled    (assoc :disabled true))]]
+         (if has-icons
+           (into [:div {:class "form-input-wrap"}]
+                 (cond-> []
+                   icon-left  (conj [:span {:class "form-input-icon form-input-icon--left"} (icon/icon {:icon-name icon-left :size :sm})])
+                   true       (conj input-el)
+                   icon-right (conj [:span {:class "form-input-icon form-input-icon--right"} (icon/icon {:icon-name icon-right :size :sm})])))
+           input-el)))))
 
 ;; ── Textarea ────────────────────────────────────────────────────────
 

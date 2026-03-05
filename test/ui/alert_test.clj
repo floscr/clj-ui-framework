@@ -1,6 +1,7 @@
 (ns ui.alert-test
   (:require [clojure.test :refer [deftest is testing]]
-            [ui.alert :as alert]))
+            [ui.alert :as alert]
+            [ui.icon :as icon]))
 
 (deftest alert-class-list-test
   (testing "neutral (no variant)"
@@ -24,12 +25,29 @@
       (is (= "alert alert-success" (get-in result [1 :class])))
       (is (= "alert" (get-in result [1 :role])))))
 
-  (testing "alert with title includes title paragraph"
-    (let [result (alert/alert {:title "Title"} "Body")]
-      (is (some #(and (vector? %) (= "alert-title" (get-in % [1 :class])))
-                (rest (rest result))))))
+  (testing "variant alert includes default icon"
+    (let [result (alert/alert {:variant :success :title "Done!"} "Saved.")
+          icon-span (nth result 2)]
+      (is (= :span (first icon-span)))
+      (is (= "alert-icon" (get-in icon-span [1 :class])))))
 
-  (testing "alert without title has no title paragraph"
-    (let [result (alert/alert {} "Body")]
-      (is (not (some #(and (vector? %) (= "alert-title" (get-in % [1 :class])))
-                     (rest (rest result))))))))
+  (testing "neutral alert has no icon"
+    (let [result (alert/alert {:title "Title"} "Body")]
+      (is (not (some #(and (vector? %) (= "alert-icon" (get-in % [1 :class])))
+                     (rest (rest result)))))))
+
+  (testing "icon-name false suppresses icon"
+    (let [result (alert/alert {:variant :success :icon-name false} "Body")]
+      (is (not (some #(and (vector? %) (= "alert-icon" (get-in % [1 :class])))
+                     (rest (rest result)))))))
+
+  (testing "icon-name overrides default"
+    (let [result (alert/alert {:variant :success :icon-name :star} "Body")
+          icon-span (nth result 2)]
+      (is (= "alert-icon" (get-in icon-span [1 :class])))))
+
+  (testing "alert content is wrapped in alert-content div"
+    (let [result (alert/alert {:variant :info :title "Title"} "Body")
+          content-div (last result)]
+      (is (= :div (first content-div)))
+      (is (= "alert-content" (get-in content-div [1 :class]))))))
