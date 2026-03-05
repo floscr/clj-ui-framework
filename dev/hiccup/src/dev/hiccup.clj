@@ -390,7 +390,7 @@
 (defn app-sidebar [active-page own-port]
   (sidebar/sidebar {}
     (sidebar/sidebar-header {}
-      (sidebar/sidebar-brand {:title "UI Framework" :subtitle "Hiccup" :icon "U"}))
+      (sidebar/sidebar-brand {:title "Clojure UI Framework" :subtitle "Hiccup" :icon "U"}))
     (sidebar/sidebar-content {}
       (sidebar/sidebar-group {:label "Pages"}
         (apply sidebar/sidebar-menu {}

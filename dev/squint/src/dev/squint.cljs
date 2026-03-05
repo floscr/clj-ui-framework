@@ -371,7 +371,7 @@
 (defn app-sidebar [active-page]
   (sidebar/sidebar {}
     (sidebar/sidebar-header {}
-      (sidebar/sidebar-brand {:title "UI Framework" :subtitle "Squint" :icon "U"}))
+      (sidebar/sidebar-brand {:title "Clojure UI Framework" :subtitle "Squint" :icon "U"}))
     (sidebar/sidebar-content {}
       (sidebar/sidebar-group {:label "Pages"}
         (into (sidebar/sidebar-menu {})
