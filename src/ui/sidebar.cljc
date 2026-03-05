@@ -369,6 +369,89 @@
          [:span {:class "sidebar-collapsible-chevron" :aria-hidden "true"}]]
         (into [:div {:class "sidebar-collapsible-content"}] children)])))
 
+;; ── Sidebar Mobile Toggle ────────────────────────────────────────────
+
+(defn sidebar-mobile-toggle-class-list [_opts] ["sidebar-mobile-toggle"])
+(defn sidebar-mobile-toggle-classes [opts] (str/join " " (sidebar-mobile-toggle-class-list opts)))
+
+(defn sidebar-mobile-toggle
+  "Render a hamburger/close toggle button for mobile sidebar.
+   Hidden on desktop via CSS. On click, toggles `data-sidebar-open`
+   on the nearest `.sidebar-layout` ancestor.
+
+   Props:
+     :on-click - click handler (cljs/squint only)
+     :class    - additional CSS classes
+     :attrs    - additional HTML attributes"
+  [{:keys [on-click class attrs] :as _props}]
+  #?(:squint
+     (let [classes (cond-> (sidebar-mobile-toggle-classes {}) class (str " " class))
+           base-attrs (cond-> (merge {:class classes
+                                      :type "button"
+                                      :aria-label "Toggle sidebar"} attrs)
+                        on-click (assoc :on-click on-click))]
+       [:button base-attrs
+        [:span {:class "sidebar-toggle-icon-open" :aria-hidden "true"}
+         (icon/icon {:icon-name :menu :size :sm})]
+        [:span {:class "sidebar-toggle-icon-close" :aria-hidden "true"}
+         (icon/icon {:icon-name :x :size :sm})]])
+
+     :cljs
+     (let [cls (sidebar-mobile-toggle-class-list {})
+           classes (cond-> cls class (conj class))
+           base-attrs (cond-> (merge {:class classes
+                                      :type "button"
+                                      :aria-label "Toggle sidebar"} attrs)
+                        on-click (assoc-in [:on :click] on-click))]
+       [:button base-attrs
+        [:span {:class ["sidebar-toggle-icon-open"] :aria-hidden "true"}
+         (icon/icon {:icon-name :menu :size :sm})]
+        [:span {:class ["sidebar-toggle-icon-close"] :aria-hidden "true"}
+         (icon/icon {:icon-name :x :size :sm})]])
+
+     :clj
+     (let [classes (cond-> (sidebar-mobile-toggle-classes {}) class (str " " class))
+           base-attrs (merge {:class classes
+                              :type "button"
+                              :aria-label "Toggle sidebar"
+                              :onclick "this.closest('.sidebar-layout').toggleAttribute('data-sidebar-open')"} attrs)]
+       [:button base-attrs
+        [:span {:class "sidebar-toggle-icon-open" :aria-hidden "true"}
+         (icon/icon {:icon-name :menu :size :sm})]
+        [:span {:class "sidebar-toggle-icon-close" :aria-hidden "true"}
+         (icon/icon {:icon-name :x :size :sm})]])))
+
+;; ── Sidebar Overlay ─────────────────────────────────────────────────
+
+(defn sidebar-overlay
+  "Render the backdrop overlay for mobile sidebar.
+   Clicking it closes the sidebar. Place inside sidebar-layout,
+   as a sibling of the sidebar.
+
+   Props:
+     :on-click - click handler (cljs/squint only)
+     :class    - additional CSS classes
+     :attrs    - additional HTML attributes"
+  [{:keys [on-click class attrs] :as _props}]
+  #?(:squint
+     (let [classes (cond-> "sidebar-overlay" class (str " " class))
+           base-attrs (cond-> (merge {:class classes :aria-hidden "true"} attrs)
+                        on-click (assoc :on-click on-click))]
+       [:div base-attrs])
+
+     :cljs
+     (let [classes (cond-> ["sidebar-overlay"] class (conj class))
+           base-attrs (cond-> (merge {:class classes :aria-hidden "true"} attrs)
+                        on-click (assoc-in [:on :click] on-click))]
+       [:div base-attrs])
+
+     :clj
+     (let [classes (cond-> "sidebar-overlay" class (str " " class))
+           base-attrs (merge {:class classes
+                              :aria-hidden "true"
+                              :onclick "this.closest('.sidebar-layout').removeAttribute('data-sidebar-open')"} attrs)]
+       [:div base-attrs])))
+
 ;; ── Sidebar Separator ───────────────────────────────────────────────
 
 (defn sidebar-separator

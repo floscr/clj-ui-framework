@@ -146,6 +146,37 @@
         (is (= :summary (first summary)))
         (is (= "Section" (nth (nth summary 1) 1)))))))
 
+(deftest sidebar-mobile-toggle-class-list-test
+  (testing "returns sidebar-mobile-toggle class"
+    (is (= ["sidebar-mobile-toggle"] (sidebar/sidebar-mobile-toggle-class-list {})))))
+
+(deftest sidebar-mobile-toggle-test
+  (testing "renders a button with toggle icons"
+    (let [result (sidebar/sidebar-mobile-toggle {})]
+      (is (= :button (first result)))
+      (is (= "sidebar-mobile-toggle" (get-in result [1 :class])))
+      (is (= "button" (get-in result [1 :type])))
+      (is (= "Toggle sidebar" (get-in result [1 :aria-label])))))
+  (testing "has onclick for toggling data-sidebar-open"
+    (let [result (sidebar/sidebar-mobile-toggle {})]
+      (is (string? (get-in result [1 :onclick])))))
+  (testing "extra class appended"
+    (let [result (sidebar/sidebar-mobile-toggle {:class "custom"})]
+      (is (= "sidebar-mobile-toggle custom" (get-in result [1 :class]))))))
+
+(deftest sidebar-overlay-test
+  (testing "renders a div with overlay class"
+    (let [result (sidebar/sidebar-overlay {})]
+      (is (= :div (first result)))
+      (is (= "sidebar-overlay" (get-in result [1 :class])))
+      (is (= "true" (get-in result [1 :aria-hidden])))))
+  (testing "has onclick for closing sidebar"
+    (let [result (sidebar/sidebar-overlay {})]
+      (is (string? (get-in result [1 :onclick])))))
+  (testing "extra class appended"
+    (let [result (sidebar/sidebar-overlay {:class "custom"})]
+      (is (= "sidebar-overlay custom" (get-in result [1 :class]))))))
+
 (deftest sidebar-separator-test
   (testing "renders <hr>"
     (let [result (sidebar/sidebar-separator)]

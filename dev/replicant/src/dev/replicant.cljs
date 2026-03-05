@@ -344,6 +344,14 @@
     (js/requestAnimationFrame
       #(js-delete (.-dataset el) "noTransitions"))))
 
+(defn toggle-sidebar! [_e]
+  (when-let [layout (.querySelector js/document ".sidebar-layout")]
+    (.toggleAttribute layout "data-sidebar-open")))
+
+(defn close-sidebar! [_e]
+  (when-let [layout (.querySelector js/document ".sidebar-layout")]
+    (.removeAttribute layout "data-sidebar-open")))
+
 ;; ── App Shell ───────────────────────────────────────────────────────
 
 (defn own-port []
@@ -391,8 +399,11 @@
   (let [active-page @!page]
     (sidebar/sidebar-layout {}
       (app-sidebar active-page)
+      (sidebar/sidebar-overlay {:on-click close-sidebar!})
       (sidebar/sidebar-layout-main {}
         [:div {:style {:padding "2rem" :max-width "960px"}}
+         [:div {:style {:display "flex" :align-items "center" :gap "0.75rem" :margin-bottom "1rem"}}
+          (sidebar/sidebar-mobile-toggle {:on-click toggle-sidebar!})]
          (case active-page
            :components (components-page)
            :icons      (icons-page)

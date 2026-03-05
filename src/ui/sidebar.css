@@ -4,6 +4,7 @@
   display: flex;
   min-height: 100vh;
   min-height: 100dvh;
+  position: relative;
 }
 
 .sidebar-layout-main {
@@ -144,7 +145,9 @@
 .sidebar-content {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: var(--size-2) var(--size-3);
+  min-width: 0;
 }
 
 /* Scrollbar styling */
@@ -196,6 +199,11 @@
 
 /* ── Sidebar Menu Item ─────────────────────────────────────────── */
 
+.sidebar-menu > li {
+  display: flex;
+  min-width: 0;
+}
+
 .sidebar-menu-item {
   display: flex;
   align-items: center;
@@ -211,8 +219,12 @@
   background: transparent;
   font-family: inherit;
   width: 100%;
+  min-width: 0;
   text-align: left;
   line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 a.sidebar-menu-item {
@@ -386,4 +398,98 @@ a.sidebar-menu-item {
   padding-top: var(--size-1);
   border-left: var(--border-0);
   padding-left: var(--size-2);
+}
+
+/* ── Sidebar Mobile Toggle ─────────────────────────────────────── */
+
+.sidebar-mobile-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--size-10);
+  height: var(--size-10);
+  padding: 0;
+  border: var(--border-0);
+  border-radius: var(--radius-md);
+  background: var(--bg-0);
+  color: var(--fg-1);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+.sidebar-mobile-toggle:hover {
+  background: var(--bg-1);
+  color: var(--fg-0);
+}
+
+.sidebar-mobile-toggle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Show open icon by default, hide close icon */
+.sidebar-mobile-toggle .sidebar-toggle-icon-open {
+  display: flex;
+}
+
+.sidebar-mobile-toggle .sidebar-toggle-icon-close {
+  display: none;
+}
+
+/* ── Sidebar Overlay ───────────────────────────────────────────── */
+
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 40;
+  opacity: 0;
+  transition: opacity 200ms ease;
+}
+
+/* ── Mobile Responsive ─────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .sidebar-mobile-toggle {
+    display: flex;
+  }
+
+  .sidebar-layout > .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 50;
+    height: 100vh;
+    height: 100dvh;
+    transform: translateX(-100%);
+    transition: transform 250ms ease;
+    box-shadow: none;
+  }
+
+  .sidebar-layout > .sidebar-overlay {
+    display: block;
+    pointer-events: none;
+  }
+
+  /* Open state — toggled via data-sidebar-open on .sidebar-layout */
+  .sidebar-layout[data-sidebar-open] > .sidebar {
+    transform: translateX(0);
+    box-shadow: var(--shadow-3);
+  }
+
+  .sidebar-layout[data-sidebar-open] > .sidebar-overlay {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* Swap icons when open */
+  .sidebar-layout[data-sidebar-open] .sidebar-mobile-toggle .sidebar-toggle-icon-open {
+    display: none;
+  }
+
+  .sidebar-layout[data-sidebar-open] .sidebar-mobile-toggle .sidebar-toggle-icon-close {
+    display: flex;
+  }
 }

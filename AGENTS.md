@@ -192,7 +192,18 @@ bb build-theme   # Regenerate CSS with new component styles
 bb test          # All tests pass
 ```
 
-### 6. Check running dev servers before committing — CRITICAL
+### 6. Never start dev servers from the agent — CRITICAL
+
+**Do not run `bb dev`, `bb dev-hiccup`, `bb dev-replicant`, `bb dev-squint`, or any long-running server process from the agent.** The user manages dev servers in a separate tmux session (`ui-dev`). Starting servers from the agent blocks the session, spawns orphan processes, and can break existing tmux panes.
+
+The agent may only:
+- Run short commands: `bb test`, `bb build-theme`, `curl`, `wc -l`, `grep`
+- Inspect tmux panes via `tmux capture-pane`
+- Touch files to trigger recompilation: `touch src/ui/<module>.cljc`
+
+If a dev server needs restarting, **tell the user** — don't do it yourself.
+
+### 7. Check running dev servers before committing — CRITICAL
 
 A tmux session `ui-dev` runs all three dev servers (`bb dev-all`). **Always check every pane for compile errors before committing:**
 
@@ -211,6 +222,30 @@ Look for:
 - **Hiccup** (Babashka): stack traces or `Exception`
 
 Do **not** commit if any pane shows errors. Fix them first.
+
+### 8. Verify pages load in browser before committing — CRITICAL
+
+Terminal compile checks alone are **not enough**. Squint can produce empty `.mjs` files silently (no errors in the terminal). Use the `fetch` tool to verify each dev server actually serves a working page:
+
+```sh
+# Check hiccup (server-rendered — look for actual HTML content)
+curl -s http://localhost:4003 | grep -c 'sidebar-layout'
+
+# Check squint compiled output is not empty (must be >1 line)
+wc -l dev/squint/.compiled/dev/squint.mjs
+wc -l dev/squint/.compiled/ui/*.mjs | sort -n | head -5
+# Any file with only 1 line is broken — recompile it:
+# touch src/ui/<module>.cljc
+
+# Check replicant compiled JS exists
+ls -la dev/replicant/public/js/cljs-runtime/ui.sidebar.js
+```
+
+If any compiled file is suspiciously small (1 line = just the import), touch the source file to trigger rewatch, or manually compile:
+```sh
+cd dev/squint && npx squint compile ../../src/ui/<module>.cljc
+cd dev/squint && npx squint compile src/dev/squint.cljs
+```
 
 ## Theme System
 

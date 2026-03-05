@@ -356,9 +356,12 @@
                  (sidebar/sidebar-menu-item {:href "#"} "redirect")))))
          (sidebar/sidebar-footer {}
            (sidebar/sidebar-user {:user-name "Alice Johnson" :email "alice@example.com"})))
+       (sidebar/sidebar-overlay {})
        (sidebar/sidebar-layout-main {}
          [:div {:style "padding: 2rem;"}
-          [:h3 {:style "margin: 0 0 1rem; color: var(--fg-0);"} "Dashboard"]
+          [:div {:style "display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;"}
+           (sidebar/sidebar-mobile-toggle {})
+           [:h3 {:style "margin: 0; color: var(--fg-0);"} "Dashboard"]]
           [:div {:style "display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;"}
            [:div {:style "aspect-ratio: 16/9; background: var(--bg-1); border-radius: var(--radius-lg); border: var(--border-0);"}]
            [:div {:style "aspect-ratio: 16/9; background: var(--bg-1); border-radius: var(--radius-lg); border: var(--border-0);"}]
@@ -435,8 +438,11 @@
          [:body
           (sidebar/sidebar-layout {}
             (app-sidebar active-page port)
+            (sidebar/sidebar-overlay {})
             (sidebar/sidebar-layout-main {}
               [:div {:style "padding: 2rem; max-width: 960px;"}
+               [:div {:style "display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;"}
+                (sidebar/sidebar-mobile-toggle {})]
                (case active-page
                  :components (components-page)
                  :icons      (icons-page)
