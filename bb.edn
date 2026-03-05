@@ -86,7 +86,7 @@
    :depends [build-theme ensure-npm]
    :task (let [port (or (some-> (System/getenv "PORT") parse-long) 3002)]
            (shell {:dir "dev/squint"}
-                  "bash" "-c" (str "npx squint watch & npx vite --port " port)))}
+                  "bash" "-c" (str "npx squint watch & exec npx vite --port " port)))}
 
   dev
   {:doc "Start all dev servers"
@@ -121,7 +121,7 @@
                   (str "bash -c 'cd dev/replicant && npx shadow-cljs watch app'"))
            (shell "tmux split-window -v -t" session
                   (str "bash -c 'cd dev/squint && npx squint watch"
-                       " & npx vite --port " sport "'"))
+                       " & cd dev/squint && npx vite --port " sport "'"))
            (shell "tmux select-layout -t" session "tiled")
            (println (str "Tmux session 'ui-dev' created (base port " base "):"))
            (println (str "  Pane 0: Hiccup    → http://localhost:" hport))
