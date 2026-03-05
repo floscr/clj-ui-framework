@@ -7,6 +7,41 @@
   <style>
     html, body { margin: 0; padding: 0; }
   </style>
+  <script>
+    (function() {
+      var params = new URLSearchParams(window.location.search);
+      var theme = params.get('theme');
+      if (theme === 'dark' || theme === 'light') {
+        document.documentElement.dataset.theme = theme;
+      }
+      new MutationObserver(function(mutations) {
+        for (var i = 0; i < mutations.length; i++) {
+          if (mutations[i].attributeName === 'data-theme') {
+            var t = document.documentElement.dataset.theme;
+            var url = new URL(window.location);
+            if (t) url.searchParams.set('theme', t);
+            else url.searchParams.delete('theme');
+            history.replaceState(null, '', url);
+            if (window.parent !== window) {
+              window.parent.postMessage({ type: 'theme-change', theme: t || '' }, '*');
+            }
+          }
+        }
+      }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+      document.addEventListener('click', function(e) {
+        var a = e.target.closest('a[href]');
+        if (!a) return;
+        try {
+          var url = new URL(a.href);
+          if (url.hostname === location.hostname && url.port !== location.port) {
+            var t = document.documentElement.dataset.theme;
+            if (t) url.searchParams.set('theme', t);
+            a.href = url.toString();
+          }
+        } catch (ex) {}
+      });
+    })();
+  </script>
 </head>
 <body>
   <div id="app"></div>

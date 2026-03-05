@@ -64,19 +64,38 @@
     <button class="tab" data-target="squint" data-url="http://localhost:3002">Squint</button>
   </div>
   <div class="frame-container" id="frame-container">
-    <iframe id="target-frame" src="http://localhost:3003"></iframe>
+    <iframe id="target-frame"></iframe>
   </div>
 
   <script>
     const tabs = document.querySelectorAll('.tab');
     const frame = document.getElementById('target-frame');
 
+    // Track current theme from iframe messages or URL param
+    var currentTheme = new URLSearchParams(window.location.search).get('theme') || '';
+
+    function buildUrl(base) {
+      var url = new URL(base);
+      if (currentTheme) url.searchParams.set('theme', currentTheme);
+      return url.toString();
+    }
+
+    // Set initial iframe URL with theme param
+    frame.src = buildUrl(document.querySelector('.tab.active').dataset.url);
+
+    // Listen for theme changes from iframes
+    window.addEventListener('message', function(e) {
+      if (e.data && e.data.type === 'theme-change') {
+        currentTheme = e.data.theme || '';
+      }
+    });
+
     tabs.forEach(tab => {
       tab.addEventListener('click', () => {
         if (tab.classList.contains('disabled')) return;
         tabs.forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
-        frame.src = tab.dataset.url;
+        frame.src = buildUrl(tab.dataset.url);
       });
     });
   </script>

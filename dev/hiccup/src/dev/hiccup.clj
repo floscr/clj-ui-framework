@@ -1,6 +1,7 @@
 (ns dev.hiccup
   (:require [org.httpkit.server :as http]
             [hiccup2.core :as h]
+            [clojure.string :as str]
             [ui.button :as button]
             [ui.alert :as alert]
             [ui.badge :as badge]
@@ -18,6 +19,55 @@
             [ui.form :as form]
             [ui.sidebar :as sidebar]
             [ui.icon :as icon]))
+
+;; ── Query Params ────────────────────────────────────────────────────
+
+(defn parse-query-params
+  "Parse query string from URI into a map."
+  [uri]
+  (if-let [q (second (str/split uri #"\?" 2))]
+    (into {}
+      (for [pair (str/split q #"&")
+            :let [[k v] (str/split pair #"=" 2)]
+            :when k]
+        [k (or v "")]))
+    {}))
+
+(def theme-persistence-script
+  "/* Theme persistence: read from ?theme=, sync changes to URL & parent frame */
+  (function() {
+    var params = new URLSearchParams(window.location.search);
+    var theme = params.get('theme');
+    if (theme === 'dark' || theme === 'light') {
+      document.documentElement.dataset.theme = theme;
+    }
+    new MutationObserver(function(mutations) {
+      for (var i = 0; i < mutations.length; i++) {
+        if (mutations[i].attributeName === 'data-theme') {
+          var t = document.documentElement.dataset.theme;
+          var url = new URL(window.location);
+          if (t) url.searchParams.set('theme', t);
+          else url.searchParams.delete('theme');
+          history.replaceState(null, '', url);
+          if (window.parent !== window) {
+            window.parent.postMessage({ type: 'theme-change', theme: t || '' }, '*');
+          }
+        }
+      }
+    }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    document.addEventListener('click', function(e) {
+      var a = e.target.closest('a[href]');
+      if (!a) return;
+      try {
+        var url = new URL(a.href);
+        if (url.hostname === location.hostname && url.port !== location.port) {
+          var t = document.documentElement.dataset.theme;
+          if (t) url.searchParams.set('theme', t);
+          a.href = url.toString();
+        }
+      } catch (ex) {}
+    });
+  })();")
 
 ;; ── Helpers ─────────────────────────────────────────────────────────
 
@@ -368,16 +418,20 @@
       (sidebar/sidebar-user {:user-name "Dev Mode" :email (str "hiccup · port " own-port) :avatar "bb"}))))
 
 (defn render-page [uri port]
-  (let [active-page (resolve-page uri)]
+  (let [params     (parse-query-params uri)
+        theme      (get params "theme")
+        path       (first (str/split uri #"\?" 2))
+        active-page (resolve-page path)]
     (str
       "<!DOCTYPE html>\n"
       (h/html
-        [:html
+        [:html (when (#{"dark" "light"} theme) {:data-theme theme})
          [:head
           [:meta {:charset "utf-8"}]
           [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
           [:link {:rel "stylesheet" :href "/theme.css"}]
-          [:style (h/raw "html, body { margin: 0; padding: 0; }")]]
+          [:style (h/raw "html, body { margin: 0; padding: 0; }")]
+          [:script (h/raw theme-persistence-script)]]
          [:body
           (sidebar/sidebar-layout {}
             (app-sidebar active-page port)
@@ -394,14 +448,15 @@
 (defonce !port (atom 3003))
 
 (defn handler [{:keys [uri]}]
-  (let [port @!port]
+  (let [port @!port
+        path (first (str/split uri #"\?" 2))]
     (cond
-      (= uri "/theme.css")
+      (= path "/theme.css")
       {:status 200
        :headers {"Content-Type" "text/css"}
        :body (slurp "dist/theme.css")}
 
-      (resolve-page uri)
+      (resolve-page path)
       {:status 200
        :headers {"Content-Type" "text/html; charset=utf-8"}
        :body (render-page uri port)}
