@@ -74,6 +74,12 @@
 :focus:not(:focus-visible) {
   outline: none;
   box-shadow: none;
+}
+
+[data-no-transitions] *,
+[data-no-transitions] *::before,
+[data-no-transitions] *::after {
+  transition: none !important;
 }")
 
 (defn collect-component-css

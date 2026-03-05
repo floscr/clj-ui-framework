@@ -27,8 +27,11 @@
 (defn toggle-theme! [_e]
   (let [el (.-documentElement js/document)
         current (.. el -dataset -theme)]
+    (set! (.. el -dataset -noTransitions) "")
     (set! (.. el -dataset -theme)
-          (if (= current "dark") "light" "dark"))))
+          (if (= current "dark") "light" "dark"))
+    (js/requestAnimationFrame
+      #(js-delete (.-dataset el) "noTransitions"))))
 
 (defn section [title & children]
   [:section {:style {"margin-bottom" "2.5rem"}}

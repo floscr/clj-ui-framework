@@ -362,7 +362,7 @@
         (sidebar/sidebar-menu {}
           (sidebar/sidebar-menu-item
             {:icon-name :sun
-             :attrs {:onclick "document.documentElement.dataset.theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'"}}
+             :attrs {:onclick "document.documentElement.dataset.noTransitions = ''; document.documentElement.dataset.theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'; requestAnimationFrame(() => { delete document.documentElement.dataset.noTransitions; })"}}
             "Toggle Dark Mode"))))
     (sidebar/sidebar-footer {}
       (sidebar/sidebar-user {:user-name "Dev Mode" :email (str "hiccup · port " own-port) :avatar "bb"}))))
