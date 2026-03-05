@@ -2,6 +2,8 @@
   (:require [org.httpkit.server :as http]
             [hiccup2.core :as h]
             [clojure.string :as str]
+            [clojure.java.io :as io]
+            [babashka.fs :as fs]
             [ui.button :as button]
             [ui.alert :as alert]
             [ui.badge :as badge]
@@ -507,6 +509,18 @@
     (sidebar/sidebar-footer {}
       (sidebar/sidebar-user {:user-name "Dev Mode" :email (str "hiccup · port " own-port) :avatar "bb"}))))
 
+(def live-reload-script
+  "/* Live reload: poll /dev/changes, reload on version bump */
+  (function() {
+    var lastV = null;
+    setInterval(function() {
+      fetch('/dev/changes').then(function(r) { return r.text(); }).then(function(v) {
+        if (lastV !== null && v !== lastV) location.reload();
+        lastV = v;
+      }).catch(function() {});
+    }, 500);
+  })();")
+
 (defn render-page [uri port]
   (let [params     (parse-query-params uri)
         theme      (get params "theme")
@@ -521,7 +535,8 @@
           [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
           [:link {:rel "stylesheet" :href "/theme.css"}]
           [:style (h/raw "html, body { margin: 0; padding: 0; }")]
-          [:script (h/raw theme-persistence-script)]]
+          [:script (h/raw theme-persistence-script)]
+          [:script (h/raw live-reload-script)]]
          [:body
           [:script {:src "/theme-adapter.js" :defer true}]
           [:script {:src "/css-live-reload.js" :defer true}]
@@ -538,6 +553,58 @@
                  :sidebar    (sidebar-page)
                  [:div (page-header "Not Found" "This page doesn't exist.")])]))]]))))
 
+;; ── Live Reload ─────────────────────────────────────────────────────
+
+(defonce !version (atom 0))
+(defonce !last-mtimes (atom {}))
+
+(def watch-dirs ["src" "dev/hiccup/src"])
+(def watch-exts #{".clj" ".cljc" ".css" ".edn"})
+
+(defn source-mtimes
+  "Collect last-modified timestamps for all source files."
+  []
+  (into {}
+    (for [dir  watch-dirs
+          :let [root (io/file dir)]
+          :when (.isDirectory root)
+          f    (file-seq root)
+          :when (and (.isFile f)
+                     (some #(str/ends-with? (.getName f) %) watch-exts))]
+      [(.getPath f) (.lastModified f)])))
+
+(defn reload-namespaces!
+  "Reload dev.hiccup and all transitive deps (all ui.* namespaces)."
+  []
+  (try
+    (require 'dev.hiccup :reload-all)
+    (catch Exception e
+      (println "⚠ Reload error:" (.getMessage e)))))
+
+(defn start-watcher!
+  "Start a background thread that polls source files for changes."
+  []
+  (reset! !last-mtimes (source-mtimes))
+  (future
+    (loop []
+      (Thread/sleep 500)
+      (try
+        (let [current (source-mtimes)]
+          (when (not= current @!last-mtimes)
+            (let [changed (into []
+                            (filter #(not= (get current %) (get @!last-mtimes %)))
+                            (keys current))
+                  new-files (into []
+                              (filter #(not (contains? @!last-mtimes %)))
+                              (keys current))]
+              (reset! !last-mtimes current)
+              (println (str "♻ Reloading (" (count (concat changed new-files)) " file(s) changed)"))
+              (reload-namespaces!)
+              (swap! !version inc))))
+        (catch Exception e
+          (println "⚠ Watcher error:" (.getMessage e))))
+      (recur))))
+
 ;; ── Server ──────────────────────────────────────────────────────────
 
 (defonce !port (atom 3003))
@@ -546,6 +613,12 @@
   (let [port @!port
         path (first (str/split uri #"\?" 2))]
     (cond
+      (= path "/dev/changes")
+      {:status 200
+       :headers {"Content-Type" "text/plain"
+                 "Cache-Control" "no-cache"}
+       :body (str @!version)}
+
       (= path "/theme.css")
       {:status 200
        :headers {"Content-Type" "text/css"}
@@ -573,5 +646,6 @@
 
 (defn start! [{:keys [port] :or {port 3003}}]
   (reset! !port port)
-  (println (str "Hiccup server running at http://localhost:" port))
+  (start-watcher!)
+  (println (str "Hiccup server running at http://localhost:" port " (live reload enabled)"))
   (http/run-server #'handler {:port port}))
