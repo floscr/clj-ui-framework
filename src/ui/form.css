@@ -292,7 +292,7 @@
 
 .form-fieldset--inline .form-legend {
   width: 100%;
-  margin-bottom: 0;
+  margin-bottom: var(--size-1);
 }
 
 /* ── Input group ───────────────────────────────────────────────── */
