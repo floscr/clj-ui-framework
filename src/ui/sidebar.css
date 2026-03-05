@@ -1,0 +1,389 @@
+/* ── Sidebar Layout ─────────────────────────────────────────────── */
+
+.sidebar-layout {
+  display: flex;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.sidebar-layout-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Sidebar ───────────────────────────────────────────────────── */
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  width: 16rem;
+  flex-shrink: 0;
+  background: var(--bg-0);
+  border-right: var(--border-0);
+  height: 100vh;
+  height: 100dvh;
+  position: sticky;
+  top: 0;
+  overflow: hidden;
+}
+
+/* ── Sidebar Header ────────────────────────────────────────────── */
+
+.sidebar-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-3);
+  padding: var(--size-3) var(--size-3) var(--size-2);
+}
+
+/* ── Sidebar Brand ─────────────────────────────────────────────── */
+
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--size-3);
+  padding: var(--size-1) var(--size-1);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  min-height: var(--size-10);
+}
+
+.sidebar-brand:hover {
+  background: var(--bg-1);
+}
+
+.sidebar-brand-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--size-8);
+  height: var(--size-8);
+  flex-shrink: 0;
+  border-radius: var(--radius-md);
+  background: var(--accent);
+  color: var(--fg-on-accent);
+  font-weight: 700;
+  font-size: var(--font-sm);
+}
+
+.sidebar-brand-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+}
+
+.sidebar-brand-title {
+  font-size: var(--font-sm);
+  font-weight: 600;
+  color: var(--fg-0);
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar-brand-subtitle {
+  font-size: var(--font-xs);
+  color: var(--fg-2);
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Sidebar Search ────────────────────────────────────────────── */
+
+.sidebar-search {
+  position: relative;
+}
+
+.sidebar-search-icon {
+  position: absolute;
+  left: var(--size-2);
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1rem;
+  height: 1rem;
+  pointer-events: none;
+  opacity: 0.5;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2371717a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.3-4.3'/%3E%3C/svg%3E");
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.sidebar-search-input {
+  width: 100%;
+  padding: var(--size-2) var(--size-3) var(--size-2) var(--size-8);
+  font-size: var(--font-sm);
+  font-family: inherit;
+  line-height: 1.5;
+  background: var(--bg-1);
+  color: var(--fg-0);
+  border: var(--border-0);
+  border-radius: var(--radius-md);
+  transition: border-color 150ms ease, background-color 150ms ease;
+}
+
+.sidebar-search-input::placeholder {
+  color: var(--fg-2);
+}
+
+.sidebar-search-input:focus-visible {
+  background: var(--bg-0);
+  border-color: var(--accent);
+  outline: none;
+}
+
+/* ── Sidebar Content ───────────────────────────────────────────── */
+
+.sidebar-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--size-2) var(--size-3);
+}
+
+/* Scrollbar styling */
+.sidebar-content::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-content::-webkit-scrollbar-thumb {
+  background: var(--bg-2);
+  border-radius: 9999px;
+}
+
+/* ── Sidebar Group ─────────────────────────────────────────────── */
+
+.sidebar-group {
+  margin-bottom: var(--size-4);
+}
+
+.sidebar-group:last-child {
+  margin-bottom: 0;
+}
+
+.sidebar-group-label {
+  display: flex;
+  align-items: center;
+  padding: var(--size-1) var(--size-2);
+  font-size: var(--font-xs);
+  font-weight: 500;
+  color: var(--fg-2);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  user-select: none;
+}
+
+/* ── Sidebar Menu ──────────────────────────────────────────────── */
+
+.sidebar-menu {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-1);
+}
+
+/* ── Sidebar Menu Item ─────────────────────────────────────────── */
+
+.sidebar-menu-item {
+  display: flex;
+  align-items: center;
+  gap: var(--size-2);
+  padding: var(--size-2) var(--size-2);
+  font-size: var(--font-sm);
+  color: var(--fg-1);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  width: 100%;
+  text-align: left;
+  line-height: 1.4;
+}
+
+a.sidebar-menu-item {
+  text-decoration: none;
+  color: var(--fg-1);
+}
+
+.sidebar-menu-item:hover {
+  background: var(--bg-1);
+  color: var(--fg-0);
+}
+
+.sidebar-menu-item-active {
+  background: var(--bg-1);
+  color: var(--fg-0);
+  font-weight: 500;
+}
+
+.sidebar-menu-item-active:hover {
+  background: var(--bg-2);
+}
+
+.sidebar-menu-item-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.sidebar-menu-item-active .sidebar-menu-item-icon {
+  opacity: 1;
+}
+
+.sidebar-menu-item-badge {
+  margin-left: auto;
+  font-size: var(--font-xs);
+  padding: 0 var(--size-2);
+  background: var(--bg-2);
+  color: var(--fg-2);
+  border-radius: 9999px;
+  line-height: 1.6;
+  font-weight: 500;
+}
+
+/* ── Sidebar Separator ─────────────────────────────────────────── */
+
+.sidebar-separator {
+  height: 1px;
+  background: var(--bg-2);
+  border: none;
+  margin: var(--size-2) var(--size-2);
+}
+
+/* ── Sidebar Footer ────────────────────────────────────────────── */
+
+.sidebar-footer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-1);
+  padding: var(--size-3);
+  border-top: var(--border-0);
+}
+
+/* ── Sidebar User ──────────────────────────────────────────────── */
+
+.sidebar-user {
+  display: flex;
+  align-items: center;
+  gap: var(--size-3);
+  padding: var(--size-2) var(--size-1);
+  border-radius: var(--radius-md);
+}
+
+.sidebar-user-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--size-8);
+  height: var(--size-8);
+  flex-shrink: 0;
+  border-radius: 9999px;
+  background: var(--bg-2);
+  color: var(--fg-1);
+  font-weight: 600;
+  font-size: var(--font-xs);
+}
+
+.sidebar-user-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.sidebar-user-name {
+  font-size: var(--font-sm);
+  font-weight: 500;
+  color: var(--fg-0);
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar-user-email {
+  font-size: var(--font-xs);
+  color: var(--fg-2);
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Sidebar Collapsible Section ───────────────────────────────── */
+
+.sidebar-collapsible {
+  border: none;
+  margin: 0;
+}
+
+.sidebar-collapsible > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--size-2);
+  padding: var(--size-2) var(--size-2);
+  font-size: var(--font-sm);
+  font-weight: 500;
+  color: var(--fg-1);
+  cursor: pointer;
+  user-select: none;
+  border-radius: var(--radius-md);
+  list-style: none;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+.sidebar-collapsible > summary::-webkit-details-marker,
+.sidebar-collapsible > summary::marker {
+  display: none;
+  content: "";
+}
+
+.sidebar-collapsible > summary:hover {
+  background: var(--bg-1);
+  color: var(--fg-0);
+}
+
+.sidebar-collapsible-chevron {
+  display: block;
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2371717a' stroke-width='2'%3E%3Cpath d='m9 18 6-6-6-6'/%3E%3C/svg%3E");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  transition: transform 150ms ease;
+}
+
+.sidebar-collapsible[open] > summary .sidebar-collapsible-chevron {
+  transform: rotate(90deg);
+}
+
+.sidebar-collapsible-content {
+  padding-left: var(--size-4);
+}
+
+.sidebar-collapsible-content .sidebar-menu {
+  padding-top: var(--size-1);
+  border-left: var(--border-0);
+  padding-left: var(--size-2);
+}

@@ -14,7 +14,9 @@
             [ui.tooltip :as tooltip]
             [ui.breadcrumb :as breadcrumb]
             [ui.pagination :as pagination]
-            [ui.form :as form]))
+            [ui.form :as form]
+            [ui.sidebar :as sidebar]
+            [ui.icon :as icon]))
 
 (defn section [title & children]
   [:section {:style {:margin-bottom "2.5rem"}}
@@ -221,6 +223,65 @@
      (form/form-field {:label "Email" :error "Please enter a valid email address."}
        (form/form-input {:type :email :error true :value "invalid-email"}))]))
 
+;; ── Icon ─────────────────────────────────────────────────────────
+(defn icon-demo []
+  (section "Icon"
+    [:div {:style {:display "flex" :gap "1.5rem" :flex-wrap "wrap" :align-items "center"}}
+     (for [n [:home :search :settings :user :mail :bell :calendar :star
+              :file :folder :code :terminal :globe :shield :zap :heart
+              :plus :minus :check :edit :trash :download :upload :copy
+              :eye :lock :bookmark :inbox :database :map-pin]]
+       [:div {:style {:display "flex" :flex-direction "column" :align-items "center" :gap "0.25rem"}}
+        (icon/icon {:icon-name n})
+        [:span {:style {:font-size "var(--font-xs)" :color "var(--fg-2)"}} (name n)]])]
+    [:div {:style {:display "flex" :gap "1rem" :align-items "center" :margin-top "0.5rem"}}
+     [:span {:style {:font-size "var(--font-xs)" :color "var(--fg-2)"}} "Sizes:"]
+     (icon/icon {:icon-name :star :size :sm})
+     (icon/icon {:icon-name :star})
+     (icon/icon {:icon-name :star :size :lg})
+     (icon/icon {:icon-name :star :size :xl})]))
+
+;; ── Sidebar ─────────────────────────────────────────────────────────
+(defn sidebar-demo []
+  (section "Sidebar"
+    (sidebar/sidebar-layout {}
+      (sidebar/sidebar {}
+        (sidebar/sidebar-header {}
+          (sidebar/sidebar-brand {:title "Acme Inc." :subtitle "Enterprise" :icon "A"})
+          (sidebar/sidebar-search {:placeholder "Search..."}))
+        (sidebar/sidebar-content {}
+          (sidebar/sidebar-group {:label "Getting Started"}
+            (sidebar/sidebar-menu {}
+              (sidebar/sidebar-menu-item {:href "#" :icon-name :download} "Installation")
+              (sidebar/sidebar-menu-item {:href "#" :icon-name :folder :active true} "Project Structure")))
+          (sidebar/sidebar-group {:label "Building"}
+            (sidebar/sidebar-menu {}
+              (sidebar/sidebar-menu-item {:href "#" :icon-name :globe} "Routing")
+              (sidebar/sidebar-menu-item {:href "#" :icon-name :database :badge "New"} "Data Fetching")
+              (sidebar/sidebar-menu-item {:href "#" :icon-name :layers} "Rendering")
+              (sidebar/sidebar-menu-item {:href "#" :icon-name :zap} "Caching")
+              (sidebar/sidebar-menu-item {:href "#" :icon-name :eye} "Styling")))
+          (sidebar/sidebar-group {:label "API Reference"}
+            (sidebar/sidebar-collapsible {:title "Components" :open true}
+              (sidebar/sidebar-menu {}
+                (sidebar/sidebar-menu-item {:href "#"} "Button")
+                (sidebar/sidebar-menu-item {:href "#"} "Card")
+                (sidebar/sidebar-menu-item {:href "#"} "Dialog")))
+            (sidebar/sidebar-collapsible {:title "Functions"}
+              (sidebar/sidebar-menu {}
+                (sidebar/sidebar-menu-item {:href "#"} "fetch")
+                (sidebar/sidebar-menu-item {:href "#"} "redirect")))))
+        (sidebar/sidebar-footer {}
+          (sidebar/sidebar-user {:user-name "Alice Johnson" :email "alice@example.com"})))
+      (sidebar/sidebar-layout-main {}
+        [:div {:style {:padding "2rem"}}
+         [:h2 {:style {:margin "0 0 1rem" :color "var(--fg-0)"}} "Dashboard"]
+         [:div {:style {:display "grid" :grid-template-columns "repeat(3, 1fr)" :gap "1rem"}}
+          [:div {:style {:aspect-ratio "16/9" :background "var(--bg-1)" :border-radius "var(--radius-lg)" :border "var(--border-0)"}}]
+          [:div {:style {:aspect-ratio "16/9" :background "var(--bg-1)" :border-radius "var(--radius-lg)" :border "var(--border-0)"}}]
+          [:div {:style {:aspect-ratio "16/9" :background "var(--bg-1)" :border-radius "var(--radius-lg)" :border "var(--border-0)"}}]]
+         [:div {:style {:margin-top "1rem" :min-height "200px" :background "var(--bg-1)" :border-radius "var(--radius-lg)" :border "var(--border-0)"}}]]))))
+
 ;; ── Theme toggle ────────────────────────────────────────────────────
 (defn toggle-theme! [_e]
   (let [el (.-documentElement js/document)
@@ -251,7 +312,9 @@
    (tooltip-demo)
    (breadcrumb-demo)
    (pagination-demo)
-   (form-demo)])
+   (form-demo)
+   (icon-demo)
+   (sidebar-demo)])
 
 (defn ^:export init! []
   (d/set-dispatch! (fn [_ _]))

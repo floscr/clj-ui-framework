@@ -31,6 +31,8 @@
               [ui.breadcrumb-test]
               [ui.pagination-test]
               [ui.form-test]
+              [ui.icon-test]
+              [ui.sidebar-test]
               [ui.theme-test])
    :task (let [{:keys [fail error]} (t/run-tests
                                       'ui.button-test
@@ -48,6 +50,8 @@
                                       'ui.breadcrumb-test
                                       'ui.pagination-test
                                       'ui.form-test
+                                      'ui.icon-test
+                                      'ui.sidebar-test
                                       'ui.theme-test)]
            (when (pos? (+ fail error))
              (System/exit 1)))}
