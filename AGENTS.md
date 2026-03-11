@@ -254,28 +254,28 @@ Produces `--size-1: 0.25rem` through `--size-16: 4rem`. Use for all spacing, pad
 
 Produces `--font-xs: 0.64rem` through `--font-3xl: 3.052rem`. Use for all font-size values.
 
-**Color scales** — HSL-based, generated via `jon.color-tools`:
+**Color scales** — OKLCH-based for perceptual uniformity, via `jon.color-tools`:
 
 ```edn
-:color {:gray {:hue 240 :saturation 18
-               :steps [[50 97 14] [100 95 14] ... [950 5 18]]}}
+:color {:gray {:hue 285 :chroma 0.025
+               :steps [[50 0.975 0.003] [100 0.955 0.005] ... [950 0.145 0.011]]}}
 ```
 
-Each step is `[label lightness]` (uses default saturation) or `[label lightness saturation]` (per-step override). Produces `--gray-50: #hex` through `--gray-950: #hex`.
+Each step is `[label lightness]` (uses default chroma) or `[label lightness chroma]` (per-step override). OKLCH ensures equal lightness steps = equal perceived brightness across hues. Produces `--gray-50: oklch(0.975 0.003 285)` through `--gray-950: oklch(...)`.
 
 Available color scales: `gray`, `accent`, `danger`, `success`, `warning`. Each generates 11 stops (50, 100, 200–900, 950).
 
 **To change the gray tone** (e.g. warm gray, cool blue-gray, purplish), change `hue`:
-- `240` → purplish gray (current, inspired by activity-tracker)
-- `220` → blue-gray
-- `0` → warm gray (pinkish)
-- `0` with saturation `0` → pure neutral gray
+- `285` → purplish gray (current, inspired by activity-tracker)
+- `255` → blue-gray
+- `60` → warm/sandy gray
+- any hue with chroma `0` → pure neutral gray
 
 **To change the accent color**, change `hue` in the accent scale:
-- `252` → purple (current, matches activity-tracker)
-- `220` → blue
-- `142` → green
-- `0` → red
+- `286` → purple (current, matches activity-tracker)
+- `255` → blue
+- `165` → green
+- `25` → red
 
 Semantic tokens reference scale variables: `var(--gray-50)`, `var(--accent-500)`, etc. Dark theme overrides switch which stop is used (e.g. `bg-0` goes from `gray-50` → `gray-950`).
 

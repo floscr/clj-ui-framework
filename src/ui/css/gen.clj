@@ -30,6 +30,43 @@
         (str/replace #"0+$" "")
         (str/replace #"\.$" ""))))
 
+;; ── OKLCH ────────────────────────────────────────────────────────
+
+(defn oklch->srgb
+  "Convert OKLCH [L C H] to sRGB [r g b] (0-255 clamped).
+   L: 0-1, C: 0-~0.4, H: 0-360 degrees."
+  [[l c h]]
+  (let [h-rad (* h (/ Math/PI 180))
+        ;; OKLCH → OKLab
+        a (* c (Math/cos h-rad))
+        b (* c (Math/sin h-rad))
+        ;; OKLab → LMS (cube roots)
+        l_ (+ l (* 0.3963377774 a) (* 0.2158037573 b))
+        m_ (+ l (* -0.1055613458 a) (* -0.0638541728 b))
+        s_ (+ l (* -0.0894841775 a) (* -1.2914855480 b))
+        ;; Cube to get LMS
+        l3 (* l_ l_ l_)
+        m3 (* m_ m_ m_)
+        s3 (* s_ s_ s_)
+        ;; LMS → linear sRGB
+        r-lin (+ (* 4.0767416621 l3) (* -3.3077115913 m3) (* 0.2309699292 s3))
+        g-lin (+ (* -1.2684380046 l3) (* 2.6097574011 m3) (* -0.3413193965 s3))
+        b-lin (+ (* -0.0041960863 l3) (* -0.7034186147 m3) (* 1.7076147010 s3))
+        ;; Linear sRGB → sRGB (gamma)
+        gamma (fn [x]
+                (if (<= x 0.0031308)
+                  (* 12.92 x)
+                  (- (* 1.055 (Math/pow (max 0.0 x) (/ 1.0 2.4))) 0.055)))
+        clamp (fn [x] (max 0 (min 255 (int (Math/round (* 255.0 (gamma (max 0.0 x))))))))]
+    [(clamp r-lin) (clamp g-lin) (clamp b-lin)]))
+
+(defn oklch->hex
+  "Convert OKLCH [L C H] to hex string. Clamps to sRGB gamut."
+  [[l c h]]
+  (color/rgb->hex (oklch->srgb [l c h])))
+
+;; ── Scale generation ─────────────────────────────────────────────
+
 (defn generate-size-scale
   "Generate linear size scale: --size-N = base * N."
   [{:keys [base unit steps]}]
@@ -49,17 +86,20 @@
        (str/join "\n")))
 
 (defn generate-color-scale
-  "Generate CSS variables for a named color scale.
-  Each step is [label lightness] or [label lightness saturation].
-  Uses hsl->hex from jon.color-tools for conversion."
-  [scale-name {:keys [hue saturation steps]}]
+  "Generate CSS variables for a named OKLCH color scale.
+   Each step is [label lightness] or [label lightness chroma].
+   Outputs oklch() CSS values for perceptual uniformity."
+  [scale-name {:keys [hue chroma steps]}]
   (->> steps
        (map (fn [step]
-              (let [[label lightness sat] (if (= 3 (count step))
+              (let [[label lightness chr] (if (= 3 (count step))
                                             step
-                                            [(first step) (second step) saturation])
-                    hex (color/hsl->hex [hue sat lightness])]
-                (str "  --" (name scale-name) "-" label ": " hex ";"))))
+                                            [(first step) (second step) chroma])
+                    ;; Format: oklch(L C H)
+                    css-val (str "oklch(" (format "%.3f" (double lightness))
+                                " " (format "%.4f" (double chr))
+                                " " (format "%.1f" (double hue)) ")")]
+                (str "  --" (name scale-name) "-" label ": " css-val ";"))))
        (str/join "\n")))
 
 (defn generate-color-scales

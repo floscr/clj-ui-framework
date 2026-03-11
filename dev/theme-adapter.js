@@ -3,52 +3,55 @@
 (function() {
   'use strict';
 
-  // ── HSL → Hex ──────────────────────────────────────────────────
-  function hslToHex(h, s, l) {
-    h = ((h % 360) + 360) % 360;
-    s = Math.max(0, Math.min(100, s)) / 100;
-    l = Math.max(0, Math.min(100, l)) / 100;
-    var c = (1 - Math.abs(2 * l - 1)) * s;
-    var x = c * (1 - Math.abs(((h / 60) % 2) - 1));
-    var m = l - c / 2;
-    var r, g, b;
-    if (h < 60)       { r = c; g = x; b = 0; }
-    else if (h < 120) { r = x; g = c; b = 0; }
-    else if (h < 180) { r = 0; g = c; b = x; }
-    else if (h < 240) { r = 0; g = x; b = c; }
-    else if (h < 300) { r = x; g = 0; b = c; }
-    else              { r = c; g = 0; b = x; }
-    function toHex(v) {
-      var n = Math.round((v + m) * 255);
-      var hex = n.toString(16);
-      return hex.length === 1 ? '0' + hex : hex;
-    }
-    return '#' + toHex(r) + toHex(g) + toHex(b);
+  // ── OKLCH helpers ───────────────────────────────────────────────
+  // CSS oklch() is used directly — no hex conversion needed.
+  // oklch(L C H) where L: 0-1, C: 0-~0.4, H: 0-360 degrees.
+  function oklchCSS(l, c, h) {
+    return 'oklch(' + l.toFixed(3) + ' ' + c.toFixed(4) + ' ' + h.toFixed(1) + ')';
   }
 
-  // ── Scale step definitions [label, lightness, baseSaturation] ──
+  // OKLCH → sRGB hex for swatch preview (canvas-free fallback)
+  function oklchToHex(L, C, H) {
+    var hRad = H * Math.PI / 180;
+    var a = C * Math.cos(hRad), b = C * Math.sin(hRad);
+    var l_ = L + 0.3963377774 * a + 0.2158037573 * b;
+    var m_ = L - 0.1055613458 * a - 0.0638541728 * b;
+    var s_ = L - 0.0894841775 * a - 1.2914855480 * b;
+    var l3 = l_*l_*l_, m3 = m_*m_*m_, s3 = s_*s_*s_;
+    var rLin =  4.0767416621*l3 - 3.3077115913*m3 + 0.2309699292*s3;
+    var gLin = -1.2684380046*l3 + 2.6097574011*m3 - 0.3413193965*s3;
+    var bLin = -0.0041960863*l3 - 0.7034186147*m3 + 1.7076147010*s3;
+    function gamma(x) { return x <= 0.0031308 ? 12.92*x : 1.055*Math.pow(Math.max(0,x),1/2.4)-0.055; }
+    function clamp(x) { return Math.max(0, Math.min(255, Math.round(gamma(Math.max(0,x))*255))); }
+    var r = clamp(rLin), g = clamp(gLin), bl = clamp(bLin);
+    return '#' + [r,g,bl].map(function(v){ var h = v.toString(16); return h.length<2?'0'+h:h; }).join('');
+  }
+
+  // ── Scale step definitions [label, lightness, baseChroma] ──────
+  // OKLCH: L is 0-1 (perceptual lightness), C is chroma (colorfulness)
   var GRAY_STEPS = [
-    [50,97,14],[100,95,14],[200,90,12],[300,82,10],[400,64,10],
-    [500,46,10],[600,34,12],[700,26,16],[800,15,18],[900,9,18],[950,5,18]
+    [50,0.975,0.003],[100,0.955,0.005],[200,0.915,0.010],[300,0.850,0.012],[400,0.690,0.025],
+    [500,0.530,0.035],[600,0.425,0.035],[700,0.350,0.035],[800,0.245,0.025],[900,0.190,0.016],[950,0.145,0.011]
   ];
   var ACCENT_STEPS = [
-    [50,97,100],[100,94,95],[200,89,95],[300,82,95],[400,75,93],
-    [500,67,96],[600,57,84],[700,49,72],[800,41,69],[900,34,67],[950,22,73]
+    [50,0.965,0.020],[100,0.925,0.040],[200,0.860,0.075],[300,0.770,0.125],[400,0.690,0.170],
+    [500,0.595,0.230],[600,0.505,0.255],[700,0.450,0.245],[800,0.395,0.210],[900,0.350,0.175],[950,0.260,0.130]
   ];
 
   // ── Presets ────────────────────────────────────────────────────
+  // Presets use OKLCH hue (0-360) and chroma multiplier (0-2)
   var PRESETS = [
-    { name: 'Purple',  grayHue: 240, graySat: 1.0, accentHue: 252, accentSat: 1.0 },
-    { name: 'Blue',    grayHue: 215, graySat: 0.4, accentHue: 221, accentSat: 0.87 },
-    { name: 'Neutral', grayHue: 0,   graySat: 0.0, accentHue: 221, accentSat: 0.87 },
-    { name: 'Warm',    grayHue: 30,  graySat: 0.7, accentHue: 24,  accentSat: 1.0 },
-    { name: 'Rose',    grayHue: 340, graySat: 0.5, accentHue: 340, accentSat: 0.85 },
-    { name: 'Emerald', grayHue: 160, graySat: 0.5, accentHue: 160, accentSat: 0.75 },
+    { name: 'Purple',  grayHue: 285, graySat: 1.0, accentHue: 286, accentSat: 1.0 },
+    { name: 'Blue',    grayHue: 255, graySat: 0.5, accentHue: 255, accentSat: 0.87 },
+    { name: 'Neutral', grayHue: 0,   graySat: 0.0, accentHue: 255, accentSat: 0.87 },
+    { name: 'Warm',    grayHue: 60,  graySat: 0.7, accentHue: 50,  accentSat: 0.85 },
+    { name: 'Rose',    grayHue: 0,   graySat: 0.5, accentHue: 350, accentSat: 0.85 },
+    { name: 'Emerald', grayHue: 165, graySat: 0.5, accentHue: 165, accentSat: 0.75 },
   ];
 
   // ── State ──────────────────────────────────────────────────────
-  var STORAGE_KEY = 'ui-fw-theme-adapter';
-  var DEFAULT = { grayHue: 240, graySat: 1.0, accentHue: 252, accentSat: 1.0, open: false };
+  var STORAGE_KEY = 'ui-fw-theme-adapter-v2';
+  var DEFAULT = { grayHue: 285, graySat: 1.0, accentHue: 286, accentSat: 1.0, open: false };
   var state = assign({}, DEFAULT);
   try {
     var saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
@@ -68,12 +71,12 @@
   }
 
   // ── Apply colors to :root ─────────────────────────────────────
-  function applyScale(name, hue, steps, satMul) {
+  function applyScale(name, hue, steps, chromaMul) {
     var root = document.documentElement.style;
     for (var i = 0; i < steps.length; i++) {
-      var label = steps[i][0], l = steps[i][1], baseSat = steps[i][2];
-      var sat = Math.round(Math.min(100, baseSat * satMul));
-      root.setProperty('--' + name + '-' + label, hslToHex(hue, sat, l));
+      var label = steps[i][0], l = steps[i][1], baseChroma = steps[i][2];
+      var c = Math.min(0.4, baseChroma * chromaMul);
+      root.setProperty('--' + name + '-' + label, oklchCSS(l, c, hue));
     }
   }
 
@@ -96,16 +99,18 @@
 
   // ── Generate EDN for tokens.edn ───────────────────────────────
   function generateEDN() {
-    function fmtSteps(steps, satMul) {
+    function fmtSteps(steps, chromaMul) {
       return steps.map(function(s) {
-        var sat = Math.round(Math.min(100, s[2] * satMul));
-        return '                    [' + String(s[0]).padStart(3) + ' ' + String(s[1]).padStart(2) + ' ' + sat + ']';
+        var c = Math.min(0.4, s[2] * chromaMul);
+        return '                    [' + String(s[0]).padStart(3) + '  ' + s[1].toFixed(3) + ' ' + c.toFixed(3) + ']';
       }).join('\n');
     }
+    var grayChroma = Math.min(0.4, 0.025 * state.graySat);
+    var accentChroma = Math.min(0.4, 0.23 * state.accentSat);
     return ':color\n' +
-      '  {:gray {:hue ' + state.grayHue + ' :saturation ' + Math.round(18 * state.graySat) + '\n' +
+      '  {:gray {:hue ' + state.grayHue + ' :chroma ' + grayChroma.toFixed(3) + '\n' +
       '          :steps [' + fmtSteps(GRAY_STEPS, state.graySat).trimStart() + ']}\n\n' +
-      '   :accent {:hue ' + state.accentHue + ' :saturation ' + Math.round(96 * state.accentSat) + '\n' +
+      '   :accent {:hue ' + state.accentHue + ' :chroma ' + accentChroma.toFixed(2) + '\n' +
       '            :steps [' + fmtSteps(ACCENT_STEPS, state.accentSat).trimStart() + ']}}';
   }
 
@@ -188,7 +193,7 @@
   }
 
   function satGradient(hue) {
-    return 'linear-gradient(to right, hsl(' + hue + ',0%,50%), hsl(' + hue + ',100%,50%))';
+    return 'linear-gradient(to right, oklch(0.5 0 ' + hue + '), oklch(0.5 0.15 ' + hue + '))';
   }
 
   function makeSlider(id, label, min, max, step, gradient) {
@@ -265,7 +270,7 @@
       // Small color dot
       var dot = el('span');
       dot.style.cssText = 'display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:4px;vertical-align:middle;';
-      dot.style.background = hslToHex(p.accentHue, Math.round(96 * p.accentSat), 67);
+      dot.style.background = oklchToHex(0.595, 0.23 * p.accentSat, p.accentHue);
       btn.insertBefore(dot, btn.firstChild);
       presetRow.appendChild(btn);
     });
@@ -277,7 +282,7 @@
     applyStyle(grayLabel, S.label);
     graySection.appendChild(grayLabel);
     graySection.appendChild(makeSlider('grayHue', 'Hue', 0, 360, 1, hueGradient()));
-    graySection.appendChild(makeSlider('graySat', 'Sat', 0, 200, 1));
+    graySection.appendChild(makeSlider('graySat', 'Chr', 0, 200, 1));
     var graySwatches = makeSwatches();
     swatchGray = graySwatches.items;
     graySection.appendChild(graySwatches.row);
@@ -289,7 +294,7 @@
     applyStyle(accentLabel, S.label);
     accentSection.appendChild(accentLabel);
     accentSection.appendChild(makeSlider('accentHue', 'Hue', 0, 360, 1, hueGradient()));
-    accentSection.appendChild(makeSlider('accentSat', 'Sat', 0, 200, 1));
+    accentSection.appendChild(makeSlider('accentSat', 'Chr', 0, 200, 1));
     var accentSwatches = makeSwatches();
     swatchAccent = accentSwatches.items;
     accentSection.appendChild(accentSwatches.row);
@@ -379,17 +384,17 @@
     inputs.accentSat.value.textContent = Math.round(state.accentSat * 100) + '%';
     inputs.accentSat.input.style.background = satGradient(state.accentHue);
 
-    // Swatches
+    // Swatches — use oklch() CSS for accurate preview
     if (swatchGray) {
       GRAY_STEPS.forEach(function(s, i) {
-        var sat = Math.round(Math.min(100, s[2] * state.graySat));
-        swatchGray[i].style.background = hslToHex(state.grayHue, sat, s[1]);
+        var c = Math.min(0.4, s[2] * state.graySat);
+        swatchGray[i].style.background = oklchCSS(s[1], c, state.grayHue);
       });
     }
     if (swatchAccent) {
       ACCENT_STEPS.forEach(function(s, i) {
-        var sat = Math.round(Math.min(100, s[2] * state.accentSat));
-        swatchAccent[i].style.background = hslToHex(state.accentHue, sat, s[1]);
+        var c = Math.min(0.4, s[2] * state.accentSat);
+        swatchAccent[i].style.background = oklchCSS(s[1], c, state.accentHue);
       });
     }
   }

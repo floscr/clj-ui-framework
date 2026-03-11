@@ -27,37 +27,31 @@ Each component is a `.cljc` file in `src/ui/` with a matching `.css` file. The C
 
 ## Color System
 
-Colors are generated from HSL parameters defined in `src/theme/tokens.edn`, using [jon/color-tools](https://github.com/jramosg/color-tools) for conversion. Instead of picking individual hex values, you define a hue and saturation, and the generator produces an 11-stop scale (50–950) for each color.
+Colors are generated from OKLCH parameters defined in `src/theme/tokens.edn`. OKLCH is a perceptually uniform color space — equal lightness steps produce equal perceived brightness across all hues, unlike HSL. You define a hue and chroma, and the generator produces an 11-stop scale (50–950) for each color, output as `oklch()` CSS values.
 
 Five scales ship by default: `gray`, `accent`, `danger`, `success`, `warning`.
 
 ### How it works
 
-Each scale is defined by a hue, a default saturation, and a list of lightness steps:
+Each scale is defined by a hue, a default chroma, and a list of lightness steps:
 
 ```edn
-:gray {:hue 240 :saturation 18
-       :steps [[50  97 14]    ;; [label lightness saturation]
-               [100 95 14]
-               [200 90 12]
+:gray {:hue 285 :chroma 0.025
+       :steps [[50  0.975 0.003]   ;; [label lightness chroma]
+               [100 0.955 0.005]
+               [200 0.915 0.010]
                ...
-               [950  5 18]]}
+               [950 0.145 0.011]]}
 ```
 
 This generates CSS variables in `:root`:
 
 ```css
---gray-50:  #f6f6f8;
---gray-100: #f0f0f4;
---gray-200: #e2e2e9;
---gray-300: #cdcdd6;
---gray-400: #9a9aac;
---gray-500: #6a6a81;
---gray-600: #4c4c61;
---gray-700: #38384d;
---gray-800: #1f1f2d;
---gray-900: #13131b;
---gray-950: #0a0a0f;
+--gray-50:  oklch(0.975 0.003 285);
+--gray-100: oklch(0.955 0.005 285);
+--gray-200: oklch(0.915 0.010 285);
+...
+--gray-950: oklch(0.145 0.011 285);
 ```
 
 Semantic tokens reference these scales. Light theme points at the light end, dark theme at the dark end:
@@ -76,33 +70,33 @@ The scale variables are generated once and never change between themes. Only the
 
 ### Changing the palette
 
-The gray hue controls the tint of all neutral surfaces, borders, and text. Change it to shift the entire feel:
+The gray hue controls the tint of all neutral surfaces, borders, and text. OKLCH hues differ from HSL — change it to shift the entire feel:
 
 | Hue | Result |
 |-----|--------|
-| `240` | Purplish gray (default) |
-| `220` | Blue-gray |
-| `30` | Warm/sandy |
-| `0` sat `0` | Pure neutral |
+| `285` | Purplish gray (default) |
+| `255` | Blue-gray |
+| `60` | Warm/sandy |
+| any, chroma `0` | Pure neutral |
 
 The accent hue controls buttons, focus rings, links:
 
 | Hue | Result |
 |-----|--------|
-| `252` | Purple (default) |
-| `220` | Blue |
-| `0` | Red |
-| `142` | Green |
+| `286` | Purple (default) |
+| `255` | Blue |
+| `25` | Red |
+| `165` | Green |
 
 After changing values, run `bb build-theme` to regenerate `dist/theme.css`.
 
-### Per-step saturation
+### Per-step chroma
 
-Steps can be `[label lightness]` to use the scale's default saturation, or `[label lightness saturation]` to override it. This is useful for chromatic colors where high saturation looks wrong at the extremes — the accent scale uses ~100% saturation for light tints and drops to ~70% for dark shades.
+Steps can be `[label lightness]` to use the scale's default chroma, or `[label lightness chroma]` to override it. This is important for chromatic colors where high chroma looks wrong at the extremes — the accent scale peaks at chroma 0.255 in the mid-range and tapers to 0.020 for light tints and 0.130 for dark shades. The gray scale uses very low chroma (0.003–0.035) that peaks in the mid-range for a subtle tint.
 
 ### Current palette
 
-The default ships with a purplish gray (hue 240) and a vivid purple accent (hue 252, `--accent-500: #7a5afc`), inspired by the [activity-tracker](https://github.com/user/piui) app. The purple tint is strongest in dark backgrounds and fades to near-neutral in light ones, achieved by tapering saturation from 18% at the dark end to 14% at the light end.
+The default ships with a purplish gray (hue 285) and a vivid purple accent (hue 286, `--accent-500: oklch(0.595 0.23 286)`), inspired by the [activity-tracker](https://github.com/user/piui) app. OKLCH ensures the lightness steps are perceptually even — a gray at L=0.5 looks equally bright regardless of hue, unlike HSL where different hues have wildly different perceived brightness.
 
 ## Theme Tokens
 

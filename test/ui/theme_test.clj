@@ -16,20 +16,27 @@
     (is (= "--bg-0" (gen/token->css-var :bg-0)))))
 
 (deftest generate-color-scale-test
-  (testing "generates CSS variables for a color scale"
+  (testing "generates OKLCH CSS variables for a color scale"
     (let [scale (gen/generate-color-scale
-                  :gray {:hue 240 :saturation 18
-                         :steps [[50 97] [950 5]]})]
+                  :gray {:hue 285 :chroma 0.025
+                         :steps [[50 0.975] [950 0.145]]})]
       (is (str/includes? scale "--gray-50:"))
       (is (str/includes? scale "--gray-950:"))
-      (is (str/includes? scale "#"))))
+      (is (str/includes? scale "oklch("))))
 
-  (testing "per-step saturation override"
+  (testing "per-step chroma override"
     (let [scale (gen/generate-color-scale
-                  :accent {:hue 252 :saturation 96
-                           :steps [[500 67 96] [400 75 93]]})]
+                  :accent {:hue 286 :chroma 0.23
+                           :steps [[500 0.595 0.230] [400 0.690 0.170]]})]
       (is (str/includes? scale "--accent-500:"))
-      (is (str/includes? scale "--accent-400:")))))
+      (is (str/includes? scale "--accent-400:"))
+      (is (str/includes? scale "oklch(0.595 0.2300 286.0)"))))
+
+  (testing "oklch->hex roundtrip produces valid hex"
+    (let [hex (gen/oklch->hex [0.595 0.23 286])]
+      (is (string? hex))
+      (is (str/starts-with? hex "#") "should start with #")
+      (is (= 7 (count hex))))))
 
 (deftest generate-css-test
   (let [token-data (gen/read-tokens "src/theme/tokens.edn")
