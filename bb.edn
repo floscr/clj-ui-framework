@@ -16,7 +16,15 @@
              (let [adapter (slurp "dev/theme-adapter.js")]
                (spit "dev/replicant/public/theme-adapter.js" adapter)
                (spit "dev/squint/public/theme-adapter.js" adapter)
-               (println "Copied theme-adapter.js to dev targets")))}
+               (println "Copied theme-adapter.js to dev targets"))
+             (let [lr (slurp "dev/css-live-reload.js")]
+               (spit "dev/replicant/public/css-live-reload.js" lr)
+               (spit "dev/squint/public/css-live-reload.js" lr)
+               (println "Copied css-live-reload.js to dev targets")))}
+
+  watch-theme
+  {:doc "Watch src/ui/*.css and tokens.edn, rebuild theme on changes"
+   :task (load-file "scripts/watch-theme.bb")}
 
   test
   {:doc "Run all unit tests"
@@ -125,7 +133,7 @@
                session "ui-dev"]
            (shell {:continue true} "tmux kill-session -t" session)
            (shell "tmux new-session -d -s" session
-                  (str "PORT=" hport " bb dev-hiccup"))
+                  (str "bash -c 'bb watch-theme & PORT=" hport " bb dev-hiccup'"))
            (shell "tmux split-window -h -t" session
                   (str "bash -c 'cd dev/replicant && SHADOW_HTTP_PORT=" rport " npx shadow-cljs watch app'"))
            (shell "tmux split-window -v -t" session

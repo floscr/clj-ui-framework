@@ -503,6 +503,7 @@
           [:script (h/raw theme-persistence-script)]]
          [:body
           [:script {:src "/theme-adapter.js" :defer true}]
+          [:script {:src "/css-live-reload.js" :defer true}]
           (sidebar/sidebar-layout {}
             (app-sidebar active-page port)
             (sidebar/sidebar-overlay {})
@@ -533,6 +534,11 @@
       {:status 200
        :headers {"Content-Type" "application/javascript"}
        :body (slurp "dev/theme-adapter.js")}
+
+      (= path "/css-live-reload.js")
+      {:status 200
+       :headers {"Content-Type" "application/javascript"}
+       :body (slurp "dev/css-live-reload.js")}
 
       (resolve-page path)
       {:status 200
