@@ -1,7 +1,8 @@
 (ns ui.css.gen
   (:require [babashka.fs :as fs]
             [clojure.edn :as edn]
-            [clojure.string :as str]))
+            [clojure.string :as str]
+            [jon.color-tools :as color]))
 
 (defn read-tokens
   "Read and parse the tokens EDN file."
@@ -47,13 +48,37 @@
                    unit ";")))
        (str/join "\n")))
 
+(defn generate-color-scale
+  "Generate CSS variables for a named color scale.
+  Each step is [label lightness] or [label lightness saturation].
+  Uses hsl->hex from jon.color-tools for conversion."
+  [scale-name {:keys [hue saturation steps]}]
+  (->> steps
+       (map (fn [step]
+              (let [[label lightness sat] (if (= 3 (count step))
+                                            step
+                                            [(first step) (second step) saturation])
+                    hex (color/hsl->hex [hue sat lightness])]
+                (str "  --" (name scale-name) "-" label ": " hex ";"))))
+       (str/join "\n")))
+
+(defn generate-color-scales
+  "Generate all color scale CSS variables."
+  [color-scales]
+  (->> color-scales
+       (sort-by key)
+       (map (fn [[scale-name config]]
+              (generate-color-scale scale-name config)))
+       (str/join "\n")))
+
 (defn generate-scales
   "Generate CSS variable declarations for all scales."
   [scales]
   (str/join "\n"
     (cond-> []
-      (:size scales) (conj (generate-size-scale (:size scales)))
-      (:font scales) (conj (generate-font-scale (:font scales))))))
+      (:size scales)  (conj (generate-size-scale (:size scales)))
+      (:font scales)  (conj (generate-font-scale (:font scales)))
+      (:color scales) (conj (generate-color-scales (:color scales))))))
 
 (defn base-css
   "Generate base body/reset styles."

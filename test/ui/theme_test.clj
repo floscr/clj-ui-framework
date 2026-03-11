@@ -15,6 +15,22 @@
     (is (= "--accent" (gen/token->css-var :accent)))
     (is (= "--bg-0" (gen/token->css-var :bg-0)))))
 
+(deftest generate-color-scale-test
+  (testing "generates CSS variables for a color scale"
+    (let [scale (gen/generate-color-scale
+                  :gray {:hue 240 :saturation 18
+                         :steps [[50 97] [950 5]]})]
+      (is (str/includes? scale "--gray-50:"))
+      (is (str/includes? scale "--gray-950:"))
+      (is (str/includes? scale "#"))))
+
+  (testing "per-step saturation override"
+    (let [scale (gen/generate-color-scale
+                  :accent {:hue 252 :saturation 96
+                           :steps [[500 67 96] [400 75 93]]})]
+      (is (str/includes? scale "--accent-500:"))
+      (is (str/includes? scale "--accent-400:")))))
+
 (deftest generate-css-test
   (let [token-data (gen/read-tokens "src/theme/tokens.edn")
         css (gen/generate-css token-data)]
@@ -30,6 +46,17 @@
                       :radius-sm :radius-md :radius-lg]]
         (is (str/includes? css (str "--" (name token) ":"))
             (str "Missing token: " (name token)))))
+
+    (testing "contains color scale variables"
+      (doseq [scale ["gray" "accent" "danger" "success" "warning"]]
+        (doseq [step [50 100 200 300 400 500 600 700 800 900 950]]
+          (is (str/includes? css (str "--" scale "-" step ":"))
+              (str "Missing color: " scale "-" step)))))
+
+    (testing "color scales only in :root, not in dark theme blocks"
+      (let [dark-block (second (str/split css #"\[data-theme=\"dark\"\]"))]
+        (is (not (str/includes? dark-block "--gray-50:")))
+        (is (not (str/includes? dark-block "--accent-500:")))))
 
     (testing "contains dark theme data attribute selector"
       (is (str/includes? css "[data-theme=\"dark\"]")))

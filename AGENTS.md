@@ -229,7 +229,7 @@ Semantic + scale tokens in `src/theme/tokens.edn`:
 - **Backgrounds**: `bg-0` (base), `bg-1` (surface), `bg-2` (elevated)
 - **Foregrounds**: `fg-0` (primary text), `fg-1` (secondary), `fg-2` (muted)
 - **Semantic**: `accent`, `danger`, `success` + `fg-on-*` for contrast text
-- **Borders**: `border-0/1/2` (full shorthand: `1px solid #color`)
+- **Borders**: `border-0/1/2` (full shorthand: `1px solid var(--gray-N)`)
 - **Shadows**: `shadow-0/1/2/3` (increasing elevation)
 - **Radii**: `radius-sm/md/lg`
 
@@ -254,7 +254,32 @@ Produces `--size-1: 0.25rem` through `--size-16: 4rem`. Use for all spacing, pad
 
 Produces `--font-xs: 0.64rem` through `--font-3xl: 3.052rem`. Use for all font-size values.
 
-To adjust the entire scale, change `base` or `ratio` — all values recompute on `bb build-theme`.
+**Color scales** — HSL-based, generated via `jon.color-tools`:
+
+```edn
+:color {:gray {:hue 240 :saturation 18
+               :steps [[50 97 14] [100 95 14] ... [950 5 18]]}}
+```
+
+Each step is `[label lightness]` (uses default saturation) or `[label lightness saturation]` (per-step override). Produces `--gray-50: #hex` through `--gray-950: #hex`.
+
+Available color scales: `gray`, `accent`, `danger`, `success`, `warning`. Each generates 11 stops (50, 100, 200–900, 950).
+
+**To change the gray tone** (e.g. warm gray, cool blue-gray, purplish), change `hue`:
+- `240` → purplish gray (current, inspired by activity-tracker)
+- `220` → blue-gray
+- `0` → warm gray (pinkish)
+- `0` with saturation `0` → pure neutral gray
+
+**To change the accent color**, change `hue` in the accent scale:
+- `252` → purple (current, matches activity-tracker)
+- `220` → blue
+- `142` → green
+- `0` → red
+
+Semantic tokens reference scale variables: `var(--gray-50)`, `var(--accent-500)`, etc. Dark theme overrides switch which stop is used (e.g. `bg-0` goes from `gray-50` → `gray-950`).
+
+To adjust the entire scale, change `hue`, `saturation`, or `steps` — all values recompute on `bb build-theme`.
 
 **Usage in component CSS:**
 
@@ -267,6 +292,7 @@ To adjust the entire scale, change `base` or `ratio` — all values recompute on
 ```
 
 **Rule: never use raw `rem` values in component CSS** — always reference a scale variable.
+**Rule: never use raw hex colors in component CSS** — always reference a token or scale variable.
 
 ### Adding tokens
 
@@ -275,9 +301,11 @@ Add to both `:tokens` (light) and `:themes > :dark` in `tokens.edn`. They must h
 ### Dark mode
 
 Three CSS layers are generated:
-1. `:root { ... }` — light defaults
-2. `[data-theme="dark"] { ... }` — explicit dark override
+1. `:root { ... }` — light defaults + all scales (size, font, color)
+2. `[data-theme="dark"] { ... }` — explicit dark override (semantic tokens only)
 3. `@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { ... } }` — auto dark
+
+Color scales are generated once in `:root` and never duplicated. Dark theme just reassigns which scale stop each semantic token points to.
 
 Toggle with: `document.documentElement.dataset.theme = "dark" | "light"`
 
