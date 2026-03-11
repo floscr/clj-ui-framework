@@ -1,0 +1,27 @@
+/* Separator — visually or semantically separates content */
+
+.separator {
+  flex-shrink: 0;
+  background: var(--gray-200);
+}
+
+.separator-horizontal {
+  height: 1px;
+  width: 100%;
+}
+
+.separator-vertical {
+  width: 1px;
+  align-self: stretch;
+}
+
+/* Dark mode: use a lighter border shade */
+[data-theme="dark"] .separator {
+  background: var(--gray-800);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .separator {
+    background: var(--gray-800);
+  }
+}

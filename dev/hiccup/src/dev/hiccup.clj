@@ -18,7 +18,8 @@
             [ui.pagination :as pagination]
             [ui.form :as form]
             [ui.sidebar :as sidebar]
-            [ui.icon :as icon]))
+            [ui.icon :as icon]
+            [ui.separator :as separator]))
 
 ;; ── Query Params ────────────────────────────────────────────────────
 
@@ -228,6 +229,24 @@
     (pagination/pagination {:current 3 :total 5
                             :href-fn (fn [p] (str "#page-" p))})))
 
+(defn separator-demo []
+  (section "Separator"
+    ;; Basic horizontal
+    [:div {:style "max-width: 24rem;"}
+     [:div {:style "display: flex; flex-direction: column; gap: 0.375rem;"}
+      [:div {:style "font-weight: 500; line-height: 1;"} "Clojure UI"]
+      [:div {:style "color: var(--fg-2); font-size: var(--font-sm);"} "A cross-target component library"]]
+     [:div {:style "margin: 1rem 0;"}
+      (separator/separator {})]
+     [:p {:style "font-size: var(--font-sm);"} "Build once, render everywhere — Hiccup, Replicant, and Squint."]]
+    ;; Vertical separator
+    [:div {:style "display: flex; align-items: center; gap: 1rem; height: 1.25rem;"}
+     [:span {:style "font-size: var(--font-sm);"} "Blog"]
+     (separator/separator {:orientation :vertical})
+     [:span {:style "font-size: var(--font-sm);"} "Docs"]
+     (separator/separator {:orientation :vertical})
+     [:span {:style "font-size: var(--font-sm);"} "Source"]]))
+
 (defn form-demo []
   (section "Form"
     [:form {:style "max-width: 480px;"}
@@ -297,6 +316,7 @@
    (tooltip-demo)
    (breadcrumb-demo)
    (pagination-demo)
+   (separator-demo)
    (form-demo)])
 
 (def icon-categories
@@ -403,6 +423,8 @@
             {:label "Spinner" :anchor "spinner"}
             {:label "Skeleton" :anchor "skeleton"}
             {:label "Tooltip" :anchor "tooltip"}]}
+   {:title "Layout"
+    :items [{:label "Separator" :anchor "separator"}]}
    {:title "Navigation"
     :items [{:label "Breadcrumb" :anchor "breadcrumb"}
             {:label "Pagination" :anchor "pagination"}]}])
