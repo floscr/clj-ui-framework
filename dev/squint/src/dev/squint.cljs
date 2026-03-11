@@ -104,7 +104,21 @@
       (card/card-body {} [:p "This is the card content. It can contain any HTML."])
       (card/card-footer {}
         (button/button {:variant "secondary" :size "sm"} "Cancel")
-        (button/button {:variant "primary" :size "sm"} "Save")))))
+        (button/button {:variant "primary" :size "sm"} "Save")))
+
+    [:h5 "Card List (full dividers)"]
+    (card/card-list {}
+      (card/card-list-item {} "Notifications")
+      (card/card-list-item {} "Privacy")
+      (card/card-list-item {} "Appearance")
+      (card/card-list-item {} "Accessibility"))
+
+    [:h5 "Card List (inset dividers)"]
+    (card/card-list {:divider "inset"}
+      (card/card-list-item {} "Notifications")
+      (card/card-list-item {} "Privacy")
+      (card/card-list-item {} "Appearance")
+      (card/card-list-item {} "Accessibility"))))
 
 (defn accordion-demo []
   (section "Accordion"

@@ -63,3 +63,39 @@
   font-size: var(--font-base);
   line-height: var(--size-5);
 }
+
+/* ─── Card List ───────────────────────────────────────────────── */
+
+.card-list {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-1);
+  color: var(--fg-0);
+  border: var(--border-0);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.card-list-item {
+  padding: var(--size-3) var(--size-4);
+}
+
+/* Full-width dividers (default) */
+.card-list-item + .card-list-item {
+  border-top: var(--border-0);
+}
+
+/* Inset dividers — border is inset from edges via pseudo-element */
+.card-list-inset .card-list-item + .card-list-item {
+  border-top: none;
+  position: relative;
+}
+
+.card-list-inset .card-list-item + .card-list-item::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: var(--size-4);
+  right: var(--size-4);
+  border-top: var(--border-0);
+}
