@@ -350,7 +350,8 @@
 }
 
 .form-group > .form-input,
-.form-group > .form-select {
+.form-group > .form-select,
+.form-group > .btn {
   border-radius: 0;
 }
 
