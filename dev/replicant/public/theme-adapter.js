@@ -49,9 +49,20 @@
   var SIZE_STEPS = 16;  // --size-1 through --size-16
   var DEFAULT_SIZE_BASE = 0.25; // rem
 
+  // ── Font scale ────────────────────────────────────────────────
+  // Geometric: --font-{label} = base × ratio^power
+  var FONT_STEPS = [[-2,'xs'],[-1,'sm'],[0,'base'],[1,'md'],[2,'lg'],[3,'xl'],[4,'2xl'],[5,'3xl']];
+  var DEFAULT_FONT_BASE = 1.0;  // rem
+  var DEFAULT_FONT_RATIO = 1.25;
+
+  // ── Border radius ──────────────────────────────────────────────
+  // Base values in px, scaled by a multiplier (0–2×)
+  var RADIUS_DEFAULTS = [['sm',6],['md',10],['lg',16]];
+  var DEFAULT_RADIUS_SCALE = 1.0;
+
   // ── State ──────────────────────────────────────────────────────
   var STORAGE_KEY = 'ui-fw-theme-adapter-v2';
-  var DEFAULT = { grayHue: 285, graySat: 1.0, accentHue: 286, accentSat: 1.0, sizeBase: DEFAULT_SIZE_BASE, open: false };
+  var DEFAULT = { grayHue: 285, graySat: 1.0, accentHue: 286, accentSat: 1.0, sizeBase: DEFAULT_SIZE_BASE, fontBase: DEFAULT_FONT_BASE, fontRatio: DEFAULT_FONT_RATIO, radiusScale: DEFAULT_RADIUS_SCALE, open: false };
   var state = assign({}, DEFAULT);
   try {
     var saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
@@ -90,10 +101,31 @@
     }
   }
 
+  function applyFont() {
+    var root = document.documentElement.style;
+    for (var i = 0; i < FONT_STEPS.length; i++) {
+      var power = FONT_STEPS[i][0], label = FONT_STEPS[i][1];
+      var val = state.fontBase * Math.pow(state.fontRatio, power);
+      var s = val.toFixed(3).replace(/0+$/, '').replace(/\.$/, '');
+      root.setProperty('--font-' + label, s + 'rem');
+    }
+  }
+
+  function applyRadius() {
+    var root = document.documentElement.style;
+    for (var i = 0; i < RADIUS_DEFAULTS.length; i++) {
+      var label = RADIUS_DEFAULTS[i][0], base = RADIUS_DEFAULTS[i][1];
+      var val = Math.round(base * state.radiusScale);
+      root.setProperty('--radius-' + label, val + 'px');
+    }
+  }
+
   function apply() {
     applyScale('gray', state.grayHue, GRAY_STEPS, state.graySat);
     applyScale('accent', state.accentHue, ACCENT_STEPS, state.accentSat);
     applySpacing();
+    applyFont();
+    applyRadius();
     save();
     updateUI();
   }
@@ -104,6 +136,8 @@
     GRAY_STEPS.forEach(function(s) { root.removeProperty('--gray-' + s[0]); });
     ACCENT_STEPS.forEach(function(s) { root.removeProperty('--accent-' + s[0]); });
     for (var n = 1; n <= SIZE_STEPS; n++) { root.removeProperty('--size-' + n); }
+    for (var i = 0; i < FONT_STEPS.length; i++) { root.removeProperty('--font-' + FONT_STEPS[i][1]); }
+    for (var i = 0; i < RADIUS_DEFAULTS.length; i++) { root.removeProperty('--radius-' + RADIUS_DEFAULTS[i][0]); }
     save();
     updateUI();
   }
@@ -119,13 +153,24 @@
     var grayChroma = Math.min(0.4, 0.025 * state.graySat);
     var accentChroma = Math.min(0.4, 0.23 * state.accentSat);
     var sizeBase = state.sizeBase.toFixed(3).replace(/0+$/, '').replace(/\.$/, '');
+    var fontBase = state.fontBase.toFixed(3).replace(/0+$/, '').replace(/\.$/, '');
+    var fontRatio = state.fontRatio.toFixed(3).replace(/0+$/, '').replace(/\.$/, '');
+    var fontStepsEDN = FONT_STEPS.map(function(s) {
+      return '[' + String(s[0]).padStart(2) + ' "' + s[1] + '"]';
+    }).join('\n                 ');
     return ':scales\n' +
       ' {:size {:base ' + sizeBase + ' :unit "rem" :steps ' + SIZE_STEPS + '}\n\n' +
+      '  :font {:base ' + fontBase + ' :unit "rem" :ratio ' + fontRatio + '\n' +
+      '         :steps [' + fontStepsEDN + ']}\n\n' +
       '  :color\n' +
       '  {:gray {:hue ' + state.grayHue + ' :chroma ' + grayChroma.toFixed(3) + '\n' +
       '          :steps [' + fmtSteps(GRAY_STEPS, state.graySat).trimStart() + ']}\n\n' +
       '   :accent {:hue ' + state.accentHue + ' :chroma ' + accentChroma.toFixed(2) + '\n' +
-      '            :steps [' + fmtSteps(ACCENT_STEPS, state.accentSat).trimStart() + ']}}}';
+      '            :steps [' + fmtSteps(ACCENT_STEPS, state.accentSat).trimStart() + ']}}}' +
+      '\n\n;; Radius (add to :tokens and :themes > :dark)\n' +
+      RADIUS_DEFAULTS.map(function(r) {
+        return ':radius-' + r[0] + ' "' + Math.round(r[1] * state.radiusScale) + 'px"';
+      }).join('\n');
   }
 
   // ── DOM helpers ────────────────────────────────────────────────
@@ -258,10 +303,23 @@
     spacingSection.appendChild(el('div', 'text-xs text-faint uppercase tracking-wide font-semibold', 'Spacing'));
     spacingSection.appendChild(makeSlider('sizeBase', 'Base', 10, 50, 1));
 
+    // Font section
+    var fontSection = el('div', 'vstack gap-2');
+    fontSection.appendChild(el('div', 'text-xs text-faint uppercase tracking-wide font-semibold', 'Font'));
+    fontSection.appendChild(makeSlider('fontBase', 'Base', 75, 125, 1));
+    fontSection.appendChild(makeSlider('fontRatio', 'Ratio', 105, 150, 1));
+
+    // Radius section
+    var radiusSection = el('div', 'vstack gap-2');
+    radiusSection.appendChild(el('div', 'text-xs text-faint uppercase tracking-wide font-semibold', 'Radius'));
+    radiusSection.appendChild(makeSlider('radiusScale', 'Scale', 0, 200, 5));
+
     body.appendChild(presetRow);
     body.appendChild(graySection);
     body.appendChild(accentSection);
     body.appendChild(spacingSection);
+    body.appendChild(fontSection);
+    body.appendChild(radiusSection);
 
     // ─ Footer section ─
     var footer = el('div', 'card-section');
@@ -299,6 +357,15 @@
     inputs.sizeBase.input.addEventListener('input', function(e) {
       state.sizeBase = parseInt(e.target.value) / 100; apply();
     });
+    inputs.fontBase.input.addEventListener('input', function(e) {
+      state.fontBase = parseInt(e.target.value) / 100; apply();
+    });
+    inputs.fontRatio.input.addEventListener('input', function(e) {
+      state.fontRatio = parseInt(e.target.value) / 100; apply();
+    });
+    inputs.radiusScale.input.addEventListener('input', function(e) {
+      state.radiusScale = parseInt(e.target.value) / 100; apply();
+    });
   }
 
   // ── Update UI ─────────────────────────────────────────────────
@@ -324,6 +391,16 @@
     // Sync spacing slider
     inputs.sizeBase.input.value = Math.round(state.sizeBase * 100);
     inputs.sizeBase.value.textContent = state.sizeBase.toFixed(2);
+
+    // Sync font sliders
+    inputs.fontBase.input.value = Math.round(state.fontBase * 100);
+    inputs.fontBase.value.textContent = state.fontBase.toFixed(2);
+    inputs.fontRatio.input.value = Math.round(state.fontRatio * 100);
+    inputs.fontRatio.value.textContent = state.fontRatio.toFixed(2);
+
+    // Sync radius slider
+    inputs.radiusScale.input.value = Math.round(state.radiusScale * 100);
+    inputs.radiusScale.value.textContent = Math.round(state.radiusScale * 100) + '%';
 
     // Preset active states — uses .chip / .chip-active
     presetBtns.forEach(function(item) {
@@ -353,7 +430,9 @@
     buildPanel();
     if (state.grayHue !== DEFAULT.grayHue || state.graySat !== DEFAULT.graySat ||
         state.accentHue !== DEFAULT.accentHue || state.accentSat !== DEFAULT.accentSat ||
-        state.sizeBase !== DEFAULT.sizeBase) {
+        state.sizeBase !== DEFAULT.sizeBase ||
+        state.fontBase !== DEFAULT.fontBase || state.fontRatio !== DEFAULT.fontRatio ||
+        state.radiusScale !== DEFAULT.radiusScale) {
       apply();
     } else {
       updateUI();
