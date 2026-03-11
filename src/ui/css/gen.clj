@@ -58,7 +58,11 @@
 (defn base-css
   "Generate base body/reset styles."
   []
-  "body {
+  "*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   margin: 0;
   background: var(--bg-0);

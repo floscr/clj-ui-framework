@@ -1,6 +1,8 @@
 .alert {
+  container-type: inline-size;
   position: relative;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: var(--size-3);
   padding: var(--size-4) var(--size-6);
@@ -17,6 +19,13 @@
 
 .alert-body {
   margin: 0;
+}
+
+@container (max-width: 24rem) {
+  .alert-title,
+  .alert-body {
+    flex-basis: 100%;
+  }
 }
 
 .alert-success {
