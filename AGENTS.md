@@ -2,6 +2,26 @@
 
 A cross-target component library for Clojure, ClojureScript (Replicant), and Squint (Eucalypt). Components are `.cljc` files using reader conditionals. CSS is generated from EDN tokens via Babashka.
 
+## Installation (Git Submodule)
+
+This library is designed to be consumed as a git submodule. The consuming project adds `lib/ui/src` to its classpath and links/copies `dist/theme.css`.
+
+```sh
+# Add to a project
+git submodule add https://github.com/floscr/clj-ui-framework.git lib/ui
+git submodule update --init
+```
+
+**Classpath setup** — add `lib/ui/src` to `:paths` in the consumer's `bb.edn`, `deps.edn`, `shadow-cljs.edn`, or `squint.edn`:
+
+```edn
+{:paths ["src" "lib/ui/src"]}
+```
+
+**CSS setup** — copy or symlink `lib/ui/dist/theme.css` into the consumer's public directory and include via `<link>` tag. If tokens are customized, regenerate with `cd lib/ui && bb build-theme`.
+
+**Updating** — `git submodule update --remote lib/ui`, then rebuild theme if needed.
+
 ## Project Structure
 
 ```

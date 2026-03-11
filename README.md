@@ -2,7 +2,88 @@
 
 A cross-target component library for Clojure (Hiccup), ClojureScript (Replicant), and Squint (Eucalypt). Components are `.cljc` files that compile to all three targets using reader conditionals.
 
-## Setup
+## Installation
+
+Add as a git submodule to your project:
+
+```sh
+git submodule add https://github.com/floscr/clj-ui-framework.git lib/ui
+git submodule update --init
+```
+
+### Clojure / Babashka
+
+Add the submodule's `src` directory to your classpath. In `bb.edn` or `deps.edn`:
+
+```edn
+;; bb.edn
+{:paths ["src" "lib/ui/src"]}
+
+;; deps.edn
+{:paths ["src" "lib/ui/src"]}
+```
+
+Then require components directly:
+
+```clojure
+(ns my-app.core
+  (:require [ui.button :as button]
+            [ui.card :as card]
+            [ui.theme :as theme]))
+
+(button/button {:variant :primary} "Click me")
+```
+
+### ClojureScript (Replicant / shadow-cljs)
+
+Add the source path in `shadow-cljs.edn`:
+
+```edn
+{:source-paths ["src" "lib/ui/src"]
+ :builds {:app {:target :browser
+                :modules {:main {:init-fn my-app.core/init}}}}}
+```
+
+### Squint
+
+Point squint at the submodule source in `squint.edn`:
+
+```edn
+{:paths ["src" "lib/ui/src"]}
+```
+
+### CSS
+
+Copy or link the generated theme CSS into your project:
+
+```sh
+# Option A: copy (run after each theme update)
+cp lib/ui/dist/theme.css public/theme.css
+
+# Option B: symlink
+ln -s ../../lib/ui/dist/theme.css public/theme.css
+```
+
+Then include it in your HTML:
+
+```html
+<link rel="stylesheet" href="/theme.css">
+```
+
+If you want to customize tokens, edit `lib/ui/src/theme/tokens.edn` and regenerate:
+
+```sh
+cd lib/ui && bb build-theme
+```
+
+### Updating
+
+```sh
+git submodule update --remote lib/ui
+cd lib/ui && bb build-theme   # regenerate CSS if tokens changed
+```
+
+## Development
 
 Requires [Babashka](https://github.com/babashka/babashka).
 
