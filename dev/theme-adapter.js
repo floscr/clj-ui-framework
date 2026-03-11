@@ -1,16 +1,14 @@
 // Theme Adapter — live color scale editor for dev preview
+// Uses the framework's own CSS classes (dogfooding).
 // Self-contained IIFE. Persists state in localStorage.
 (function() {
   'use strict';
 
   // ── OKLCH helpers ───────────────────────────────────────────────
-  // CSS oklch() is used directly — no hex conversion needed.
-  // oklch(L C H) where L: 0-1, C: 0-~0.4, H: 0-360 degrees.
   function oklchCSS(l, c, h) {
     return 'oklch(' + l.toFixed(3) + ' ' + c.toFixed(4) + ' ' + h.toFixed(1) + ')';
   }
 
-  // OKLCH → sRGB hex for swatch preview (canvas-free fallback)
   function oklchToHex(L, C, H) {
     var hRad = H * Math.PI / 180;
     var a = C * Math.cos(hRad), b = C * Math.sin(hRad);
@@ -28,7 +26,6 @@
   }
 
   // ── Scale step definitions [label, lightness, baseChroma] ──────
-  // OKLCH: L is 0-1 (perceptual lightness), C is chroma (colorfulness)
   var GRAY_STEPS = [
     [50,0.975,0.003],[100,0.955,0.005],[200,0.915,0.010],[300,0.850,0.012],[400,0.690,0.025],
     [500,0.530,0.035],[600,0.425,0.035],[700,0.350,0.035],[800,0.245,0.025],[900,0.190,0.016],[950,0.145,0.011]
@@ -39,7 +36,6 @@
   ];
 
   // ── Presets ────────────────────────────────────────────────────
-  // Presets use OKLCH hue (0-360) and chroma multiplier (0-2)
   var PRESETS = [
     { name: 'Purple',  grayHue: 285, graySat: 1.0, accentHue: 286, accentSat: 1.0 },
     { name: 'Blue',    grayHue: 255, graySat: 0.5, accentHue: 255, accentSat: 0.87 },
@@ -89,7 +85,6 @@
 
   function reset() {
     state = assign({}, DEFAULT, { open: true });
-    // Remove inline overrides so CSS file values take effect
     var root = document.documentElement.style;
     GRAY_STEPS.forEach(function(s) { root.removeProperty('--gray-' + s[0]); });
     ACCENT_STEPS.forEach(function(s) { root.removeProperty('--accent-' + s[0]); });
@@ -114,98 +109,42 @@
       '            :steps [' + fmtSteps(ACCENT_STEPS, state.accentSat).trimStart() + ']}}';
   }
 
-  // ── UI ─────────────────────────────────────────────────────────
-  var panel, swatchGray, swatchAccent, inputs = {};
+  // ── DOM helpers ────────────────────────────────────────────────
+  var panel, toggleBtn, swatchGray, swatchAccent, presetBtns = [], inputs = {};
 
-  function el(tag, attrs, children) {
+  function el(tag, cls, children) {
     var e = document.createElement(tag);
-    if (attrs) for (var k in attrs) {
-      if (k === 'style' && typeof attrs[k] === 'object') {
-        for (var s in attrs[k]) e.style[s] = attrs[k][s];
-      } else if (k.slice(0,2) === 'on') {
-        e.addEventListener(k.slice(2), attrs[k]);
-      } else {
-        e.setAttribute(k, attrs[k]);
-      }
-    }
-    if (children) {
-      if (typeof children === 'string') e.textContent = children;
-      else if (Array.isArray(children)) children.forEach(function(c) { if (c) e.appendChild(c); });
-    }
+    if (cls) e.className = cls;
+    if (typeof children === 'string') e.textContent = children;
+    else if (Array.isArray(children)) children.forEach(function(c) { if (c) e.appendChild(c); });
     return e;
   }
 
-  var S = {
-    panel: {
-      position: 'fixed', bottom: '16px', right: '16px', zIndex: '99999',
-      fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-      fontSize: '12px', lineHeight: '1.4',
-    },
-    card: {
-      background: '#1a1a26', color: '#e0e0e8', border: '1px solid #2a2a3a',
-      borderRadius: '12px', width: '280px', overflow: 'hidden',
-      boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
-    },
-    header: {
-      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      padding: '10px 12px', borderBottom: '1px solid #2a2a3a',
-    },
-    title: { fontWeight: '600', fontSize: '12px', letterSpacing: '0.02em' },
-    body: { padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: '10px' },
-    presetRow: { display: 'flex', flexWrap: 'wrap', gap: '4px' },
-    preset: {
-      padding: '3px 8px', border: '1px solid #3a3a4a', borderRadius: '6px',
-      background: 'transparent', color: '#b0b0c0', cursor: 'pointer',
-      fontSize: '11px', fontFamily: 'inherit', transition: 'all 0.15s',
-    },
-    presetActive: {
-      background: '#7a5afc', borderColor: '#7a5afc', color: '#fff',
-    },
-    section: { display: 'flex', flexDirection: 'column', gap: '6px' },
-    label: { fontWeight: '500', fontSize: '11px', color: '#8a8aa0', textTransform: 'uppercase', letterSpacing: '0.05em' },
-    sliderRow: { display: 'flex', alignItems: 'center', gap: '8px' },
-    sliderLabel: { width: '26px', fontSize: '10px', color: '#6a6a80', flexShrink: '0' },
-    sliderValue: { width: '32px', fontSize: '10px', color: '#9a9aac', textAlign: 'right', flexShrink: '0', fontFamily: "'JetBrains Mono', monospace" },
-    slider: { flex: '1', height: '4px', WebkitAppearance: 'none', appearance: 'none', borderRadius: '2px', outline: 'none', cursor: 'pointer' },
-    swatches: { display: 'flex', gap: '2px' },
-    swatch: { flex: '1', height: '14px', borderRadius: '3px' },
-    footer: { padding: '8px 12px', borderTop: '1px solid #2a2a3a', display: 'flex', gap: '6px' },
-    btn: {
-      flex: '1', padding: '5px 8px', border: '1px solid #3a3a4a', borderRadius: '6px',
-      background: 'transparent', color: '#b0b0c0', cursor: 'pointer',
-      fontSize: '11px', fontFamily: 'inherit', textAlign: 'center',
-    },
-    toggle: {
-      width: '36px', height: '36px', borderRadius: '10px',
-      background: '#1a1a26', border: '1px solid #2a2a3a', cursor: 'pointer',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      fontSize: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-      position: 'fixed', bottom: '16px', right: '16px', zIndex: '99999',
-    },
-  };
-
-  function applyStyle(elem, style) {
-    for (var k in style) elem.style[k] = style[k];
-  }
-
   function hueGradient() {
-    return 'linear-gradient(to right, hsl(0,80%,50%),hsl(60,80%,50%),hsl(120,80%,50%),hsl(180,80%,50%),hsl(240,80%,50%),hsl(300,80%,50%),hsl(360,80%,50%))';
+    return 'linear-gradient(to right, oklch(0.65 0.15 0),oklch(0.65 0.15 60),oklch(0.65 0.15 120),oklch(0.65 0.15 180),oklch(0.65 0.15 240),oklch(0.65 0.15 300),oklch(0.65 0.15 360))';
   }
 
-  function satGradient(hue) {
+  function chromaGradient(hue) {
     return 'linear-gradient(to right, oklch(0.5 0 ' + hue + '), oklch(0.5 0.15 ' + hue + '))';
   }
 
+  // ── Build slider row ──────────────────────────────────────────
   function makeSlider(id, label, min, max, step, gradient) {
-    var row = el('div');
-    applyStyle(row, S.sliderRow);
-    var lbl = el('span', null, label);
-    applyStyle(lbl, S.sliderLabel);
-    var input = el('input', { type: 'range', min: String(min), max: String(max), step: String(step) });
-    applyStyle(input, S.slider);
-    input.style.background = gradient || '#3a3a4a';
-    var val = el('span', null, '0');
-    applyStyle(val, S.sliderValue);
+    var row = el('div', 'flex items-center gap-2');
+
+    var lbl = el('span', 'text-xs text-faint shrink-0', label);
+    lbl.style.width = '26px';
+
+    var input = el('input', 'form-range flex-1');
+    input.type = 'range';
+    input.min = String(min);
+    input.max = String(max);
+    input.step = String(step);
+    if (gradient) input.style.background = gradient;
+
+    var val = el('span', 'text-xs text-muted shrink-0 font-mono text-right', '0');
+    val.style.width = '32px';
+
     row.appendChild(lbl);
     row.appendChild(input);
     row.appendChild(val);
@@ -213,86 +152,82 @@
     return row;
   }
 
+  // ── Build swatch row ──────────────────────────────────────────
   function makeSwatches() {
-    var row = el('div');
-    applyStyle(row, S.swatches);
+    var row = el('div', 'swatch-row');
     var items = [];
     for (var i = 0; i < 11; i++) {
-      var sw = el('div');
-      applyStyle(sw, S.swatch);
+      var sw = el('div', 'swatch');
       row.appendChild(sw);
       items.push(sw);
     }
     return { row: row, items: items };
   }
 
+  // ── Build panel ───────────────────────────────────────────────
   function buildPanel() {
-    // Toggle button (shown when panel is closed)
-    var toggle = el('button', { onclick: function() { state.open = true; save(); updateUI(); } }, '\u{1F3A8}');
-    applyStyle(toggle, S.toggle);
+    var root = el('div', 'popover popover-br');
 
-    // Panel
-    panel = el('div');
-    applyStyle(panel, S.panel);
+    // Toggle button (visible when panel closed)
+    toggleBtn = el('button', 'btn btn-secondary btn-icon btn-icon-round', '\u{1F3A8}');
+    toggleBtn.addEventListener('click', function() {
+      state.open = true; save(); updateUI();
+    });
 
-    var card = el('div');
-    applyStyle(card, S.card);
+    // Panel card
+    panel = el('div', 'card card-flush');
+    panel.style.width = '280px';
 
-    // Header
-    var header = el('div');
-    applyStyle(header, S.header);
-    var title = el('span', null, 'Theme');
-    applyStyle(title, S.title);
-    var closeBtn = el('button', { onclick: function() { state.open = false; save(); updateUI(); } }, '\u00d7');
-    applyStyle(closeBtn, { background: 'none', border: 'none', color: '#6a6a80', cursor: 'pointer', fontSize: '16px', padding: '0 2px', fontFamily: 'inherit' });
-    var resetBtn = el('button', { onclick: reset }, 'Reset');
-    applyStyle(resetBtn, { background: 'none', border: '1px solid #3a3a4a', color: '#6a6a80', cursor: 'pointer', fontSize: '10px', padding: '2px 6px', borderRadius: '4px', fontFamily: 'inherit', marginLeft: 'auto', marginRight: '8px' });
+    // ─ Header section ─
+    var header = el('div', 'card-section flex items-center justify-between');
+    var title = el('span', 'font-semibold text-sm', 'Theme');
+    var headerActions = el('div', 'flex items-center gap-2');
+    var resetBtn = el('button', 'btn btn-ghost btn-sm', 'Reset');
+    resetBtn.addEventListener('click', reset);
+    var closeBtn = el('button', 'btn btn-ghost btn-icon btn-sm', '\u00d7');
+    closeBtn.addEventListener('click', function() {
+      state.open = false; save(); updateUI();
+    });
+    headerActions.appendChild(resetBtn);
+    headerActions.appendChild(closeBtn);
     header.appendChild(title);
-    header.appendChild(resetBtn);
-    header.appendChild(closeBtn);
+    header.appendChild(headerActions);
 
-    // Body
-    var body = el('div');
-    applyStyle(body, S.body);
+    // ─ Body section ─
+    var body = el('div', 'card-section vstack gap-3');
 
     // Presets
-    var presetRow = el('div');
-    applyStyle(presetRow, S.presetRow);
+    var presetRow = el('div', 'hstack gap-1');
     PRESETS.forEach(function(p) {
-      var btn = el('button', { onclick: function() {
+      var dot = el('span', 'chip-dot');
+      dot.style.background = oklchToHex(0.595, 0.23 * p.accentSat, p.accentHue);
+
+      var btn = el('button', 'chip');
+      btn.appendChild(dot);
+      btn.appendChild(document.createTextNode(p.name));
+      btn.addEventListener('click', function() {
         state.grayHue = p.grayHue;
         state.graySat = p.graySat;
         state.accentHue = p.accentHue;
         state.accentSat = p.accentSat;
         apply();
-      }}, p.name);
-      applyStyle(btn, S.preset);
-      // Small color dot
-      var dot = el('span');
-      dot.style.cssText = 'display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:4px;vertical-align:middle;';
-      dot.style.background = oklchToHex(0.595, 0.23 * p.accentSat, p.accentHue);
-      btn.insertBefore(dot, btn.firstChild);
+      });
+      presetBtns.push({ el: btn, preset: p });
       presetRow.appendChild(btn);
     });
 
-    // Gray section
-    var graySection = el('div');
-    applyStyle(graySection, S.section);
-    var grayLabel = el('div', null, 'Gray');
-    applyStyle(grayLabel, S.label);
-    graySection.appendChild(grayLabel);
+    // Gray scale section
+    var graySection = el('div', 'vstack gap-2');
+    graySection.appendChild(el('div', 'text-xs text-faint uppercase tracking-wide font-semibold', 'Gray'));
     graySection.appendChild(makeSlider('grayHue', 'Hue', 0, 360, 1, hueGradient()));
     graySection.appendChild(makeSlider('graySat', 'Chr', 0, 200, 1));
     var graySwatches = makeSwatches();
     swatchGray = graySwatches.items;
     graySection.appendChild(graySwatches.row);
 
-    // Accent section
-    var accentSection = el('div');
-    applyStyle(accentSection, S.section);
-    var accentLabel = el('div', null, 'Accent');
-    applyStyle(accentLabel, S.label);
-    accentSection.appendChild(accentLabel);
+    // Accent scale section
+    var accentSection = el('div', 'vstack gap-2');
+    accentSection.appendChild(el('div', 'text-xs text-faint uppercase tracking-wide font-semibold', 'Accent'));
     accentSection.appendChild(makeSlider('accentHue', 'Hue', 0, 360, 1, hueGradient()));
     accentSection.appendChild(makeSlider('accentSat', 'Chr', 0, 200, 1));
     var accentSwatches = makeSwatches();
@@ -303,26 +238,25 @@
     body.appendChild(graySection);
     body.appendChild(accentSection);
 
-    // Footer
-    var footer = el('div');
-    applyStyle(footer, S.footer);
-    var copyBtn = el('button', { onclick: function() {
+    // ─ Footer section ─
+    var footer = el('div', 'card-section');
+    var copyBtn = el('button', 'btn btn-secondary btn-sm w-full', 'Copy EDN');
+    copyBtn.addEventListener('click', function() {
       var edn = generateEDN();
       navigator.clipboard.writeText(edn).then(function() {
         copyBtn.textContent = 'Copied!';
         setTimeout(function() { copyBtn.textContent = 'Copy EDN'; }, 1500);
       });
-    }}, 'Copy EDN');
-    applyStyle(copyBtn, S.btn);
+    });
     footer.appendChild(copyBtn);
 
-    card.appendChild(header);
-    card.appendChild(body);
-    card.appendChild(footer);
-    panel.appendChild(card);
-
-    document.body.appendChild(toggle);
-    document.body.appendChild(panel);
+    // Assemble
+    panel.appendChild(header);
+    panel.appendChild(body);
+    panel.appendChild(footer);
+    root.appendChild(toggleBtn);
+    root.appendChild(panel);
+    document.body.appendChild(root);
 
     // Slider events
     inputs.grayHue.input.addEventListener('input', function(e) {
@@ -337,54 +271,37 @@
     inputs.accentSat.input.addEventListener('input', function(e) {
       state.accentSat = parseInt(e.target.value) / 100; apply();
     });
-
-    // Style range inputs (webkit + moz)
-    var css = document.createElement('style');
-    css.textContent = [
-      '#ta-root input[type=range]::-webkit-slider-thumb {',
-      '  -webkit-appearance: none; width: 14px; height: 14px;',
-      '  border-radius: 50%; background: #fff; border: 2px solid #7a5afc;',
-      '  cursor: pointer; margin-top: -5px; box-shadow: 0 1px 4px rgba(0,0,0,0.3);',
-      '}',
-      '#ta-root input[type=range]::-moz-range-thumb {',
-      '  width: 14px; height: 14px; border-radius: 50%;',
-      '  background: #fff; border: 2px solid #7a5afc; cursor: pointer;',
-      '  box-shadow: 0 1px 4px rgba(0,0,0,0.3);',
-      '}',
-      '#ta-root input[type=range]::-webkit-slider-runnable-track {',
-      '  height: 4px; border-radius: 2px;',
-      '}',
-      '#ta-root input[type=range]::-moz-range-track {',
-      '  height: 4px; border-radius: 2px;',
-      '}',
-    ].join('\n');
-    document.head.appendChild(css);
-    panel.id = 'ta-root';
-    toggle.id = 'ta-toggle';
-
-    // Reference for toggle visibility
-    panel._toggle = toggle;
   }
 
+  // ── Update UI ─────────────────────────────────────────────────
   function updateUI() {
     if (!panel) return;
+
     // Show/hide
-    panel.style.display = state.open ? 'block' : 'none';
-    panel._toggle.style.display = state.open ? 'none' : 'flex';
+    panel.style.display = state.open ? 'flex' : 'none';
+    toggleBtn.style.display = state.open ? 'none' : 'inline-flex';
 
     // Sync slider values
     inputs.grayHue.input.value = state.grayHue;
     inputs.grayHue.value.textContent = state.grayHue + '\u00b0';
     inputs.graySat.input.value = Math.round(state.graySat * 100);
     inputs.graySat.value.textContent = Math.round(state.graySat * 100) + '%';
-    inputs.graySat.input.style.background = satGradient(state.grayHue);
+    inputs.graySat.input.style.background = chromaGradient(state.grayHue);
     inputs.accentHue.input.value = state.accentHue;
     inputs.accentHue.value.textContent = state.accentHue + '\u00b0';
     inputs.accentSat.input.value = Math.round(state.accentSat * 100);
     inputs.accentSat.value.textContent = Math.round(state.accentSat * 100) + '%';
-    inputs.accentSat.input.style.background = satGradient(state.accentHue);
+    inputs.accentSat.input.style.background = chromaGradient(state.accentHue);
 
-    // Swatches — use oklch() CSS for accurate preview
+    // Preset active states — uses .chip / .chip-active
+    presetBtns.forEach(function(item) {
+      var p = item.preset;
+      var isActive = (state.grayHue === p.grayHue && state.graySat === p.graySat &&
+                      state.accentHue === p.accentHue && state.accentSat === p.accentSat);
+      item.el.className = isActive ? 'chip chip-active' : 'chip';
+    });
+
+    // Swatches
     if (swatchGray) {
       GRAY_STEPS.forEach(function(s, i) {
         var c = Math.min(0.4, s[2] * state.graySat);
@@ -400,20 +317,19 @@
   }
 
   // ── Init ───────────────────────────────────────────────────────
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
-  }
-
   function init() {
     buildPanel();
-    // Apply saved non-default state
     if (state.grayHue !== DEFAULT.grayHue || state.graySat !== DEFAULT.graySat ||
         state.accentHue !== DEFAULT.accentHue || state.accentSat !== DEFAULT.accentSat) {
       apply();
     } else {
       updateUI();
     }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
   }
 })();

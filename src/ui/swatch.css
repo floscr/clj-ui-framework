@@ -1,0 +1,13 @@
+/* ── Swatch ─────────────────────────────────────────────────────── */
+/* Color preview strip — a row of small colored boxes.             */
+
+.swatch-row {
+  display: flex;
+  gap: 2px;
+}
+
+.swatch {
+  flex: 1;
+  height: var(--size-4);
+  border-radius: var(--radius-sm);
+}

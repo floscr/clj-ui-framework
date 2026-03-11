@@ -1,0 +1,37 @@
+/* ── Chip ───────────────────────────────────────────────────────── */
+/* Small selectable buttons for tags, filters, presets.            */
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--size-1);
+  padding: var(--size-1) var(--size-2);
+  font-size: var(--font-xs);
+  font-weight: 500;
+  line-height: var(--size-4);
+  border: var(--border-0);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--fg-1);
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 150ms ease, border-color 150ms ease, color 150ms ease;
+}
+
+.chip:hover:not(.chip-active) {
+  background: var(--bg-2);
+}
+
+.chip-active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--fg-on-accent);
+}
+
+.chip-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  flex-shrink: 0;
+}

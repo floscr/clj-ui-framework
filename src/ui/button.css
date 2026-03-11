@@ -78,6 +78,24 @@ a.btn-link {
   line-height: var(--size-6);
 }
 
+.btn-icon {
+  padding: var(--size-2);
+  line-height: 1;
+  aspect-ratio: 1;
+}
+
+.btn-icon.btn-sm {
+  padding: var(--size-1);
+}
+
+.btn-icon.btn-lg {
+  padding: var(--size-3);
+}
+
+.btn-icon-round {
+  border-radius: 9999px;
+}
+
 .btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;

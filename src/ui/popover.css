@@ -1,0 +1,12 @@
+/* ── Popover ────────────────────────────────────────────────────── */
+/* Fixed-position floating panel. Combine with a corner class.     */
+
+.popover {
+  position: fixed;
+  z-index: 9999;
+}
+
+.popover-br { bottom: var(--size-4); right: var(--size-4); }
+.popover-bl { bottom: var(--size-4); left: var(--size-4); }
+.popover-tr { top: var(--size-4); right: var(--size-4); }
+.popover-tl { top: var(--size-4); left: var(--size-4); }

@@ -37,6 +37,19 @@
 .mb-6 { margin-bottom: var(--size-6); }
 .p-4 { padding: var(--size-4); }
 
+.flex-1 { flex: 1; min-width: 0; }
+.shrink-0 { flex-shrink: 0; }
+.flex-row { flex-direction: row; }
+.flex-wrap { flex-wrap: wrap; }
+
+.text-xs { font-size: var(--font-xs); }
+.text-sm { font-size: var(--font-sm); }
+.text-right { text-align: right; }
+.font-semibold { font-weight: 600; }
+.font-mono { font-family: ui-monospace, 'JetBrains Mono', monospace; }
+.uppercase { text-transform: uppercase; }
+.tracking-wide { letter-spacing: 0.05em; }
+
 .w-full { width: 100%; }
 .sr-only {
   position: absolute;

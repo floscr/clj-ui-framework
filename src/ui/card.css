@@ -11,6 +11,19 @@
   padding: var(--size-6);
 }
 
+.card-flush {
+  padding: 0;
+  gap: 0;
+}
+
+.card-section {
+  padding: var(--size-3) var(--size-4);
+}
+
+.card-section + .card-section {
+  border-top: var(--border-0);
+}
+
 .card-header {
   display: flex;
   flex-direction: column;
