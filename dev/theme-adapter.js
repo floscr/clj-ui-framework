@@ -55,9 +55,14 @@
   var DEFAULT_FONT_BASE = 1.0;  // rem
   var DEFAULT_FONT_RATIO = 1.25;
 
+  // ── Border radius ──────────────────────────────────────────────
+  // Base values in px, scaled by a multiplier (0–2×)
+  var RADIUS_DEFAULTS = [['sm',6],['md',10],['lg',16]];
+  var DEFAULT_RADIUS_SCALE = 1.0;
+
   // ── State ──────────────────────────────────────────────────────
   var STORAGE_KEY = 'ui-fw-theme-adapter-v2';
-  var DEFAULT = { grayHue: 285, graySat: 1.0, accentHue: 286, accentSat: 1.0, sizeBase: DEFAULT_SIZE_BASE, fontBase: DEFAULT_FONT_BASE, fontRatio: DEFAULT_FONT_RATIO, open: false };
+  var DEFAULT = { grayHue: 285, graySat: 1.0, accentHue: 286, accentSat: 1.0, sizeBase: DEFAULT_SIZE_BASE, fontBase: DEFAULT_FONT_BASE, fontRatio: DEFAULT_FONT_RATIO, radiusScale: DEFAULT_RADIUS_SCALE, open: false };
   var state = assign({}, DEFAULT);
   try {
     var saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
@@ -106,11 +111,21 @@
     }
   }
 
+  function applyRadius() {
+    var root = document.documentElement.style;
+    for (var i = 0; i < RADIUS_DEFAULTS.length; i++) {
+      var label = RADIUS_DEFAULTS[i][0], base = RADIUS_DEFAULTS[i][1];
+      var val = Math.round(base * state.radiusScale);
+      root.setProperty('--radius-' + label, val + 'px');
+    }
+  }
+
   function apply() {
     applyScale('gray', state.grayHue, GRAY_STEPS, state.graySat);
     applyScale('accent', state.accentHue, ACCENT_STEPS, state.accentSat);
     applySpacing();
     applyFont();
+    applyRadius();
     save();
     updateUI();
   }
@@ -122,6 +137,7 @@
     ACCENT_STEPS.forEach(function(s) { root.removeProperty('--accent-' + s[0]); });
     for (var n = 1; n <= SIZE_STEPS; n++) { root.removeProperty('--size-' + n); }
     for (var i = 0; i < FONT_STEPS.length; i++) { root.removeProperty('--font-' + FONT_STEPS[i][1]); }
+    for (var i = 0; i < RADIUS_DEFAULTS.length; i++) { root.removeProperty('--radius-' + RADIUS_DEFAULTS[i][0]); }
     save();
     updateUI();
   }
@@ -150,7 +166,11 @@
       '  {:gray {:hue ' + state.grayHue + ' :chroma ' + grayChroma.toFixed(3) + '\n' +
       '          :steps [' + fmtSteps(GRAY_STEPS, state.graySat).trimStart() + ']}\n\n' +
       '   :accent {:hue ' + state.accentHue + ' :chroma ' + accentChroma.toFixed(2) + '\n' +
-      '            :steps [' + fmtSteps(ACCENT_STEPS, state.accentSat).trimStart() + ']}}}';
+      '            :steps [' + fmtSteps(ACCENT_STEPS, state.accentSat).trimStart() + ']}}}' +
+      '\n\n;; Radius (add to :tokens and :themes > :dark)\n' +
+      RADIUS_DEFAULTS.map(function(r) {
+        return ':radius-' + r[0] + ' "' + Math.round(r[1] * state.radiusScale) + 'px"';
+      }).join('\n');
   }
 
   // ── DOM helpers ────────────────────────────────────────────────
@@ -289,11 +309,17 @@
     fontSection.appendChild(makeSlider('fontBase', 'Base', 75, 125, 1));
     fontSection.appendChild(makeSlider('fontRatio', 'Ratio', 105, 150, 1));
 
+    // Radius section
+    var radiusSection = el('div', 'vstack gap-2');
+    radiusSection.appendChild(el('div', 'text-xs text-faint uppercase tracking-wide font-semibold', 'Radius'));
+    radiusSection.appendChild(makeSlider('radiusScale', 'Scale', 0, 200, 5));
+
     body.appendChild(presetRow);
     body.appendChild(graySection);
     body.appendChild(accentSection);
     body.appendChild(spacingSection);
     body.appendChild(fontSection);
+    body.appendChild(radiusSection);
 
     // ─ Footer section ─
     var footer = el('div', 'card-section');
@@ -337,6 +363,9 @@
     inputs.fontRatio.input.addEventListener('input', function(e) {
       state.fontRatio = parseInt(e.target.value) / 100; apply();
     });
+    inputs.radiusScale.input.addEventListener('input', function(e) {
+      state.radiusScale = parseInt(e.target.value) / 100; apply();
+    });
   }
 
   // ── Update UI ─────────────────────────────────────────────────
@@ -369,6 +398,10 @@
     inputs.fontRatio.input.value = Math.round(state.fontRatio * 100);
     inputs.fontRatio.value.textContent = state.fontRatio.toFixed(2);
 
+    // Sync radius slider
+    inputs.radiusScale.input.value = Math.round(state.radiusScale * 100);
+    inputs.radiusScale.value.textContent = Math.round(state.radiusScale * 100) + '%';
+
     // Preset active states — uses .chip / .chip-active
     presetBtns.forEach(function(item) {
       var p = item.preset;
@@ -398,7 +431,8 @@
     if (state.grayHue !== DEFAULT.grayHue || state.graySat !== DEFAULT.graySat ||
         state.accentHue !== DEFAULT.accentHue || state.accentSat !== DEFAULT.accentSat ||
         state.sizeBase !== DEFAULT.sizeBase ||
-        state.fontBase !== DEFAULT.fontBase || state.fontRatio !== DEFAULT.fontRatio) {
+        state.fontBase !== DEFAULT.fontBase || state.fontRatio !== DEFAULT.fontRatio ||
+        state.radiusScale !== DEFAULT.radiusScale) {
       apply();
     } else {
       updateUI();
