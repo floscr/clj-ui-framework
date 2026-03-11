@@ -12,7 +12,11 @@
                (spit "dev/replicant/public/theme.css" css)
                (io/make-parents "dev/squint/public/theme.css")
                (spit "dev/squint/public/theme.css" css)
-               (println "Copied theme.css to dev targets")))}
+               (println "Copied theme.css to dev targets"))
+             (let [adapter (slurp "dev/theme-adapter.js")]
+               (spit "dev/replicant/public/theme-adapter.js" adapter)
+               (spit "dev/squint/public/theme-adapter.js" adapter)
+               (println "Copied theme-adapter.js to dev targets")))}
 
   test
   {:doc "Run all unit tests"

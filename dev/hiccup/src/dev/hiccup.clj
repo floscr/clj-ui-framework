@@ -466,6 +466,7 @@
           [:style (h/raw "html, body { margin: 0; padding: 0; }")]
           [:script (h/raw theme-persistence-script)]]
          [:body
+          [:script {:src "/theme-adapter.js" :defer true}]
           (sidebar/sidebar-layout {}
             (app-sidebar active-page port)
             (sidebar/sidebar-overlay {})
@@ -492,6 +493,11 @@
        :headers {"Content-Type" "text/css"}
        :body (slurp "dist/theme.css")}
 
+      (= path "/theme-adapter.js")
+      {:status 200
+       :headers {"Content-Type" "application/javascript"}
+       :body (slurp "dev/theme-adapter.js")}
+
       (resolve-page path)
       {:status 200
        :headers {"Content-Type" "text/html; charset=utf-8"}
@@ -505,4 +511,4 @@
 (defn start! [{:keys [port] :or {port 3003}}]
   (reset! !port port)
   (println (str "Hiccup server running at http://localhost:" port))
-  (http/run-server handler {:port port}))
+  (http/run-server #'handler {:port port}))
