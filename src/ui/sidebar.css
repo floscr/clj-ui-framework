@@ -150,20 +150,6 @@
   min-width: 0;
 }
 
-/* Scrollbar styling */
-.sidebar-content::-webkit-scrollbar {
-  width: 4px;
-}
-
-.sidebar-content::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.sidebar-content::-webkit-scrollbar-thumb {
-  background: var(--bg-2);
-  border-radius: 9999px;
-}
-
 /* ── Sidebar Group ─────────────────────────────────────────────── */
 
 .sidebar-group {
