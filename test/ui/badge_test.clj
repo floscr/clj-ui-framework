@@ -31,6 +31,14 @@
     (let [result (badge/badge {:class "extra"} "X")]
       (is (= "badge extra" (get-in result [1 :class]))))))
 
+(deftest badge-size-test
+  (testing "sm size adds badge-sm class"
+    (is (= ["badge" "badge-sm"] (badge/badge-class-list {:size :sm}))))
+  (testing "sm size with variant"
+    (is (= ["badge" "badge-danger" "badge-sm"] (badge/badge-class-list {:variant :danger :size :sm}))))
+  (testing "no size specified"
+    (is (= ["badge"] (badge/badge-class-list {})))))
+
 (deftest badge-icon-test
   (testing "badge with icon-name renders icon before text"
     (let [result (badge/badge {:icon-name :check} "Done")]
