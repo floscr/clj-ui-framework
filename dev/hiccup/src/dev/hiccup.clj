@@ -21,7 +21,9 @@
             [ui.form :as form]
             [ui.sidebar :as sidebar]
             [ui.icon :as icon]
-            [ui.separator :as separator]))
+            [ui.separator :as separator]
+            [ui.calendar :as calendar]
+            [ui.calendar-events :as cal-events]))
 
 ;; ── Query Params ────────────────────────────────────────────────────
 
@@ -314,6 +316,51 @@
      (form/form-field {:label "Email" :error "Please enter a valid email address."}
        (form/form-input {:type :email :error true :value "invalid-email"}))]))
 
+(def sample-calendar-events
+  [{:title "Team standup"     :date "2026-03-29" :time-start "09:00" :time-end "09:30" :color :accent}
+   {:title "Lunch with Alex"  :date "2026-03-29" :time-start "12:00" :time-end "13:00" :color :success}
+   {:title "Deploy v2.0"      :date "2026-03-29" :time-start "15:00" :color :danger}
+   {:title "Design review"    :date "2026-03-30" :time-start "10:00" :color :warning}
+   {:title "All-day planning" :date "2026-03-31" :color nil :done? true}
+   {:title "Sprint retro"     :date "2026-04-01" :time-start "14:00" :time-end "15:00" :color :accent}
+   {:title "1:1 with manager" :date "2026-04-02" :time-start "11:00" :color :success}
+   {:title "Release party"    :date "2026-04-03" :time-start "17:00" :color :danger}])
+
+(defn calendar-demo []
+  (section "Calendar"
+    [:h5 "Date Picker"]
+    [:div {:style "display: flex; gap: 1.5rem; flex-wrap: wrap;"}
+     (calendar/calendar {:year 2026 :month 3 :today-str "2026-03-29"
+                          :selected-date "2026-03-29"})
+     (calendar/calendar {:year 2026 :month 4 :today-str "2026-03-29"})]
+
+    [:h5 "Event Grid"]
+    (cal-events/calendar-event-grid {:year 2026 :month 3 :today-str "2026-03-29"
+                                      :selected-date "2026-03-29"
+                                      :events sample-calendar-events})
+
+    [:h5 "Day Ticker"]
+    (cal-events/ticker-strip {:days [{:date "2026-03-27" :day-num 27 :day-label "Fr"}
+                                      {:date "2026-03-28" :day-num 28 :day-label "Sa"}
+                                      {:date "2026-03-29" :day-num 29 :day-label "Su"}
+                                      {:date "2026-03-30" :day-num 30 :day-label "Mo"}
+                                      {:date "2026-03-31" :day-num 31 :day-label "Tu"}
+                                      {:date "2026-04-01" :day-num 1  :day-label "We"}
+                                      {:date "2026-04-02" :day-num 2  :day-label "Th"}
+                                      {:date "2026-04-03" :day-num 3  :day-label "Fr"}]
+                               :today-str "2026-03-29"
+                               :selected "2026-03-29"
+                               :events sample-calendar-events})
+
+    [:h5 "Agenda List"]
+    (cal-events/agenda-list {:days [{:date "2026-03-29" :label "Today"}
+                                     {:date "2026-03-30" :label "Tomorrow"}
+                                     {:date "2026-03-31" :label "Tue"}
+                                     {:date "2026-04-01" :label "Wed"}
+                                     {:date "2026-04-02" :label "Thu"}
+                                     {:date "2026-04-03" :label "Fri"}]
+                              :events sample-calendar-events})))
+
 ;; ── Pages ───────────────────────────────────────────────────────────
 
 (defn page-header [title subtitle]
@@ -361,6 +408,11 @@
     [:alert-triangle :alert-circle :info :circle-check :circle-x]]
    ["Dev & Technical"
     [:code :terminal :database :globe :shield :zap :book-open :map-pin]]])
+
+(defn calendar-page []
+  [:div
+   (page-header "Calendar" "Date picker, event grid, ticker strip, and agenda list.")
+   (calendar-demo)])
 
 (defn icons-page []
   [:div
@@ -454,14 +506,16 @@
 
 (def nav-items
   [{:id :components :label "Components"  :icon-name :package    :href "/"}
+   {:id :calendar   :label "Calendar"    :icon-name :calendar   :href "/calendar"}
    {:id :icons      :label "Icons"       :icon-name :image      :href "/icons"}
    {:id :sidebar    :label "Sidebar"     :icon-name :layout-dashboard :href "/sidebar"}])
 
 (defn resolve-page [uri]
   (case uri
-    "/"         :components
-    "/icons"    :icons
-    "/sidebar"  :sidebar
+    "/"          :components
+    "/calendar"  :calendar
+    "/icons"     :icons
+    "/sidebar"   :sidebar
     nil))
 
 ;; ── App Shell ───────────────────────────────────────────────────────
@@ -549,6 +603,7 @@
                 (sidebar/sidebar-mobile-toggle {})]
                (case active-page
                  :components (components-page)
+                 :calendar   (calendar-page)
                  :icons      (icons-page)
                  :sidebar    (sidebar-page)
                  [:div (page-header "Not Found" "This page doesn't exist.")])]))]]))))

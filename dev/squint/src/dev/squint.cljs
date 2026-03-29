@@ -17,7 +17,9 @@
             [ui.form :as form]
             [ui.sidebar :as sidebar]
             [ui.icon :as icon]
-            [ui.separator :as separator]))
+            [ui.separator :as separator]
+            [ui.calendar :as calendar]
+            [ui.calendar-events :as cal-events]))
 
 ;; ── State ───────────────────────────────────────────────────────────
 
@@ -294,6 +296,86 @@
      (form/form-field {:label "Email" :error "Please enter a valid email address."}
        (form/form-input {:type "email" :error true :value "invalid-email"}))]))
 
+(def !cal-state (atom {:year 2026 :month 3 :selected-date nil}))
+
+(def sample-calendar-events
+  [{:title "Team standup"     :date "2026-03-29" :time-start "09:00" :time-end "09:30" :color "accent"}
+   {:title "Lunch with Alex"  :date "2026-03-29" :time-start "12:00" :time-end "13:00" :color "success"}
+   {:title "Deploy v2.0"      :date "2026-03-29" :time-start "15:00" :color "danger"}
+   {:title "Design review"    :date "2026-03-30" :time-start "10:00" :color "warning"}
+   {:title "All-day planning" :date "2026-03-31" :color nil :done? true}
+   {:title "Sprint retro"     :date "2026-04-01" :time-start "14:00" :time-end "15:00" :color "accent"}
+   {:title "1:1 with manager" :date "2026-04-02" :time-start "11:00" :color "success"}
+   {:title "Release party"    :date "2026-04-03" :time-start "17:00" :color "danger"}])
+
+(defn calendar-demo []
+  (let [{:keys [year month selected-date]} @!cal-state
+        today-str "2026-03-29"]
+    (section "Calendar"
+      [:h5 "Date Picker (interactive)"]
+      [:div {:style {"display" "flex" "gap" "1.5rem" "flex-wrap" "wrap"}}
+       (calendar/calendar {:year year :month month
+                           :today-str today-str
+                           :selected-date selected-date
+                           :on-select (fn [d]
+                                        (swap! !cal-state assoc :selected-date d)
+                                        (render!))
+                           :on-prev-month (fn [_]
+                                            (let [[ny nm] (calendar/prev-month year month)]
+                                              (swap! !cal-state assoc :year ny :month nm)
+                                              (render!)))
+                           :on-next-month (fn [_]
+                                            (let [[ny nm] (calendar/next-month year month)]
+                                              (swap! !cal-state assoc :year ny :month nm)
+                                              (render!)))})]
+      (when selected-date
+        [:p {:style {"color" "var(--fg-1)" "font-size" "var(--font-sm)"}}
+         (str "Selected: " selected-date)])
+
+      [:h5 "Event Grid"]
+      (cal-events/calendar-event-grid {:year year :month month
+                                        :today-str today-str
+                                        :selected-date selected-date
+                                        :events sample-calendar-events
+                                        :on-select (fn [d]
+                                                     (swap! !cal-state assoc :selected-date d)
+                                                     (render!))
+                                        :on-prev-month (fn [_]
+                                                         (let [[ny nm] (calendar/prev-month year month)]
+                                                           (swap! !cal-state assoc :year ny :month nm)
+                                                           (render!)))
+                                        :on-next-month (fn [_]
+                                                         (let [[ny nm] (calendar/next-month year month)]
+                                                           (swap! !cal-state assoc :year ny :month nm)
+                                                           (render!)))
+                                        :on-event-click (fn [evt] (js/console.log "Event clicked:" (:title evt)))})
+
+      [:h5 "Day Ticker"]
+      (cal-events/ticker-strip {:days [{:date "2026-03-27" :day-num 27 :day-label "Fr"}
+                                        {:date "2026-03-28" :day-num 28 :day-label "Sa"}
+                                        {:date "2026-03-29" :day-num 29 :day-label "Su"}
+                                        {:date "2026-03-30" :day-num 30 :day-label "Mo"}
+                                        {:date "2026-03-31" :day-num 31 :day-label "Tu"}
+                                        {:date "2026-04-01" :day-num 1  :day-label "We"}
+                                        {:date "2026-04-02" :day-num 2  :day-label "Th"}
+                                        {:date "2026-04-03" :day-num 3  :day-label "Fr"}]
+                                 :today-str today-str
+                                 :selected (or selected-date today-str)
+                                 :events sample-calendar-events
+                                 :on-select (fn [d]
+                                              (swap! !cal-state assoc :selected-date d)
+                                              (render!))})
+
+      [:h5 "Agenda List"]
+      (cal-events/agenda-list {:days [{:date "2026-03-29" :label "Today"}
+                                       {:date "2026-03-30" :label "Tomorrow"}
+                                       {:date "2026-03-31" :label "Tue"}
+                                       {:date "2026-04-01" :label "Wed"}
+                                       {:date "2026-04-02" :label "Thu"}
+                                       {:date "2026-04-03" :label "Fri"}]
+                                :events sample-calendar-events
+                                :on-event-click (fn [evt] (js/console.log "Agenda event:" (:title evt)))}))))
+
 ;; ── Pages ───────────────────────────────────────────────────────────
 
 (defn components-page []
@@ -350,6 +432,11 @@
     (section cat-name
       (into [:div {:style {"display" "grid" "grid-template-columns" "repeat(auto-fill, minmax(5rem, 1fr))" "gap" "var(--size-4)"}}]
             (map icon-card icons)))))
+
+(defn calendar-page []
+  [:div
+   (page-header "Calendar" "Date picker, event grid, ticker strip, and agenda list.")
+   (calendar-demo)])
 
 (defn icons-page []
   [:div
@@ -435,6 +522,7 @@
 
 (def nav-items
   [{:id "components" :label "Components"  :icon-name "package"}
+   {:id "calendar"   :label "Calendar"    :icon-name "calendar"}
    {:id "icons"      :label "Icons"       :icon-name "image"}
    {:id "sidebar"    :label "Sidebar"     :icon-name "layout-dashboard"}])
 
@@ -519,6 +607,7 @@
           (sidebar/sidebar-mobile-toggle {:on-click toggle-sidebar!})]
          (case active-page
            "components" (components-page)
+           "calendar"   (calendar-page)
            "icons"      (icons-page)
            "sidebar"    (sidebar-page)
            (components-page))]))))

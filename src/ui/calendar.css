@@ -1,0 +1,138 @@
+/* ── Calendar ─────────────────────────────────────────────────────── */
+/* Date picker inspired by shadcn/radix Calendar component.         */
+
+.cal {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-1);
+  border: var(--border-0);
+  border-radius: var(--radius-md);
+  padding: var(--size-3);
+  width: fit-content;
+}
+
+/* ── Navigation ──────────────────────────────────────────────────── */
+
+.cal-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: var(--size-2);
+}
+
+.cal-nav-title {
+  font-size: var(--font-sm);
+  font-weight: 600;
+  color: var(--fg-0);
+  text-align: center;
+  flex: 1;
+}
+
+.cal-nav-btn {
+  flex-shrink: 0;
+}
+
+/* ── Weekday Headers ─────────────────────────────────────────────── */
+
+.cal-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: var(--size-1);
+}
+
+.cal-weekday {
+  text-align: center;
+  padding: var(--size-1) 0;
+  font-size: var(--font-xs);
+  font-weight: 500;
+  color: var(--fg-2);
+  user-select: none;
+}
+
+/* ── Day Grid ────────────────────────────────────────────────────── */
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: var(--size-1);
+}
+
+/* ── Day Cell (Picker) ───────────────────────────────────────────── */
+
+.cal-day {
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: var(--fg-0);
+  font-family: inherit;
+  font-size: var(--font-sm);
+  font-weight: 400;
+  width: var(--size-9);
+  height: var(--size-9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  position: relative;
+}
+
+.cal-day:hover:not(:disabled):not(.cal-day-selected) {
+  background: var(--bg-2);
+}
+
+.cal-day:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.cal-day-number {
+  position: relative;
+  z-index: 1;
+  line-height: 1;
+}
+
+/* Outside month days */
+.cal-day-outside {
+  color: var(--fg-2);
+  opacity: 0.5;
+}
+
+.cal-day-outside:hover:not(:disabled) {
+  opacity: 0.7;
+}
+
+/* Today highlight */
+.cal-day-today {
+  font-weight: 600;
+  background: var(--bg-2);
+}
+
+/* Selected day */
+.cal-day-selected {
+  background: var(--accent);
+  color: var(--fg-on-accent);
+  font-weight: 600;
+}
+
+.cal-day-selected:hover:not(:disabled) {
+  background: var(--accent);
+  filter: brightness(1.1);
+}
+
+/* Today + Selected */
+.cal-day-today.cal-day-selected {
+  background: var(--accent);
+  color: var(--fg-on-accent);
+}
+
+/* Disabled */
+.cal-day-disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.cal-day-disabled:hover {
+  background: transparent;
+}

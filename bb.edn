@@ -48,6 +48,8 @@
               [ui.sidebar-test]
               [ui.chip-test]
               [ui.separator-test]
+              [ui.calendar-test]
+              [ui.calendar-events-test]
               [ui.theme-test])
    :task (let [{:keys [fail error]} (t/run-tests
                                       'ui.button-test
@@ -69,6 +71,8 @@
                                       'ui.sidebar-test
                                       'ui.chip-test
                                       'ui.separator-test
+                                      'ui.calendar-test
+                                      'ui.calendar-events-test
                                       'ui.theme-test)]
            (when (pos? (+ fail error))
              (System/exit 1)))}
