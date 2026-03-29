@@ -1,9 +1,7 @@
 (ns ui.calendar-events
   "Event-aware calendar components. See src/ui/calendar.md for full documentation."
   (:require [clojure.string :as str]
-            [ui.calendar :as cal]
-            [ui.button :as button]
-            [ui.icon :as icon]))
+            [ui.calendar :as cal]))
 
 ;; In squint, keywords are strings — name is identity
 #?(:squint (defn- kw-name [s] s)
@@ -18,8 +16,6 @@
 ;;   :time-end   - "HH:MM" string or nil
 ;;   :color      - :accent, :danger, :success, :warning, or nil (default)
 ;;   :done?      - boolean
-;;   :tags       - vector of strings (optional)
-;;   :source     - string (optional, e.g. file/calendar name)
 
 (def event-colors #{"accent" "danger" "success" "warning"})
 
@@ -98,259 +94,7 @@
   [opts]
   (str/join " " (agenda-event-class-list opts)))
 
-(defn view-toggle-class-list
-  "Returns a vector of CSS class strings for a view toggle button.
-   Options:
-     :active? - boolean"
-  [{:keys [active?]}]
-  (cond-> ["cal-view-btn"]
-    active? (conj "cal-view-btn-active")))
-
-(defn view-toggle-classes [opts]
-  (str/join " " (view-toggle-class-list opts)))
-
-(defn source-toggle-class-list
-  "Returns a vector of CSS class strings for a source filter toggle.
-   Options:
-     :color   - event color keyword
-     :active? - boolean (visible)"
-  [{:keys [color active?]}]
-  (cond-> ["cal-source-toggle" (event-color-class color)]
-    (not active?) (conj "cal-source-inactive")))
-
-(defn source-toggle-classes [opts]
-  (str/join " " (source-toggle-class-list opts)))
-
 ;; ── Components ──────────────────────────────────────────────────────
-
-;; ── View Toggle ─────────────────────────────────────────────────────
-
-(defn view-toggle
-  "Render a Grid/Agenda view toggle.
-
-   Props:
-     :view      - current view (:month or :agenda)
-     :on-change - callback fn, receives the new view keyword
-     :class     - additional CSS classes
-     :attrs     - additional HTML attributes"
-  [{:keys [view on-change class attrs]}]
-  (let [v (kw-name (or view #?(:squint "month" :cljs :month :clj :month)))]
-    #?(:squint
-       (let [classes (cond-> "cal-view-toggle" class (str " " class))
-             base-attrs (merge {:class classes} attrs)]
-         [:div base-attrs
-          [:button {:class (view-toggle-classes {:active? (= v "month")})
-                    :on-click (when on-change (fn [_] (on-change "month")))}
-           "Grid"]
-          [:button {:class (view-toggle-classes {:active? (= v "agenda")})
-                    :on-click (when on-change (fn [_] (on-change "agenda")))}
-           "Agenda"]])
-
-       :cljs
-       (let [classes (cond-> ["cal-view-toggle"] class (conj class))
-             base-attrs (merge {:class classes} attrs)]
-         [:div base-attrs
-          [:button {:class (view-toggle-class-list {:active? (= v "month")})
-                    :on (when on-change {:click (fn [_] (on-change :month))})}
-           "Grid"]
-          [:button {:class (view-toggle-class-list {:active? (= v "agenda")})
-                    :on (when on-change {:click (fn [_] (on-change :agenda))})}
-           "Agenda"]])
-
-       :clj
-       (let [classes (cond-> "cal-view-toggle" class (str " " class))
-             base-attrs (merge {:class classes} attrs)]
-         [:div base-attrs
-          [:button {:class (view-toggle-classes {:active? (= v "month")})} "Grid"]
-          [:button {:class (view-toggle-classes {:active? (= v "agenda")})} "Agenda"]]))))
-
-;; ── Loading Indicator ───────────────────────────────────────────────
-
-(defn loading-indicator
-  "Render a small pulsing dot to indicate loading state."
-  []
-  #?(:squint [:div {:class "cal-loading"}]
-     :cljs   [:div {:class ["cal-loading"]}]
-     :clj    [:div {:class "cal-loading"}]))
-
-;; ── Error Banner ────────────────────────────────────────────────────
-
-(defn error-banner
-  "Render an error banner at the top of the calendar.
-
-   Props:
-     :message    - error message string
-     :on-dismiss - callback to dismiss the error"
-  [{:keys [message on-dismiss]}]
-  (when message
-    #?(:squint
-       [:div {:class "cal-error-banner"}
-        [:span (str "Error: " message)]
-        (when on-dismiss
-          [:button {:class "cal-error-dismiss" :on-click on-dismiss} "\u00d7"])]
-
-       :cljs
-       [:div {:class ["cal-error-banner"]}
-        [:span (str "Error: " message)]
-        (when on-dismiss
-          [:button {:class ["cal-error-dismiss"]
-                    :on {:click on-dismiss}} "\u00d7"])]
-
-       :clj
-       [:div {:class "cal-error-banner"}
-        [:span (str "Error: " message)]
-        [:button {:class "cal-error-dismiss"} "\u00d7"]])))
-
-;; ── Source Filter Toggles ───────────────────────────────────────────
-
-(defn source-toggles
-  "Render a row of source filter toggle buttons.
-
-   Props:
-     :sources  - vector of {:name :color :active?} maps
-     :on-toggle - callback fn, receives source name string
-     :class     - additional CSS classes
-     :attrs     - additional HTML attributes"
-  [{:keys [sources on-toggle class attrs]}]
-  (when (seq sources)
-    #?(:squint
-       (let [classes (cond-> "cal-source-toggles" class (str " " class))
-             base-attrs (merge {:class classes} attrs)]
-         (into [:div base-attrs]
-               (map (fn [src]
-                      [:button {:class (source-toggle-classes {:color (:color src) :active? (:active? src)})
-                                :on-click (when on-toggle (fn [_] (on-toggle (:name src))))}
-                       (:name src)])
-                    sources)))
-
-       :cljs
-       (let [classes (cond-> ["cal-source-toggles"] class (conj class))
-             base-attrs (merge {:class classes} attrs)]
-         (into [:div base-attrs]
-               (map (fn [src]
-                      [:button {:class (source-toggle-class-list {:color (:color src) :active? (:active? src)})
-                                :on (when on-toggle {:click (fn [_] (on-toggle (:name src)))})}
-                       (:name src)])
-                    sources)))
-
-       :clj
-       (let [classes (cond-> "cal-source-toggles" class (str " " class))
-             base-attrs (merge {:class classes} attrs)]
-         (into [:div base-attrs]
-               (map (fn [src]
-                      [:button {:class (source-toggle-classes {:color (:color src) :active? (:active? src)})}
-                       (:name src)])
-                    sources))))))
-
-;; ── Event Detail Dialog ─────────────────────────────────────────────
-
-(defn event-detail-dialog
-  "Render an event detail overlay/dialog.
-
-   Props:
-     :event      - event map (nil to hide)
-     :on-close   - callback to close the dialog
-     :class      - additional CSS classes
-     :attrs      - additional HTML attributes"
-  [{:keys [event on-close class attrs]}]
-  (when event
-    (let [title    (:title event)
-          done?    (:done? event)
-          tags     (or (:tags event) [])
-          source   (:source event)
-          color    (:color event)
-          time-str (event-time-display event)
-          date     (:date event)]
-      #?(:squint
-         [:div {:class "cal-detail-overlay"
-                :on-click on-close}
-          [:div {:class (str "cal-detail " (event-color-class color)
-                             (when class (str " " class)))
-                 :on-click (fn [e] (.stopPropagation e))}
-           [:div {:class "cal-detail-header"}
-            [:div {:class "cal-detail-title"}
-             (when done? [:span {:class "cal-detail-badge"} "DONE"])
-             title]
-            [:button {:class "cal-detail-close" :on-click on-close} "\u00d7"]]
-           [:div {:class "cal-detail-body"}
-            (when date
-              [:div {:class "cal-detail-row"}
-               [:span {:class "cal-detail-label"} "Date"]
-               [:span {:class "cal-detail-value"} (str/replace date "-" "/")]])
-            (when time-str
-              [:div {:class "cal-detail-row"}
-               [:span {:class "cal-detail-label"} "Time"]
-               [:span {:class "cal-detail-value"} time-str]])
-            (when (seq tags)
-              [:div {:class "cal-detail-row"}
-               [:span {:class "cal-detail-label"} "Tags"]
-               (into [:div {:class "cal-detail-tags"}]
-                     (map (fn [t] [:span {:class "cal-detail-tag"} t]) tags))])
-            (when source
-              [:div {:class "cal-detail-row"}
-               [:span {:class "cal-detail-label"} "Source"]
-               [:span {:class "cal-detail-value"} source]])]]]
-
-         :cljs
-         [:div {:class ["cal-detail-overlay"]
-                :on {:click on-close}}
-          [:div {:class [(str "cal-detail " (event-color-class color))
-                         (when class class)]
-                 :on {:click (fn [e] (.stopPropagation e))}}
-           [:div {:class ["cal-detail-header"]}
-            [:div {:class ["cal-detail-title"]}
-             (when done? [:span {:class ["cal-detail-badge"]} "DONE"])
-             title]
-            [:button {:class ["cal-detail-close"]
-                      :on {:click on-close}} "\u00d7"]]
-           [:div {:class ["cal-detail-body"]}
-            (when date
-              [:div {:class ["cal-detail-row"]}
-               [:span {:class ["cal-detail-label"]} "Date"]
-               [:span {:class ["cal-detail-value"]} (str/replace date "-" "/")]])
-            (when time-str
-              [:div {:class ["cal-detail-row"]}
-               [:span {:class ["cal-detail-label"]} "Time"]
-               [:span {:class ["cal-detail-value"]} time-str]])
-            (when (seq tags)
-              [:div {:class ["cal-detail-row"]}
-               [:span {:class ["cal-detail-label"]} "Tags"]
-               (into [:div {:class ["cal-detail-tags"]}]
-                     (map (fn [t] [:span {:class ["cal-detail-tag"]} t]) tags))])
-            (when source
-              [:div {:class ["cal-detail-row"]}
-               [:span {:class ["cal-detail-label"]} "Source"]
-               [:span {:class ["cal-detail-value"]} source]])]]]
-
-         :clj
-         [:div {:class "cal-detail-overlay"}
-          [:div {:class (str "cal-detail " (event-color-class color)
-                             (when class (str " " class)))}
-           [:div {:class "cal-detail-header"}
-            [:div {:class "cal-detail-title"}
-             (when done? [:span {:class "cal-detail-badge"} "DONE"])
-             title]
-            [:button {:class "cal-detail-close"} "\u00d7"]]
-           [:div {:class "cal-detail-body"}
-            (when date
-              [:div {:class "cal-detail-row"}
-               [:span {:class "cal-detail-label"} "Date"]
-               [:span {:class "cal-detail-value"} (str/replace date "-" "/")]])
-            (when time-str
-              [:div {:class "cal-detail-row"}
-               [:span {:class "cal-detail-label"} "Time"]
-               [:span {:class "cal-detail-value"} time-str]])
-            (when (seq tags)
-              [:div {:class "cal-detail-row"}
-               [:span {:class "cal-detail-label"} "Tags"]
-               (into [:div {:class "cal-detail-tags"}]
-                     (map (fn [t] [:span {:class "cal-detail-tag"} t]) tags))])
-            (when source
-              [:div {:class "cal-detail-row"}
-               [:span {:class "cal-detail-label"} "Source"]
-               [:span {:class "cal-detail-value"} source]])]]]))))
-
-;; ── Event Pill ──────────────────────────────────────────────────────
 
 (defn event-pill
   "Render a small event chip for use inside calendar day cells.
@@ -388,8 +132,6 @@
         (when time-str
           [:span {:class "cal-event-time"} time-str])
         [:span {:class "cal-event-title"} title]])))
-
-;; ── Event Day Cell ──────────────────────────────────────────────────
 
 (defn event-day-cell
   "Render a day cell with event pills for the calendar event grid.
@@ -451,8 +193,6 @@
                (when (pos? overflow)
                  [[:div {:class "cal-event-more"} (str "+" overflow " more")]])))])))
 
-;; ── Calendar Event Grid ─────────────────────────────────────────────
-
 (defn calendar-event-grid
   "Render a month grid calendar with events displayed in day cells.
 
@@ -467,32 +207,19 @@
      :on-next-month  - callback for next month nav
      :on-event-click - callback for event click
      :max-visible    - max events per cell (default 3)
-     :loading?       - show loading indicator
-     :header-actions - extra hiccup to render in header right side
      :class          - additional CSS classes
      :attrs          - additional HTML attributes"
   [{:keys [year month today-str selected-date events on-select
            on-prev-month on-next-month on-event-click max-visible
-           loading? header-actions class attrs]}]
+           class attrs]}]
   (let [days (cal/calendar-days year month)]
     #?(:squint
        (let [classes (cond-> "cal cal-has-events" class (str " " class))
              base-attrs (merge {:class classes} attrs)]
          [:div base-attrs
-          [:div {:class "cal-nav"}
-           (button/button {:variant "ghost" :icon "chevron-left" :size "sm"
-                           :on-click on-prev-month
-                           :class "cal-nav-btn"
-                           :attrs {:aria-label "Previous month"}})
-           [:div {:class "cal-nav-title"}
-            (str (cal/month-name month) " " year)
-            (when loading? (loading-indicator))]
-           [:div {:class "cal-nav-actions"}
-            header-actions
-            (button/button {:variant "ghost" :icon "chevron-right" :size "sm"
-                            :on-click on-next-month
-                            :class "cal-nav-btn"
-                            :attrs {:aria-label "Next month"}})]]
+          (cal/calendar-header {:year year :month month
+                                :on-prev-month on-prev-month
+                                :on-next-month on-next-month})
           (cal/calendar-weekdays {})
           (into [:div {:class "cal-grid cal-grid-events"}]
                 (map (fn [day-info]
@@ -510,20 +237,9 @@
              classes (cond-> cls class (conj class))
              base-attrs (merge {:class classes} attrs)]
          [:div base-attrs
-          [:div {:class ["cal-nav"]}
-           (button/button {:variant :ghost :icon :chevron-left :size :sm
-                           :on-click on-prev-month
-                           :class "cal-nav-btn"
-                           :attrs {:aria-label "Previous month"}})
-           [:div {:class ["cal-nav-title"]}
-            (str (cal/month-name month) " " year)
-            (when loading? (loading-indicator))]
-           [:div {:class ["cal-nav-actions"]}
-            header-actions
-            (button/button {:variant :ghost :icon :chevron-right :size :sm
-                            :on-click on-next-month
-                            :class "cal-nav-btn"
-                            :attrs {:aria-label "Next month"}})]]
+          (cal/calendar-header {:year year :month month
+                                :on-prev-month on-prev-month
+                                :on-next-month on-next-month})
           (cal/calendar-weekdays {})
           (into [:div {:class ["cal-grid" "cal-grid-events"]}]
                 (map (fn [day-info]
@@ -540,18 +256,7 @@
        (let [classes (cond-> "cal cal-has-events" class (str " " class))
              base-attrs (merge {:class classes} attrs)]
          [:div base-attrs
-          [:div {:class "cal-nav"}
-           (button/button {:variant :ghost :icon :chevron-left :size :sm
-                           :class "cal-nav-btn"
-                           :attrs {:aria-label "Previous month"}})
-           [:div {:class "cal-nav-title"}
-            (str (cal/month-name month) " " year)
-            (when loading? (loading-indicator))]
-           [:div {:class "cal-nav-actions"}
-            header-actions
-            (button/button {:variant :ghost :icon :chevron-right :size :sm
-                            :class "cal-nav-btn"
-                            :attrs {:aria-label "Next month"}})]]
+          (cal/calendar-header {:year year :month month})
           (cal/calendar-weekdays {})
           (into [:div {:class "cal-grid cal-grid-events"}]
                 (map (fn [day-info]
@@ -616,8 +321,12 @@
               (map (fn [evt] (ticker-dot {:event evt}))
                    (take 4 day-evts)))])))
 
+(def ^:private weekday-short-names
+  ["Mon" "Tue" "Wed" "Thu" "Fri" "Sat" "Sun"])
+
 (defn ticker-strip
   "Render a horizontal scrollable day ticker strip.
+   Shows days from the given list with event dot indicators.
 
    Props:
      :days       - vector of {:date :day-num :day-label} maps
@@ -715,21 +424,18 @@
   "Render a day group in the agenda list with header and event rows.
 
    Props:
-     :date           - YYYY-MM-DD string
-     :label          - display label (e.g. 'Today', 'Tomorrow', 'Mon')
-     :events         - all events (filtered internally)
-     :on-event-click - callback for event click
-     :day-actions    - extra hiccup to render in the day header (e.g. add button)"
-  [{:keys [date label events on-event-click day-actions]}]
+     :date       - YYYY-MM-DD string
+     :label      - display label (e.g. 'Today', 'Tomorrow', 'Mon')
+     :events     - all events (filtered internally)
+     :on-event-click - callback for event click"
+  [{:keys [date label events on-event-click]}]
   (let [day-evts (events-for-date events date)]
     (when (seq day-evts)
       #?(:squint
          [:div {:class "cal-agenda-day-group"}
           [:div {:class "cal-agenda-day-header"}
-           [:div {:class "cal-agenda-day-header-left"}
-            [:span {:class "cal-agenda-day-label"} label]
-            [:span {:class "cal-agenda-day-date"} (str/replace date "-" "/")]]
-           (when day-actions day-actions)]
+           [:span {:class "cal-agenda-day-label"} label]
+           [:span {:class "cal-agenda-day-date"} (str/replace date "-" "/")]]
           (into [:div {:class "cal-agenda-day-events"}]
                 (map (fn [evt]
                        (agenda-event-row {:event evt :on-click on-event-click}))
@@ -738,10 +444,8 @@
          :cljs
          [:div {:class ["cal-agenda-day-group"]}
           [:div {:class ["cal-agenda-day-header"]}
-           [:div {:class ["cal-agenda-day-header-left"]}
-            [:span {:class ["cal-agenda-day-label"]} label]
-            [:span {:class ["cal-agenda-day-date"]} (str/replace date "-" "/")]]
-           (when day-actions day-actions)]
+           [:span {:class ["cal-agenda-day-label"]} label]
+           [:span {:class ["cal-agenda-day-date"]} (str/replace date "-" "/")]]
           (into [:div {:class ["cal-agenda-day-events"]}]
                 (map (fn [evt]
                        (agenda-event-row {:event evt :on-click on-event-click}))
@@ -750,10 +454,8 @@
          :clj
          [:div {:class "cal-agenda-day-group"}
           [:div {:class "cal-agenda-day-header"}
-           [:div {:class "cal-agenda-day-header-left"}
-            [:span {:class "cal-agenda-day-label"} label]
-            [:span {:class "cal-agenda-day-date"} (str/replace date "-" "/")]]
-           (when day-actions day-actions)]
+           [:span {:class "cal-agenda-day-label"} label]
+           [:span {:class "cal-agenda-day-date"} (str/replace date "-" "/")]]
           (into [:div {:class "cal-agenda-day-events"}]
                 (map (fn [evt]
                        (agenda-event-row {:event evt}))
@@ -766,17 +468,14 @@
      :days           - vector of {:date :label} maps for days to show
      :events         - all events
      :on-event-click - callback for event click
-     :day-actions-fn - (fn [date-str] hiccup) — optional, renders action slot per day header
      :class          - additional CSS classes
      :attrs          - additional HTML attributes"
-  [{:keys [days events on-event-click day-actions-fn class attrs]}]
+  [{:keys [days events on-event-click class attrs]}]
   (let [groups (keep (fn [d]
                        (agenda-day-group {:date (:date d)
                                           :label (:label d)
                                           :events events
-                                          :on-event-click on-event-click
-                                          :day-actions (when day-actions-fn
-                                                         (day-actions-fn (:date d)))}))
+                                          :on-event-click on-event-click}))
                      days)
         empty? (not (seq groups))]
     #?(:squint

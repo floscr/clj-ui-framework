@@ -75,60 +75,6 @@ Vertical list of events grouped by day.
    :on-event-click (fn [event-map] ...)})
 ```
 
-## View Toggle
-
-A segmented control to switch between Grid and Agenda views:
-
-```clojure
-(cal-events/view-toggle
-  {:view :month          ;; :month or :agenda
-   :on-change (fn [new-view] ...)})
-```
-
-## Source Filter Toggles
-
-Colored pill buttons to show/hide event sources:
-
-```clojure
-(cal-events/source-toggles
-  {:sources [{:name "Work" :color :accent :active? true}
-             {:name "Personal" :color :success :active? false}]
-   :on-toggle (fn [source-name] ...)})
-```
-
-## Event Detail Dialog
-
-An overlay dialog showing event details (date, time, tags, source):
-
-```clojure
-(cal-events/event-detail-dialog
-  {:event {:title "Meeting" :date "2026-03-29" :time-start "10:00"
-           :color :accent :tags ["work"] :source "Work Calendar"}
-   :on-close (fn [] ...)})
-```
-
-## Error Banner
-
-A dismissible error bar at the top of the calendar:
-
-```clojure
-(cal-events/error-banner
-  {:message "Failed to fetch events"
-   :on-dismiss (fn [_] ...)})
-```
-
-## Loading Indicator
-
-A pulsing dot for loading state, placed inline in the header:
-
-```clojure
-(cal-events/loading-indicator)
-```
-
-## Event Colors
-
-Colors map to the theme's semantic tokens and support dark mode automatically: `:accent`, `:danger`, `:success`, `:warning`. Pass `nil` for the default gray.
-
 ## Event Data Format
 
 Events are plain maps:
@@ -139,10 +85,12 @@ Events are plain maps:
  :time-start "09:00"          ;; HH:MM or nil
  :time-end   "09:30"          ;; HH:MM or nil
  :color      :accent          ;; :accent :danger :success :warning or nil
- :done?      false
- :tags       ["work" "daily"] ;; optional, shown in detail dialog
- :source     "Work Calendar"} ;; optional, shown in detail dialog
+ :done?      false}
 ```
+
+## Event Colors
+
+Colors map to the theme's semantic tokens and support dark mode automatically: `:accent`, `:danger`, `:success`, `:warning`. Pass `nil` for the default gray.
 
 ## Date Utilities
 

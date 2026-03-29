@@ -297,99 +297,85 @@
      (form/form-field {:label "Email" :error "Please enter a valid email address."}
        (form/form-input {:type "email" :error true :value "invalid-email"}))]))
 
-(def !cal-state (atom {:year 2026 :month 3 :selected-date nil
-                       :view "month" :selected-event nil :error nil}))
+(def !cal-state (atom {:year 2026 :month 3 :selected-date nil}))
 
 (def sample-calendar-events
-  [{:title "Team standup"     :date "2026-03-29" :time-start "09:00" :time-end "09:30" :color "accent" :tags ["work"] :source "Work"}
-   {:title "Lunch with Alex"  :date "2026-03-29" :time-start "12:00" :time-end "13:00" :color "success" :tags ["social"] :source "Personal"}
-   {:title "Deploy v2.0"      :date "2026-03-29" :time-start "15:00" :color "danger" :tags ["ops" "urgent"] :source "Work"}
-   {:title "Design review"    :date "2026-03-30" :time-start "10:00" :color "warning" :tags ["design"] :source "Work"}
-   {:title "All-day planning" :date "2026-03-31" :color nil :done? true :source "Work"}
-   {:title "Sprint retro"     :date "2026-04-01" :time-start "14:00" :time-end "15:00" :color "accent" :source "Work"}
-   {:title "1:1 with manager" :date "2026-04-02" :time-start "11:00" :color "success" :source "Work"}
-   {:title "Release party"    :date "2026-04-03" :time-start "17:00" :color "danger" :tags ["social"] :source "Personal"}])
-
-(defn- nav! [key val]
-  (fn [_] (swap! !cal-state assoc key val) (render!)))
-
-(defn- prev-month! [_]
-  (let [{:keys [year month]} @!cal-state
-        [ny nm] (calendar/prev-month year month)]
-    (swap! !cal-state assoc :year ny :month nm)
-    (render!)))
-
-(defn- next-month! [_]
-  (let [{:keys [year month]} @!cal-state
-        [ny nm] (calendar/next-month year month)]
-    (swap! !cal-state assoc :year ny :month nm)
-    (render!)))
+  [{:title "Team standup"     :date "2026-03-29" :time-start "09:00" :time-end "09:30" :color "accent"}
+   {:title "Lunch with Alex"  :date "2026-03-29" :time-start "12:00" :time-end "13:00" :color "success"}
+   {:title "Deploy v2.0"      :date "2026-03-29" :time-start "15:00" :color "danger"}
+   {:title "Design review"    :date "2026-03-30" :time-start "10:00" :color "warning"}
+   {:title "All-day planning" :date "2026-03-31" :color nil :done? true}
+   {:title "Sprint retro"     :date "2026-04-01" :time-start "14:00" :time-end "15:00" :color "accent"}
+   {:title "1:1 with manager" :date "2026-04-02" :time-start "11:00" :color "success"}
+   {:title "Release party"    :date "2026-04-03" :time-start "17:00" :color "danger"}])
 
 (defn calendar-demo []
-  (let [{:keys [year month selected-date view selected-event error]} @!cal-state
+  (let [{:keys [year month selected-date]} @!cal-state
         today-str "2026-03-29"]
     (section "Calendar"
-      [:h5 "Date Picker"]
-      (calendar/calendar {:year year :month month
-                          :today-str today-str
-                          :selected-date selected-date
-                          :on-select (nav! :selected-date)
-                          :on-prev-month prev-month!
-                          :on-next-month next-month!})
+      [:h5 "Date Picker (interactive)"]
+      [:div {:style {"display" "flex" "gap" "1.5rem" "flex-wrap" "wrap"}}
+       (calendar/calendar {:year year :month month
+                           :today-str today-str
+                           :selected-date selected-date
+                           :on-select (fn [d]
+                                        (swap! !cal-state assoc :selected-date d)
+                                        (render!))
+                           :on-prev-month (fn [_]
+                                            (let [[ny nm] (calendar/prev-month year month)]
+                                              (swap! !cal-state assoc :year ny :month nm)
+                                              (render!)))
+                           :on-next-month (fn [_]
+                                            (let [[ny nm] (calendar/next-month year month)]
+                                              (swap! !cal-state assoc :year ny :month nm)
+                                              (render!)))})]
+      (when selected-date
+        [:p {:style {"color" "var(--fg-1)" "font-size" "var(--font-sm)"}}
+         (str "Selected: " selected-date)])
 
-      [:h5 "Full Calendar App"]
-      ;; Error banner
-      (cal-events/error-banner {:message error
-                                 :on-dismiss (nav! :error nil)})
+      [:h5 "Event Grid"]
+      (cal-events/calendar-event-grid {:year year :month month
+                                        :today-str today-str
+                                        :selected-date selected-date
+                                        :events sample-calendar-events
+                                        :on-select (fn [d]
+                                                     (swap! !cal-state assoc :selected-date d)
+                                                     (render!))
+                                        :on-prev-month (fn [_]
+                                                         (let [[ny nm] (calendar/prev-month year month)]
+                                                           (swap! !cal-state assoc :year ny :month nm)
+                                                           (render!)))
+                                        :on-next-month (fn [_]
+                                                         (let [[ny nm] (calendar/next-month year month)]
+                                                           (swap! !cal-state assoc :year ny :month nm)
+                                                           (render!)))
+                                        :on-event-click (fn [evt] (js/console.log "Event clicked:" (:title evt)))})
 
-      ;; Source toggles
-      (cal-events/source-toggles
-        {:sources [{:name "Work" :color "accent" :active? true}
-                   {:name "Personal" :color "success" :active? true}]
-         :on-toggle (fn [s] (js/console.log "Toggle source:" s))})
+      [:h5 "Day Ticker"]
+      (cal-events/ticker-strip {:days [{:date "2026-03-27" :day-num 27 :day-label "Fr"}
+                                        {:date "2026-03-28" :day-num 28 :day-label "Sa"}
+                                        {:date "2026-03-29" :day-num 29 :day-label "Su"}
+                                        {:date "2026-03-30" :day-num 30 :day-label "Mo"}
+                                        {:date "2026-03-31" :day-num 31 :day-label "Tu"}
+                                        {:date "2026-04-01" :day-num 1  :day-label "We"}
+                                        {:date "2026-04-02" :day-num 2  :day-label "Th"}
+                                        {:date "2026-04-03" :day-num 3  :day-label "Fr"}]
+                                 :today-str today-str
+                                 :selected (or selected-date today-str)
+                                 :events sample-calendar-events
+                                 :on-select (fn [d]
+                                              (swap! !cal-state assoc :selected-date d)
+                                              (render!))})
 
-      ;; View toggle + event grid / agenda
-      (if (= view "agenda")
-        [:div
-         (cal-events/ticker-strip {:days [{:date "2026-03-27" :day-num 27 :day-label "Fr"}
-                                           {:date "2026-03-28" :day-num 28 :day-label "Sa"}
-                                           {:date "2026-03-29" :day-num 29 :day-label "Su"}
-                                           {:date "2026-03-30" :day-num 30 :day-label "Mo"}
-                                           {:date "2026-03-31" :day-num 31 :day-label "Tu"}
-                                           {:date "2026-04-01" :day-num 1  :day-label "We"}
-                                           {:date "2026-04-02" :day-num 2  :day-label "Th"}
-                                           {:date "2026-04-03" :day-num 3  :day-label "Fr"}]
-                                    :today-str today-str
-                                    :selected (or selected-date today-str)
-                                    :events sample-calendar-events
-                                    :on-select (nav! :selected-date)})
-         (cal-events/agenda-list {:days [{:date "2026-03-29" :label "Today"}
-                                          {:date "2026-03-30" :label "Tomorrow"}
-                                          {:date "2026-03-31" :label "Tue"}
-                                          {:date "2026-04-01" :label "Wed"}
-                                          {:date "2026-04-02" :label "Thu"}
-                                          {:date "2026-04-03" :label "Fri"}]
-                                   :events sample-calendar-events
-                                   :on-event-click (fn [evt]
-                                                     (swap! !cal-state assoc :selected-event evt)
-                                                     (render!))})]
-        (cal-events/calendar-event-grid {:year year :month month
-                                          :today-str today-str
-                                          :selected-date selected-date
-                                          :events sample-calendar-events
-                                          :on-select (nav! :selected-date)
-                                          :on-prev-month prev-month!
-                                          :on-next-month next-month!
-                                          :on-event-click (fn [evt]
-                                                            (swap! !cal-state assoc :selected-event evt)
-                                                            (render!))
-                                          :header-actions (cal-events/view-toggle
-                                                            {:view view
-                                                             :on-change (nav! :view)})}))
-
-      ;; Event detail dialog
-      (cal-events/event-detail-dialog {:event selected-event
-                                        :on-close (fn [] (swap! !cal-state assoc :selected-event nil) (render!))}))))
+      [:h5 "Agenda List"]
+      (cal-events/agenda-list {:days [{:date "2026-03-29" :label "Today"}
+                                       {:date "2026-03-30" :label "Tomorrow"}
+                                       {:date "2026-03-31" :label "Tue"}
+                                       {:date "2026-04-01" :label "Wed"}
+                                       {:date "2026-04-02" :label "Thu"}
+                                       {:date "2026-04-03" :label "Fri"}]
+                                :events sample-calendar-events
+                                :on-event-click (fn [evt] (js/console.log "Agenda event:" (:title evt)))}))))
 
 ;; ── Pages ───────────────────────────────────────────────────────────
 
@@ -462,10 +448,10 @@
   (load-calendar-docs!)
   [:div
    (page-header "Calendar" "Date picker, event grid, ticker strip, and agenda list.")
-   (calendar-demo)
    (when-let [md @!calendar-docs]
      (into [:div {:class "md-docs"}]
-           (markdown/markdown->hiccup md)))])
+           (markdown/markdown->hiccup md)))
+   (calendar-demo)])
 
 (defn icons-page []
   [:div
