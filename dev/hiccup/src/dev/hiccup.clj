@@ -318,14 +318,14 @@
        (form/form-input {:type :email :error true :value "invalid-email"}))]))
 
 (def sample-calendar-events
-  [{:title "Team standup"     :date "2026-03-29" :time-start "09:00" :time-end "09:30" :color :accent}
-   {:title "Lunch with Alex"  :date "2026-03-29" :time-start "12:00" :time-end "13:00" :color :success}
-   {:title "Deploy v2.0"      :date "2026-03-29" :time-start "15:00" :color :danger}
-   {:title "Design review"    :date "2026-03-30" :time-start "10:00" :color :warning}
-   {:title "All-day planning" :date "2026-03-31" :color nil :done? true}
-   {:title "Sprint retro"     :date "2026-04-01" :time-start "14:00" :time-end "15:00" :color :accent}
-   {:title "1:1 with manager" :date "2026-04-02" :time-start "11:00" :color :success}
-   {:title "Release party"    :date "2026-04-03" :time-start "17:00" :color :danger}])
+  [{:title "Team standup"     :date "2026-03-29" :time-start "09:00" :time-end "09:30" :color :accent :tags ["work"] :source "Work"}
+   {:title "Lunch with Alex"  :date "2026-03-29" :time-start "12:00" :time-end "13:00" :color :success :tags ["social"] :source "Personal"}
+   {:title "Deploy v2.0"      :date "2026-03-29" :time-start "15:00" :color :danger :tags ["ops" "urgent"] :source "Work"}
+   {:title "Design review"    :date "2026-03-30" :time-start "10:00" :color :warning :tags ["design"] :source "Work"}
+   {:title "All-day planning" :date "2026-03-31" :color nil :done? true :source "Work"}
+   {:title "Sprint retro"     :date "2026-04-01" :time-start "14:00" :time-end "15:00" :color :accent :source "Work"}
+   {:title "1:1 with manager" :date "2026-04-02" :time-start "11:00" :color :success :source "Work"}
+   {:title "Release party"    :date "2026-04-03" :time-start "17:00" :color :danger :tags ["social"] :source "Personal"}])
 
 (defn calendar-demo []
   (section "Calendar"
@@ -335,12 +335,25 @@
                           :selected-date "2026-03-29"})
      (calendar/calendar {:year 2026 :month 4 :today-str "2026-03-29"})]
 
-    [:h5 "Event Grid"]
+    [:h5 "Full Calendar App"]
+
+    ;; Error banner
+    (cal-events/error-banner {:message "Could not fetch events (demo)"})
+
+    ;; Source toggles
+    (cal-events/source-toggles
+      {:sources [{:name "Work" :color :accent :active? true}
+                 {:name "Personal" :color :success :active? true}
+                 {:name "Inbox" :color :warning :active? false}]})
+
+    ;; Event grid with view toggle in header
     (cal-events/calendar-event-grid {:year 2026 :month 3 :today-str "2026-03-29"
                                       :selected-date "2026-03-29"
-                                      :events sample-calendar-events})
+                                      :events sample-calendar-events
+                                      :header-actions (cal-events/view-toggle {:view :month})})
 
-    [:h5 "Day Ticker"]
+    ;; Ticker + Agenda
+    [:h5 "Agenda View"]
     (cal-events/ticker-strip {:days [{:date "2026-03-27" :day-num 27 :day-label "Fr"}
                                       {:date "2026-03-28" :day-num 28 :day-label "Sa"}
                                       {:date "2026-03-29" :day-num 29 :day-label "Su"}
@@ -352,15 +365,19 @@
                                :today-str "2026-03-29"
                                :selected "2026-03-29"
                                :events sample-calendar-events})
-
-    [:h5 "Agenda List"]
     (cal-events/agenda-list {:days [{:date "2026-03-29" :label "Today"}
                                      {:date "2026-03-30" :label "Tomorrow"}
                                      {:date "2026-03-31" :label "Tue"}
                                      {:date "2026-04-01" :label "Wed"}
                                      {:date "2026-04-02" :label "Thu"}
                                      {:date "2026-04-03" :label "Fri"}]
-                              :events sample-calendar-events})))
+                              :events sample-calendar-events})
+
+    ;; Event detail dialog (static demo)
+    [:h5 "Event Detail Dialog"]
+    (cal-events/event-detail-dialog
+      {:event {:title "Deploy v2.0" :date "2026-03-29" :time-start "15:00"
+               :color :danger :tags ["ops" "urgent"] :source "Work"}})))
 
 ;; ── Pages ───────────────────────────────────────────────────────────
 
@@ -413,9 +430,9 @@
 (defn calendar-page []
   [:div
    (page-header "Calendar" "Date picker, event grid, ticker strip, and agenda list.")
+   (calendar-demo)
    (into [:div {:class "md-docs"}]
-         (markdown/markdown->hiccup (slurp "src/ui/calendar.md")))
-   (calendar-demo)])
+         (markdown/markdown->hiccup (slurp "src/ui/calendar.md")))])
 
 (defn icons-page []
   [:div

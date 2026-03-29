@@ -439,6 +439,292 @@
   font-size: var(--font-sm);
 }
 
+/* ── Nav Actions (header right side slot) ────────────────────────── */
+
+.cal-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--size-1);
+}
+
+/* ── View Toggle ─────────────────────────────────────────────────── */
+
+.cal-view-toggle {
+  display: flex;
+  background: var(--bg-2);
+  border-radius: var(--radius-sm);
+  padding: var(--size-1);
+  gap: var(--size-1);
+}
+
+.cal-view-btn {
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: var(--fg-2);
+  font-family: inherit;
+  font-size: var(--font-xs);
+  font-weight: 600;
+  padding: var(--size-1) var(--size-2);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.cal-view-btn:hover {
+  color: var(--fg-1);
+}
+
+.cal-view-btn-active {
+  background: var(--bg-1);
+  color: var(--fg-0);
+  box-shadow: var(--shadow-0);
+}
+
+/* ── Loading Indicator ───────────────────────────────────────────── */
+
+.cal-loading {
+  width: var(--size-2);
+  height: var(--size-2);
+  border-radius: 9999px;
+  background: var(--accent);
+  animation: cal-pulse 0.9s ease-in-out infinite;
+  flex-shrink: 0;
+  display: inline-block;
+  margin-left: var(--size-2);
+  vertical-align: middle;
+}
+
+@keyframes cal-pulse {
+  0%, 100% { opacity: 0.3; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+/* ── Error Banner ────────────────────────────────────────────────── */
+
+.cal-error-banner {
+  background: var(--danger-100);
+  border-bottom: 1px solid var(--danger-200);
+  color: var(--danger-800);
+  padding: var(--size-2) var(--size-4);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: var(--font-xs);
+  font-weight: 500;
+}
+
+.cal-error-dismiss {
+  appearance: none;
+  border: none;
+  background: none;
+  color: var(--danger-800);
+  cursor: pointer;
+  font-size: var(--font-md);
+  padding: 0 var(--size-1);
+  opacity: 0.6;
+  line-height: 1;
+}
+
+.cal-error-dismiss:hover {
+  opacity: 1;
+}
+
+[data-theme="dark"] .cal-error-banner {
+  background: var(--danger-950);
+  border-bottom-color: var(--danger-900);
+  color: var(--danger-200);
+}
+
+[data-theme="dark"] .cal-error-dismiss {
+  color: var(--danger-200);
+}
+
+/* ── Source Filter Toggles ───────────────────────────────────────── */
+
+.cal-source-toggles {
+  display: flex;
+  gap: var(--size-1);
+  padding: var(--size-2) var(--size-4);
+  border-bottom: var(--border-0);
+  background: var(--bg-1);
+  flex-wrap: wrap;
+}
+
+.cal-source-toggle {
+  appearance: none;
+  border: none;
+  padding: var(--size-1) var(--size-2);
+  border-radius: 9999px;
+  font-family: inherit;
+  font-size: var(--font-xs);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.cal-source-toggle:hover {
+  filter: brightness(0.95);
+}
+
+.cal-source-inactive {
+  background: var(--bg-2) !important;
+  color: var(--fg-2) !important;
+  border-left-color: transparent !important;
+}
+
+/* ── Agenda Day Header (with action slot) ────────────────────────── */
+
+.cal-agenda-day-header-left {
+  display: flex;
+  align-items: baseline;
+  gap: var(--size-2);
+  flex: 1;
+}
+
+.cal-agenda-day-header {
+  justify-content: space-between;
+}
+
+/* ── Event Detail Dialog ─────────────────────────────────────────── */
+
+.cal-detail-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: var(--size-4);
+  animation: cal-fade-in 0.15s ease;
+}
+
+@keyframes cal-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.cal-detail {
+  background: var(--bg-1);
+  border-radius: var(--radius-md);
+  width: 100%;
+  max-width: 28rem;
+  box-shadow: var(--shadow-3);
+  border-left: 4px solid transparent;
+  animation: cal-dialog-in 0.15s ease;
+  overflow: hidden;
+}
+
+@keyframes cal-dialog-in {
+  from { opacity: 0; transform: scale(0.96) translateY(var(--size-2)); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.cal-detail-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--size-4);
+  padding: var(--size-4) var(--size-4) var(--size-2);
+}
+
+.cal-detail-title {
+  font-size: var(--font-base);
+  font-weight: 600;
+  line-height: 1.35;
+  display: flex;
+  align-items: baseline;
+  gap: var(--size-2);
+  flex: 1;
+  min-width: 0;
+  word-break: break-word;
+}
+
+.cal-detail-badge {
+  font-size: var(--font-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: var(--size-1) var(--size-1);
+  border-radius: var(--radius-sm);
+  background: var(--bg-2);
+  color: var(--fg-1);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.cal-detail-close {
+  appearance: none;
+  border: none;
+  background: none;
+  color: var(--fg-2);
+  cursor: pointer;
+  font-size: var(--font-lg);
+  line-height: 1;
+  padding: 0;
+  flex-shrink: 0;
+  transition: color 0.15s;
+}
+
+.cal-detail-close:hover {
+  color: var(--fg-0);
+}
+
+.cal-detail-body {
+  padding: 0 var(--size-4) var(--size-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-2);
+}
+
+.cal-detail-row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--size-3);
+}
+
+.cal-detail-label {
+  font-size: var(--font-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--fg-2);
+  width: var(--size-16);
+  flex-shrink: 0;
+}
+
+.cal-detail-value {
+  font-size: var(--font-sm);
+  color: var(--fg-0);
+  font-weight: 400;
+}
+
+.cal-detail-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--size-1);
+}
+
+.cal-detail-tag {
+  font-size: var(--font-xs);
+  font-weight: 600;
+  padding: var(--size-1) var(--size-2);
+  border-radius: 9999px;
+  background: var(--bg-2);
+  color: var(--fg-1);
+}
+
+[data-theme="dark"] .cal-detail {
+  box-shadow: var(--shadow-3);
+}
+
+[data-theme="dark"] .cal-detail-overlay {
+  background: rgba(0, 0, 0, 0.5);
+}
+
 /* ── Responsive ──────────────────────────────────────────────────── */
 
 @media (max-width: 768px) {

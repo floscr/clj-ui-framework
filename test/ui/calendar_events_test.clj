@@ -115,3 +115,61 @@
                                                 :label "Wed"
                                                 :events sample-events})]
       (is (nil? result)))))
+
+;; ── New component tests ─────────────────────────────────────────────
+
+(deftest view-toggle-class-list-test
+  (testing "active"
+    (is (= ["cal-view-btn" "cal-view-btn-active"]
+           (cal-events/view-toggle-class-list {:active? true}))))
+  (testing "inactive"
+    (is (= ["cal-view-btn"]
+           (cal-events/view-toggle-class-list {:active? false})))))
+
+(deftest source-toggle-class-list-test
+  (testing "active source"
+    (is (= ["cal-source-toggle" "cal-event-accent"]
+           (cal-events/source-toggle-class-list {:color :accent :active? true}))))
+  (testing "inactive source"
+    (is (= ["cal-source-toggle" "cal-event-danger" "cal-source-inactive"]
+           (cal-events/source-toggle-class-list {:color :danger :active? false})))))
+
+(deftest view-toggle-component-test
+  (testing "renders view toggle (clj target)"
+    (let [result (cal-events/view-toggle {:view :month})]
+      (is (= :div (first result)))
+      (is (= "cal-view-toggle" (get-in result [1 :class]))))))
+
+(deftest loading-indicator-test
+  (testing "renders loading indicator"
+    (let [result (cal-events/loading-indicator)]
+      (is (= :div (first result)))
+      (is (= "cal-loading" (get-in result [1 :class]))))))
+
+(deftest error-banner-test
+  (testing "renders error with message"
+    (let [result (cal-events/error-banner {:message "Something broke"})]
+      (is (some? result))
+      (is (= :div (first result)))))
+  (testing "returns nil with no message"
+    (is (nil? (cal-events/error-banner {:message nil})))))
+
+(deftest source-toggles-test
+  (testing "renders source toggles"
+    (let [result (cal-events/source-toggles
+                   {:sources [{:name "Work" :color :accent :active? true}
+                              {:name "Personal" :color :success :active? false}]})]
+      (is (some? result))
+      (is (= :div (first result)))))
+  (testing "returns nil with no sources"
+    (is (nil? (cal-events/source-toggles {:sources []})))))
+
+(deftest event-detail-dialog-test
+  (testing "renders detail dialog with event"
+    (let [evt {:title "Meeting" :date "2026-03-29" :color :accent
+               :time-start "10:00" :tags ["work"] :source "cal:Work"}
+          result (cal-events/event-detail-dialog {:event evt})]
+      (is (some? result))
+      (is (= :div (first result)))))
+  (testing "returns nil with no event"
+    (is (nil? (cal-events/event-detail-dialog {:event nil})))))
