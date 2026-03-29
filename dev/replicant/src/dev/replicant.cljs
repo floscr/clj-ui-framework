@@ -20,7 +20,9 @@
             [ui.icon :as icon]
             [ui.separator :as separator]
             [ui.calendar :as calendar]
-            [ui.calendar-events :as cal-events]))
+            [ui.calendar-events :as cal-events]
+            [ui.markdown :as markdown])
+  (:require-macros [ui.macros :refer [inline-file]]))
 
 ;; ── State ───────────────────────────────────────────────────────────
 
@@ -390,9 +392,13 @@
    ["Dev & Technical"
     [:code :terminal :database :globe :shield :zap :book-open :map-pin]]])
 
+(def calendar-docs-md (inline-file "../../src/ui/calendar.md"))
+
 (defn calendar-page []
   [:div
    (page-header "Calendar" "Date picker, event grid, ticker strip, and agenda list.")
+   (into [:div {:class ["md-docs"]}]
+         (markdown/markdown->hiccup calendar-docs-md))
    (calendar-demo)])
 
 (defn icons-page []

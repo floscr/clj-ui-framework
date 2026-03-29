@@ -15,7 +15,7 @@
 .cal-event-day {
   width: auto;
   height: auto;
-  min-height: var(--size-16);
+  aspect-ratio: 1;
   align-items: flex-start;
   justify-content: flex-start;
   flex-direction: column;
@@ -24,6 +24,7 @@
   border-right: var(--border-0);
   border-bottom: var(--border-0);
   cursor: pointer;
+  overflow: hidden;
 }
 
 .cal-grid-events .cal-day:nth-child(7n) {
@@ -442,7 +443,6 @@
 
 @media (max-width: 768px) {
   .cal-event-day {
-    min-height: var(--size-12);
     padding: var(--size-1);
   }
 

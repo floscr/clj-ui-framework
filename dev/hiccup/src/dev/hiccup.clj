@@ -23,7 +23,8 @@
             [ui.icon :as icon]
             [ui.separator :as separator]
             [ui.calendar :as calendar]
-            [ui.calendar-events :as cal-events]))
+            [ui.calendar-events :as cal-events]
+            [ui.markdown :as markdown]))
 
 ;; ── Query Params ────────────────────────────────────────────────────
 
@@ -412,6 +413,8 @@
 (defn calendar-page []
   [:div
    (page-header "Calendar" "Date picker, event grid, ticker strip, and agenda list.")
+   (into [:div {:class "md-docs"}]
+         (markdown/markdown->hiccup (slurp "src/ui/calendar.md")))
    (calendar-demo)])
 
 (defn icons-page []

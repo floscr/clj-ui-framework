@@ -20,7 +20,12 @@
              (let [lr (slurp "dev/css-live-reload.js")]
                (spit "dev/replicant/public/css-live-reload.js" lr)
                (spit "dev/squint/public/css-live-reload.js" lr)
-               (println "Copied css-live-reload.js to dev targets")))}
+               (println "Copied css-live-reload.js to dev targets"))
+             (doseq [md (.listFiles (io/file "src/ui")
+                          (reify java.io.FileFilter
+                            (accept [_ f] (.endsWith (.getName f) ".md"))))]
+               (spit (str "dev/squint/public/" (.getName md)) (slurp md)))
+             (println "Copied component docs to dev/squint"))}
 
   watch-theme
   {:doc "Watch src/ui/*.css and tokens.edn, rebuild theme on changes"

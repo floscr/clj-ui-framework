@@ -19,7 +19,8 @@
             [ui.icon :as icon]
             [ui.separator :as separator]
             [ui.calendar :as calendar]
-            [ui.calendar-events :as cal-events]))
+            [ui.calendar-events :as cal-events]
+            [ui.markdown :as markdown]))
 
 ;; ── State ───────────────────────────────────────────────────────────
 
@@ -433,9 +434,23 @@
       (into [:div {:style {"display" "grid" "grid-template-columns" "repeat(auto-fill, minmax(5rem, 1fr))" "gap" "var(--size-4)"}}]
             (map icon-card icons)))))
 
+(def !calendar-docs (atom nil))
+
+(defn load-calendar-docs! []
+  (when-not @!calendar-docs
+    (-> (js/fetch "/calendar.md")
+        (.then (fn [r] (.text r)))
+        (.then (fn [text]
+                 (reset! !calendar-docs text)
+                 (render!))))))
+
 (defn calendar-page []
+  (load-calendar-docs!)
   [:div
    (page-header "Calendar" "Date picker, event grid, ticker strip, and agenda list.")
+   (when-let [md @!calendar-docs]
+     (into [:div {:class "md-docs"}]
+           (markdown/markdown->hiccup md)))
    (calendar-demo)])
 
 (defn icons-page []

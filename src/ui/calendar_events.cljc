@@ -1,4 +1,5 @@
 (ns ui.calendar-events
+  "Event-aware calendar components. See src/ui/calendar.md for full documentation."
   (:require [clojure.string :as str]
             [ui.calendar :as cal]))
 

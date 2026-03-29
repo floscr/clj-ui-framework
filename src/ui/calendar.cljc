@@ -1,4 +1,5 @@
 (ns ui.calendar
+  "Month-grid date picker. See src/ui/calendar.md for full documentation."
   (:require [clojure.string :as str]
             [ui.button :as button]
             [ui.icon :as icon]))
