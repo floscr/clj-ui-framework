@@ -8,7 +8,7 @@
   font-weight: 600;
   line-height: var(--size-5);
   border: none;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   cursor: pointer;
   font-family: inherit;
 }
