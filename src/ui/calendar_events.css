@@ -90,7 +90,7 @@
   font-size: var(--font-xs);
   line-height: 1.4;
   padding: var(--size-1);
-  border-radius: var(--radius-sm);
+  border-radius: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
