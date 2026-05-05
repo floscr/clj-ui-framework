@@ -329,6 +329,40 @@ Color scales are generated once in `:root` and never duplicated. Dark theme just
 
 Toggle with: `document.documentElement.dataset.theme = "dark" | "light"`
 
+## Utility Classes
+
+`src/ui/utilities.css` provides lightweight utility classes. Use these instead of inline styles or one-off CSS. All spacing/sizing values reference scale tokens.
+
+| Category | Classes |
+|----------|---------|
+| **Layout** | `.flex`, `.flex-col`, `.flex-row`, `.flex-wrap`, `.items-center`, `.justify-center`, `.justify-between`, `.justify-end` |
+| **Stacks** | `.hstack` (horizontal, centered, gap-4, wrapping), `.vstack` (vertical, gap-3) |
+| **Spacing** | `.gap-{1,2,3,4}`, `.mt-{2,4,6}`, `.mb-{2,4,6}`, `.p-4` |
+| **Flex** | `.flex-1` (flex: 1 + min-width: 0), `.shrink-0` |
+| **Typography** | `.text-xs`, `.text-sm`, `.font-semibold`, `.font-mono`, `.uppercase`, `.tracking-wide` |
+| **Alignment** | `.align-left`, `.align-center`, `.align-right`, `.text-right` |
+| **Color** | `.text-muted` (fg-1), `.text-faint` (fg-2) |
+| **Sizing** | `.w-full` |
+| **A11y** | `.sr-only` (visually hidden, screen-reader accessible) |
+| **Hit area** | `.hit-area` + `.hit-area-{2,3,4,6}` (expand clickable area via `::before` pseudo-element) |
+
+### Hit area expand
+
+`.hit-area` uses a `::before` pseudo-element to expand the clickable/tappable area beyond visual bounds. Combine with a size class or set custom properties:
+
+```html
+<!-- Uniform expansion -->
+<button class="hit-area hit-area-4">×</button>
+
+<!-- Per-side via custom properties -->
+<button class="hit-area" style="--hit-area-t: 8px; --hit-area-l: 12px">×</button>
+
+<!-- Custom uniform via --hit-area -->
+<button class="hit-area" style="--hit-area: 20px">×</button>
+```
+
+Custom properties: `--hit-area` (all sides), `--hit-area-t`, `--hit-area-r`, `--hit-area-b`, `--hit-area-l` (per-side overrides).
+
 ## Squint Pitfalls
 
 1. **`name` is not available** — define `kw-name` stubs via reader conditionals

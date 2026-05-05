@@ -63,6 +63,31 @@
   border: 0;
 }
 
+/* ── Hit area expand ──────────────────────────────────────────── */
+/* Expands the clickable/tappable area beyond visual bounds using  */
+/* a ::before pseudo-element. Apply .hit-area and set --hit-area   */
+/* (uniform) or --hit-area-{t,r,b,l} (per-side) via inline style. */
+/* Predefined sizes: .hit-area-2 through .hit-area-6.              */
+
+.hit-area {
+  position: relative;
+}
+
+.hit-area::before {
+  content: "";
+  position: absolute;
+  top: calc(var(--hit-area-t, var(--hit-area, 0px)) * -1);
+  right: calc(var(--hit-area-r, var(--hit-area, 0px)) * -1);
+  bottom: calc(var(--hit-area-b, var(--hit-area, 0px)) * -1);
+  left: calc(var(--hit-area-l, var(--hit-area, 0px)) * -1);
+  pointer-events: inherit;
+}
+
+.hit-area-2 { --hit-area: var(--size-2); }
+.hit-area-3 { --hit-area: var(--size-3); }
+.hit-area-4 { --hit-area: var(--size-4); }
+.hit-area-6 { --hit-area: var(--size-6); }
+
 /* ── Scrollbars ────────────────────────────────────────────────── */
 /* Thin, subtle scrollbars everywhere.                             */
 
