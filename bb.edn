@@ -52,6 +52,7 @@
               [ui.icon-test]
               [ui.sidebar-test]
               [ui.chip-test]
+              [ui.tag-input-test]
               [ui.separator-test]
               [ui.calendar-test]
               [ui.calendar-events-test]
@@ -75,6 +76,7 @@
                                       'ui.icon-test
                                       'ui.sidebar-test
                                       'ui.chip-test
+                                      'ui.tag-input-test
                                       'ui.separator-test
                                       'ui.calendar-test
                                       'ui.calendar-events-test
