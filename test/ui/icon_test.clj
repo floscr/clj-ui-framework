@@ -67,8 +67,18 @@
     (is (contains? icon/icon-names :code))
     (is (contains? icon/icon-names :globe)))
 
+  (testing "icon-names contains media icons"
+    (is (contains? icon/icon-names :play))
+    (is (contains? icon/icon-names :pause))
+    (is (contains? icon/icon-names :skip-back))
+    (is (contains? icon/icon-names :skip-forward))
+    (is (contains? icon/icon-names :shuffle))
+    (is (contains? icon/icon-names :repeat))
+    (is (contains? icon/icon-names :volume-2))
+    (is (contains? icon/icon-names :music)))
+
   (testing "icon-names has reasonable count"
-    (is (>= (count icon/icon-names) 40))))
+    (is (>= (count icon/icon-names) 48))))
 
 (deftest all-icons-render-test
   (testing "every icon in the set renders successfully"

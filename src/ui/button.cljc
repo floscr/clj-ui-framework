@@ -13,13 +13,15 @@
 (defn button-class-list
   "Generate a vector of CSS class strings for a button given variant, size, and icon mode.
    Returns e.g. [\"btn\" \"btn-primary\" \"btn-lg\"].
-   When :icon is provided (icon-only mode), adds \"btn-icon\"."
-  [{:keys [variant size icon]}]
+   When :icon is provided (icon-only mode), adds \"btn-icon\".
+   When :round is true and :icon is set, adds \"btn-icon-round\"."
+  [{:keys [variant size icon round]}]
   (let [v (or (some-> variant kw-name) default-variant)
         s (or (some-> size kw-name) default-size)]
     (cond-> ["btn" (str "btn-" v)]
-      (not= s "md") (conj (str "btn-" s))
-      icon          (conj "btn-icon"))))
+      (not= s "md")    (conj (str "btn-" s))
+      icon              (conj "btn-icon")
+      (and icon round)  (conj "btn-icon-round"))))
 
 (defn button-classes
   "Generate CSS class string for a button. Returns a space-joined string."
@@ -41,14 +43,14 @@
      :icon       - icon name keyword for icon-only button (no text children)
      :class      - additional CSS classes (string or vector)
      :attrs      - additional HTML attributes map"
-  [{:keys [variant size href on-click disabled icon-left icon-right icon class attrs] :as _props} & children]
+  [{:keys [variant size href on-click disabled icon-left icon-right icon round class attrs] :as _props} & children]
   (let [icon-size (case (kw-name (or size default-size))
                     "sm" :sm
                     "lg" :md
                     #?(:squint "sm" :cljs :sm :clj :sm))]
     #?(:squint
        (let [tag    (if href :a :button)
-             classes (cond-> (button-classes {:variant variant :size size :icon icon})
+             classes (cond-> (button-classes {:variant variant :size size :icon icon :round round})
                        class (str " " class))
              base-attrs (cond-> (merge {:class classes} attrs)
                           href     (assoc :href href)
@@ -65,7 +67,7 @@
 
        :cljs
        (let [tag    (if href :a :button)
-             cls    (button-class-list {:variant variant :size size :icon icon})
+             cls    (button-class-list {:variant variant :size size :icon icon :round round})
              classes (cond-> cls
                        class (conj class))
              base-attrs (cond-> (merge {:class classes} attrs)
@@ -83,7 +85,7 @@
 
        :clj
        (let [tag    (if href :a :button)
-             classes (cond-> (button-classes {:variant variant :size size :icon icon})
+             classes (cond-> (button-classes {:variant variant :size size :icon icon :round round})
                        class (str " " class))
              base-attrs (cond-> (merge {:class classes} attrs)
                           href     (assoc :href href)

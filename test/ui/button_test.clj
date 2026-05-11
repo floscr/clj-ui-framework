@@ -108,6 +108,19 @@
     (is (= ["btn" "btn-primary" "btn-sm" "btn-icon"]
            (button/button-class-list {:variant :primary :size :sm :icon :plus})))))
 
+(deftest button-round-test
+  (testing "round class added when icon and round"
+    (is (= ["btn" "btn-secondary" "btn-icon" "btn-icon-round"]
+           (button/button-class-list {:icon :plus :round true}))))
+
+  (testing "round class not added without icon"
+    (is (= ["btn" "btn-secondary"]
+           (button/button-class-list {:round true}))))
+
+  (testing "round class with variant and size"
+    (is (= ["btn" "btn-primary" "btn-sm" "btn-icon" "btn-icon-round"]
+           (button/button-class-list {:variant :primary :size :sm :icon :plus :round true})))))
+
 (deftest button-icon-component-test
   (testing "icon-only button renders icon child"
     (let [result (button/button {:variant :primary :icon :plus})]

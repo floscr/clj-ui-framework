@@ -25,7 +25,8 @@
             [ui.calendar :as calendar]
             [ui.calendar-events :as cal-events]
             [ui.tag-input :as tag-input]
-            [ui.markdown :as markdown]))
+            [ui.markdown :as markdown]
+            [ui.player-bar :as player-bar]))
 
 ;; ── Query Params ────────────────────────────────────────────────────
 
@@ -116,7 +117,13 @@
      (button/button {:variant :ghost :icon :settings})
      (button/button {:variant :danger :icon :trash})
      (button/button {:variant :primary :icon :plus :size :sm})
-     (button/button {:variant :primary :icon :plus :size :lg})]))
+     (button/button {:variant :primary :icon :plus :size :lg})]
+    [:div {:style "display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center;"}
+     (button/button {:variant :primary :icon :play :round true})
+     (button/button {:variant :secondary :icon :pause :round true})
+     (button/button {:variant :ghost :icon :heart :round true})
+     (button/button {:variant :primary :icon :plus :size :sm :round true})
+     (button/button {:variant :primary :icon :plus :size :lg :round true})]))
 
 (defn alert-demo []
   (section "Alert"
@@ -385,10 +392,35 @@
    (when subtitle
      [:p {:style "margin: 0; color: var(--fg-2); font-size: var(--font-sm);"} subtitle])])
 
+(defn player-bar-demo []
+  (section "Player Bar"
+    (player-bar/player-bar
+      {:track-name "Across The Universe"
+       :subtitle "The Beatles"
+       :playing true
+       :progress 35
+       :current-time "1:23"
+       :duration "3:48"
+       :shuffle false
+       :repeat false
+       :favorited true})
+    [:div {:style "margin-top: 1rem;"}
+     (player-bar/player-bar
+       {:track-name "Bohemian Rhapsody"
+        :subtitle "Queen"
+        :playing false
+        :progress 0
+        :current-time "0:00"
+        :duration "5:55"
+        :shuffle true
+        :repeat true
+        :favorited false})]))
+
 (defn components-page []
   [:div
    (page-header "Components" "All UI components at a glance.")
    (button-demo)
+   (player-bar-demo)
    (alert-demo)
    (badge-demo)
    (card-demo)
@@ -423,6 +455,8 @@
      :lock :grid :list :layout-dashboard :monitor :moon :sun]]
    ["Status"
     [:alert-triangle :alert-circle :info :circle-check :circle-x]]
+   ["Media"
+    [:play :pause :skip-back :skip-forward :shuffle :repeat :volume-2 :music]]
    ["Dev & Technical"
     [:code :terminal :database :globe :shield :zap :book-open :map-pin]]])
 
@@ -503,7 +537,8 @@
   [{:title "General"
     :items [{:label "Button" :anchor "button"}
             {:label "Badge" :anchor "badge"}
-            {:label "Card" :anchor "card"}]}
+            {:label "Card" :anchor "card"}
+            {:label "Player Bar" :anchor "player-bar"}]}
    {:title "Forms"
     :items [{:label "Form" :anchor "form"}
             {:label "Tag Input" :anchor "tag-input"}
