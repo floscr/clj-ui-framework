@@ -17,7 +17,7 @@ Add as a **git dependency** in `bb.edn` or `deps.edn`:
 
 Babashka/Clojure resolves the dependency automatically — no manual path or submodule needed.
 
-**Squint apps** — squint can't resolve git deps. Add a `frontend:setup` task in `bb.edn` that finds clj-ui-framework on the classpath and symlinks it for squint (see README.md for the full setup task). Add the generated `lib/ui` and `lib/theme.css` to `.gitignore`.
+**Squint apps** — squint can't resolve git deps. Use the built-in `ui.setup/setup!` helper in a `frontend:setup` task (see README.md). It symlinks sources and copies theme.css. Add the generated `lib/ui` and `lib/theme.css` to `.gitignore`.
 
 **CSS setup** — `dist/theme.css` contains all design tokens and component styles. **You must include it.** Component CSS references variables from the theme — without it, styles break. For browser apps, the setup task copies it. For server-rendered apps, inline it or serve from the dep's dist dir.
 

@@ -39,7 +39,7 @@ Add as a git dep in `deps.edn` (shadow-cljs reads it):
 
 ### Squint
 
-Squint doesn't resolve git deps — it only reads `:paths` from `squint.edn`. Add a **setup task** in `bb.edn` that finds the git dep on the classpath and symlinks it for squint:
+Squint doesn't resolve git deps — it only reads `:paths` from `squint.edn`. Use the built-in `ui.setup` helper to symlink sources and copy theme CSS:
 
 ```edn
 ;; bb.edn — the git dep is declared here
@@ -49,28 +49,10 @@ Squint doesn't resolve git deps — it only reads `:paths` from `squint.edn`. Ad
  :paths ["src"]
  :tasks
  {frontend:setup
-  {:doc "Link clj-ui-framework sources + copy theme for frontend"
-   :requires ([babashka.classpath :as cp]
-              [babashka.fs :as fs]
-              [clojure.string :as str])
-   :task (let [ui-src (->> (str/split (cp/get-classpath) (re-pattern ":"))
-                           (filter (fn [p] (str/includes? p "clj-ui-framework")))
-                           first)
-               link-target "app/lib/ui"
-               theme-src (str (fs/parent ui-src) "/dist/theme.css")
-               theme-dst "app/lib/theme.css"]
-           (when-not ui-src
-             (println "ERROR: clj-ui-framework not found on classpath")
-             (System/exit 1))
-           (fs/delete-if-exists link-target)
-           (fs/create-dirs "app/lib")
-           (fs/create-sym-link link-target ui-src)
-           (println "Linked" link-target "→" ui-src)
-           (when-not (fs/exists? theme-src)
-             (println "Building theme.css...")
-             (shell {:dir (str (fs/parent ui-src))} "bb build-theme"))
-           (fs/copy theme-src theme-dst {:replace-existing true})
-           (println "Copied theme.css →" theme-dst))}
+  {:doc "Setup clj-ui-framework for squint frontend"
+   :requires ([ui.setup :as setup])
+   :task (setup/setup! {:link-target "app/lib/ui"
+                        :theme-target "app/lib/theme.css"})}
 
   frontend {:depends [frontend:setup]
             :task (shell {:dir "app"} "npm run watch")}}}
