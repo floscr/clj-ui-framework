@@ -14,6 +14,7 @@
                            :theme-target \"app/lib/theme.css\"})}"
   (:require [babashka.classpath :as cp]
             [babashka.fs :as fs]
+            [babashka.process :as proc]
             [clojure.string :as str]))
 
 (defn find-ui-src
@@ -49,7 +50,7 @@
     (let [theme-src (str (fs/parent ui-src) "/dist/theme.css")]
       (when-not (fs/exists? theme-src)
         (println "Building theme.css...")
-        (shell {:dir (str (fs/parent ui-src))} "bb build-theme"))
+        (proc/shell {:dir (str (fs/parent ui-src))} "bb" "build-theme"))
       (fs/create-dirs (str (fs/parent theme-target)))
       (fs/copy theme-src theme-target {:replace-existing true})
       (println "Copied theme.css →" theme-target))))
