@@ -2,25 +2,28 @@
 
 A cross-target component library for Clojure, ClojureScript (Replicant), and Squint (Eucalypt). Components are `.cljc` files using reader conditionals. CSS is generated from EDN tokens via Babashka.
 
-## Installation (Git Submodule)
+## Installation (Git Dependency)
 
-This library is designed to be consumed as a git submodule. The consuming project adds `lib/ui/src` to its classpath and links/copies `dist/theme.css`.
+**NEVER use git submodules or worktrees** — they cause stale checkouts, missing theme CSS, and broken builds across repos.
 
-```sh
-# Add to a project
-git submodule add https://github.com/floscr/clj-ui-framework.git lib/ui
-git submodule update --init
-```
-
-**Classpath setup** — add `lib/ui/src` to `:paths` in the consumer's `bb.edn`, `deps.edn`, `shadow-cljs.edn`, or `squint.edn`:
+Add as a **git dependency** in `bb.edn` or `deps.edn`:
 
 ```edn
-{:paths ["src" "lib/ui/src"]}
+{:deps {clj-ui-framework/clj-ui-framework
+        {:git/url "https://github.com/floscr/clj-ui-framework"
+         :sha "<latest-sha>"}}
+ :paths ["src"]}
 ```
 
-**CSS setup** — copy or symlink `lib/ui/dist/theme.css` into the consumer's public directory and include via `<link>` tag. If tokens are customized, regenerate with `cd lib/ui && bb build-theme`.
+Babashka/Clojure resolves the dependency automatically — no manual path or submodule needed.
 
-**Updating** — `git submodule update --remote lib/ui`, then rebuild theme if needed.
+**Squint apps** — squint can't resolve git deps. Add a `frontend:setup` task in `bb.edn` that finds clj-ui-framework on the classpath and symlinks it for squint (see README.md for the full setup task). Add the generated `lib/ui` and `lib/theme.css` to `.gitignore`.
+
+**CSS setup** — `dist/theme.css` contains all design tokens and component styles. **You must include it.** Component CSS references variables from the theme — without it, styles break. For browser apps, the setup task copies it. For server-rendered apps, inline it or serve from the dep's dist dir.
+
+**Do not duplicate theme tokens** in your app's CSS. If colors/spacing look wrong, you're missing `theme.css`.
+
+**Updating** — bump the `:sha` in `bb.edn`/`deps.edn`, then `bb frontend:setup` for squint apps.
 
 ## Project Structure
 
