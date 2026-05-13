@@ -90,7 +90,7 @@
             [:button.player-bar-play-btn
              (cond-> {:title (if playing "Pause" "Play")}
                on-play-pause (assoc :on-click on-play-pause))
-             (icon/icon {:icon-name (if playing :pause :play) :size :sm})]
+             (icon/icon {:icon-name (if playing :pause :play) :size :sm :filled true})]
             [:button.player-bar-icon-btn
              (cond-> {:title "Next"}
                on-next (assoc :on-click on-next))
@@ -149,7 +149,7 @@
             [:button (cond-> {:class ["player-bar-play-btn"]
                               :title (if playing "Pause" "Play")}
                        on-play-pause (assoc :on {:click on-play-pause}))
-             (icon/icon {:icon-name (if playing :pause :play) :size :sm})]
+             (icon/icon {:icon-name (if playing :pause :play) :size :sm :filled true})]
             [:button (cond-> {:class ["player-bar-icon-btn"]
                               :title "Next"}
                        on-next (assoc :on {:click on-next}))
@@ -203,7 +203,7 @@
              (icon/icon {:icon-name :skip-back :size :sm})]
             [:button {:class "player-bar-play-btn"
                       :title (if playing "Pause" "Play")}
-             (icon/icon {:icon-name (if playing :pause :play) :size :sm})]
+             (icon/icon {:icon-name (if playing :pause :play) :size :sm :filled true})]
             [:button {:class "player-bar-icon-btn"
                       :title "Next"}
              (icon/icon {:icon-name :skip-forward :size :sm})]
