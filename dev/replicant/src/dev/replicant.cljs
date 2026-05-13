@@ -23,7 +23,8 @@
             [ui.calendar-events :as cal-events]
             [ui.tag-input :as tag-input]
             [ui.markdown :as markdown]
-            [ui.player-bar :as player-bar])
+            [ui.player-bar :as player-bar]
+            [ui.lightbox :as lightbox])
   (:require-macros [ui.macros :refer [inline-file]]))
 
 ;; ── State ───────────────────────────────────────────────────────────
@@ -387,6 +388,8 @@
 
 (defonce !cal-state (atom {:year 2026 :month 3 :selected-date nil}))
 
+(defonce !lightbox-state (atom {:src nil}))
+
 (def sample-calendar-events
   [{:title "Team standup"     :date "2026-03-29" :time-start "09:00" :time-end "09:30" :color :accent}
    {:title "Lunch with Alex"  :date "2026-03-29" :time-start "12:00" :time-end "13:00" :color :success}
@@ -455,6 +458,30 @@
                                 :events sample-calendar-events
                                 :on-event-click (fn [evt] (js/console.log "Agenda event:" (:title evt)))}))))
 
+(def sample-images
+  [{:src "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect fill='%234f46e5' width='400' height='300'/%3E%3Ctext x='200' y='150' text-anchor='middle' dominant-baseline='middle' fill='white' font-size='24' font-family='sans-serif'%3EIndigo%3C/text%3E%3C/svg%3E"
+    :alt "Indigo"}
+   {:src "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect fill='%2316a34a' width='400' height='300'/%3E%3Ctext x='200' y='150' text-anchor='middle' dominant-baseline='middle' fill='white' font-size='24' font-family='sans-serif'%3EGreen%3C/text%3E%3C/svg%3E"
+    :alt "Green"}
+   {:src "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect fill='%23dc2626' width='400' height='300'/%3E%3Ctext x='200' y='150' text-anchor='middle' dominant-baseline='middle' fill='white' font-size='24' font-family='sans-serif'%3ERed%3C/text%3E%3C/svg%3E"
+    :alt "Red"}
+   {:src "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect fill='%23ea580c' width='400' height='300'/%3E%3Ctext x='200' y='150' text-anchor='middle' dominant-baseline='middle' fill='white' font-size='24' font-family='sans-serif'%3EOrange%3C/text%3E%3C/svg%3E"
+    :alt "Orange"}])
+
+(defn lightbox-demo []
+  (let [{:keys [src]} @!lightbox-state]
+    (section "Lightbox"
+      [:p {:style {:color "var(--fg-2)" :font-size "var(--font-sm)"}}
+       "Click a thumbnail to open the fullscreen lightbox overlay."]
+      [:div {:style {:display "flex" :gap "0.75rem" :flex-wrap "wrap"}}
+       (for [{img-src :src img-alt :alt} sample-images]
+         (lightbox/image-thumbnail
+           {:src img-src
+            :alt img-alt
+            :on-click (fn [] (swap! !lightbox-state assoc :src img-src))}))]
+      (lightbox/lightbox {:src src
+                          :on-close (fn [] (swap! !lightbox-state assoc :src nil))}))))
+
 ;; ── Pages ───────────────────────────────────────────────────────────
 
 (defn components-page []
@@ -477,7 +504,8 @@
    (pagination-demo)
    (separator-demo)
    (form-demo)
-   (tag-input-demo)])
+   (tag-input-demo)
+   (lightbox-demo)])
 
 (def icon-categories
   [["Navigation"
@@ -597,6 +625,8 @@
             {:label "Tooltip" :anchor "tooltip"}]}
    {:title "Layout"
     :items [{:label "Separator" :anchor "separator"}]}
+   {:title "Overlay"
+    :items [{:label "Lightbox" :anchor "lightbox"}]}
    {:title "Navigation"
     :items [{:label "Breadcrumb" :anchor "breadcrumb"}
             {:label "Pagination" :anchor "pagination"}]}])
@@ -714,6 +744,7 @@
   (add-watch !page :render (fn [_ _ _ _] (render!)))
   (add-watch !tag-state :render (fn [_ _ _ _] (render!)))
   (add-watch !cal-state :render (fn [_ _ _ _] (render!)))
+  (add-watch !lightbox-state :render (fn [_ _ _ _] (render!)))
   (render!))
 
 (defn ^:export reload! []

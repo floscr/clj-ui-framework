@@ -26,7 +26,8 @@
             [ui.calendar-events :as cal-events]
             [ui.tag-input :as tag-input]
             [ui.markdown :as markdown]
-            [ui.player-bar :as player-bar]))
+            [ui.player-bar :as player-bar]
+            [ui.lightbox :as lightbox]))
 
 ;; ── Query Params ────────────────────────────────────────────────────
 
@@ -325,6 +326,28 @@
      (form/form-field {:label "Email" :error "Please enter a valid email address."}
        (form/form-input {:type :email :error true :value "invalid-email"}))]))
 
+(def sample-images
+  [{:src "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect fill='%234f46e5' width='400' height='300'/%3E%3Ctext x='200' y='150' text-anchor='middle' dominant-baseline='middle' fill='white' font-size='24' font-family='sans-serif'%3EIndigo%3C/text%3E%3C/svg%3E"
+    :alt "Indigo"}
+   {:src "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect fill='%2316a34a' width='400' height='300'/%3E%3Ctext x='200' y='150' text-anchor='middle' dominant-baseline='middle' fill='white' font-size='24' font-family='sans-serif'%3EGreen%3C/text%3E%3C/svg%3E"
+    :alt "Green"}
+   {:src "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect fill='%23dc2626' width='400' height='300'/%3E%3Ctext x='200' y='150' text-anchor='middle' dominant-baseline='middle' fill='white' font-size='24' font-family='sans-serif'%3ERed%3C/text%3E%3C/svg%3E"
+    :alt "Red"}
+   {:src "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect fill='%23ea580c' width='400' height='300'/%3E%3Ctext x='200' y='150' text-anchor='middle' dominant-baseline='middle' fill='white' font-size='24' font-family='sans-serif'%3EOrange%3C/text%3E%3C/svg%3E"
+    :alt "Orange"}])
+
+(defn lightbox-demo []
+  (section "Lightbox"
+    [:p {:style "color: var(--fg-2); font-size: var(--font-sm);"}
+     "Click a thumbnail to open the fullscreen lightbox overlay (requires JavaScript)."]
+    [:div {:style "display: flex; gap: 0.75rem; flex-wrap: wrap;"}
+     (for [{:keys [src alt]} sample-images]
+       (lightbox/image-thumbnail {:src src :alt alt}))]
+    [:p {:style "color: var(--fg-2); font-size: var(--font-sm); margin-top: 0.5rem;"}
+     "Static lightbox overlay preview:"]
+    [:div {:style "position: relative; height: 300px; border-radius: var(--radius-md); overflow: hidden;"}
+     (lightbox/lightbox {:src (:src (first sample-images)) :alt "Indigo"})]))
+
 (defn tag-input-demo []
   (section "Tag Input"
     [:div {:style "max-width: 480px;"}
@@ -436,7 +459,9 @@
    (pagination-demo)
    (separator-demo)
    (form-demo)
-   (tag-input-demo)])
+   (tag-input-demo)
+   (lightbox-demo)
+   [:style (h/raw ".lightbox-overlay { position: absolute !important; }")]])
 
 (def icon-categories
   [["Navigation"
@@ -555,6 +580,8 @@
             {:label "Tooltip" :anchor "tooltip"}]}
    {:title "Layout"
     :items [{:label "Separator" :anchor "separator"}]}
+   {:title "Overlay"
+    :items [{:label "Lightbox" :anchor "lightbox"}]}
    {:title "Navigation"
     :items [{:label "Breadcrumb" :anchor "breadcrumb"}
             {:label "Pagination" :anchor "pagination"}]}])

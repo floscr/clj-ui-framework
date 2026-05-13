@@ -23,7 +23,8 @@
             [ui.calendar-events :as cal-events]
             [ui.tag-input :as tag-input]
             [ui.markdown :as markdown]
-            [ui.player-bar :as player-bar]))
+            [ui.player-bar :as player-bar]
+            [ui.lightbox :as lightbox]))
 
 ;; ── State ───────────────────────────────────────────────────────────
 
@@ -96,7 +97,7 @@
            (button/button {:variant "ghost" :icon "settings"})
            (button/button {:variant "danger" :icon "trash"})
            (button/button {:variant "primary" :icon "plus" :size "sm"})
-           (button/button {:variant "primary" :icon "plus" :size "lg"})]
+           (button/button {:variant "primary" :icon "plus" :size "lg"})])
     (into [:div {:style {"display" "flex" "gap" "0.75rem" "flex-wrap" "wrap" "align-items" "center"}}]
           [(button/button {:variant "primary" :icon "play" :round true})
            (button/button {:variant "secondary" :icon "pause" :round true})
@@ -413,6 +414,8 @@
 
 (def !cal-state (atom {:year 2026 :month 3 :selected-date nil}))
 
+(def !lightbox-state (atom {:src nil}))
+
 (def sample-calendar-events
   [{:title "Team standup"     :date "2026-03-29" :time-start "09:00" :time-end "09:30" :color "accent"}
    {:title "Lunch with Alex"  :date "2026-03-29" :time-start "12:00" :time-end "13:00" :color "success"}
@@ -491,6 +494,35 @@
                                 :events sample-calendar-events
                                 :on-event-click (fn [evt] (js/console.log "Agenda event:" (:title evt)))}))))
 
+(def sample-images
+  [{:src "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect fill='%234f46e5' width='400' height='300'/%3E%3Ctext x='200' y='150' text-anchor='middle' dominant-baseline='middle' fill='white' font-size='24' font-family='sans-serif'%3EIndigo%3C/text%3E%3C/svg%3E"
+    :alt "Indigo"}
+   {:src "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect fill='%2316a34a' width='400' height='300'/%3E%3Ctext x='200' y='150' text-anchor='middle' dominant-baseline='middle' fill='white' font-size='24' font-family='sans-serif'%3EGreen%3C/text%3E%3C/svg%3E"
+    :alt "Green"}
+   {:src "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect fill='%23dc2626' width='400' height='300'/%3E%3Ctext x='200' y='150' text-anchor='middle' dominant-baseline='middle' fill='white' font-size='24' font-family='sans-serif'%3ERed%3C/text%3E%3C/svg%3E"
+    :alt "Red"}
+   {:src "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect fill='%23ea580c' width='400' height='300'/%3E%3Ctext x='200' y='150' text-anchor='middle' dominant-baseline='middle' fill='white' font-size='24' font-family='sans-serif'%3EOrange%3C/text%3E%3C/svg%3E"
+    :alt "Orange"}])
+
+(defn lightbox-demo []
+  (let [{:keys [src]} @!lightbox-state]
+    (section "Lightbox"
+      [:p {:style {"color" "var(--fg-2)" "font-size" "var(--font-sm)"}}
+       "Click a thumbnail to open the fullscreen lightbox overlay."]
+      (into [:div {:style {"display" "flex" "gap" "0.75rem" "flex-wrap" "wrap"}}]
+            (map (fn [{img-src :src img-alt :alt}]
+                   (lightbox/image-thumbnail
+                     {:src img-src
+                      :alt img-alt
+                      :on-click (fn []
+                                  (swap! !lightbox-state assoc :src img-src)
+                                  (render!))}))
+                 sample-images))
+      (lightbox/lightbox {:src src
+                          :on-close (fn []
+                                      (swap! !lightbox-state assoc :src nil)
+                                      (render!))}))))
+
 ;; ── Pages ───────────────────────────────────────────────────────────
 
 (defn components-page []
@@ -513,7 +545,8 @@
    (pagination-demo)
    (separator-demo)
    (form-demo)
-   (tag-input-demo)])
+   (tag-input-demo)
+   (lightbox-demo)])
 
 (def icon-categories
   [["Navigation"
@@ -651,6 +684,8 @@
             {:label "Tooltip" :anchor "tooltip"}]}
    {:title "Layout"
     :items [{:label "Separator" :anchor "separator"}]}
+   {:title "Overlay"
+    :items [{:label "Lightbox" :anchor "lightbox"}]}
    {:title "Navigation"
     :items [{:label "Breadcrumb" :anchor "breadcrumb"}
             {:label "Pagination" :anchor "pagination"}]}])
