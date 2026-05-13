@@ -57,7 +57,7 @@
          [:div base-attrs
           ;; Progress slider
           [:div.player-bar-progress
-           (cond-> {}
+           (cond-> {:style {"--progress" pct}}
              on-seek (assoc :on-click on-seek))
            [:div.player-bar-progress-track
             [:div.player-bar-progress-fill {:style {"width" pct}}]]]
@@ -115,7 +115,8 @@
              base-attrs (merge {:class classes} attrs)]
          [:div base-attrs
           ;; Progress slider
-          [:div (cond-> {:class ["player-bar-progress"]}
+          [:div (cond-> {:class ["player-bar-progress"]
+                        :style {:--progress pct}}
                   on-seek (assoc :on {:click on-seek}))
            [:div {:class ["player-bar-progress-track"]}
             [:div {:class ["player-bar-progress-fill"]
@@ -174,7 +175,8 @@
              base-attrs (merge {:class classes} attrs)]
          [:div base-attrs
           ;; Progress slider
-          [:div {:class "player-bar-progress"}
+          [:div {:class "player-bar-progress"
+                 :style (str "--progress: " pct)}
            [:div {:class "player-bar-progress-track"}
             [:div {:class "player-bar-progress-fill"
                    :style (str "width: " pct)}]]]

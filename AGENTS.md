@@ -366,6 +366,40 @@ Toggle with: `document.documentElement.dataset.theme = "dark" | "light"`
 
 Custom properties: `--hit-area` (all sides), `--hit-area-t`, `--hit-area-r`, `--hit-area-b`, `--hit-area-l` (per-side overrides).
 
+## Touch Alternatives (`.clj-ui-touch`)
+
+The class `.clj-ui-touch` on an ancestor element (typically `<html>` or `<body>`) activates touch-friendly alternatives throughout the UI. This is a **consumer responsibility** — the framework provides the CSS rules, the app applies the class.
+
+### How to apply
+
+```js
+// Detect touch and apply at startup
+if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+  document.documentElement.classList.add('clj-ui-touch');
+}
+```
+
+### What changes
+
+| Component | Desktop (default) | Touch (`.clj-ui-touch`) |
+|-----------|-------------------|-------------------------|
+| Player bar scrubber | Shown on hover | Always visible |
+
+### Adding touch alternatives in CSS
+
+Use `.clj-ui-touch` as an ancestor selector to override hover-dependent interactions:
+
+```css
+/* Default: hidden, shown on hover */
+.my-handle { opacity: 0; }
+.my-container:hover .my-handle { opacity: 1; }
+
+/* Touch: always visible */
+.clj-ui-touch .my-handle { opacity: 1; }
+```
+
+**Convention:** touch rules go directly after the hover rule they override, with a `/* Touch: ... */` comment.
+
 ## Icons (`ui.icon`)
 
 Inline SVG icons using Lucide-compatible 24×24 paths. All icons are defined in `src/ui/icon.cljc`.
