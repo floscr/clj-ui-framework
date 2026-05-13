@@ -296,8 +296,8 @@
 
    :music
    [[:path {:d "M9 18V5l12-2v13"}]
-    [:circle {:cx "6" :cy "18" :r "3"}]
-    [:circle {:cx "18" :cy "16" :r "3"}]]
+    [:circle {:cx "6" :cy "18" :r "3" :fill "currentColor"}]
+    [:circle {:cx "18" :cy "16" :r "3" :fill "currentColor"}]]
 
    ;; ── Dev / Technical ─────────────────────────────────────────────
    :code
@@ -332,6 +332,37 @@
    [[:path {:d "M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"}]
     [:circle {:cx "12" :cy "10" :r "3"}]]})
 
+;; ── Filled icon variants ────────────────────────────────────────────
+;; Used when :filled true is passed to the icon component.
+;; Lines/strokes that must remain visible override with per-element attrs.
+
+(def filled-icon-paths
+  {:play
+   [[:path {:d "M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"}]]
+
+   :pause
+   [[:rect {:x "14" :y "4" :width "4" :height "16" :rx "1"}]
+    [:rect {:x "6" :y "4" :width "4" :height "16" :rx "1"}]]
+
+   :skip-back
+   [[:path {:d "M17.971 4.285A2 2 0 0 1 21 6v12a2 2 0 0 1-3.029 1.715l-9.997-5.998a2 2 0 0 1-.003-3.432z"}]
+    [:rect {:x "2" :y "4" :width "2" :height "16" :rx "1"}]]
+
+   :skip-forward
+   [[:rect {:x "20" :y "4" :width "2" :height "16" :rx "1"}]
+    [:path {:d "M6.029 4.285A2 2 0 0 0 3 6v12a2 2 0 0 0 3.029 1.715l9.997-5.998a2 2 0 0 0 .003-3.432z"}]]
+
+   :repeat
+   [[:path {:d "m17 2 4 4-4 4z"}]
+    [:path {:d "M3 11v-1a4 4 0 0 1 4-4h14" :fill "none" :stroke "currentColor" :stroke-width "2"}]
+    [:path {:d "m7 22-4-4 4-4z"}]
+    [:path {:d "M21 13v1a4 4 0 0 1-4 4H3" :fill "none" :stroke "currentColor" :stroke-width "2"}]]
+
+   :volume-2
+   [[:path {:d "M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z"}]
+    [:path {:d "M16 9a5 5 0 0 1 0 6" :fill "none" :stroke "currentColor" :stroke-width "2"}]
+    [:path {:d "M19.364 18.364a9 9 0 0 0 0-12.728" :fill "none" :stroke "currentColor" :stroke-width "2"}]]})
+
 ;; ── Public API ──────────────────────────────────────────────────────
 
 (def icon-names
@@ -357,26 +388,27 @@
   "Render an inline SVG icon.
 
    Props:
-     :name  - icon name keyword (e.g. :home, :search, :settings)
-     :size  - :sm, :md (default), :lg, :xl
-     :class - additional CSS classes
-     :attrs - additional HTML/SVG attributes
+     :icon-name - icon name keyword (e.g. :home, :search, :settings)
+     :size      - :sm, :md (default), :lg, :xl
+     :class     - additional CSS classes
+     :attrs     - additional HTML/SVG attributes
+     :filled    - boolean, render filled variant (media icons)
 
    Returns hiccup SVG element. Returns nil for unknown icon names."
-  [{:keys [icon-name size class attrs] :as _props}]
+  [{:keys [icon-name size class attrs filled] :as _props}]
   (let [n (kw-name icon-name)
-        paths (get icon-paths
-                   #?(:squint n
-                      :cljs   (keyword n)
-                      :clj    (keyword n)))]
+        kw #?(:squint n :cljs (keyword n) :clj (keyword n))
+        paths (if filled
+                (or (get filled-icon-paths kw) (get icon-paths kw))
+                (get icon-paths kw))]
     (when paths
       #?(:squint
          (let [classes (cond-> (icon-classes {:size size})
                          class (str " " class))
                svg-attrs (merge {:xmlns "http://www.w3.org/2000/svg"
                                  :viewBox "0 0 24 24"
-                                 :fill "none"
-                                 :stroke "currentColor"
+                                 :fill (if filled "currentColor" "none")
+                                 :stroke (if filled "none" "currentColor")
                                  :stroke-width "2"
                                  :stroke-linecap "round"
                                  :stroke-linejoin "round"
@@ -390,8 +422,8 @@
                classes (cond-> cls class (conj class))
                svg-attrs (merge {:xmlns "http://www.w3.org/2000/svg"
                                  :viewBox "0 0 24 24"
-                                 :fill "none"
-                                 :stroke "currentColor"
+                                 :fill (if filled "currentColor" "none")
+                                 :stroke (if filled "none" "currentColor")
                                  :stroke-width "2"
                                  :stroke-linecap "round"
                                  :stroke-linejoin "round"
@@ -405,8 +437,8 @@
                          class (str " " class))
                svg-attrs (merge {:xmlns "http://www.w3.org/2000/svg"
                                  :viewBox "0 0 24 24"
-                                 :fill "none"
-                                 :stroke "currentColor"
+                                 :fill (if filled "currentColor" "none")
+                                 :stroke (if filled "none" "currentColor")
                                  :stroke-width "2"
                                  :stroke-linecap "round"
                                  :stroke-linejoin "round"

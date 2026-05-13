@@ -604,6 +604,16 @@
            (markdown/markdown->hiccup md)))
    (calendar-demo)])
 
+(defn- filled-icon-card [n]
+  [:div {:style {"display" "flex" "flex-direction" "column" "align-items" "center"
+                 "gap" "var(--size-3)" "padding" "var(--size-3)"
+                 "border-radius" "var(--radius-md)" "border" "var(--border-0)"}}
+   [:div {:style {"display" "flex" "gap" "var(--size-4)" "align-items" "center"}}
+    (icon/icon {:icon-name n})
+    (icon/icon {:icon-name n :filled true})]
+   [:span {:style {"font-size" "var(--font-xs)" "color" "var(--fg-2)"
+                   "text-align" "center"}} n]])
+
 (defn icons-page []
   [:div
    (page-header "Icons" (str (count icon/icon-names) " icons based on Lucide. All render as inline SVG with stroke=\"currentColor\"."))
@@ -616,6 +626,11 @@
                      (icon/icon {:icon-name "star" :size s})
                      [:span {:style {"font-size" "var(--font-xs)" "color" "var(--fg-2)"}} label]]))
                 [["sm" "sm"] ["md" "md (default)"] ["lg" "lg"] ["xl" "xl"]])))
+   (section "Filled Variants"
+     [:p {:style {"color" "var(--fg-1)" "margin-bottom" "var(--size-4)" "font-size" "var(--font-sm)"}}
+      "Media icons support a " [:code ":filled true"] " prop for solid rendering."]
+     (into [:div {:style {"display" "grid" "grid-template-columns" "repeat(auto-fill, minmax(8rem, 1fr))" "gap" "var(--size-4)"}}]
+           (map filled-icon-card ["play" "pause" "skip-back" "skip-forward" "repeat" "volume-2"])))
    (into [:div] (map icon-category-section icon-categories))])
 
 (defn sidebar-page []

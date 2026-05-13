@@ -366,6 +366,48 @@ Toggle with: `document.documentElement.dataset.theme = "dark" | "light"`
 
 Custom properties: `--hit-area` (all sides), `--hit-area-t`, `--hit-area-r`, `--hit-area-b`, `--hit-area-l` (per-side overrides).
 
+## Icons (`ui.icon`)
+
+Inline SVG icons using Lucide-compatible 24×24 paths. All icons are defined in `src/ui/icon.cljc`.
+
+### Usage
+
+```clojure
+(icon/icon {:icon-name :play :size :sm})
+(icon/icon {:icon-name :play :size :lg :filled true})
+(icon/icon {:icon-name :home :class "extra" :attrs {:id "nav-icon"}})
+```
+
+### Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `:icon-name` | keyword | required | Icon name (e.g. `:home`, `:play`, `:search`) |
+| `:size` | keyword | `:md` | `:sm` (16px), `:md` (20px), `:lg` (24px), `:xl` (32px) |
+| `:filled` | boolean | `false` | Render filled variant (solid shapes instead of strokes) |
+| `:class` | string | `nil` | Additional CSS classes |
+| `:attrs` | map | `nil` | Extra HTML/SVG attributes merged onto the `<svg>` element |
+
+### Outline vs Filled
+
+By default icons render as **stroked outlines** (`fill: none`, `stroke: currentColor`). Pass `:filled true` to get **solid fills** (`fill: currentColor`, `stroke: none`).
+
+Filled variants live in `filled-icon-paths`. When a filled variant isn't defined for an icon, it falls back to the outline paths with filled SVG attrs.
+
+Icons with dedicated filled path data: `:play`, `:pause`, `:skip-back`, `:skip-forward`, `:repeat`, `:volume-2`.
+
+**Special cases:**
+- **`:music`** — filled by default (note-head circles have `fill: currentColor` baked into path attrs), no need for `:filled true`
+- **`:shuffle`** — no filled variant (inherently stroke-based)
+- **`:volume-2`** filled — speaker body fills, wave arcs keep their stroke via per-element attr overrides
+- **`:repeat`** filled — arrow chevrons close into solid triangles, arc paths keep their stroke
+
+### Adding a new icon
+
+1. Add an entry to `icon-paths` with a keyword name and a vector of hiccup SVG child elements (`:path`, `:rect`, `:circle`, etc.)
+2. If it needs a filled variant with different paths, add a matching entry to `filled-icon-paths`
+3. For elements that must keep their stroke in filled mode, add per-element attrs: `{:fill "none" :stroke "currentColor" :stroke-width "2"}`
+
 ## Squint Pitfalls
 
 1. **`name` is not available** — define `kw-name` stubs via reader conditionals

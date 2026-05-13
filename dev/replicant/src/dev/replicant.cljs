@@ -547,6 +547,19 @@
         [:div {:style {:display "flex" :flex-direction "column" :align-items "center" :gap "var(--size-2)"}}
          (icon/icon {:icon-name :star :size s})
          [:span {:style {:font-size "var(--font-xs)" :color "var(--fg-2)"}} label]])])
+   (section "Filled Variants"
+     [:p {:style {:color "var(--fg-1)" :margin-bottom "var(--size-4)" :font-size "var(--font-sm)"}}
+      "Media icons support a " [:code ":filled true"] " prop for solid rendering."]
+     [:div {:style {:display "grid" :grid-template-columns "repeat(auto-fill, minmax(8rem, 1fr))" :gap "var(--size-4)"}}
+      (for [n [:play :pause :skip-back :skip-forward :repeat :volume-2]]
+        [:div {:style {:display "flex" :flex-direction "column" :align-items "center"
+                       :gap "var(--size-3)" :padding "var(--size-3)"
+                       :border-radius "var(--radius-md)" :border "var(--border-0)"}}
+         [:div {:style {:display "flex" :gap "var(--size-4)" :align-items "center"}}
+          (icon/icon {:icon-name n})
+          (icon/icon {:icon-name n :filled true})]
+         [:span {:style {:font-size "var(--font-xs)" :color "var(--fg-2)"
+                         :text-align "center"}} (name n)]])])
    (for [[cat-name icons] icon-categories]
      (section cat-name
        [:div {:style {:display "grid" :grid-template-columns "repeat(auto-fill, minmax(5rem, 1fr))" :gap "var(--size-4)"}}
