@@ -215,6 +215,62 @@
                     disabled    (assoc :disabled true))
         (or value "")])))
 
+;; ── Auto-growing Textarea ────────────────────────────────────────────
+
+(defn form-textarea-auto
+  "Render an auto-growing textarea that starts at 1 row and expands up to
+   :max-rows lines. Uses CSS `field-sizing: content` for automatic height,
+   capped via an inline `max-height` style.
+
+   Props:
+     :placeholder - placeholder text
+     :value       - textarea value
+     :disabled    - boolean
+     :error       - boolean, adds error styling
+     :max-rows    - maximum number of visible rows (default 3)
+     :on-change   - change handler (ignored in :clj target)
+     :class       - additional CSS classes
+     :attrs       - additional HTML attributes"
+  [{:keys [placeholder value disabled error max-rows on-change class attrs] :as _props}]
+  (let [rows   (or max-rows 3)
+        max-h  (str "calc(1.5em * " rows ")")]
+    #?(:squint
+       (let [classes (cond-> (str "form-textarea form-textarea-auto")
+                       error (str " form-textarea--error")
+                       class (str " " class))
+             style   (str "max-height:" max-h)]
+         [:textarea (cond-> (merge {:class classes
+                                    :rows "1"
+                                    :style style} attrs)
+                      placeholder (assoc :placeholder placeholder)
+                      disabled    (assoc :disabled true)
+                      on-change   (assoc :on-change on-change))
+          (or value "")])
+
+       :cljs
+       (let [cls (cond-> ["form-textarea" "form-textarea-auto"]
+                   error (conj "form-textarea--error")
+                   class (conj class))]
+         [:textarea (cond-> (merge {:class cls
+                                    :rows "1"
+                                    :style {:max-height max-h}} attrs)
+                      placeholder (assoc :placeholder placeholder)
+                      disabled    (assoc :disabled true)
+                      on-change   (assoc-in [:on :change] on-change))
+          (or value "")])
+
+       :clj
+       (let [classes (cond-> (str "form-textarea form-textarea-auto")
+                       error (str " form-textarea--error")
+                       class (str " " class))
+             style   (str "max-height:" max-h)]
+         [:textarea (cond-> (merge {:class classes
+                                    :rows "1"
+                                    :style style} attrs)
+                      placeholder (assoc :placeholder placeholder)
+                      disabled    (assoc :disabled true))
+          (or value "")]))))
+
 ;; ── Select ──────────────────────────────────────────────────────────
 
 (defn form-select

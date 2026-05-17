@@ -127,6 +127,16 @@
   resize: vertical;
 }
 
+/* ── Auto-growing Textarea ─────────────────────────────────── */
+
+.form-textarea-auto {
+  field-sizing: content;
+  min-height: unset;
+  resize: none;
+  overflow-y: auto;
+  line-height: 1.5;
+}
+
 /* ── Select ────────────────────────────────────────────────────── */
 
 .form-select {

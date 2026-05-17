@@ -275,6 +275,8 @@
                                     {:value "c" :label "Option C"}]}))
      (form/form-field {:label "Message"}
        (form/form-textarea {:placeholder "Your message..."}))
+     (form/form-field {:label "Auto-growing (3 lines max)"}
+       (form/form-textarea-auto {:placeholder "Grows as you type..." :max-rows 3}))
      (form/form-field {:label "Disabled"}
        (form/form-input {:type "text" :placeholder "Disabled" :disabled true}))
      (form/form-field {:label "File"}
