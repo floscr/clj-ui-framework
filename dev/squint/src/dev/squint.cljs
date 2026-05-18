@@ -25,7 +25,8 @@
             [ui.markdown :as markdown]
             [ui.player-bar :as player-bar]
             [ui.lightbox :as lightbox]
-            [ui.context-menu :as context-menu]))
+            [ui.context-menu :as context-menu]
+            [ui.file-browser :as fb]))
 
 ;; ── State ───────────────────────────────────────────────────────────
 
@@ -757,11 +758,111 @@
     :items [{:label "Breadcrumb" :anchor "breadcrumb"}
             {:label "Pagination" :anchor "pagination"}]}])
 
+(def sample-files
+  [{:name "Documents"          :file-type "folder"      :modified "May 10, 2026"}
+   {:name "Photos"              :file-type "folder"      :modified "May 8, 2026"}
+   {:name "project-proposal.pdf" :file-type "document"   :size "2.4 MB"   :modified "May 12, 2026"}
+   {:name "vacation-photo.jpg"  :file-type "image"       :size "4.1 MB"   :modified "May 11, 2026"}
+   {:name "presentation.pptx"  :file-type "document"    :size "12.8 MB"  :modified "May 9, 2026"}
+   {:name "budget-2026.xlsx"   :file-type "spreadsheet" :size "156 KB"   :modified "May 7, 2026"}
+   {:name "intro-video.mp4"    :file-type "video"       :size "245 MB"   :modified "May 5, 2026"}
+   {:name "podcast-ep12.mp3"   :file-type "audio"       :size "48 MB"    :modified "May 3, 2026"}
+   {:name "app.clj"            :file-type "code"        :size "8.2 KB"   :modified "May 14, 2026"}
+   {:name "backup.zip"         :file-type "archive"     :size "1.2 GB"   :modified "Apr 28, 2026"}
+   {:name "README.md"          :file-type "document"    :size "4.5 KB"   :modified "May 15, 2026"}
+   {:name "screenshot.png"     :file-type "image"       :size "890 KB"   :modified "May 13, 2026"}])
+
+(defn file-context-menu-items [item]
+  (let [is-folder? (= (:file-type item) "folder")]
+    (cond-> [{:label "Open"   :icon "folder"
+              :on-click (fn [] (js/console.log (str "Open: " (:name item))) (render!))}]
+      (not is-folder?) (conj {:label "Download" :icon "download"
+                               :on-click (fn [] (js/console.log (str "Download: " (:name item))) (render!))})
+      true (conj {:label "Rename" :icon "edit"
+                  :on-click (fn [] (js/console.log (str "Rename: " (:name item))) (render!))})
+      true (conj {:label "Share" :icon "link"
+                  :on-click (fn [] (js/console.log (str "Share: " (:name item))) (render!))})
+      true (conj {:type "separator"})
+      true (conj {:label "Delete" :icon "trash" :variant "danger"
+                  :on-click (fn [] (js/console.log (str "Delete: " (:name item))) (render!))}))))
+
+(def !fb-view (atom "grid"))
+(def !fb-sort (atom {:key "name" :dir "asc"}))
+
+(defn- toggle-sort! [col-key]
+  (swap! !fb-sort (fn [{:keys [key dir]}]
+                    (if (= key col-key)
+                      {:key key :dir (if (= dir "asc") "desc" "asc")}
+                      {:key col-key :dir "asc"})))
+  (render!))
+
+(defn- sorted-files [files {:keys [key dir]}]
+  (let [cmp-fn (fn [a b]
+                 (let [va (get a (keyword key))
+                       vb (get b (keyword key))
+                       fa (= (:file-type a) "folder")
+                       fb-flag (= (:file-type b) "folder")]
+                   (cond
+                     (and fa (not fb-flag)) -1
+                     (and fb-flag (not fa)) 1
+                     :else (compare (or va "") (or vb "")))))
+        sorted (sort cmp-fn files)]
+    (if (= dir "desc") (reverse sorted) sorted)))
+
+(defn file-browser-page []
+  (let [view @!fb-view
+        sort-state @!fb-sort
+        files (sorted-files sample-files sort-state)]
+    [:div
+     (page-header "File Browser" "Grid and list views for file management with type-specific icons and context menus.")
+
+     (section "File Type Icons"
+       [:p {:style {"color" "var(--fg-2)" "font-size" "var(--font-sm)" "margin-bottom" "0.5rem"}}
+        "Each file type gets a distinctive icon and color."]
+       (into [:div {:style {"display" "grid" "grid-template-columns" "repeat(auto-fill, minmax(6rem, 1fr))" "gap" "var(--size-4)"}}]
+             (map (fn [ft]
+                    [:div {:style {"display" "flex" "flex-direction" "column" "align-items" "center" "gap" "var(--size-2)"
+                                   "padding" "var(--size-3)" "border-radius" "var(--radius-md)" "border" "var(--border-0)"}}
+                     (fb/file-type-icon {:file-type ft})
+                     [:span {:style {"font-size" "var(--font-xs)" "color" "var(--fg-2)"}} ft]])
+                  ["folder" "image" "video" "audio" "document" "spreadsheet" "code" "archive" "file"])))
+
+     (section "Interactive File Browser"
+       [:div {:class "fb-toolbar"}
+        [:div {:style {"font-weight" "500"}} "My Files"]
+        (fb/file-view-toggle {:view view
+                              :on-grid-click (fn [_] (reset! !fb-view "grid") (render!))
+                              :on-list-click (fn [_] (reset! !fb-view "list") (render!))})]
+       (if (= view "grid")
+         (into [:div {:class "fb-grid"}]
+               (map (fn [item]
+                      (fb/file-item-grid {:item item
+                                          :context-menu-items (file-context-menu-items item)}))
+                    files))
+         (into [:div {:class "fb-list"}]
+               (into [(fb/file-list-header {:sort-key (:key sort-state)
+                                            :sort-dir (:dir sort-state)
+                                            :on-sort  toggle-sort!})]
+                     (map (fn [item]
+                            (fb/file-item-list {:item item
+                                                :context-menu-items (file-context-menu-items item)}))
+                          files)))))
+
+     (section "Selected Items"
+       [:p {:style {"color" "var(--fg-2)" "font-size" "var(--font-sm)"}}
+        "Items can show a selected state."]
+       (into [:div {:class "fb-grid"}]
+             (map-indexed (fn [i item]
+                            (fb/file-item-grid {:item item
+                                                :selected (or (= i 0) (= i 2))}))
+                          (take 4 sample-files))))]))
+
 (def nav-items
   [{:id "components" :label "Components"  :icon-name "package"}
    {:id "calendar"   :label "Calendar"    :icon-name "calendar"}
    {:id "icons"      :label "Icons"       :icon-name "image"}
-   {:id "sidebar"    :label "Sidebar"     :icon-name "layout-dashboard"}])
+   {:id "sidebar"    :label "Sidebar"     :icon-name "layout-dashboard"}
+   {:id "files"      :label "File Browser" :icon-name "folder"}])
 
 (defn navigate! [page-id]
   (fn [_e]
@@ -847,6 +948,7 @@
            "calendar"   (calendar-page)
            "icons"      (icons-page)
            "sidebar"    (sidebar-page)
+           "files"      (file-browser-page)
            (components-page))]))))
 
 ;; ── Init ────────────────────────────────────────────────────────────

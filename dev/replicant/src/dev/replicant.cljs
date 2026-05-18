@@ -25,7 +25,8 @@
             [ui.markdown :as markdown]
             [ui.player-bar :as player-bar]
             [ui.lightbox :as lightbox]
-            [ui.context-menu :as context-menu])
+            [ui.context-menu :as context-menu]
+            [ui.file-browser :as fb])
   (:require-macros [ui.macros :refer [inline-file]]))
 
 ;; ── State ───────────────────────────────────────────────────────────
@@ -695,11 +696,107 @@
     :items [{:label "Breadcrumb" :anchor "breadcrumb"}
             {:label "Pagination" :anchor "pagination"}]}])
 
+(def sample-files
+  [{:name "Documents"          :file-type :folder      :modified "May 10, 2026"}
+   {:name "Photos"              :file-type :folder      :modified "May 8, 2026"}
+   {:name "project-proposal.pdf" :file-type :document   :size "2.4 MB"   :modified "May 12, 2026"}
+   {:name "vacation-photo.jpg"  :file-type :image       :size "4.1 MB"   :modified "May 11, 2026"}
+   {:name "presentation.pptx"  :file-type :document    :size "12.8 MB"  :modified "May 9, 2026"}
+   {:name "budget-2026.xlsx"   :file-type :spreadsheet :size "156 KB"   :modified "May 7, 2026"}
+   {:name "intro-video.mp4"    :file-type :video       :size "245 MB"   :modified "May 5, 2026"}
+   {:name "podcast-ep12.mp3"   :file-type :audio       :size "48 MB"    :modified "May 3, 2026"}
+   {:name "app.clj"            :file-type :code        :size "8.2 KB"   :modified "May 14, 2026"}
+   {:name "backup.zip"         :file-type :archive     :size "1.2 GB"   :modified "Apr 28, 2026"}
+   {:name "README.md"          :file-type :document    :size "4.5 KB"   :modified "May 15, 2026"}
+   {:name "screenshot.png"     :file-type :image       :size "890 KB"   :modified "May 13, 2026"}])
+
+(defn file-context-menu-items [item]
+  (let [is-folder? (= (name (:file-type item)) "folder")]
+    (cond-> [{:label "Open"   :icon :folder
+              :on-click (fn [] (js/console.log (str "Open: " (:name item))))}]
+      (not is-folder?) (conj {:label "Download" :icon :download
+                               :on-click (fn [] (js/console.log (str "Download: " (:name item))))})
+      true (conj {:label "Rename" :icon :edit
+                  :on-click (fn [] (js/console.log (str "Rename: " (:name item))))})
+      true (conj {:label "Share" :icon :link
+                  :on-click (fn [] (js/console.log (str "Share: " (:name item))))})
+      true (conj {:type :separator})
+      true (conj {:label "Delete" :icon :trash :variant :danger
+                  :on-click (fn [] (js/console.log (str "Delete: " (:name item))))}))))
+
+(defonce !fb-view (atom :grid))
+(defonce !fb-sort (atom {:key :name :dir :asc}))
+
+(defn- toggle-sort! [col-key]
+  (swap! !fb-sort (fn [{:keys [key dir]}]
+                    (if (= key col-key)
+                      {:key key :dir (if (= dir :asc) :desc :asc)}
+                      {:key col-key :dir :asc}))))
+
+(defn- sorted-files [files {:keys [key dir]}]
+  (let [cmp-fn (fn [a b]
+                 (let [va (get a key)
+                       vb (get b key)
+                       ;; folders first
+                       fa (= (name (:file-type a)) "folder")
+                       fb (= (name (:file-type b)) "folder")]
+                   (cond
+                     (and fa (not fb)) -1
+                     (and fb (not fa)) 1
+                     :else (compare (or va "") (or vb "")))))
+        sorted (sort cmp-fn files)]
+    (if (= dir :desc) (reverse sorted) sorted)))
+
+(defn file-browser-page []
+  (let [view @!fb-view
+        sort-state @!fb-sort
+        files (sorted-files sample-files sort-state)]
+    [:div
+     (page-header "File Browser" "Grid and list views for file management with type-specific icons and context menus.")
+
+     (section "File Type Icons"
+       [:p {:style {:color "var(--fg-2)" :font-size "var(--font-sm)" :margin-bottom "0.5rem"}}
+        "Each file type gets a distinctive icon and color."]
+       [:div {:style {:display "grid" :grid-template-columns "repeat(auto-fill, minmax(6rem, 1fr))" :gap "var(--size-4)"}}
+        (for [ft [:folder :image :video :audio :document :spreadsheet :code :archive :file]]
+          [:div {:style {:display "flex" :flex-direction "column" :align-items "center" :gap "var(--size-2)"
+                         :padding "var(--size-3)" :border-radius "var(--radius-md)" :border "var(--border-0)"}}
+           (fb/file-type-icon {:file-type ft})
+           [:span {:style {:font-size "var(--font-xs)" :color "var(--fg-2)"}} (name ft)]])])
+
+     (section "Interactive File Browser"
+       [:div {:class ["fb-toolbar"]}
+        [:div {:style {:font-weight "500"}} "My Files"]
+        (fb/file-view-toggle {:view view
+                              :on-grid-click (fn [_] (reset! !fb-view :grid))
+                              :on-list-click (fn [_] (reset! !fb-view :list))})]
+       (if (= view :grid)
+         [:div {:class ["fb-grid"]}
+          (for [item files]
+            (fb/file-item-grid {:item item
+                                :context-menu-items (file-context-menu-items item)}))]
+         [:div {:class ["fb-list"]}
+          (fb/file-list-header {:sort-key (:key sort-state)
+                                :sort-dir (:dir sort-state)
+                                :on-sort  toggle-sort!})
+          (for [item files]
+            (fb/file-item-list {:item item
+                                :context-menu-items (file-context-menu-items item)}))]))
+
+     (section "Selected Items"
+       [:p {:style {:color "var(--fg-2)" :font-size "var(--font-sm)"}}
+        "Items can show a selected state."]
+       [:div {:class ["fb-grid"]}
+        (for [[i item] (map-indexed vector (take 4 sample-files))]
+          (fb/file-item-grid {:item item
+                              :selected (contains? #{0 2} i)}))])]))
+
 (def nav-items
   [{:id :components :label "Components"  :icon-name :package}
    {:id :calendar   :label "Calendar"    :icon-name :calendar}
    {:id :icons      :label "Icons"       :icon-name :image}
-   {:id :sidebar    :label "Sidebar"     :icon-name :layout-dashboard}])
+   {:id :sidebar    :label "Sidebar"     :icon-name :layout-dashboard}
+   {:id :files      :label "File Browser" :icon-name :folder}])
 
 (defn navigate! [page-id]
   (fn [_e]
@@ -796,6 +893,7 @@
            :calendar   (calendar-page)
            :icons      (icons-page)
            :sidebar    (sidebar-page)
+           :files      (file-browser-page)
            (components-page))]))))
 
 ;; ── Init ────────────────────────────────────────────────────────────
@@ -810,6 +908,8 @@
   (add-watch !cal-state :render (fn [_ _ _ _] (render!)))
   (add-watch !lightbox-state :render (fn [_ _ _ _] (render!)))
   (add-watch !ctx-log :render (fn [_ _ _ _] (render!)))
+  (add-watch !fb-view :render (fn [_ _ _ _] (render!)))
+  (add-watch !fb-sort :render (fn [_ _ _ _] (render!)))
   (render!))
 
 (defn ^:export reload! []

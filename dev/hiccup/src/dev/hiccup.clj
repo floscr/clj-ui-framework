@@ -28,7 +28,8 @@
             [ui.markdown :as markdown]
             [ui.player-bar :as player-bar]
             [ui.lightbox :as lightbox]
-            [ui.context-menu :as context-menu]))
+            [ui.context-menu :as context-menu]
+            [ui.file-browser :as fb]))
 
 ;; ── Query Params ────────────────────────────────────────────────────
 
@@ -486,6 +487,69 @@
    (lightbox-demo)
    [:style (h/raw ".lightbox-overlay { position: absolute !important; }")]])
 
+(def sample-files
+  [{:name "Documents"          :file-type :folder      :modified "May 10, 2026"}
+   {:name "Photos"              :file-type :folder      :modified "May 8, 2026"}
+   {:name "project-proposal.pdf" :file-type :document   :size "2.4 MB"   :modified "May 12, 2026"}
+   {:name "vacation-photo.jpg"  :file-type :image       :size "4.1 MB"   :modified "May 11, 2026"}
+   {:name "presentation.pptx"  :file-type :document    :size "12.8 MB"  :modified "May 9, 2026"}
+   {:name "budget-2026.xlsx"   :file-type :spreadsheet :size "156 KB"   :modified "May 7, 2026"}
+   {:name "intro-video.mp4"    :file-type :video       :size "245 MB"   :modified "May 5, 2026"}
+   {:name "podcast-ep12.mp3"   :file-type :audio       :size "48 MB"    :modified "May 3, 2026"}
+   {:name "app.clj"            :file-type :code        :size "8.2 KB"   :modified "May 14, 2026"}
+   {:name "backup.zip"         :file-type :archive     :size "1.2 GB"   :modified "Apr 28, 2026"}
+   {:name "README.md"          :file-type :document    :size "4.5 KB"   :modified "May 15, 2026"}
+   {:name "screenshot.png"     :file-type :image       :size "890 KB"   :modified "May 13, 2026"}])
+
+(defn file-context-menu-items [item]
+  (let [is-folder? (= (name (:file-type item)) "folder")]
+    (cond-> [{:label "Open"   :icon :folder  :url "#"}]
+      (not is-folder?) (conj {:label "Download" :icon :download :url "#"})
+      true (conj {:label "Rename" :icon :edit :url "#"})
+      true (conj {:label "Share" :icon :link :url "#"})
+      true (conj {:type :separator})
+      true (conj {:label "Delete" :icon :trash :variant :danger :url "#"}))))
+
+(defn file-browser-page []
+  [:div
+   (page-header "File Browser" "Grid and list views for file management with type-specific icons and context menus.")
+
+   (section "File Type Icons"
+     [:p {:style "color: var(--fg-2); font-size: var(--font-sm); margin-bottom: 0.5rem;"}
+      "Each file type gets a distinctive icon and color."]
+     [:div {:style "display: grid; grid-template-columns: repeat(auto-fill, minmax(6rem, 1fr)); gap: var(--size-4);"}
+      (for [ft [:folder :image :video :audio :document :spreadsheet :code :archive :file]]
+        [:div {:style "display: flex; flex-direction: column; align-items: center; gap: var(--size-2); padding: var(--size-3); border-radius: var(--radius-md); border: var(--border-0);"}
+         (fb/file-type-icon {:file-type ft})
+         [:span {:style "font-size: var(--font-xs); color: var(--fg-2);"} (name ft)]])])
+
+   (section "Grid View"
+     [:div {:class "fb-toolbar"}
+      [:div {:style "font-weight: 500;"} "My Files"]
+      (fb/file-view-toggle {:view :grid})]
+     [:div {:class "fb-grid"}
+      (for [item sample-files]
+        (fb/file-item-grid {:item item
+                            :context-menu-items (file-context-menu-items item)}))])
+
+   (section "List View"
+     [:div {:class "fb-toolbar"}
+      [:div {:style "font-weight: 500;"} "My Files"]
+      (fb/file-view-toggle {:view :list})]
+     [:div {:class "fb-list"}
+      (fb/file-list-header {:sort-key :name :sort-dir :asc})
+      (for [item sample-files]
+        (fb/file-item-list {:item item
+                            :context-menu-items (file-context-menu-items item)}))])
+
+   (section "Selected Items"
+     [:p {:style "color: var(--fg-2); font-size: var(--font-sm);"}
+      "Items can show a selected state."]
+     [:div {:class "fb-grid"}
+      (for [[i item] (map-indexed vector (take 4 sample-files))]
+        (fb/file-item-grid {:item item
+                            :selected (#{0 2} i)}))])])
+
 (def icon-categories
   [["Navigation"
     [:home :menu :x
@@ -625,7 +689,8 @@
   [{:id :components :label "Components"  :icon-name :package    :href "/"}
    {:id :calendar   :label "Calendar"    :icon-name :calendar   :href "/calendar"}
    {:id :icons      :label "Icons"       :icon-name :image      :href "/icons"}
-   {:id :sidebar    :label "Sidebar"     :icon-name :layout-dashboard :href "/sidebar"}])
+   {:id :sidebar    :label "Sidebar"     :icon-name :layout-dashboard :href "/sidebar"}
+   {:id :files      :label "File Browser" :icon-name :folder           :href "/files"}])
 
 (defn resolve-page [uri]
   (case uri
@@ -633,6 +698,7 @@
     "/calendar"  :calendar
     "/icons"     :icons
     "/sidebar"   :sidebar
+    "/files"     :files
     nil))
 
 ;; ── App Shell ───────────────────────────────────────────────────────
@@ -724,6 +790,7 @@
                  :calendar   (calendar-page)
                  :icons      (icons-page)
                  :sidebar    (sidebar-page)
+                 :files      (file-browser-page)
                  [:div (page-header "Not Found" "This page doesn't exist.")])]))]]))))
 
 ;; ── Live Reload ─────────────────────────────────────────────────────
