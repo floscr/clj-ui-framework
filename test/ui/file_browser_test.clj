@@ -125,46 +125,51 @@
            (mapv :key fb/default-columns)))))
 
 (deftest file-table-test
-  (testing "renders table with default columns"
+  (testing "renders grid-based table with default columns"
     (let [items [{:name "test.txt" :file-type :document :size "1 KB" :modified "May 1"}]
           result (fb/file-table {:items items})]
       (is (= :div (first result)))
       (is (re-find #"fb-table-wrapper" (get-in result [1 :class])))
-      ;; second element is the table
-      (let [table (nth result 2)]
-        (is (= :table (first table)))
-        (is (= "fb-table" (get-in table [1 :class]))))))
+      ;; second element is the CSS Grid container
+      (let [grid (nth result 2)]
+        (is (= :div (first grid)))
+        (is (re-find #"fb-table" (get-in grid [1 :class]))))))
 
   (testing "renders custom columns"
     (let [cols [{:key :name :label "File"}
                 {:key :owner :label "Owner" :width "120px"}]
           items [{:name "a.txt" :owner "Alice"}]
           result (fb/file-table {:columns cols :items items})
-          table (nth result 2)
-          ;; thead is after colgroup (or directly after attrs)
-          thead (first (filter #(and (vector? %) (= :thead (first %))) (rest table)))
-          header-row (second thead)
-          th1 (nth header-row 1)
-          th2 (nth header-row 2)]
-      ;; headers match custom labels — [:th attrs [:span "File"] ...]
+          grid (nth result 2)
+          ;; first child after tag+attrs is the header group
+          header (nth grid 2)
+          th1 (nth header 2)
+          th2 (nth header 3)]
+      ;; headers match custom labels — [:div attrs [:span "File"] ...]
       (is (= "File" (second (nth th1 2))))
       (is (= "Owner" (second (nth th2 2))))))
 
   (testing "sortable header gets active class"
     (let [result (fb/file-table {:items [] :sort-key :name :sort-dir :asc :on-sort identity})
-          table (nth result 2)
-          thead (first (filter #(and (vector? %) (= :thead (first %))) (rest table)))
-          header-row (second thead)
-          th1 (nth header-row 1)] ;; Name column
+          grid (nth result 2)
+          header (nth grid 2)
+          th1 (nth header 2)] ;; Name column
       (is (re-find #"fb-table-th-active" (get-in th1 [1 :class])))))
 
   (testing "selected row gets class"
     (let [items [{:name "a.txt" :file-type :file}]
           result (fb/file-table {:items items :selected-fn (constantly true)})
-          table (nth result 2)
-          tbody (last table)
-          row (second tbody)]
+          grid (nth result 2)
+          ;; first row is after header (index 3)
+          row (nth grid 3)]
       (is (re-find #"fb-table-row-selected" (get-in row [1 :class]))))))
+
+  (testing "grid-template-columns derived from column widths"
+    (let [result (fb/file-table {:items [] :columns [{:key :name :label "Name"}
+                                                     {:key :size :label "Size" :width "90px"}]})
+          grid (nth result 2)
+          style (get-in grid [1 :style])]
+      (is (= "grid-template-columns: minmax(0,1fr) 90px" style))))
 
 ;; ── Drop Zone Tests ─────────────────────────────────────────────────
 

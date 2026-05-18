@@ -881,7 +881,8 @@
                          :sort-key (:key sort-state)
                          :sort-dir (:dir sort-state)
                          :on-sort  toggle-sort!
-                         :on-row-click (fn [item] (js/console.log (str "Clicked: " (:name item))))})))
+                         :on-row-click (fn [item] (js/console.log (str "Clicked: " (:name item))))
+                         :context-menu-items-fn file-context-menu-items})))
 
      (section "Selected Items"
        [:p {:style {"color" "var(--fg-2)" "font-size" "var(--font-sm)"}}

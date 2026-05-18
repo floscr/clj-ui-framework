@@ -255,7 +255,8 @@
 (defn file-table
   "Renders a file browser table with custom columns.
 
-   Uses a semantic <table> element styled to match the file browser list view.
+   Uses CSS Grid with display:contents rows so that wrapper elements
+   (e.g. context-menu triggers) don't break the grid layout.
    Columns are fully configurable — use the built-in col-name, col-size,
    col-modified, col-type helpers or define your own.
 
@@ -268,6 +269,7 @@
      :on-sort      - (fn [col-key]) called when a header is clicked
      :on-row-click - (fn [item]) called when a row is clicked
      :selected-fn  - (fn [item]) -> boolean, highlights the row
+     :context-menu-items-fn - (fn [item]) -> items vector, right-click menu per row
      :class        - additional CSS classes on the wrapper
      :attrs        - additional HTML attributes on the wrapper
 
@@ -277,116 +279,112 @@
      :width  - CSS width string (optional, e.g. \"90px\")
      :render - (fn [item]) custom cell renderer (optional)
      :class  - additional CSS class for this column's cells (optional)"
-  [{:keys [columns items sort-key sort-dir on-sort on-row-click selected-fn class attrs]}]
+  [{:keys [columns items sort-key sort-dir on-sort on-row-click selected-fn context-menu-items-fn class attrs]}]
   (let [cols         (or columns default-columns)
         sortable?    (some? on-sort)
-        col-widths   (map :width cols)
-        has-widths?  (some some? col-widths)]
+        gtc          (str/join " " (map (fn [col] (or (:width col) "minmax(0,1fr)")) cols))]
     #?(:squint
        [:div (merge {:class (cond-> "fb-table-wrapper"
                               class (str " " class))}
                     attrs)
-        [:table {:class "fb-table"}
-         (when has-widths?
-           (into [:colgroup]
-                 (map (fn [col]
-                        [:col (when-let [w (:width col)] {:style {"width" w}})])
-                      cols)))
-         [:thead
-          (into [:tr]
-                (map (fn [col]
-                       (let [k     (:key col)
-                             active (= k (or sort-key ""))]
-                         [:th {:class (cond-> "fb-table-th"
-                                        active    (str " fb-table-th-active")
-                                        sortable? (str " fb-table-th-sortable")
-                                        (:class col) (str " " (:class col)))
-                               :on-click (when sortable? (fn [_] (on-sort k)))}
-                          [:span (:label col)]
-                          (when active (table-sort-indicator sort-dir))]))
-                     cols))]
-         (into [:tbody]
-               (map (fn [item]
-                      (let [sel? (and selected-fn (selected-fn item))]
-                        (into [:tr {:class (cond-> "fb-table-row"
-                                            sel?         (str " fb-table-row-selected")
-                                            on-row-click (str " fb-table-row-clickable"))
-                                    :on-click (when on-row-click (fn [_] (on-row-click item)))}]
-                              (map (fn [col]
-                                     [:td {:class (or (:class col) "")}
-                                      (render-cell col item)])
-                                   cols))))
-                    items))]]
+        (into [:div {:class "fb-table"
+                     :style {"grid-template-columns" gtc}}
+               (into [:div {:class "fb-table-header"}]
+                     (map (fn [col]
+                            (let [k     (:key col)
+                                  active (= k (or sort-key ""))]
+                              [:div {:class (cond-> "fb-table-th"
+                                              active    (str " fb-table-th-active")
+                                              sortable? (str " fb-table-th-sortable")
+                                              (:class col) (str " " (:class col)))
+                                     :on-click (when sortable? (fn [_] (on-sort k)))}
+                               [:span (:label col)]
+                               (when active (table-sort-indicator sort-dir))]))
+                          cols))]
+              (map (fn [item]
+                     (let [sel?     (and selected-fn (selected-fn item))
+                           cm-items (when context-menu-items-fn (context-menu-items-fn item))
+                           row      (into [:div {:class (cond-> "fb-table-row"
+                                                          sel?         (str " fb-table-row-selected")
+                                                          on-row-click (str " fb-table-row-clickable"))
+                                                  :on-click (when on-row-click (fn [_] (on-row-click item)))}]
+                                          (map (fn [col]
+                                                 [:div {:class (cond-> "fb-table-cell"
+                                                                 (:class col) (str " " (:class col)))}
+                                                  (render-cell col item)])
+                                               cols))]
+                       (if (seq cm-items)
+                         (context-menu/context-menu-trigger {:items cm-items} row)
+                         row)))
+                   items))]
 
        :cljs
        [:div (merge {:class (cond-> ["fb-table-wrapper"]
                               class (conj class))}
                     attrs)
-        [:table {:class ["fb-table"]}
-         (when has-widths?
-           (into [:colgroup]
-                 (map (fn [col]
-                        [:col (when-let [w (:width col)] {:style {:width w}})])
-                      cols)))
-         [:thead
-          (into [:tr]
-                (map (fn [col]
-                       (let [k     (:key col)
-                             active (= (kw-name k) (kw-name (or sort-key "")))]
-                         [:th {:class (cond-> ["fb-table-th"]
-                                        active    (conj "fb-table-th-active")
-                                        sortable? (conj "fb-table-th-sortable")
-                                        (:class col) (conj (:class col)))
-                               :on (when sortable? {:click (fn [_] (on-sort k))})}
-                          [:span (:label col)]
-                          (when active (table-sort-indicator sort-dir))]))
-                     cols))]
-         (into [:tbody]
-               (map (fn [item]
-                      (let [sel? (and selected-fn (selected-fn item))]
-                        (into [:tr {:class (cond-> ["fb-table-row"]
-                                            sel?         (conj "fb-table-row-selected")
-                                            on-row-click (conj "fb-table-row-clickable"))
-                                    :on (when on-row-click {:click (fn [_] (on-row-click item))})}]
-                              (map (fn [col]
-                                     [:td {:class (or (:class col) "")}
-                                      (render-cell col item)])
-                                   cols))))
-                    items))]]
+        (into [:div {:class ["fb-table"]
+                     :style {:grid-template-columns gtc}}
+               (into [:div {:class ["fb-table-header"]}]
+                     (map (fn [col]
+                            (let [k     (:key col)
+                                  active (= (kw-name k) (kw-name (or sort-key "")))]
+                              [:div {:class (cond-> ["fb-table-th"]
+                                              active    (conj "fb-table-th-active")
+                                              sortable? (conj "fb-table-th-sortable")
+                                              (:class col) (conj (:class col)))
+                                     :on (when sortable? {:click (fn [_] (on-sort k))})}
+                               [:span (:label col)]
+                               (when active (table-sort-indicator sort-dir))]))
+                          cols))]
+              (map (fn [item]
+                     (let [sel?     (and selected-fn (selected-fn item))
+                           cm-items (when context-menu-items-fn (context-menu-items-fn item))
+                           row      (into [:div {:class (cond-> ["fb-table-row"]
+                                                          sel?         (conj "fb-table-row-selected")
+                                                          on-row-click (conj "fb-table-row-clickable"))
+                                                  :on (when on-row-click {:click (fn [_] (on-row-click item))})}]
+                                          (map (fn [col]
+                                                 [:div {:class (cond-> ["fb-table-cell"]
+                                                                 (:class col) (conj (:class col)))}
+                                                  (render-cell col item)])
+                                               cols))]
+                       (if (seq cm-items)
+                         (context-menu/context-menu-trigger {:items cm-items} row)
+                         row)))
+                   items))]
 
        :clj
        [:div (merge {:class (cond-> "fb-table-wrapper"
                               class (str " " class))}
                     attrs)
-        [:table {:class "fb-table"}
-         (when has-widths?
-           (into [:colgroup]
-                 (map (fn [col]
-                        [:col (when-let [w (:width col)] {:style (str "width:" w)})])
-                      cols)))
-         [:thead
-          (into [:tr]
-                (map (fn [col]
-                       (let [k     (:key col)
-                             active (= (kw-name k) (kw-name (or sort-key "")))]
-                         [:th {:class (cond-> "fb-table-th"
-                                        active    (str " fb-table-th-active")
-                                        sortable? (str " fb-table-th-sortable")
-                                        (:class col) (str " " (:class col)))}
-                          [:span (:label col)]
-                          (when active (table-sort-indicator sort-dir))]))
-                     cols))]
-         (into [:tbody]
-               (map (fn [item]
-                      (let [sel? (and selected-fn (selected-fn item))]
-                        (into [:tr {:class (cond-> "fb-table-row"
-                                            sel?         (str " fb-table-row-selected")
-                                            on-row-click (str " fb-table-row-clickable"))}]
-                              (map (fn [col]
-                                     [:td {:class (or (:class col) "")}
-                                      (render-cell col item)])
-                                   cols))))
-                    items))]])))
+        (into [:div {:class "fb-table"
+                     :style (str "grid-template-columns: " gtc)}
+               (into [:div {:class "fb-table-header"}]
+                     (map (fn [col]
+                            (let [k     (:key col)
+                                  active (= (kw-name k) (kw-name (or sort-key "")))]
+                              [:div {:class (cond-> "fb-table-th"
+                                              active    (str " fb-table-th-active")
+                                              sortable? (str " fb-table-th-sortable")
+                                              (:class col) (str " " (:class col)))}
+                               [:span (:label col)]
+                               (when active (table-sort-indicator sort-dir))]))
+                          cols))]
+              (map (fn [item]
+                     (let [sel?     (and selected-fn (selected-fn item))
+                           cm-items (when context-menu-items-fn (context-menu-items-fn item))
+                           row      (into [:div {:class (cond-> "fb-table-row"
+                                                          sel?         (str " fb-table-row-selected")
+                                                          on-row-click (str " fb-table-row-clickable"))}]
+                                          (map (fn [col]
+                                                 [:div {:class (cond-> "fb-table-cell"
+                                                                 (:class col) (str " " (:class col)))}
+                                                  (render-cell col item)])
+                                               cols))]
+                       (if (seq cm-items)
+                         (context-menu/context-menu-trigger {:items cm-items} row)
+                         row)))
+                   items))])))
 
 ;; ── List Header ─────────────────────────────────────────────────────
 

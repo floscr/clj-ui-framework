@@ -539,7 +539,8 @@
       (fb/file-view-toggle {:view :list})]
      (fb/file-table {:items sample-files
                      :sort-key :name
-                     :sort-dir :asc}))
+                     :sort-dir :asc
+                     :context-menu-items-fn file-context-menu-items}))
 
    (section "Selected Items"
      [:p {:style "color: var(--fg-2); font-size: var(--font-sm);"}

@@ -317,7 +317,7 @@
   font-size: var(--font-sm);
 }
 
-/* ── File Table ───────────────────────────────────────────────────── */
+/* ── File Table (CSS Grid + display:contents) ────────────────────── */
 
 .fb-table-wrapper {
   border: var(--border-0);
@@ -326,13 +326,18 @@
 }
 
 .fb-table {
+  display: grid;
   width: 100%;
-  border-collapse: collapse;
-  table-layout: fixed;
 }
 
-.fb-table thead {
-  background: var(--bg-1);
+/* Context-menu wrappers become layout-transparent inside the grid */
+.fb-table > .context-menu-trigger {
+  display: contents;
+}
+
+/* Header group: display:contents so th cells are direct grid items */
+.fb-table-header {
+  display: contents;
 }
 
 .fb-table-th {
@@ -345,6 +350,7 @@
   letter-spacing: 0.05em;
   user-select: none;
   white-space: nowrap;
+  background: var(--bg-1);
 }
 
 .fb-table-th > * {
@@ -366,39 +372,44 @@
   color: var(--fg-0);
 }
 
+/* Row: display:contents so cells participate in the parent grid */
 .fb-table-row {
-  border-top: var(--border-0);
-  transition: background-color 150ms ease;
+  display: contents;
 }
 
-.fb-table-row:first-child {
-  border-top: none;
-}
-
-.fb-table-row:hover {
-  background: var(--bg-1);
-}
-
-.fb-table-row-selected,
-.fb-table-row-selected:hover {
-  background: var(--bg-2);
-}
-
-.fb-table-row-clickable {
-  cursor: pointer;
-}
-
-.fb-table td {
+/* Cells */
+.fb-table-cell {
   padding: var(--size-2) var(--size-3);
   font-size: var(--font-sm);
   color: var(--fg-0);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  border-top: var(--border-0);
+  transition: background-color 150ms ease;
 }
 
-/* Meta-style cells (size, date, type) */
-.fb-table td:not(:first-child) {
+/* Meta-style cells (not the first in a row) */
+.fb-table-row > .fb-table-cell ~ .fb-table-cell {
   color: var(--fg-2);
   font-size: var(--font-xs);
+}
+
+/* Row hover */
+.fb-table-row:hover > .fb-table-cell {
+  background: var(--bg-1);
+}
+
+/* Selected row */
+.fb-table-row-selected > .fb-table-cell {
+  background: var(--bg-2);
+}
+
+.fb-table-row-selected:hover > .fb-table-cell {
+  background: var(--bg-2);
+}
+
+/* Clickable row */
+.fb-table-row-clickable > .fb-table-cell {
+  cursor: pointer;
 }
