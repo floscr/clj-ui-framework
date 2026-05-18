@@ -29,7 +29,8 @@
             [ui.player-bar :as player-bar]
             [ui.lightbox :as lightbox]
             [ui.context-menu :as context-menu]
-            [ui.file-browser :as fb]))
+            [ui.file-browser :as fb]
+            [ui.file-progress :as fp]))
 
 ;; ── Query Params ────────────────────────────────────────────────────
 
@@ -574,22 +575,22 @@
      (fb/file-dropzone {:id "demo-upload"
                         :accept "image/*,.pdf,.doc,.docx"
                         :multiple true})
-     (fb/file-dropzone-list {}
-       (fb/file-dropzone-item {:name "project-proposal.pdf"
+     (fp/file-progress-list {}
+       (fp/file-progress-item {:name "project-proposal.pdf"
                                :size "2.4 MB"
-                               :file-type :document
+                               :icon (fb/file-type-icon {:file-type :document :size :sm})
                                :progress 100
                                :status :complete
                                :on-remove identity})
-       (fb/file-dropzone-item {:name "vacation-photo.jpg"
+       (fp/file-progress-item {:name "vacation-photo.jpg"
                                :size "4.1 MB"
-                               :file-type :image
+                               :icon (fb/file-type-icon {:file-type :image :size :sm})
                                :progress 67
                                :status :uploading
                                :on-remove identity})
-       (fb/file-dropzone-item {:name "backup.zip"
+       (fp/file-progress-item {:name "backup.zip"
                                :size "1.2 GB"
-                               :file-type :archive
+                               :icon (fb/file-type-icon {:file-type :archive :size :sm})
                                :progress 23
                                :status :error
                                :on-remove identity})))

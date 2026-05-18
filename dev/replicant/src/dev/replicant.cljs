@@ -26,7 +26,8 @@
             [ui.player-bar :as player-bar]
             [ui.lightbox :as lightbox]
             [ui.context-menu :as context-menu]
-            [ui.file-browser :as fb])
+            [ui.file-browser :as fb]
+            [ui.file-progress :as fp])
   (:require-macros [ui.macros :refer [inline-file]]))
 
 ;; ── State ───────────────────────────────────────────────────────────
@@ -854,11 +855,11 @@
                           :multiple true
                           :on-files handle-dropped-files!})
        (when (seq @!fb-dropped-files)
-         (apply fb/file-dropzone-list {}
+         (apply fp/file-progress-list {}
            (for [f @!fb-dropped-files]
-             (fb/file-dropzone-item {:name (:name f)
+             (fp/file-progress-item {:name (:name f)
                                      :size (:size f)
-                                     :file-type (:file-type f)
+                                     :icon (fb/file-type-icon {:file-type (:file-type f) :size :sm})
                                      :progress (:progress f)
                                      :status (:status f)
                                      :on-remove (fn [] (remove-dropped-file! (:name f)))})))))

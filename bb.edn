@@ -97,6 +97,7 @@
               [ui.calendar-events-test]
               [ui.player-bar-test]
               [ui.file-browser-test]
+              [ui.file-progress-test]
               [ui.theme-test])
    :task (let [{:keys [fail error]} (t/run-tests
                                       'ui.button-test
@@ -123,6 +124,7 @@
                                       'ui.calendar-events-test
                                       'ui.player-bar-test
                                       'ui.file-browser-test
+                                      'ui.file-progress-test
                                       'ui.theme-test)]
            (when (pos? (+ fail error))
              (System/exit 1)))}

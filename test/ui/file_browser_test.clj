@@ -199,22 +199,22 @@
       (is (= "PNG or JPG up to 10MB" (last subtitle-el))))))
 
 (deftest file-dropzone-item-test
-  (testing "basic file item"
+  (testing "basic file item delegates to file-progress"
     (let [result (fb/file-dropzone-item {:name "photo.jpg" :size "2.4 MB" :file-type :image})]
       (is (= :div (first result)))
-      (is (= "fb-dropzone-file" (get-in result [1 :class])))))
+      (is (= "fp-item" (get-in result [1 :class])))))
 
   (testing "error state adds class"
     (let [result (fb/file-dropzone-item {:name "bad.txt" :status :error})]
-      (is (re-find #"fb-dropzone-file-error" (get-in result [1 :class])))))
+      (is (re-find #"fp-item-error" (get-in result [1 :class])))))
 
   (testing "complete state adds class"
     (let [result (fb/file-dropzone-item {:name "done.pdf" :status :complete})]
-      (is (re-find #"fb-dropzone-file-complete" (get-in result [1 :class])))))
+      (is (re-find #"fp-item-complete" (get-in result [1 :class])))))
 
   (testing "includes progress bar when progress is set"
     (let [result (fb/file-dropzone-item {:name "uploading.zip" :progress 45})
-          info (nth result 3)  ;; fb-dropzone-file-info
+          info (nth result 3)  ;; fp-item-info
           progress-el (last info)]
       (is (= :div (first progress-el)))
       (is (re-find #"progress" (get-in progress-el [1 :class])))))
@@ -228,7 +228,7 @@
   (testing "remove button present when on-remove provided"
     (let [result (fb/file-dropzone-item {:name "f.txt" :on-remove identity})]
       (is (= :button (first (last result))))
-      (is (re-find #"fb-dropzone-file-remove" (get-in (last result) [1 :class])))))
+      (is (re-find #"fp-item-remove" (get-in (last result) [1 :class])))))
 
   (testing "no remove button when on-remove absent"
     (let [result (fb/file-dropzone-item {:name "f.txt"})]
@@ -241,7 +241,7 @@
           child2 [:div "file2"]
           result (fb/file-dropzone-list {} child1 child2)]
       (is (= :div (first result)))
-      (is (re-find #"fb-dropzone-files" (get-in result [1 :class]))))))
+      (is (re-find #"fp-list" (get-in result [1 :class]))))))
 
 (deftest file-dropzone-overlay-test
   (testing "renders overlay with default text"

@@ -22,7 +22,8 @@
   (:require [clojure.string :as str]
             [ui.icon :as icon]
             [ui.progress :as progress]
-            [ui.context-menu :as context-menu]))
+            [ui.context-menu :as context-menu]
+            [ui.file-progress :as fp]))
 
 ;; In squint, keywords are strings — name is identity
 #?(:squint (defn- kw-name [s] s)
@@ -634,117 +635,28 @@
          [:div {:class "fb-dropzone-text"} title-text]
          [:div {:class "fb-dropzone-subtext"} subtitle-text]]])))
 
-;; ── Drop Zone File Item ─────────────────────────────────────────────
+;; ── Drop Zone File Item (delegates to ui.file-progress) ────────────
 
 (defn file-dropzone-item
   "Renders a file entry in the upload queue.
+   Delegates to ui.file-progress/file-progress-item,
+   automatically providing the file-type icon.
 
-   Props:
-     :name      - file name
-     :size      - formatted size string (e.g. \"2.4 MB\")
-     :file-type - keyword/string for icon (:image, :document, etc.)
-     :progress  - upload progress 0–100 (nil = no progress bar)
-     :status    - :idle, :uploading, :complete, :error
-     :on-remove - (fn []) called when remove button is clicked
-     :class     - additional CSS classes
-     :attrs     - additional HTML attributes"
-  [{:keys [name size file-type progress status on-remove class attrs]}]
-  (let [s (kw-name (or status "idle"))
-        error?    (= s "error")
-        complete? (= s "complete")]
-    #?(:squint
-       [:div (merge {:class (cond-> "fb-dropzone-file"
-                              error?    (str " fb-dropzone-file-error")
-                              complete? (str " fb-dropzone-file-complete")
-                              class     (str " " class))}
-                    attrs)
-        [:div {:class "fb-dropzone-file-icon"}
-         (file-type-icon {:file-type (or file-type "file") :size "sm"})]
-        [:div {:class "fb-dropzone-file-info"}
-         [:div {:class "fb-dropzone-file-name"} name]
-         (when size
-           [:div {:class "fb-dropzone-file-size"} size])
-         (when (and progress (not complete?))
-           (progress/progress {:value progress
-                               :variant (when error? "danger")}))]
-        (when on-remove
-          [:button {:class "fb-dropzone-file-remove"
-                    :on-click (fn [e]
-                                (.stopPropagation e)
-                                (on-remove))
-                    :title "Remove"}
-           (icon/icon {:icon-name "x" :size "sm"})])]
-
-       :cljs
-       [:div (merge {:class (cond-> ["fb-dropzone-file"]
-                              error?    (conj "fb-dropzone-file-error")
-                              complete? (conj "fb-dropzone-file-complete")
-                              class     (conj class))}
-                    attrs)
-        [:div {:class ["fb-dropzone-file-icon"]}
-         (file-type-icon {:file-type (or file-type :file) :size :sm})]
-        [:div {:class ["fb-dropzone-file-info"]}
-         [:div {:class ["fb-dropzone-file-name"]} name]
-         (when size
-           [:div {:class ["fb-dropzone-file-size"]} size])
-         (when (and progress (not complete?))
-           (progress/progress {:value progress
-                               :variant (when error? :danger)}))]
-        (when on-remove
-          [:button {:class ["fb-dropzone-file-remove"]
-                    :on {:click (fn [e]
-                                  (.stopPropagation e)
-                                  (on-remove))}
-                    :title "Remove"}
-           (icon/icon {:icon-name :x :size :sm})])]
-
-       :clj
-       [:div (merge {:class (cond-> "fb-dropzone-file"
-                              error?    (str " fb-dropzone-file-error")
-                              complete? (str " fb-dropzone-file-complete")
-                              class     (str " " class))}
-                    attrs)
-        [:div {:class "fb-dropzone-file-icon"}
-         (file-type-icon {:file-type (or file-type :file) :size :sm})]
-        [:div {:class "fb-dropzone-file-info"}
-         [:div {:class "fb-dropzone-file-name"} name]
-         (when size
-           [:div {:class "fb-dropzone-file-size"} size])
-         (when (and progress (not complete?))
-           (progress/progress {:value progress
-                               :variant (when error? :danger)}))]
-        (when on-remove
-          [:button {:class "fb-dropzone-file-remove"
-                    :title "Remove"}
-           (icon/icon {:icon-name :x :size :sm})])])))
-
-;; ── Drop Zone File List ─────────────────────────────────────────────
+   Props: same as file-progress-item, plus:
+     :file-type - keyword/string for icon (:image, :document, etc.)"
+  [{:keys [file-type] :as props}]
+  (fp/file-progress-item
+    (-> props
+        (dissoc :file-type)
+        (assoc :icon (file-type-icon {:file-type (or file-type
+                                                     #?(:squint "file" :cljs :file :clj :file))
+                                      :size #?(:squint "sm" :cljs :sm :clj :sm)})))))
 
 (defn file-dropzone-list
-  "Wraps a list of file-dropzone-item elements.
-
-   Props:
-     :class - additional CSS classes
-     :attrs - additional HTML attributes
-   Children: file-dropzone-item elements"
-  [{:keys [class attrs]} & children]
-  #?(:squint
-     (into [:div (merge {:class (cond-> "fb-dropzone-files"
-                                  class (str " " class))}
-                        attrs)]
-           children)
-
-     :cljs
-     (into [:div (merge {:class (cond-> ["fb-dropzone-files"]
-                                  class (conj class))}
-                        attrs)]
-           children)
-
-     :clj
-     (into [:div (merge {:class (cond-> "fb-dropzone-files"
-                                  class (str " " class))}
-                        attrs)]
-           children)))
+  "Wraps file-dropzone-item elements in a continuous bordered list.
+   Delegates to ui.file-progress/file-progress-list."
+  [props & children]
+  (apply fp/file-progress-list props children))
 
 ;; ── Body Drop Zone (full-page drag & drop) ──────────────────────────
 
