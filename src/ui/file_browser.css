@@ -379,6 +379,8 @@
 
 /* Cells */
 .fb-table-cell {
+  display: flex;
+  align-items: center;
   padding: var(--size-2) var(--size-3);
   font-size: var(--font-sm);
   color: var(--fg-0);
