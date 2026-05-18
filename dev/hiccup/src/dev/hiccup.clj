@@ -603,8 +603,9 @@
    (section "Full-Page Drop Zone Overlay"
      [:p {:style "color: var(--fg-2); font-size: var(--font-sm); margin-bottom: 0.5rem;"}
       "In interactive targets (Replicant, Squint), dragging files anywhere on the page shows this overlay. Below is a static preview."]
-     [:div {:style "position: relative; height: 200px; border: var(--border-0); border-radius: var(--radius-md); overflow: hidden;"}
-      (fb/file-dropzone-overlay {})])])
+     [:div {:style "position: relative; height: 300px; border: var(--border-0); border-radius: var(--radius-md); overflow: hidden;"}
+      (fb/file-dropzone-overlay {})])
+   [:style ".fb-dropzone-overlay { position: absolute !important; }"]])
 
 (def icon-categories
   [["Navigation"
