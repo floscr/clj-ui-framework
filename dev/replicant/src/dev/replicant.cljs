@@ -811,13 +811,11 @@
           (for [item files]
             (fb/file-item-grid {:item item
                                 :context-menu-items (file-context-menu-items item)}))]
-         [:div {:class ["fb-list"]}
-          (fb/file-list-header {:sort-key (:key sort-state)
-                                :sort-dir (:dir sort-state)
-                                :on-sort  toggle-sort!})
-          (for [item files]
-            (fb/file-item-list {:item item
-                                :context-menu-items (file-context-menu-items item)}))]))
+         (fb/file-table {:items    files
+                         :sort-key (:key sort-state)
+                         :sort-dir (:dir sort-state)
+                         :on-sort  toggle-sort!
+                         :on-row-click (fn [item] (js/console.log (str "Clicked: " (:name item))))})))
 
      (section "Selected Items"
        [:p {:style {:color "var(--fg-2)" :font-size "var(--font-sm)"}}
@@ -826,6 +824,27 @@
         (for [[i item] (map-indexed vector (take 4 sample-files))]
           (fb/file-item-grid {:item item
                               :selected (contains? #{0 2} i)}))])
+
+     (section "Custom Columns"
+       [:p {:style {:color "var(--fg-2)" :font-size "var(--font-sm)" :margin-bottom "0.5rem"}}
+        "The file table supports custom column definitions. Mix built-in helpers with your own columns."]
+       (fb/file-table {:items    files
+                       :columns  [(fb/col-name {:label "File"})
+                                  (fb/col-size)
+                                  {:key   :owner
+                                   :label "Owner"
+                                   :width "120px"
+                                   :render (fn [item]
+                                             (if (= (name (:file-type item)) "folder")
+                                               "Team"
+                                               "Alice"))}
+                                  {:key   :status
+                                   :label "Status"
+                                   :width "100px"
+                                   :render (fn [_item] "Synced")}]
+                       :sort-key (:key sort-state)
+                       :sort-dir (:dir sort-state)
+                       :on-sort  toggle-sort!}))
 
      (section "Drop Zone"
        [:p {:style {:color "var(--fg-2)" :font-size "var(--font-sm)" :margin-bottom "0.5rem"}}

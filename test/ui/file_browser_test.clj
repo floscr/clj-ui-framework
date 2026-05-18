@@ -87,6 +87,85 @@
     (let [result (fb/file-view-toggle {:view :list})]
       (is (= :div (first result))))))
 
+;; ── Column & Table Tests ───────────────────────────────────────────
+
+(deftest col-helpers-test
+  (testing "col-name returns map with :key :label :render"
+    (let [col (fb/col-name)]
+      (is (= :name (:key col)))
+      (is (= "Name" (:label col)))
+      (is (fn? (:render col)))))
+
+  (testing "col-name with overrides"
+    (let [col (fb/col-name {:label "File" :width "200px"})]
+      (is (= "File" (:label col)))
+      (is (= "200px" (:width col)))))
+
+  (testing "col-size defaults"
+    (let [col (fb/col-size)]
+      (is (= :size (:key col)))
+      (is (= "Size" (:label col)))
+      (is (= "90px" (:width col)))))
+
+  (testing "col-modified defaults"
+    (let [col (fb/col-modified)]
+      (is (= :modified (:key col)))
+      (is (= "130px" (:width col)))))
+
+  (testing "col-type has render fn"
+    (let [col (fb/col-type)
+          rendered ((:render col) {:file-type :image})]
+      (is (= "Image" rendered)))))
+
+(deftest default-columns-test
+  (testing "has 4 columns"
+    (is (= 4 (count fb/default-columns))))
+  (testing "keys are name, size, modified, type"
+    (is (= [:name :size :modified :type]
+           (mapv :key fb/default-columns)))))
+
+(deftest file-table-test
+  (testing "renders table with default columns"
+    (let [items [{:name "test.txt" :file-type :document :size "1 KB" :modified "May 1"}]
+          result (fb/file-table {:items items})]
+      (is (= :div (first result)))
+      (is (re-find #"fb-table-wrapper" (get-in result [1 :class])))
+      ;; second element is the table
+      (let [table (nth result 2)]
+        (is (= :table (first table)))
+        (is (= "fb-table" (get-in table [1 :class]))))))
+
+  (testing "renders custom columns"
+    (let [cols [{:key :name :label "File"}
+                {:key :owner :label "Owner" :width "120px"}]
+          items [{:name "a.txt" :owner "Alice"}]
+          result (fb/file-table {:columns cols :items items})
+          table (nth result 2)
+          ;; thead is after colgroup (or directly after attrs)
+          thead (first (filter #(and (vector? %) (= :thead (first %))) (rest table)))
+          header-row (second thead)
+          th1 (nth header-row 1)
+          th2 (nth header-row 2)]
+      ;; headers match custom labels — [:th attrs [:span "File"] ...]
+      (is (= "File" (second (nth th1 2))))
+      (is (= "Owner" (second (nth th2 2))))))
+
+  (testing "sortable header gets active class"
+    (let [result (fb/file-table {:items [] :sort-key :name :sort-dir :asc :on-sort identity})
+          table (nth result 2)
+          thead (first (filter #(and (vector? %) (= :thead (first %))) (rest table)))
+          header-row (second thead)
+          th1 (nth header-row 1)] ;; Name column
+      (is (re-find #"fb-table-th-active" (get-in th1 [1 :class])))))
+
+  (testing "selected row gets class"
+    (let [items [{:name "a.txt" :file-type :file}]
+          result (fb/file-table {:items items :selected-fn (constantly true)})
+          table (nth result 2)
+          tbody (last table)
+          row (second tbody)]
+      (is (re-find #"fb-table-row-selected" (get-in row [1 :class]))))))
+
 ;; ── Drop Zone Tests ─────────────────────────────────────────────────
 
 (deftest file-dropzone-test

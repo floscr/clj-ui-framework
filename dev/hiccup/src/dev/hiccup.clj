@@ -536,11 +536,9 @@
      [:div {:class "fb-toolbar"}
       [:div {:style "font-weight: 500;"} "My Files"]
       (fb/file-view-toggle {:view :list})]
-     [:div {:class "fb-list"}
-      (fb/file-list-header {:sort-key :name :sort-dir :asc})
-      (for [item sample-files]
-        (fb/file-item-list {:item item
-                            :context-menu-items (file-context-menu-items item)}))])
+     (fb/file-table {:items sample-files
+                     :sort-key :name
+                     :sort-dir :asc}))
 
    (section "Selected Items"
      [:p {:style "color: var(--fg-2); font-size: var(--font-sm);"}
@@ -549,6 +547,26 @@
       (for [[i item] (map-indexed vector (take 4 sample-files))]
         (fb/file-item-grid {:item item
                             :selected (#{0 2} i)}))])
+
+   (section "Custom Columns"
+     [:p {:style "color: var(--fg-2); font-size: var(--font-sm); margin-bottom: 0.5rem;"}
+      "The file table supports custom column definitions. Mix built-in helpers with your own columns."]
+     (fb/file-table {:items sample-files
+                     :columns [(fb/col-name {:label "File"})
+                               (fb/col-size)
+                               {:key   :owner
+                                :label "Owner"
+                                :width "120px"
+                                :render (fn [item]
+                                          (if (= (name (:file-type item)) "folder")
+                                            "Team"
+                                            "Alice"))}
+                               {:key   :status
+                                :label "Status"
+                                :width "100px"
+                                :render (fn [_item] "Synced")}]
+                     :sort-key :name
+                     :sort-dir :asc}))
 
    (section "Drop Zone"
      [:p {:style "color: var(--fg-2); font-size: var(--font-sm); margin-bottom: 0.5rem;"}

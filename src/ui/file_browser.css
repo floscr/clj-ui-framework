@@ -399,3 +399,89 @@
 .fb-dropzone-overlay-content .fb-dropzone-subtext {
   font-size: var(--font-sm);
 }
+
+/* ── File Table ───────────────────────────────────────────────────── */
+
+.fb-table-wrapper {
+  border: var(--border-0);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.fb-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.fb-table thead {
+  background: var(--bg-1);
+}
+
+.fb-table-th {
+  padding: var(--size-2) var(--size-3);
+  text-align: left;
+  font-size: var(--font-xs);
+  font-weight: 600;
+  color: var(--fg-2);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.fb-table-th > * {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--size-1);
+  vertical-align: middle;
+}
+
+.fb-table-th-sortable {
+  cursor: pointer;
+}
+
+.fb-table-th-sortable:hover {
+  color: var(--fg-0);
+}
+
+.fb-table-th-active {
+  color: var(--fg-0);
+}
+
+.fb-table-row {
+  border-top: var(--border-0);
+  transition: background-color 150ms ease;
+}
+
+.fb-table-row:first-child {
+  border-top: none;
+}
+
+.fb-table-row:hover {
+  background: var(--bg-1);
+}
+
+.fb-table-row-selected,
+.fb-table-row-selected:hover {
+  background: var(--bg-2);
+}
+
+.fb-table-row-clickable {
+  cursor: pointer;
+}
+
+.fb-table td {
+  padding: var(--size-2) var(--size-3);
+  font-size: var(--font-sm);
+  color: var(--fg-0);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Meta-style cells (size, date, type) */
+.fb-table td:not(:first-child) {
+  color: var(--fg-2);
+  font-size: var(--font-xs);
+}

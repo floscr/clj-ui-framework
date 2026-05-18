@@ -172,6 +172,221 @@
       (context-menu/context-menu-trigger {:items context-menu-items} inner)
       inner)))
 
+;; ── Column Definitions ────────────────────────────────────────────
+
+(defn col-name
+  "Name column with file-type icon. Options map is optional.
+   Accepts:
+     :label - override header text (default \"Name\")
+     :width - override column width (default nil = auto/flex)"
+  ([] (col-name {}))
+  ([{:keys [label width]}]
+   {:key   #?(:squint "name" :cljs :name :clj :name)
+    :label (or label "Name")
+    :width width
+    :render (fn [item]
+              (let [ft (:file-type item)]
+                #?(:squint
+                   [:div {:class "fb-item-name-cell"}
+                    (file-type-icon {:file-type ft :size "sm"})
+                    [:div {:class "fb-item-name"} (:name item)]]
+
+                   :cljs
+                   [:div {:class ["fb-item-name-cell"]}
+                    (file-type-icon {:file-type ft :size :sm})
+                    [:div {:class ["fb-item-name"]} (:name item)]]
+
+                   :clj
+                   [:div {:class "fb-item-name-cell"}
+                    (file-type-icon {:file-type ft :size :sm})
+                    [:div {:class "fb-item-name"} (:name item)]])))}))
+
+(defn col-size
+  "Size column. Options map is optional."
+  ([] (col-size {}))
+  ([{:keys [label width]}]
+   {:key   #?(:squint "size" :cljs :size :clj :size)
+    :label (or label "Size")
+    :width (or width "90px")}))
+
+(defn col-modified
+  "Modified date column. Options map is optional."
+  ([] (col-modified {}))
+  ([{:keys [label width]}]
+   {:key   #?(:squint "modified" :cljs :modified :clj :modified)
+    :label (or label "Modified")
+    :width (or width "130px")}))
+
+(defn col-type
+  "File type column. Options map is optional."
+  ([] (col-type {}))
+  ([{:keys [label width]}]
+   {:key   #?(:squint "type" :cljs :type :clj :type)
+    :label (or label "Type")
+    :width (or width "100px")
+    :render (fn [item]
+              (str/capitalize (kw-name (or (:file-type item) "file"))))}))
+
+(def default-columns
+  "Default column set: Name (with icon), Size, Modified, Type."
+  [(col-name) (col-size) (col-modified) (col-type)])
+
+;; ── File Table ───────────────────────────────────────────────────────
+
+(defn- table-sort-indicator
+  "Renders a chevron icon indicating sort direction in a table header."
+  [dir]
+  (let [icon-name #?(:squint (if (= dir "asc") "chevron-up" "chevron-down")
+                     :cljs   (if (= (kw-name dir) "asc") :chevron-up :chevron-down)
+                     :clj    (if (= (kw-name dir) "asc") :chevron-up :chevron-down))]
+    (icon/icon {:icon-name icon-name :size #?(:squint "sm" :cljs :sm :clj :sm)})))
+
+(defn- render-cell
+  "Renders a table cell value. Uses column :render fn if present,
+   otherwise gets :key from item."
+  [col item]
+  (if-let [render-fn (:render col)]
+    (render-fn item)
+    (let [k (:key col)
+          v (get item #?(:squint (keyword k) :cljs k :clj k))]
+      (or v "\u2014"))))
+
+(defn file-table
+  "Renders a file browser table with custom columns.
+
+   Uses a semantic <table> element styled to match the file browser list view.
+   Columns are fully configurable — use the built-in col-name, col-size,
+   col-modified, col-type helpers or define your own.
+
+   Props:
+     :columns      - vector of column definitions (see below)
+                     defaults to default-columns if not provided
+     :items        - vector of item maps
+     :sort-key     - current sort column key
+     :sort-dir     - current direction (:asc or :desc)
+     :on-sort      - (fn [col-key]) called when a header is clicked
+     :on-row-click - (fn [item]) called when a row is clicked
+     :selected-fn  - (fn [item]) -> boolean, highlights the row
+     :class        - additional CSS classes on the wrapper
+     :attrs        - additional HTML attributes on the wrapper
+
+   Column definition map:
+     :key    - keyword/string, sort key and default data lookup
+     :label  - header text
+     :width  - CSS width string (optional, e.g. \"90px\")
+     :render - (fn [item]) custom cell renderer (optional)
+     :class  - additional CSS class for this column's cells (optional)"
+  [{:keys [columns items sort-key sort-dir on-sort on-row-click selected-fn class attrs]}]
+  (let [cols         (or columns default-columns)
+        sortable?    (some? on-sort)
+        col-widths   (map :width cols)
+        has-widths?  (some some? col-widths)]
+    #?(:squint
+       [:div (merge {:class (cond-> "fb-table-wrapper"
+                              class (str " " class))}
+                    attrs)
+        [:table {:class "fb-table"}
+         (when has-widths?
+           (into [:colgroup]
+                 (map (fn [col]
+                        [:col (when-let [w (:width col)] {:style {"width" w}})])
+                      cols)))
+         [:thead
+          (into [:tr]
+                (map (fn [col]
+                       (let [k     (:key col)
+                             active (= k (or sort-key ""))]
+                         [:th {:class (cond-> "fb-table-th"
+                                        active    (str " fb-table-th-active")
+                                        sortable? (str " fb-table-th-sortable")
+                                        (:class col) (str " " (:class col)))
+                               :on-click (when sortable? (fn [_] (on-sort k)))}
+                          [:span (:label col)]
+                          (when active (table-sort-indicator sort-dir))]))
+                     cols))]
+         (into [:tbody]
+               (map (fn [item]
+                      (let [sel? (and selected-fn (selected-fn item))]
+                        (into [:tr {:class (cond-> "fb-table-row"
+                                            sel?         (str " fb-table-row-selected")
+                                            on-row-click (str " fb-table-row-clickable"))
+                                    :on-click (when on-row-click (fn [_] (on-row-click item)))}]
+                              (map (fn [col]
+                                     [:td {:class (or (:class col) "")}
+                                      (render-cell col item)])
+                                   cols))))
+                    items))]]
+
+       :cljs
+       [:div (merge {:class (cond-> ["fb-table-wrapper"]
+                              class (conj class))}
+                    attrs)
+        [:table {:class ["fb-table"]}
+         (when has-widths?
+           (into [:colgroup]
+                 (map (fn [col]
+                        [:col (when-let [w (:width col)] {:style {:width w}})])
+                      cols)))
+         [:thead
+          (into [:tr]
+                (map (fn [col]
+                       (let [k     (:key col)
+                             active (= (kw-name k) (kw-name (or sort-key "")))]
+                         [:th {:class (cond-> ["fb-table-th"]
+                                        active    (conj "fb-table-th-active")
+                                        sortable? (conj "fb-table-th-sortable")
+                                        (:class col) (conj (:class col)))
+                               :on (when sortable? {:click (fn [_] (on-sort k))})}
+                          [:span (:label col)]
+                          (when active (table-sort-indicator sort-dir))]))
+                     cols))]
+         (into [:tbody]
+               (map (fn [item]
+                      (let [sel? (and selected-fn (selected-fn item))]
+                        (into [:tr {:class (cond-> ["fb-table-row"]
+                                            sel?         (conj "fb-table-row-selected")
+                                            on-row-click (conj "fb-table-row-clickable"))
+                                    :on (when on-row-click {:click (fn [_] (on-row-click item))})}]
+                              (map (fn [col]
+                                     [:td {:class (or (:class col) "")}
+                                      (render-cell col item)])
+                                   cols))))
+                    items))]]
+
+       :clj
+       [:div (merge {:class (cond-> "fb-table-wrapper"
+                              class (str " " class))}
+                    attrs)
+        [:table {:class "fb-table"}
+         (when has-widths?
+           (into [:colgroup]
+                 (map (fn [col]
+                        [:col (when-let [w (:width col)] {:style (str "width:" w)})])
+                      cols)))
+         [:thead
+          (into [:tr]
+                (map (fn [col]
+                       (let [k     (:key col)
+                             active (= (kw-name k) (kw-name (or sort-key "")))]
+                         [:th {:class (cond-> "fb-table-th"
+                                        active    (str " fb-table-th-active")
+                                        sortable? (str " fb-table-th-sortable")
+                                        (:class col) (str " " (:class col)))}
+                          [:span (:label col)]
+                          (when active (table-sort-indicator sort-dir))]))
+                     cols))]
+         (into [:tbody]
+               (map (fn [item]
+                      (let [sel? (and selected-fn (selected-fn item))]
+                        (into [:tr {:class (cond-> "fb-table-row"
+                                            sel?         (str " fb-table-row-selected")
+                                            on-row-click (str " fb-table-row-clickable"))}]
+                              (map (fn [col]
+                                     [:td {:class (or (:class col) "")}
+                                      (render-cell col item)])
+                                   cols))))
+                    items))]])))
+
 ;; ── List Header ─────────────────────────────────────────────────────
 
 (defn- sort-indicator
