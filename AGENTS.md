@@ -52,10 +52,15 @@ dev/
 ```sh
 bb build-theme    # Generate dist/theme.css, copy to dev targets
 bb test           # Run all unit tests
-bb dev-hiccup     # Start hiccup server (port 3003)
-bb dev-replicant  # Start replicant dev (port 3001)
-bb dev-squint     # Start squint dev (port 3002)
-bb dev            # Build theme + start hiccup + print instructions
+bb dev            # Start all dev servers in tmux (ui-dev session)
+bb dev:stop       # Stop dev tmux session
+bb dev:restart    # Restart all dev servers
+bb dev:attach     # Attach to dev tmux session
+bb dev:logs       # Show recent dev server logs
+bb dev:status     # Show dev server status
+bb dev-hiccup     # Start hiccup server only (port 3003)
+bb dev-replicant  # Start replicant dev only (port 3001)
+bb dev-squint     # Start squint dev only (port 3002)
 ```
 
 Replicant and squint need `npm install` in their dev directories first.
@@ -217,7 +222,7 @@ bb test          # All tests pass
 
 ### 6. Never start dev servers from the agent — CRITICAL
 
-**Do not run `bb dev`, `bb dev-hiccup`, `bb dev-replicant`, `bb dev-squint`, or any long-running server process from the agent.** The user manages dev servers in a separate tmux session (`ui-dev`). Starting servers from the agent blocks the session, spawns orphan processes, and can break existing tmux panes.
+**Do not run `bb dev`, `bb dev-hiccup`, `bb dev-replicant`, `bb dev-squint`, or any long-running server process from the agent.** The user manages dev servers via `bb dev` (tmux-dev session `ui-dev`). Starting servers from the agent blocks the session, spawns orphan processes, and can break existing tmux panes.
 
 The agent may only:
 - Run short commands: `bb test`, `bb build-theme`, `curl`, `wc -l`, `grep`
@@ -228,7 +233,7 @@ If a dev server needs restarting, **tell the user** — don't do it yourself.
 
 ### 7. Check running dev servers before committing — CRITICAL
 
-A tmux session `ui-dev` runs all three dev servers (`bb dev-all`). **Always run the check script before committing:**
+A tmux session `ui-dev` runs all three dev servers (`bb dev`). **Always run the check script before committing:**
 
 ```sh
 bb check-dev

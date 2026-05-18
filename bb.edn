@@ -1,8 +1,25 @@
-{:deps {com.github.jramosg/color-tools {:mvn/version "1.1.0"}}
+{:deps {com.github.jramosg/color-tools {:mvn/version "1.1.0"}
+        tmux-dev/tmux-dev {:git/url "https://git.example.com/floscr/tmux-dev"
+                           :git/sha "3d9e53bc38b818bfcee312065ded0aef83bdecf4"}}
  :paths ["src" "test" "dev/hiccup/src"]
 
  :tasks
- {build-theme
+ {:requires ([tmux-dev.core :as td]
+             [tmux-dev.env :as env])
+  :init (do
+          (def port-hiccup    (env/number "PORT_HICCUP" 3003))
+          (def port-replicant (env/number "PORT_REPLICANT" 3001))
+          (def port-squint    (env/number "PORT_SQUINT" 3002))
+          (def dev-config
+            {:session "ui-dev"
+             :windows [["hiccup"    (str "bb watch-theme & PORT=" port-hiccup " bb dev-hiccup")]
+                       ["replicant" (str "PORT=" port-replicant " bb dev-replicant")]
+                       ["squint"    (str "PORT=" port-squint " bb dev-squint")]]
+             :print [(str "Hiccup:    http://localhost:" port-hiccup)
+                     (str "Replicant: http://localhost:" port-replicant)
+                     (str "Squint:    http://localhost:" port-squint)]}))
+
+  build-theme
   {:doc "Generate dist/theme.css from tokens.edn and copy to dev targets"
    :requires ([ui.css.gen :as gen]
               [clojure.java.io :as io])
@@ -120,43 +137,33 @@
                   "bash" "-c" (str "npx squint watch & exec npx vite --port " port)))}
 
   dev
-  {:doc "Start all dev servers"
-   :depends [build-theme]
-   :requires ([dev.hiccup])
-   :task (let [port (or (some-> (System/getenv "PORT") parse-long) 3003)]
-           (dev.hiccup/start! {:port port})
-           (println "Dev servers running:")
-           (println (str "  Hiccup:    http://localhost:" port))
-           (println "  Replicant: cd dev/replicant && npx shadow-cljs watch app")
-           (println "  Squint:    cd dev/squint && npm run dev")
-           (println "  Test page: dev/index.html")
-           (deref (promise)))}
+  {:doc "Start all dev servers in tmux"
+   :depends [build-theme ensure-npm]
+   :task (td/start dev-config)}
+
+  dev:stop
+  {:doc "Stop dev tmux session"
+   :task (td/stop dev-config)}
+
+  dev:restart
+  {:doc "Restart all dev servers"
+   :depends [build-theme ensure-npm]
+   :task (td/restart dev-config)}
+
+  dev:attach
+  {:doc "Attach to dev tmux session"
+   :task (td/attach dev-config)}
+
+  dev:logs
+  {:doc "Show recent dev server logs"
+   :task (td/logs dev-config)}
+
+  dev:status
+  {:doc "Show dev server status"
+   :task (td/status dev-config)}
 
   check-dev
   {:doc "Check all ui-dev tmux panes for errors and verify dev servers"
    :task (load-file "scripts/check-dev.bb")}
 
-  dev-all
-  {:doc "Start all dev servers in tmux panes (bb dev-all [BASE_PORT], default 3000)"
-   :depends [build-theme ensure-npm]
-   :task (let [base    (or (some-> (first *command-line-args*) parse-long) 3000)
-               rport   (+ base 1)
-               sport   (+ base 2)
-               hport   (+ base 3)
-               session "ui-dev"]
-           (shell {:continue true} "tmux kill-session -t" session)
-           (shell "tmux new-session -d -s" session
-                  (str "bash -c 'bb watch-theme & PORT=" hport " bb dev-hiccup'"))
-           (shell "tmux split-window -h -t" session
-                  (str "bash -c 'cd dev/replicant && SHADOW_HTTP_PORT=" rport " npx shadow-cljs watch app'"))
-           (shell "tmux split-window -v -t" session
-                  (str "bash -c 'cd dev/squint && npx squint watch"
-                       " & cd dev/squint && npx vite --port " sport "'"))
-           (shell "tmux select-layout -t" session "tiled")
-           (println (str "Tmux session 'ui-dev' created (base port " base "):"))
-           (println (str "  Pane 0: Hiccup    → http://localhost:" hport))
-           (println (str "  Pane 1: Replicant → http://localhost:" rport))
-           (println (str "  Pane 2: Squint    → http://localhost:" sport))
-           (println)
-           (when-not (zero? (:exit (shell {:continue true} "tmux attach -t" session)))
-             (println "Attach with: tmux attach -t" session)))}}}
+}}
