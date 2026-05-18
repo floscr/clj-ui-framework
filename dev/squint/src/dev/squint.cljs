@@ -788,6 +788,42 @@
 
 (def !fb-view (atom "grid"))
 (def !fb-sort (atom {:key "name" :dir "asc"}))
+(def !fb-dropped-files (atom []))
+
+(defn- format-file-size [bytes]
+  (cond
+    (>= bytes 1073741824) (str (.toFixed (/ bytes 1073741824) 1) " GB")
+    (>= bytes 1048576)    (str (.toFixed (/ bytes 1048576) 1) " MB")
+    (>= bytes 1024)       (str (.toFixed (/ bytes 1024) 1) " KB")
+    :else                 (str bytes " B")))
+
+(defn- ext->file-type [filename]
+  (let [ext (some-> filename (.split ".") last .toLowerCase)]
+    (case ext
+      ("jpg" "jpeg" "png" "gif" "svg" "webp") "image"
+      ("mp4" "mov" "avi" "mkv" "webm") "video"
+      ("mp3" "wav" "flac" "aac" "ogg") "audio"
+      ("pdf" "doc" "docx" "txt" "rtf") "document"
+      ("xls" "xlsx" "csv") "spreadsheet"
+      ("js" "clj" "cljs" "py" "rb" "rs" "go" "ts") "code"
+      ("zip" "tar" "gz" "rar" "7z") "archive"
+      "file")))
+
+(defn- handle-dropped-files! [file-list]
+  (let [files (for [i (range (.-length file-list))]
+                (let [f (.item file-list i)]
+                  {:name (.-name f)
+                   :size (format-file-size (.-size f))
+                   :file-type (ext->file-type (.-name f))
+                   :progress (rand-int 100)
+                   :status "uploading"}))
+        existing-names (set (map :name @!fb-dropped-files))]
+    (swap! !fb-dropped-files into (remove #(existing-names (:name %)) files)))
+  (render!))
+
+(defn- remove-dropped-file! [filename]
+  (swap! !fb-dropped-files (fn [files] (vec (remove #(= (:name %) filename) files))))
+  (render!))
 
 (defn- toggle-sort! [col-key]
   (swap! !fb-sort (fn [{:keys [key dir]}]
@@ -855,7 +891,31 @@
              (map-indexed (fn [i item]
                             (fb/file-item-grid {:item item
                                                 :selected (or (= i 0) (= i 2))}))
-                          (take 4 sample-files))))]))
+                          (take 4 sample-files))))
+
+     (section "Drop Zone"
+       [:p {:style {"color" "var(--fg-2)" "font-size" "var(--font-sm)" "margin-bottom" "0.5rem"}}
+        "Drag & drop file upload area. Drop files or click to browse."]
+       (fb/file-dropzone {:id "demo-upload"
+                          :accept "image/*,.pdf,.doc,.docx"
+                          :multiple true
+                          :on-files handle-dropped-files!})
+       (when (seq @!fb-dropped-files)
+         (apply fb/file-dropzone-list {}
+           (map (fn [f]
+                  (fb/file-dropzone-item {:name (:name f)
+                                          :size (:size f)
+                                          :file-type (:file-type f)
+                                          :progress (:progress f)
+                                          :status (:status f)
+                                          :on-remove (fn [] (remove-dropped-file! (:name f)))}))
+                @!fb-dropped-files))))
+
+     (section "Drop Zone \u2014 Disabled"
+       (fb/file-dropzone {:id "demo-upload-disabled"
+                          :disabled true
+                          :title "Uploads disabled"
+                          :subtitle "You don't have permission to upload"}))]))
 
 (def nav-items
   [{:id "components" :label "Components"  :icon-name "package"}

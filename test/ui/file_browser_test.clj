@@ -86,3 +86,80 @@
   (testing "list view active"
     (let [result (fb/file-view-toggle {:view :list})]
       (is (= :div (first result))))))
+
+;; ── Drop Zone Tests ─────────────────────────────────────────────────
+
+(deftest file-dropzone-test
+  (testing "renders as label for SSR"
+    (let [result (fb/file-dropzone {:id "upload"})]
+      (is (= :label (first result)))
+      (is (= "fb-dropzone" (get-in result [1 :class])))
+      (is (= "upload" (get-in result [1 :for])))))
+
+  (testing "includes hidden file input"
+    (let [result (fb/file-dropzone {:id "upload" :accept "image/*" :multiple true})
+          input (nth result 2)]
+      (is (= :input (first input)))
+      (is (= "file" (:type (second input))))
+      (is (= "upload" (:id (second input))))
+      (is (= "image/*" (:accept (second input))))
+      (is (true? (:multiple (second input))))))
+
+  (testing "disabled state adds class"
+    (let [result (fb/file-dropzone {:id "upload" :disabled true})]
+      (is (re-find #"fb-dropzone-disabled" (get-in result [1 :class])))))
+
+  (testing "custom title and subtitle"
+    (let [result (fb/file-dropzone {:id "upload"
+                                    :title "Upload images"
+                                    :subtitle "PNG or JPG up to 10MB"})
+          content (nth result 3)
+          title-el (nth content 3)
+          subtitle-el (nth content 4)]
+      (is (= "Upload images" (last title-el)))
+      (is (= "PNG or JPG up to 10MB" (last subtitle-el))))))
+
+(deftest file-dropzone-item-test
+  (testing "basic file item"
+    (let [result (fb/file-dropzone-item {:name "photo.jpg" :size "2.4 MB" :file-type :image})]
+      (is (= :div (first result)))
+      (is (= "fb-dropzone-file" (get-in result [1 :class])))))
+
+  (testing "error state adds class"
+    (let [result (fb/file-dropzone-item {:name "bad.txt" :status :error})]
+      (is (re-find #"fb-dropzone-file-error" (get-in result [1 :class])))))
+
+  (testing "complete state adds class"
+    (let [result (fb/file-dropzone-item {:name "done.pdf" :status :complete})]
+      (is (re-find #"fb-dropzone-file-complete" (get-in result [1 :class])))))
+
+  (testing "includes progress bar when progress is set"
+    (let [result (fb/file-dropzone-item {:name "uploading.zip" :progress 45})
+          info (nth result 3)  ;; fb-dropzone-file-info
+          progress-el (last info)]
+      (is (= :div (first progress-el)))
+      (is (re-find #"progress" (get-in progress-el [1 :class])))))
+
+  (testing "no progress bar when complete"
+    (let [result (fb/file-dropzone-item {:name "done.pdf" :progress 100 :status :complete})
+          info (nth result 3)]
+      ;; should only have name, no progress bar
+      (is (not (some #(and (vector? %) (re-find #"progress" (str (get-in % [1 :class])))) info)))))
+
+  (testing "remove button present when on-remove provided"
+    (let [result (fb/file-dropzone-item {:name "f.txt" :on-remove identity})]
+      (is (= :button (first (last result))))
+      (is (re-find #"fb-dropzone-file-remove" (get-in (last result) [1 :class])))))
+
+  (testing "no remove button when on-remove absent"
+    (let [result (fb/file-dropzone-item {:name "f.txt"})]
+      ;; last element should not be a button
+      (is (not= :button (first (last result)))))))
+
+(deftest file-dropzone-list-test
+  (testing "wraps children in container div"
+    (let [child1 [:div "file1"]
+          child2 [:div "file2"]
+          result (fb/file-dropzone-list {} child1 child2)]
+      (is (= :div (first result)))
+      (is (re-find #"fb-dropzone-files" (get-in result [1 :class]))))))

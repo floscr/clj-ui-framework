@@ -1,5 +1,5 @@
 (ns ui.file-browser
-  "File browser components — grid and list views for file/folder display.
+  "File browser components — grid/list views and file drop zone.
 
    Usage:
      ;; Grid view
@@ -7,15 +7,21 @@
       (for [item files]
         (file-item-grid {:item item
                          :context-menu-items [{:label \"Open\" :icon :folder}
-                                              {:label \"Delete\" :icon :trash :variant :danger}]}))]
-
+                                              {:label \"Delete\" :icon :trash :variant :danger}]}))]\n
      ;; List view
      [:div {:class \"fb-list\"}
       (file-list-header {})
       (for [item files]
-        (file-item-list {:item item}))]"
+        (file-item-list {:item item}))]
+
+     ;; Drop zone
+     (file-dropzone {:id \"upload\"
+                     :accept \"image/*,.pdf\"
+                     :multiple true
+                     :on-files (fn [files] ...)})"
   (:require [clojure.string :as str]
             [ui.icon :as icon]
+            [ui.progress :as progress]
             [ui.context-menu :as context-menu]))
 
 ;; In squint, keywords are strings — name is identity
@@ -296,3 +302,231 @@
     (if (seq context-menu-items)
       (context-menu/context-menu-trigger {:items context-menu-items} inner)
       inner)))
+
+;; ── Drop Zone ─────────────────────────────────────────────────────────
+
+(defn file-dropzone
+  "Renders a drag-and-drop file upload zone.
+
+   In :clj (SSR) this renders a <label> wrapping a hidden <input type=\"file\">
+   so clicking opens the native file picker without JS.
+
+   In :cljs/:squint this adds drag/drop event handlers and a click handler
+   that programmatically opens the file picker.
+
+   Props:
+     :id       - unique id for the hidden file input (required)
+     :accept   - accepted file types (e.g. \"image/*,.pdf\")
+     :multiple - boolean, allow multiple files
+     :disabled - boolean
+     :on-files - (fn [file-list]) called when files are picked/dropped
+     :active   - boolean, force the drag-active visual state
+     :title    - main text (default \"Drag & drop files here\")
+     :subtitle - sub text (default \"or click to browse\")
+     :class    - additional CSS classes
+     :attrs    - additional HTML attributes"
+  [{:keys [id accept multiple disabled on-files active title subtitle class attrs]}]
+  (let [title-text    (or title "Drag & drop files here")
+        subtitle-text (or subtitle "or click to browse")
+        disabled?     (boolean disabled)
+        active?       (boolean active)
+        input-id      (or id "fb-dropzone-input")]
+    #?(:squint
+       [:div (merge {:class (cond-> "fb-dropzone"
+                              active?   (str " fb-dropzone-active")
+                              disabled? (str " fb-dropzone-disabled")
+                              class     (str " " class))
+                     :on-click (when-not disabled?
+                                 (fn [e]
+                                   (when-let [input (.querySelector (.-currentTarget e)
+                                                                    (str "#" input-id))]
+                                     (.click input))))
+                     :on-drag-over (when-not disabled?
+                                     (fn [e]
+                                       (.preventDefault e)
+                                       (.. e -currentTarget -classList (add "fb-dropzone-active"))))
+                     :on-drag-leave (when-not disabled?
+                                      (fn [e]
+                                        (.preventDefault e)
+                                        (.. e -currentTarget -classList (remove "fb-dropzone-active"))))
+                     :on-drop (when-not disabled?
+                                (fn [e]
+                                  (.preventDefault e)
+                                  (.. e -currentTarget -classList (remove "fb-dropzone-active"))
+                                  (when on-files
+                                    (on-files (.. e -dataTransfer -files)))))}
+                    attrs)
+        [:input {:id input-id :type "file" :class "fb-dropzone-input"
+                 :accept accept :multiple (boolean multiple)
+                 :on-change (when on-files
+                              (fn [e]
+                                (on-files (.. e -target -files))
+                                (set! (.. e -target -value) "")))}]
+        [:div {:class "fb-dropzone-content"}
+         [:div {:class "fb-dropzone-icon"}
+          (icon/icon {:icon-name "upload" :size "xl"})]
+         [:div {:class "fb-dropzone-text"} title-text]
+         [:div {:class "fb-dropzone-subtext"} subtitle-text]]]
+
+       :cljs
+       [:div (merge {:class (cond-> ["fb-dropzone"]
+                              active?   (conj "fb-dropzone-active")
+                              disabled? (conj "fb-dropzone-disabled")
+                              class     (conj class))
+                     :on (when-not disabled?
+                           {:click (fn [e]
+                                     (when-let [input (.querySelector (.-currentTarget e)
+                                                                      (str "#" input-id))]
+                                       (.click input)))
+                            :dragover (fn [e]
+                                        (.preventDefault e)
+                                        (.. e -currentTarget -classList (add "fb-dropzone-active")))
+                            :dragleave (fn [e]
+                                         (.preventDefault e)
+                                         (.. e -currentTarget -classList (remove "fb-dropzone-active")))
+                            :drop (fn [e]
+                                    (.preventDefault e)
+                                    (.. e -currentTarget -classList (remove "fb-dropzone-active"))
+                                    (when on-files
+                                      (on-files (.. e -dataTransfer -files))))})}
+                    attrs)
+        [:input {:id input-id :type "file" :class ["fb-dropzone-input"]
+                 :accept accept :multiple (boolean multiple)
+                 :on {:change (when on-files
+                                (fn [e]
+                                  (on-files (.. e -target -files))
+                                  (set! (.. e -target -value) "")))}}]
+        [:div {:class ["fb-dropzone-content"]}
+         [:div {:class ["fb-dropzone-icon"]}
+          (icon/icon {:icon-name :upload :size :xl})]
+         [:div {:class ["fb-dropzone-text"]} title-text]
+         [:div {:class ["fb-dropzone-subtext"]} subtitle-text]]]
+
+       :clj
+       [:label (merge {:class (cond-> "fb-dropzone"
+                                disabled? (str " fb-dropzone-disabled")
+                                class     (str " " class))
+                       :for input-id}
+                      attrs)
+        [:input (cond-> {:id input-id :type "file" :class "fb-dropzone-input"
+                         :name input-id}
+                  accept   (assoc :accept accept)
+                  multiple (assoc :multiple true)
+                  disabled (assoc :disabled true))]
+        [:div {:class "fb-dropzone-content"}
+         [:div {:class "fb-dropzone-icon"}
+          (icon/icon {:icon-name :upload :size :xl})]
+         [:div {:class "fb-dropzone-text"} title-text]
+         [:div {:class "fb-dropzone-subtext"} subtitle-text]]])))
+
+;; ── Drop Zone File Item ─────────────────────────────────────────────
+
+(defn file-dropzone-item
+  "Renders a file entry in the upload queue.
+
+   Props:
+     :name      - file name
+     :size      - formatted size string (e.g. \"2.4 MB\")
+     :file-type - keyword/string for icon (:image, :document, etc.)
+     :progress  - upload progress 0–100 (nil = no progress bar)
+     :status    - :idle, :uploading, :complete, :error
+     :on-remove - (fn []) called when remove button is clicked
+     :class     - additional CSS classes
+     :attrs     - additional HTML attributes"
+  [{:keys [name size file-type progress status on-remove class attrs]}]
+  (let [s (kw-name (or status "idle"))
+        error?    (= s "error")
+        complete? (= s "complete")]
+    #?(:squint
+       [:div (merge {:class (cond-> "fb-dropzone-file"
+                              error?    (str " fb-dropzone-file-error")
+                              complete? (str " fb-dropzone-file-complete")
+                              class     (str " " class))}
+                    attrs)
+        [:div {:class "fb-dropzone-file-icon"}
+         (file-type-icon {:file-type (or file-type "file") :size "sm"})]
+        [:div {:class "fb-dropzone-file-info"}
+         [:div {:class "fb-dropzone-file-name"} name]
+         (when size
+           [:div {:class "fb-dropzone-file-size"} size])
+         (when (and progress (not complete?))
+           (progress/progress {:value progress
+                               :variant (when error? "danger")}))]
+        (when on-remove
+          [:button {:class "fb-dropzone-file-remove"
+                    :on-click (fn [e]
+                                (.stopPropagation e)
+                                (on-remove))
+                    :title "Remove"}
+           (icon/icon {:icon-name "x" :size "sm"})])]
+
+       :cljs
+       [:div (merge {:class (cond-> ["fb-dropzone-file"]
+                              error?    (conj "fb-dropzone-file-error")
+                              complete? (conj "fb-dropzone-file-complete")
+                              class     (conj class))}
+                    attrs)
+        [:div {:class ["fb-dropzone-file-icon"]}
+         (file-type-icon {:file-type (or file-type :file) :size :sm})]
+        [:div {:class ["fb-dropzone-file-info"]}
+         [:div {:class ["fb-dropzone-file-name"]} name]
+         (when size
+           [:div {:class ["fb-dropzone-file-size"]} size])
+         (when (and progress (not complete?))
+           (progress/progress {:value progress
+                               :variant (when error? :danger)}))]
+        (when on-remove
+          [:button {:class ["fb-dropzone-file-remove"]
+                    :on {:click (fn [e]
+                                  (.stopPropagation e)
+                                  (on-remove))}
+                    :title "Remove"}
+           (icon/icon {:icon-name :x :size :sm})])]
+
+       :clj
+       [:div (merge {:class (cond-> "fb-dropzone-file"
+                              error?    (str " fb-dropzone-file-error")
+                              complete? (str " fb-dropzone-file-complete")
+                              class     (str " " class))}
+                    attrs)
+        [:div {:class "fb-dropzone-file-icon"}
+         (file-type-icon {:file-type (or file-type :file) :size :sm})]
+        [:div {:class "fb-dropzone-file-info"}
+         [:div {:class "fb-dropzone-file-name"} name]
+         (when size
+           [:div {:class "fb-dropzone-file-size"} size])
+         (when (and progress (not complete?))
+           (progress/progress {:value progress
+                               :variant (when error? :danger)}))]
+        (when on-remove
+          [:button {:class "fb-dropzone-file-remove"
+                    :title "Remove"}
+           (icon/icon {:icon-name :x :size :sm})])])))
+
+;; ── Drop Zone File List ─────────────────────────────────────────────
+
+(defn file-dropzone-list
+  "Wraps a list of file-dropzone-item elements.
+
+   Props:
+     :class - additional CSS classes
+     :attrs - additional HTML attributes
+   Children: file-dropzone-item elements"
+  [{:keys [class attrs]} & children]
+  #?(:squint
+     (into [:div (merge {:class (cond-> "fb-dropzone-files"
+                                  class (str " " class))}
+                        attrs)]
+           children)
+
+     :cljs
+     (into [:div (merge {:class (cond-> ["fb-dropzone-files"]
+                                  class (conj class))}
+                        attrs)]
+           children)
+
+     :clj
+     (into [:div (merge {:class (cond-> "fb-dropzone-files"
+                                  class (str " " class))}
+                        attrs)]
+           children)))

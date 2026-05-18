@@ -548,7 +548,39 @@
      [:div {:class "fb-grid"}
       (for [[i item] (map-indexed vector (take 4 sample-files))]
         (fb/file-item-grid {:item item
-                            :selected (#{0 2} i)}))])])
+                            :selected (#{0 2} i)}))])
+
+   (section "Drop Zone"
+     [:p {:style "color: var(--fg-2); font-size: var(--font-sm); margin-bottom: 0.5rem;"}
+      "Drag & drop file upload area. Click to browse or drag files onto the zone."]
+     (fb/file-dropzone {:id "demo-upload"
+                        :accept "image/*,.pdf,.doc,.docx"
+                        :multiple true})
+     (fb/file-dropzone-list {}
+       (fb/file-dropzone-item {:name "project-proposal.pdf"
+                               :size "2.4 MB"
+                               :file-type :document
+                               :progress 100
+                               :status :complete
+                               :on-remove identity})
+       (fb/file-dropzone-item {:name "vacation-photo.jpg"
+                               :size "4.1 MB"
+                               :file-type :image
+                               :progress 67
+                               :status :uploading
+                               :on-remove identity})
+       (fb/file-dropzone-item {:name "backup.zip"
+                               :size "1.2 GB"
+                               :file-type :archive
+                               :progress 23
+                               :status :error
+                               :on-remove identity})))
+
+   (section "Drop Zone — Disabled"
+     (fb/file-dropzone {:id "demo-upload-disabled"
+                        :disabled true
+                        :title "Uploads disabled"
+                        :subtitle "You don't have permission to upload"}))])
 
 (def icon-categories
   [["Navigation"
