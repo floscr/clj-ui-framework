@@ -727,6 +727,7 @@
 (defonce !fb-view (atom :grid))
 (defonce !fb-sort (atom {:key :name :dir :asc}))
 (defonce !fb-dropped-files (atom []))
+(defonce !fb-body-drag-active (atom false))
 
 (defn- format-file-size [bytes]
   (cond
@@ -847,7 +848,14 @@
        (fb/file-dropzone {:id "demo-upload-disabled"
                           :disabled true
                           :title "Uploads disabled"
-                          :subtitle "You don't have permission to upload"}))]))
+                          :subtitle "You don't have permission to upload"}))
+
+     (section "Full-Page Drop Zone"
+       [:p {:style {:color "var(--fg-2)" :font-size "var(--font-sm)" :margin-bottom "0.5rem"}}
+        "Drag any file over the page to see the full-screen overlay. Files dropped anywhere are added to the queue above."])
+
+     (when @!fb-body-drag-active
+       (fb/file-dropzone-overlay {}))]))
 
 (def nav-items
   [{:id :components :label "Components"  :icon-name :package}
@@ -969,6 +977,9 @@
   (add-watch !fb-view :render (fn [_ _ _ _] (render!)))
   (add-watch !fb-sort :render (fn [_ _ _ _] (render!)))
   (add-watch !fb-dropped-files :render (fn [_ _ _ _] (render!)))
+  (add-watch !fb-body-drag-active :render (fn [_ _ _ _] (render!)))
+  (fb/init-body-dropzone! {:on-files handle-dropped-files!
+                           :on-active-change (fn [active?] (reset! !fb-body-drag-active active?))})
   (render!))
 
 (defn ^:export reload! []

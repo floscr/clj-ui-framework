@@ -354,3 +354,48 @@
   color: var(--fg-0);
   background: var(--bg-1);
 }
+
+/* ── Drop Zone Overlay (full-page) ────────────────────────────────── */
+
+.fb-dropzone-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.fb-dropzone-overlay-backdrop {
+  position: absolute;
+  inset: 0;
+  background: var(--bg-0);
+  opacity: 0.85;
+}
+
+.fb-dropzone-overlay-content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--size-3);
+  padding: var(--size-10) var(--size-8);
+  border: 2px dashed var(--accent);
+  border-radius: var(--radius-lg, var(--radius-md));
+  background: var(--bg-0);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.fb-dropzone-overlay-content .fb-dropzone-icon {
+  color: var(--accent);
+}
+
+.fb-dropzone-overlay-content .fb-dropzone-text {
+  font-size: var(--font-md, 1rem);
+  font-weight: 600;
+}
+
+.fb-dropzone-overlay-content .fb-dropzone-subtext {
+  font-size: var(--font-sm);
+}

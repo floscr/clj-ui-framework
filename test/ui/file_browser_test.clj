@@ -163,3 +163,23 @@
           result (fb/file-dropzone-list {} child1 child2)]
       (is (= :div (first result)))
       (is (re-find #"fb-dropzone-files" (get-in result [1 :class]))))))
+
+(deftest file-dropzone-overlay-test
+  (testing "renders overlay with default text"
+    (let [result (fb/file-dropzone-overlay {})]
+      (is (= :div (first result)))
+      (is (= "fb-dropzone-overlay" (get-in result [1 :class])))
+      ;; has backdrop + content
+      (let [backdrop (nth result 2)
+            content (nth result 3)]
+        (is (re-find #"fb-dropzone-overlay-backdrop" (get-in backdrop [1 :class])))
+        (is (re-find #"fb-dropzone-overlay-content" (get-in content [1 :class]))))))
+
+  (testing "custom title and subtitle"
+    (let [result (fb/file-dropzone-overlay {:title "Drop here"
+                                            :subtitle "Let go now"})
+          content (nth result 3)
+          title-el (nth content 3)
+          subtitle-el (nth content 4)]
+      (is (= "Drop here" (last title-el)))
+      (is (= "Let go now" (last subtitle-el))))))

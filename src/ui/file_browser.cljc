@@ -530,3 +530,133 @@
                                   class (str " " class))}
                         attrs)]
            children)))
+
+;; ── Body Drop Zone (full-page drag & drop) ──────────────────────────
+
+#?(:squint
+   (defn init-body-dropzone!
+     "Attaches document-level drag & drop listeners for full-page drop zones.
+
+      Returns a cleanup function that removes all listeners.
+
+      Props:
+        :on-files         - (fn [file-list]) called when files are dropped
+        :on-active-change - (fn [active?]) called when drag enters/leaves the page"
+     [{:keys [on-files on-active-change]}]
+     (let [counter (atom 0)
+           on-dragenter (fn [e]
+                          (.preventDefault e)
+                          (swap! counter inc)
+                          (when (= @counter 1)
+                            (when on-active-change (on-active-change true))))
+           on-dragleave (fn [e]
+                          (.preventDefault e)
+                          (swap! counter dec)
+                          (when (<= @counter 0)
+                            (reset! counter 0)
+                            (when on-active-change (on-active-change false))))
+           on-dragover  (fn [e] (.preventDefault e))
+           on-drop      (fn [e]
+                          (.preventDefault e)
+                          (reset! counter 0)
+                          (when on-active-change (on-active-change false))
+                          (when on-files
+                            (on-files (.. e -dataTransfer -files))))]
+       (.addEventListener js/document "dragenter" on-dragenter)
+       (.addEventListener js/document "dragleave" on-dragleave)
+       (.addEventListener js/document "dragover" on-dragover)
+       (.addEventListener js/document "drop" on-drop)
+       ;; Return cleanup fn
+       (fn []
+         (.removeEventListener js/document "dragenter" on-dragenter)
+         (.removeEventListener js/document "dragleave" on-dragleave)
+         (.removeEventListener js/document "dragover" on-dragover)
+         (.removeEventListener js/document "drop" on-drop))))
+
+   :cljs
+   (defn init-body-dropzone!
+     "Attaches document-level drag & drop listeners for full-page drop zones.
+
+      Returns a cleanup function that removes all listeners.
+
+      Props:
+        :on-files         - (fn [file-list]) called when files are dropped
+        :on-active-change - (fn [active?]) called when drag enters/leaves the page"
+     [{:keys [on-files on-active-change]}]
+     (let [counter (atom 0)
+           on-dragenter (fn [e]
+                          (.preventDefault e)
+                          (swap! counter inc)
+                          (when (= @counter 1)
+                            (when on-active-change (on-active-change true))))
+           on-dragleave (fn [e]
+                          (.preventDefault e)
+                          (swap! counter dec)
+                          (when (<= @counter 0)
+                            (reset! counter 0)
+                            (when on-active-change (on-active-change false))))
+           on-dragover  (fn [e] (.preventDefault e))
+           on-drop      (fn [e]
+                          (.preventDefault e)
+                          (reset! counter 0)
+                          (when on-active-change (on-active-change false))
+                          (when on-files
+                            (on-files (.. e -dataTransfer -files))))]
+       (.addEventListener js/document "dragenter" on-dragenter)
+       (.addEventListener js/document "dragleave" on-dragleave)
+       (.addEventListener js/document "dragover" on-dragover)
+       (.addEventListener js/document "drop" on-drop)
+       ;; Return cleanup fn
+       (fn []
+         (.removeEventListener js/document "dragenter" on-dragenter)
+         (.removeEventListener js/document "dragleave" on-dragleave)
+         (.removeEventListener js/document "dragover" on-dragover)
+         (.removeEventListener js/document "drop" on-drop)))))
+
+(defn file-dropzone-overlay
+  "Full-screen overlay shown when files are dragged over the page.
+
+   Renders a fixed overlay covering the viewport with a drop zone prompt.
+   The consumer controls visibility (typically via on-active-change from
+   init-body-dropzone!).
+
+   Props:
+     :title    - main text (default \"Drop files to upload\")
+     :subtitle - sub text (default \"Release to add your files\")
+     :class    - additional CSS classes
+     :attrs    - additional HTML attributes"
+  [{:keys [title subtitle class attrs]}]
+  (let [title-text    (or title "Drop files to upload")
+        subtitle-text (or subtitle "Release to add your files")]
+    #?(:squint
+       [:div (merge {:class (cond-> "fb-dropzone-overlay"
+                              class (str " " class))}
+                    attrs)
+        [:div {:class "fb-dropzone-overlay-backdrop"}]
+        [:div {:class "fb-dropzone-overlay-content"}
+         [:div {:class "fb-dropzone-icon"}
+          (icon/icon {:icon-name "upload" :size "xl"})]
+         [:div {:class "fb-dropzone-text"} title-text]
+         [:div {:class "fb-dropzone-subtext"} subtitle-text]]]
+
+       :cljs
+       [:div (merge {:class (cond-> ["fb-dropzone-overlay"]
+                              class (conj class))}
+                    attrs)
+        [:div {:class ["fb-dropzone-overlay-backdrop"]}]
+        [:div {:class ["fb-dropzone-overlay-content"]}
+         [:div {:class ["fb-dropzone-icon"]}
+          (icon/icon {:icon-name :upload :size :xl})]
+         [:div {:class ["fb-dropzone-text"]} title-text]
+         [:div {:class ["fb-dropzone-subtext"]} subtitle-text]]]
+
+       :clj
+       [:div (merge {:class (cond-> "fb-dropzone-overlay"
+                              class (str " " class))}
+                    attrs)
+        [:div {:class "fb-dropzone-overlay-backdrop"}]
+        [:div {:class "fb-dropzone-overlay-content"}
+         [:div {:class "fb-dropzone-icon"}
+          (icon/icon {:icon-name :upload :size :xl})]
+         [:div {:class "fb-dropzone-text"} title-text]
+         [:div {:class "fb-dropzone-subtext"} subtitle-text]]])))
