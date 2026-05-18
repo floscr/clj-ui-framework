@@ -27,7 +27,8 @@
             [ui.tag-input :as tag-input]
             [ui.markdown :as markdown]
             [ui.player-bar :as player-bar]
-            [ui.lightbox :as lightbox]))
+            [ui.lightbox :as lightbox]
+            [ui.context-menu :as context-menu]))
 
 ;; ── Query Params ────────────────────────────────────────────────────
 
@@ -202,6 +203,25 @@
         (button/button {:variant :primary :size :sm
                         :attrs {:onclick "document.getElementById('demo-dialog').close()"}}
           "Confirm")))))
+
+(defn context-menu-demo []
+  (section "Context Menu"
+    [:p {:style "color: var(--fg-2); font-size: var(--font-sm);"}
+     "Right-click (or long-press) the areas below to open context menus."]
+    [:div {:style "display: flex; gap: 1rem; flex-wrap: wrap;"}
+     (context-menu/context-menu-trigger
+       {:items [{:label "Edit"   :url "#edit"   :icon :edit}
+                {:label "Copy"   :url "#copy"   :icon :copy}
+                {:type :separator}
+                {:label "Delete" :url "#delete" :icon :trash :variant :danger}]}
+       [:div {:style "padding: 2rem; border: var(--border-0); border-radius: var(--radius-md); cursor: context-menu; text-align: center; min-width: 12rem;"}
+        "Right click here"])
+     (context-menu/context-menu-trigger
+       {:items [{:label "View profile"  :url "#profile" :icon :user}
+                {:label "Send message" :url "#message" :icon :mail}
+                {:label "Share"        :url "#share"   :icon :link}]}
+       [:div {:style "padding: 2rem; border: var(--border-0); border-radius: var(--radius-md); cursor: context-menu; text-align: center; min-width: 12rem;"}
+        "Different menu"])]))
 
 (defn spinner-demo []
   (section "Spinner"
@@ -452,6 +472,7 @@
    (accordion-demo)
    (table-demo)
    (dialog-demo)
+   (context-menu-demo)
    (spinner-demo)
    (skeleton-demo)
    (progress-demo)
@@ -588,6 +609,7 @@
    {:title "Feedback"
     :items [{:label "Alert" :anchor "alert"}
             {:label "Dialog" :anchor "dialog"}
+            {:label "Context Menu" :anchor "context-menu"}
             {:label "Spinner" :anchor "spinner"}
             {:label "Skeleton" :anchor "skeleton"}
             {:label "Tooltip" :anchor "tooltip"}]}
@@ -687,6 +709,7 @@
           [:script (h/raw theme-persistence-script)]
           [:script (h/raw live-reload-script)]]
          [:body
+          [:script {:src "/ui-runtime.js"}]
           [:script {:src "/theme-adapter.js" :defer true}]
           [:script {:src "/css-live-reload.js" :defer true}]
           (sidebar/sidebar-layout {}
@@ -773,6 +796,11 @@
       {:status 200
        :headers {"Content-Type" "text/css"}
        :body (slurp "dist/theme.css")}
+
+      (= path "/ui-runtime.js")
+      {:status 200
+       :headers {"Content-Type" "application/javascript"}
+       :body (slurp "dist/ui-runtime.js")}
 
       (= path "/theme-adapter.js")
       {:status 200

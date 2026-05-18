@@ -37,12 +37,34 @@
              (let [lr (slurp "dev/css-live-reload.js")]
                (spit "dev/replicant/public/css-live-reload.js" lr)
                (spit "dev/squint/public/css-live-reload.js" lr)
-               (println "Copied css-live-reload.js to dev targets"))
+               (println "Copied css-live-reload.js to dev targets")
+             (when (.exists (io/file "dist/ui-runtime.js"))
+               (let [rt (slurp "dist/ui-runtime.js")]
+                 (spit "dev/replicant/public/ui-runtime.js" rt)
+                 (spit "dev/squint/public/ui-runtime.js" rt)
+                 (println "Copied ui-runtime.js to dev targets"))))
              (doseq [md (.listFiles (io/file "src/ui")
                           (reify java.io.FileFilter
                             (accept [_ f] (.endsWith (.getName f) ".md"))))]
                (spit (str "dev/squint/public/" (.getName md)) (slurp md)))
              (println "Copied component docs to dev/squint"))}
+
+  build-js-runtime
+  {:doc "Compile squint JS runtime (context menu etc.) into dist/ui-runtime.js"
+   :task (do
+           (println "Compiling squint runtime...")
+           (let [root  (System/getProperty "user.dir")
+                 bin   (str root "/dev/squint/node_modules/.bin/")
+                 mods  (str root "/dev/squint/node_modules")]
+             (shell {:dir "src/ui/js"}
+                    (str bin "squint") "compile")
+             (shell {:dir "src/ui/js"
+                     :extra-env {"NODE_PATH" mods}}
+                    (str bin "esbuild")
+                    ".compiled/context_menu.mjs"
+                    "--bundle" "--format=iife"
+                    (str "--outfile=" root "/dist/ui-runtime.js")))
+           (println "Built dist/ui-runtime.js"))}
 
   watch-theme
   {:doc "Watch src/ui/*.css and tokens.edn, rebuild theme on changes"

@@ -6,8 +6,10 @@ dev/replicant/public/js/
 dev/replicant/public/theme.css
 dev/replicant/public/theme-adapter.js
 dev/replicant/public/css-live-reload.js
+dev/replicant/public/ui-runtime.js
 dev/replicant/.shadow-cljs/
 dev/squint/.compiled/
+src/ui/js/.compiled/
 dev/squint/public/
 dev/squint/node_modules/
 

@@ -24,12 +24,14 @@
             [ui.tag-input :as tag-input]
             [ui.markdown :as markdown]
             [ui.player-bar :as player-bar]
-            [ui.lightbox :as lightbox])
+            [ui.lightbox :as lightbox]
+            [ui.context-menu :as context-menu])
   (:require-macros [ui.macros :refer [inline-file]]))
 
 ;; ── State ───────────────────────────────────────────────────────────
 
 (defonce !page (atom :components))
+(defonce !ctx-log (atom []))
 
 ;; ── Helpers ─────────────────────────────────────────────────────────
 
@@ -165,6 +167,51 @@
         (button/button {:variant :primary :size :sm
                         :on-click (fn [_] (.close (.getElementById js/document "demo-dialog")))}
           "Confirm")))))
+
+(defn context-menu-demo []
+  (let [log @!ctx-log]
+    (section "Context Menu"
+      [:p {:style {:color "var(--fg-2)" :font-size "var(--font-sm)"}}
+       "Right-click (or long-press) the areas below to open context menus."]
+      [:div {:style {:display "flex" :gap "1rem" :flex-wrap "wrap"}}
+       (context-menu/context-menu-trigger
+         {:items [{:label "Edit"   :url "#edit"   :icon :edit}
+                  {:label "Copy"   :url "#copy"   :icon :copy}
+                  {:type :separator}
+                  {:label "Delete" :url "#delete" :icon :trash :variant :danger}]}
+         [:div {:style {:padding "2rem" :border "var(--border-0)" :border-radius "var(--radius-md)"
+                        :cursor "context-menu" :text-align "center" :min-width "12rem"}}
+          "Link actions"])
+       (context-menu/context-menu-trigger
+         {:items [{:label "View profile"  :url "#profile" :icon :user}
+                  {:label "Send message" :url "#message" :icon :mail}
+                  {:label "Share"        :url "#share"   :icon :link}]}
+         [:div {:style {:padding "2rem" :border "var(--border-0)" :border-radius "var(--radius-md)"
+                        :cursor "context-menu" :text-align "center" :min-width "12rem"}}
+          "Different menu"])
+       (context-menu/context-menu-trigger
+         {:items [{:label "Bookmark"  :icon :bookmark
+                   :on-click (fn [] (swap! !ctx-log conj "Bookmarked!"))}
+                  {:label "Star"      :icon :star
+                   :on-click (fn [] (swap! !ctx-log conj "Starred!"))}
+                  {:label "Download" :icon :download
+                   :on-click (fn [] (swap! !ctx-log conj "Downloading…"))}
+                  {:type :separator}
+                  {:label "Report"   :icon :alert-triangle :variant :danger
+                   :on-click (fn [] (swap! !ctx-log conj "Reported."))}]}
+         [:div {:style {:padding "2rem" :border "var(--border-0)" :border-radius "var(--radius-md)"
+                        :cursor "context-menu" :text-align "center" :min-width "12rem"
+                        :border-style "dashed"}}
+          "Callbacks (no navigation)"])]
+      (when (seq log)
+        [:div {:style {:margin-top "0.75rem" :display "flex" :flex-direction "column" :gap "0.25rem"}}
+         [:div {:style {:display "flex" :justify-content "space-between" :align-items "center"}}
+          [:span {:style {:font-size "var(--font-xs)" :color "var(--fg-2)"}} "Event log:"]
+          (button/button {:variant :ghost :size :sm
+                          :on-click (fn [_] (reset! !ctx-log []))}
+            "Clear")]
+         (into [:div {:style {:display "flex" :gap "0.5rem" :flex-wrap "wrap"}}]
+               (map (fn [msg] (badge/badge {:variant :secondary} msg)) log))]))))
 
 (defn spinner-demo []
   (section "Spinner"
@@ -497,6 +544,7 @@
    (accordion-demo)
    (table-demo)
    (dialog-demo)
+   (context-menu-demo)
    (spinner-demo)
    (skeleton-demo)
    (progress-demo)
@@ -635,6 +683,7 @@
    {:title "Feedback"
     :items [{:label "Alert" :anchor "alert"}
             {:label "Dialog" :anchor "dialog"}
+            {:label "Context Menu" :anchor "context-menu"}
             {:label "Spinner" :anchor "spinner"}
             {:label "Skeleton" :anchor "skeleton"}
             {:label "Tooltip" :anchor "tooltip"}]}
@@ -760,6 +809,7 @@
   (add-watch !tag-state :render (fn [_ _ _ _] (render!)))
   (add-watch !cal-state :render (fn [_ _ _ _] (render!)))
   (add-watch !lightbox-state :render (fn [_ _ _ _] (render!)))
+  (add-watch !ctx-log :render (fn [_ _ _ _] (render!)))
   (render!))
 
 (defn ^:export reload! []
