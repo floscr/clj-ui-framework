@@ -35,8 +35,12 @@ src/
     button.cljc              # Button component (reference implementation)
     button.css               # Button component styles (read by gen.clj)
     css/gen.clj              # EDN → CSS generator (babashka)
+    js/                      # Shared JS runtime (squint source → compiled IIFE)
+      squint.edn             # Squint compiler config for this directory
+      context_menu.cljs      # Context menu JS runtime
 dist/
   theme.css                  # Generated CSS (tokens + component styles)
+  ui-runtime.js              # Compiled JS runtime (squint → esbuild bundle)
 test/ui/
   button_test.clj            # Unit tests for button-classes, button component
   theme_test.clj             # Unit tests for CSS generation
@@ -51,6 +55,7 @@ dev/
 
 ```sh
 bb build-theme    # Generate dist/theme.css, copy to dev targets
+bb build-js-runtime # Compile squint JS runtime into dist/ui-runtime.js
 bb test           # Run all unit tests
 bb dev            # Start all dev servers in tmux (ui-dev session)
 bb dev:stop       # Stop dev tmux session
@@ -446,6 +451,66 @@ Icons with dedicated filled path data: `:play`, `:pause`, `:skip-back`, `:skip-f
 1. Add an entry to `icon-paths` with a keyword name and a vector of hiccup SVG child elements (`:path`, `:rect`, `:circle`, etc.)
 2. If it needs a filled variant with different paths, add a matching entry to `filled-icon-paths`
 3. For elements that must keep their stroke in filled mode, add per-element attrs: `{:fill "none" :stroke "currentColor" :stroke-width "2"}`
+
+## JS Runtime (`src/ui/js/`) — Shared Browser Logic
+
+The hiccup target renders static HTML on the server — there is no ClojureScript runtime in the browser. Any component that needs **client-side interactivity in hiccup** (positioning, dismiss-on-click, keyboard navigation, etc.) must use a shared JS runtime.
+
+**Always put shared browser logic in `src/ui/js/`.** Do not write inline `onclick` strings for anything beyond trivial one-liners. Do not duplicate DOM-manipulation code across targets.
+
+### Architecture
+
+```
+src/ui/js/
+  squint.edn              # Squint compiler config
+  context_menu.cljs       # Context menu runtime (squint source)
+  .compiled/              # Squint output (gitignored)
+dist/
+  ui-runtime.js           # Bundled IIFE (~12kb), loaded via <script>
+```
+
+- **Source**: squint `.cljs` files in `src/ui/js/` — write ClojureScript, compiled to JS
+- **Build**: `bb build-js-runtime` compiles via squint → esbuild → `dist/ui-runtime.js`
+- **Consumed by all targets**: loaded as a `<script>` tag before app code
+- **Bridge**: functions are attached to `window` (e.g. `window.__uiContextMenu`)
+
+### How it works across targets
+
+The `.cljc` component file uses reader conditionals for the **trigger** (how items get to the runtime), but all three targets call the **same JS runtime** for DOM creation:
+
+| Target | Trigger mechanism | Runtime call |
+|--------|-------------------|--------------|
+| `:clj` (Hiccup) | JSON in `data-*` attribute + inline `oncontextmenu` | `window.__uiFn(event)` reads data attr |
+| `:squint` | Event handler passes JS objects directly | `window.__uiFn(event, items)` |
+| `:cljs` (Replicant) | Event handler passes `(clj->js items)` | `window.__uiFn(event, items)` |
+
+### When to use `src/ui/js/`
+
+**Use it when a component needs browser-side behavior that hiccup can't do with pure HTML/CSS:**
+- Floating/positioned UI (menus, tooltips, popovers, dropdowns)
+- Click-outside dismiss, Escape handling
+- Keyboard navigation within a widget
+- Drag and drop, resize handles
+- Any DOM measurement (getBoundingClientRect, viewport clamping)
+
+**Don't use it for:**
+- Pure CSS interactions (hover states, transitions, `:focus-visible`)
+- Things that only squint/replicant need (they have full ClojureScript)
+- Simple toggles that can use `<details>`/`<dialog>` or HTMX
+
+### Adding a new JS runtime module
+
+1. Create `src/ui/js/my_feature.cljs` — write squint-compatible ClojureScript
+2. Attach the public API to `window`: `(aset js/window "__uiMyFeature" my-fn)`
+3. Import it in `src/ui/js/context_menu.cljs` or create a new entry point
+4. If adding a new entry point, update the esbuild command in `bb.edn` (`build-js-runtime` task)
+5. Run `bb build-js-runtime` to rebuild `dist/ui-runtime.js`
+6. Create the `.cljc` component that calls the runtime via reader conditionals
+7. The `bb sync-dev-assets` task copies `dist/ui-runtime.js` to dev targets automatically
+
+### Naming convention
+
+Runtime functions on `window` use the `__ui` prefix: `__uiContextMenu`, `__uiTooltip`, etc.
 
 ## Squint Pitfalls
 
