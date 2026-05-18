@@ -270,6 +270,7 @@
      :on-row-click - (fn [item]) called when a row is clicked
      :selected-fn  - (fn [item]) -> boolean, highlights the row
      :context-menu-items-fn - (fn [item]) -> items vector, right-click menu per row
+     :row-attrs-fn - (fn [item]) -> attrs map, merged onto each row element
      :class        - additional CSS classes on the wrapper
      :attrs        - additional HTML attributes on the wrapper
 
@@ -279,7 +280,7 @@
      :width  - CSS width string (optional, e.g. \"90px\")
      :render - (fn [item]) custom cell renderer (optional)
      :class  - additional CSS class for this column's cells (optional)"
-  [{:keys [columns items sort-key sort-dir on-sort on-row-click selected-fn context-menu-items-fn class attrs]}]
+  [{:keys [columns items sort-key sort-dir on-sort on-row-click selected-fn context-menu-items-fn row-attrs-fn class attrs]}]
   (let [cols         (or columns default-columns)
         sortable?    (some? on-sort)
         gtc          (str/join " " (map (fn [col] (or (:width col) "minmax(0,1fr)")) cols))]
@@ -304,10 +305,11 @@
               (map (fn [item]
                      (let [sel?     (and selected-fn (selected-fn item))
                            cm-items (when context-menu-items-fn (context-menu-items-fn item))
-                           row      (into [:div {:class (cond-> "fb-table-row"
-                                                          sel?         (str " fb-table-row-selected")
-                                                          on-row-click (str " fb-table-row-clickable"))
-                                                  :on-click (when on-row-click (fn [_] (on-row-click item)))}]
+                           row      (into [:div (merge {:class (cond-> "fb-table-row"
+                                                                   sel?         (str " fb-table-row-selected")
+                                                                   on-row-click (str " fb-table-row-clickable"))
+                                                          :on-click (when on-row-click (fn [_] (on-row-click item)))}
+                                                         (when row-attrs-fn (row-attrs-fn item)))]
                                           (map (fn [col]
                                                  [:div {:class (cond-> "fb-table-cell"
                                                                  (:class col) (str " " (:class col)))}
@@ -339,10 +341,11 @@
               (map (fn [item]
                      (let [sel?     (and selected-fn (selected-fn item))
                            cm-items (when context-menu-items-fn (context-menu-items-fn item))
-                           row      (into [:div {:class (cond-> ["fb-table-row"]
-                                                          sel?         (conj "fb-table-row-selected")
-                                                          on-row-click (conj "fb-table-row-clickable"))
-                                                  :on (when on-row-click {:click (fn [_] (on-row-click item))})}]
+                           row      (into [:div (merge {:class (cond-> ["fb-table-row"]
+                                                                   sel?         (conj "fb-table-row-selected")
+                                                                   on-row-click (conj "fb-table-row-clickable"))
+                                                          :on (when on-row-click {:click (fn [_] (on-row-click item))})}
+                                                         (when row-attrs-fn (row-attrs-fn item)))]
                                           (map (fn [col]
                                                  [:div {:class (cond-> ["fb-table-cell"]
                                                                  (:class col) (conj (:class col)))}
@@ -373,9 +376,10 @@
               (map (fn [item]
                      (let [sel?     (and selected-fn (selected-fn item))
                            cm-items (when context-menu-items-fn (context-menu-items-fn item))
-                           row      (into [:div {:class (cond-> "fb-table-row"
-                                                          sel?         (str " fb-table-row-selected")
-                                                          on-row-click (str " fb-table-row-clickable"))}]
+                           row      (into [:div (merge {:class (cond-> "fb-table-row"
+                                                                   sel?         (str " fb-table-row-selected")
+                                                                   on-row-click (str " fb-table-row-clickable"))}
+                                                         (when row-attrs-fn (row-attrs-fn item)))]
                                           (map (fn [col]
                                                  [:div {:class (cond-> "fb-table-cell"
                                                                  (:class col) (str " " (:class col)))}
