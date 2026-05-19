@@ -322,7 +322,8 @@
 .fb-table-wrapper {
   border: var(--border-0);
   border-radius: var(--radius-md);
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
 }
 
 .fb-table {

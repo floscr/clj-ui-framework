@@ -283,7 +283,7 @@
   [{:keys [columns items sort-key sort-dir on-sort on-row-click selected-fn context-menu-items-fn row-attrs-fn class attrs]}]
   (let [cols         (or columns default-columns)
         sortable?    (some? on-sort)
-        gtc          (str/join " " (map (fn [col] (or (:width col) "minmax(0,1fr)")) cols))]
+        gtc          (str/join " " (map (fn [col] (or (:width col) "minmax(150px,1fr)")) cols))]
     #?(:squint
        [:div (merge {:class (cond-> "fb-table-wrapper"
                               class (str " " class))}
