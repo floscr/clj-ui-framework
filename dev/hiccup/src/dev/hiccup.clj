@@ -841,7 +841,7 @@
             (app-sidebar active-page port)
             (sidebar/sidebar-overlay {})
             (sidebar/sidebar-layout-main {}
-              [:div {:style "padding: 2rem; max-width: 960px;"}
+              [:div {:style "--body-padding-inline: 2rem; padding: 2rem; max-width: 960px;"}
                [:div {:style "display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;"}
                 (sidebar/sidebar-mobile-toggle {})]
                (case active-page

@@ -420,3 +420,12 @@
 .fb-table-row-clickable > .fb-table-cell {
   cursor: pointer;
 }
+
+/* Mobile: full bleed table */
+@media (max-width: 768px) {
+  .fb-table-wrapper {
+    margin-inline: calc(var(--body-padding-inline, 0px) * -1);
+    border-inline: none;
+    border-radius: 0;
+  }
+}
