@@ -88,6 +88,29 @@
 .hit-area-4 { --hit-area: var(--size-4); }
 .hit-area-6 { --hit-area: var(--size-6); }
 
+/* ── Body padding & full bleed ────────────────────────────────── */
+/* Consumer sets --body-padding-inline on :root, body, or a layout */
+/* wrapper. full-bleed classes break out of that padding.           */
+/*                                                                  */
+/* Usage:                                                           */
+/*   body { --body-padding-inline: var(--size-4); padding-inline: var(--size-4); } */
+/*   <div class="full-bleed-flush">edge-to-edge table</div>        */
+
+.full-bleed {
+  margin-inline: calc(var(--body-padding-inline, 0px) * -1);
+}
+
+.full-bleed-padded {
+  margin-inline: calc(var(--body-padding-inline, 0px) * -1);
+  padding-inline: var(--body-padding-inline, 0px);
+}
+
+.full-bleed-flush {
+  margin-inline: calc(var(--body-padding-inline, 0px) * -1);
+  border-inline: none;
+  border-radius: 0;
+}
+
 /* ── Scrollbars ────────────────────────────────────────────────── */
 /* Thin, subtle scrollbars everywhere.                             */
 

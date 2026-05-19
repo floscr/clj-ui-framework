@@ -358,6 +358,7 @@ Toggle with: `document.documentElement.dataset.theme = "dark" | "light"`
 | **Sizing** | `.w-full` |
 | **A11y** | `.sr-only` (visually hidden, screen-reader accessible) |
 | **Hit area** | `.hit-area` + `.hit-area-{2,3,4,6}` (expand clickable area via `::before` pseudo-element) |
+| **Full bleed** | `.full-bleed` (escape body padding), `.full-bleed-padded` (escape + re-apply padding inside), `.full-bleed-flush` (escape + strip border/radius) — requires `--body-padding-inline` on ancestor |
 
 ### Hit area expand
 
