@@ -395,7 +395,6 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   border-top: var(--border-0);
-  transition: background-color 150ms ease;
 }
 
 /* Meta-style cells (not the first in a row) */
