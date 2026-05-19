@@ -24,7 +24,6 @@
 
 .fb-item {
   cursor: pointer;
-  transition: background-color 150ms ease;
 }
 
 .fb-item:hover {
