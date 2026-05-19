@@ -185,6 +185,7 @@
    {:key   #?(:squint "name" :cljs :name :clj :name)
     :label (or label "Name")
     :width width
+    :class "fb-table-namecol"
     :render (fn [item]
               (let [ft (:file-type item)]
                 #?(:squint

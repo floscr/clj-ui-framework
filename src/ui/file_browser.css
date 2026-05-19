@@ -151,6 +151,12 @@
   height: 32px;
 }
 
+/* Name-column header: offset by icon (32px) + gap (--size-2) so the
+   label aligns with the file name text, not the icon. */
+.fb-table-th.fb-table-namecol {
+  padding-left: calc(var(--size-3) + 32px + var(--size-2));
+}
+
 /* ── File Type Colors ─────────────────────────────────────────────── */
 
 .fb-item-icon {
