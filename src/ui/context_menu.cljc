@@ -5,9 +5,12 @@
      (context-menu-trigger
        {:items [{:label \"Edit\"   :url \"/edit/123\" :icon :edit}
                 {:type :separator}
-                {:label \"Delete\" :url \"/del/123\" :icon :trash :variant :danger}]}
+                {:label \"Delete\" :url \"/del/123\" :icon :trash :variant :danger
+                 :confirm true}]}
        [:div \"Right click me\"])
 
+   :confirm can be true (default message) or a custom string:
+     {:label \"Remove\" :url \"/rm/1\" :confirm \"Delete this permanently?\"}
    Hiccup: items are serialized as a data attribute; a tiny JS runtime
    (ui-runtime.js, compiled from squint) handles DOM creation.
 
@@ -53,6 +56,8 @@
         (:url item)      (assoc :url (:url item))
         (:variant item)  (assoc :variant (kw-name (:variant item)))
         (:on-click item) (assoc :on-click (:on-click item))
+        (:confirm item)  (assoc :confirm (let [c (:confirm item)]
+                                            (if (string? c) c true)))
         icon-name        (assoc :icon-paths (icon-paths-for icon-name))))))
 
 ;; ── JSON serialization (hiccup/clj only) ────────────────────────────

@@ -55,6 +55,26 @@
   color: var(--danger-700);
 }
 
+/* ── Confirm ─────────────────────────────────────────────────────── */
+
+.context-menu-confirm-message {
+  padding: var(--size-2) var(--size-3);
+  font-size: var(--font-sm);
+  line-height: 1.25;
+  color: var(--fg-1);
+  white-space: nowrap;
+}
+
+.context-menu-confirm-actions {
+  display: flex;
+  gap: 0;
+}
+
+.context-menu-confirm-actions .context-menu-item {
+  flex: 1;
+  justify-content: center;
+}
+
 /* ── Separator ───────────────────────────────────────────────────── */
 
 .context-menu-separator {

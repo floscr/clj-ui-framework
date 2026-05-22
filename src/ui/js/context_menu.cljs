@@ -46,6 +46,61 @@
       ((.-cleanup state))
       (set! (.-cleanup state) nil))))
 
+;; ── Confirm View ────────────────────────────────────────────────────
+
+(defn- execute-item! [item]
+  (let [on-click (aget item "on-click")
+        url      (aget item "url")]
+    (if on-click
+      (on-click)
+      (when url
+        (set! (.-location js/window) url)))))
+
+(defn- show-confirm! [menu item]
+  (let [confirm-val (aget item "confirm")
+        message     (if (= confirm-val true) "Are you sure?" confirm-val)
+        ;; Clear existing content
+        _           (set! (.-innerHTML menu) "")
+        ;; Message
+        msg-el      (.createElement js/document "div")]
+    (set! (.-className msg-el) "context-menu-confirm-message")
+    (set! (.-textContent msg-el) message)
+    (.appendChild menu msg-el)
+    ;; Buttons
+    (let [actions (.createElement js/document "div")]
+      (set! (.-className actions) "context-menu-confirm-actions")
+      ;; Cancel
+      (let [cancel-btn (.createElement js/document "button")]
+        (set! (.-className cancel-btn) "context-menu-item")
+        (set! (.-textContent cancel-btn) "Cancel")
+        (.setAttribute cancel-btn "tabindex" "-1")
+        (.addEventListener cancel-btn "click"
+          (fn [e]
+            (.preventDefault e)
+            (.stopPropagation e)
+            (dismiss!)))
+        (.appendChild actions cancel-btn))
+      ;; Confirm
+      (let [danger      (= (aget item "variant") "danger")
+            confirm-btn (.createElement js/document "button")]
+        (set! (.-className confirm-btn)
+              (if danger
+                "context-menu-item context-menu-item--danger"
+                "context-menu-item"))
+        (set! (.-textContent confirm-btn) "Confirm")
+        (.setAttribute confirm-btn "tabindex" "-1")
+        (.addEventListener confirm-btn "click"
+          (fn [e]
+            (.preventDefault e)
+            (.stopPropagation e)
+            (dismiss!)
+            (execute-item! item)))
+        (.appendChild actions confirm-btn))
+      (.appendChild menu actions))
+    ;; Focus the cancel button
+    (let [cancel (.querySelector menu ".context-menu-item")]
+      (when cancel (.focus cancel)))))
+
 ;; ── Menu DOM Creation ───────────────────────────────────────────────
 
 (defn- create-menu [items]
@@ -83,12 +138,10 @@
               (fn [e]
                 (.preventDefault e)
                 (.stopPropagation e)
-                (dismiss!)
-                (let [on-click (aget item "on-click")]
-                  (if on-click
-                    (on-click)
-                    (when url
-                      (set! (.-location js/window) url))))))
+                (if (aget item "confirm")
+                  (show-confirm! (.closest el ".context-menu") item)
+                  (do (dismiss!)
+                      (execute-item! item)))))
             (.appendChild menu el)))))
     menu))
 
