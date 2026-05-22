@@ -17,13 +17,48 @@ Add as a **git dependency** in `bb.edn` or `deps.edn`:
 
 Babashka/Clojure resolves the dependency automatically — no manual path or submodule needed.
 
-**Squint apps** — squint can't resolve git deps. Use the built-in `ui.setup/setup!` helper in a `frontend:setup` task (see README.md). It symlinks sources and copies theme.css. Add the generated `lib/ui` and `lib/theme.css` to `.gitignore`.
+### CSS — CRITICAL
 
-**CSS setup** — `dist/theme.css` contains all design tokens and component styles. **You must include it.** Component CSS references variables from the theme — without it, styles break. For browser apps, the setup task copies it. For server-rendered apps, inline it or serve from the dep's dist dir.
+All component CSS and design tokens are bundled into **one CSS string** by `ui.css.gen/build-css`. This function finds default tokens and component CSS files on the classpath automatically — no paths to configure.
 
-**Do not duplicate theme tokens** in your app's CSS. If colors/spacing look wrong, you're missing `theme.css`.
+**Add a bb task** in your app's `bb.edn`:
 
-**Updating** — bump the `:sha` in `bb.edn`/`deps.edn`, then `bb frontend:setup` for squint apps.
+```edn
+ui:css
+{:doc "Generate UI framework CSS"
+ :requires ([ui.css.gen :as css])
+ :task (css/build-css {:output "resources/public/ui.css"})}
+```
+
+Then run `bb ui:css` and include it in your HTML:
+
+```html
+<link rel="stylesheet" href="/ui.css">
+```
+
+**Custom theme** — pass token overrides (deep-merged with defaults):
+
+```edn
+;; Blue accent instead of purple
+ui:css
+{:requires ([ui.css.gen :as css])
+ :task (css/build-css {:output "resources/public/ui.css"
+                       :scales {:color {:accent {:hue 220}}}})}
+```
+
+**Generate at server boot** — `build-css` returns a CSS string, no file needed:
+
+```clojure
+(require '[ui.css.gen :as css])
+(def theme-css (css/build-css))           ; default theme
+(def theme-css (css/build-css {:tokens {:accent "var(--accent-600)"}})) ; override
+```
+
+**Do not duplicate theme tokens** in your app's CSS. If colors/spacing look wrong, you're missing the generated CSS.
+
+**Squint apps** — squint can't resolve git deps. Use `ui.setup/setup!` which symlinks sources AND generates CSS. Add `lib/ui` and `lib/theme.css` to `.gitignore`.
+
+**Updating** — bump the `:sha` in `bb.edn`/`deps.edn`, then re-run `bb ui:css` (or `bb frontend:setup` for squint apps).
 
 ## Project Structure
 

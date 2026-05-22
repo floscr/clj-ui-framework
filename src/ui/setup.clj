@@ -1,12 +1,18 @@
 (ns ui.setup
-  "Helper for squint-based frontends that consume clj-ui-framework as a git dep.
+  "Helpers for consuming clj-ui-framework as a git dep.
 
-   Squint can't resolve git deps — it only reads :paths from squint.edn.
-   This namespace finds the cached git dep on the babashka classpath,
-   symlinks its src/ dir into the frontend app, and copies theme.css.
+   Most apps only need build-css from ui.css.gen — see that namespace.
+   This namespace adds squint-specific setup (source symlinking).
 
-   Usage in bb.edn:
+   Usage in consumer's bb.edn:
 
+     ;; Any app — generate CSS (with optional theme overrides)
+     ui:css
+     {:doc \"Generate UI framework CSS\"
+      :requires ([ui.css.gen :as css])
+      :task (css/build-css {:output \"resources/public/ui.css\"})}
+
+     ;; Squint app — symlink sources + generate CSS
      frontend:setup
      {:doc \"Setup clj-ui-framework for squint frontend\"
       :requires ([ui.setup :as setup])
@@ -14,10 +20,10 @@
                            :theme-target \"app/lib/theme.css\"})}"
   (:require [babashka.classpath :as cp]
             [babashka.fs :as fs]
-            [babashka.process :as proc]
-            [clojure.string :as str]))
+            [clojure.string :as str]
+            [ui.css.gen :as css]))
 
-(defn find-ui-src
+(defn- find-ui-src
   "Find the clj-ui-framework src dir on the babashka classpath.
    Returns the path string, or nil if not found."
   []
@@ -26,12 +32,14 @@
        first))
 
 (defn setup!
-  "Symlink clj-ui-framework src and copy theme.css for a squint frontend.
+  "Symlink clj-ui-framework src and generate theme.css for a squint frontend.
+   For non-squint apps, use ui.css.gen/build-css directly.
 
    Options:
      :link-target   — path where the src symlink is created (e.g. \"app/lib/ui\")
-     :theme-target  — path where theme.css is copied (e.g. \"app/lib/theme.css\")"
-  [{:keys [link-target theme-target]}]
+     :theme-target  — path where theme.css is written (e.g. \"app/lib/theme.css\")
+     :theme         — optional token overrides (same as build-css opts)"
+  [{:keys [link-target theme-target theme]}]
   (let [ui-src (find-ui-src)]
     (when-not ui-src
       (println "ERROR: clj-ui-framework not found on classpath.")
@@ -46,11 +54,5 @@
       (fs/create-sym-link link-target ui-src)
       (println "Linked" link-target "→" ui-src))
 
-    ;; Build theme if not present, then copy
-    (let [theme-src (str (fs/parent ui-src) "/dist/theme.css")]
-      (when-not (fs/exists? theme-src)
-        (println "Building theme.css...")
-        (proc/shell {:dir (str (fs/parent ui-src))} "bb" "build-theme"))
-      (fs/create-dirs (str (fs/parent theme-target)))
-      (fs/copy theme-src theme-target {:replace-existing true})
-      (println "Copied theme.css →" theme-target))))
+    ;; Generate CSS
+    (css/build-css (merge theme {:output theme-target}))))

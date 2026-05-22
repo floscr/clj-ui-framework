@@ -1,6 +1,7 @@
 (ns ui.css.gen
   (:require [babashka.fs :as fs]
             [clojure.edn :as edn]
+            [clojure.java.io :as io]
             [clojure.string :as str]
             [jon.color-tools :as color]))
 
@@ -159,25 +160,92 @@ body {
        (map #(slurp (str %)))
        (str/join "\n\n")))
 
+;; ── Classpath helpers ────────────────────────────────────────────
+
+(defn- deep-merge
+  "Recursively merge maps. Non-map values in b override a."
+  [a b]
+  (merge-with (fn [x y]
+                (if (and (map? x) (map? y))
+                  (deep-merge x y)
+                  y))
+              a b))
+
+(defn- find-ui-dir
+  "Find the ui/ directory on the classpath (works from git deps)."
+  []
+  (when-let [marker (io/resource "ui/css/gen.clj")]
+    (-> (.getFile marker)
+        (str/replace #"/css/gen\.clj$" ""))))
+
+(defn- load-default-tokens
+  "Load the default tokens.edn from the classpath."
+  []
+  (some-> (io/resource "theme/tokens.edn") slurp edn/read-string))
+
+;; ── Public API ───────────────────────────────────────────────────
+
 (defn generate-css
-  "Generate the full CSS output from parsed token data."
-  [{:keys [tokens themes scales]}]
-  (let [dark-tokens (get themes :dark)
-        scale-vars  (when scales (generate-scales scales))
-        root-block  (str ":root {\n" (tokens->css-block tokens)
-                         (when scale-vars (str "\n" scale-vars))
-                         "\n}")
-        dark-attr   (str "[data-theme=\"dark\"] {\n" (tokens->css-block dark-tokens) "\n}")
-        dark-media  (str "@media (prefers-color-scheme: dark) {\n"
-                         "  :root:not([data-theme=\"light\"]) {\n"
-                         (str/replace (tokens->css-block dark-tokens) #"(?m)^  " "    ")
-                         "\n  }\n}")
-        base        (base-css)
-        components  (collect-component-css "src/ui")]
-    (str/join "\n\n" [root-block dark-attr dark-media base components ""])))
+  "Generate the full CSS output from parsed token data.
+   component-dir defaults to \"src/ui\" (for local dev)."
+  ([token-data] (generate-css token-data "src/ui"))
+  ([{:keys [tokens themes scales]} component-dir]
+   (let [dark-tokens (get themes :dark)
+         scale-vars  (when scales (generate-scales scales))
+         root-block  (str ":root {\n" (tokens->css-block tokens)
+                          (when scale-vars (str "\n" scale-vars))
+                          "\n}")
+         dark-attr   (str "[data-theme=\"dark\"] {\n" (tokens->css-block dark-tokens) "\n}")
+         dark-media  (str "@media (prefers-color-scheme: dark) {\n"
+                          "  :root:not([data-theme=\"light\"]) {\n"
+                          (str/replace (tokens->css-block dark-tokens) #"(?m)^  " "    ")
+                          "\n  }\n}")
+         base        (base-css)
+         components  (collect-component-css component-dir)]
+     (str/join "\n\n" [root-block dark-attr dark-media base components ""]))))
+
+(defn build-css
+  "Generate bundled CSS string with theme tokens and all component styles.
+   Finds default tokens and component CSS from the classpath automatically.
+
+   Returns the CSS string. Optionally writes to :output path.
+
+     ;; Default theme
+     (build-css)
+
+     ;; Write to file
+     (build-css {:output \"resources/public/ui.css\"})
+
+     ;; Custom accent color (deep-merged with defaults)
+     (build-css {:scales {:color {:accent {:hue 200 :chroma 0.20
+                                           :steps [[500 0.60]]}}}})
+
+     ;; Override semantic tokens
+     (build-css {:tokens {:accent \"var(--accent-600)\"}
+                 :output \"public/ui.css\"})
+
+   Options map keys:
+     :output  — file path to write CSS to (optional)
+     :scales  — override/extend scale definitions
+     :tokens  — override semantic tokens (light theme)
+     :themes  — override theme variants (e.g. {:dark {...}})"
+  ([] (build-css {}))
+  ([{:keys [output] :as opts}]
+   (let [defaults   (load-default-tokens)
+         overrides  (dissoc opts :output)
+         token-data (if (seq overrides)
+                      (deep-merge defaults overrides)
+                      defaults)
+         ui-dir     (find-ui-dir)
+         css        (generate-css token-data ui-dir)]
+     (when output
+       (fs/create-dirs (fs/parent output))
+       (spit output css))
+     css)))
 
 (defn build-theme!
-  "Read tokens from file and write generated CSS to output."
+  "Read tokens from file and write generated CSS to output.
+   Used by the local bb build-theme task."
   [{:keys [input output]}]
   (let [token-data (read-tokens input)
         css        (generate-css token-data)]
