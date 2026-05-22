@@ -630,6 +630,19 @@ Runtime functions on `window` use the `__ui` prefix: `__uiContextMenu`, `__uiToo
    ```
 
    **After recovering**, always verify the compiled output is complete before committing.
+8. **Eucalypt shorthand class wiping** — When using hiccup shorthand classes (e.g., `[:button.foo.bar {:class (when active "active")}]`), Eucalypt **replaces ALL classes** when the `:class` value transitions reactively (e.g., from `"active"` to `nil`). The shorthand classes (`foo bar`) get wiped to an empty string, leaving the element unstyled.
+
+   **Wrong — classes disappear when `active` becomes falsy:**
+   ```clojure
+   [:button.player-bar-icon-btn.player-bar-hide-sm {:class (when repeat "active")}]
+   ```
+
+   **Right — always build the full class string explicitly:**
+   ```clojure
+   [:button {:class (str "player-bar-icon-btn player-bar-hide-sm" (when repeat " active"))}]
+   ```
+
+   This applies to any element with shorthand classes and a dynamic `:class` attribute. The same issue occurs with `[:div.dl-bar {:class status}]` — use `[:div {:class (str "dl-bar" (when status (str " " status)))}]` instead.
 
 ## Replicant Pitfalls
 
