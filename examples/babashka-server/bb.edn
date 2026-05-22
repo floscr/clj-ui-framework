@@ -1,0 +1,13 @@
+{:deps {clj-ui-framework/clj-ui-framework
+        {:git/url "https://github.com/floscr/clj-ui-framework"
+         :git/sha "3e1df14b217f58cb579f7eed102d1547947bc30c"}
+        ;; Transitive dep of the framework (git deps don't resolve these)
+        com.github.jramosg/color-tools {:mvn/version "1.1.0"}}
+ :paths ["src"]
+
+ :tasks
+ {serve
+  {:doc "Start the example server (PORT env, default 8090)"
+   :requires ([example.server :as server])
+   :task (do (server/start! {:port (or (some-> (System/getenv "PORT") parse-long) 8090)})
+             (deref (promise)))}}}
