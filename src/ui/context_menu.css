@@ -5,11 +5,12 @@
   position: fixed;
   z-index: 9999;
   min-width: 10rem;
-  padding: var(--size-1) 0;
+  padding: 0;
   background: var(--bg-0);
   border: var(--border-0);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-3);
+  overflow: hidden;
   animation: context-menu-in 0.12s ease;
   list-style: none;
   margin: 0;
