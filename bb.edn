@@ -63,7 +63,8 @@
                     ".compiled/context_menu.mjs"
                     "--bundle" "--format=iife"
                     (str "--outfile=" root "/dist/ui-runtime.js")))
-           (println "Built dist/ui-runtime.js"))}
+           (spit "src/ui/ui-runtime.js" (slurp "dist/ui-runtime.js"))
+           (println "Built dist/ui-runtime.js + src/ui/ui-runtime.js"))}
 
   watch-theme
   {:doc "Watch src/ui/*.css and tokens.edn, rebuild theme on changes"

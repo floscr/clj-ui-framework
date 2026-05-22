@@ -56,6 +56,33 @@ ui:css
 
 **Do not duplicate theme tokens** in your app's CSS. If colors/spacing look wrong, you're missing the generated CSS.
 
+### JS Runtime — Components with Client-Side Interactivity
+
+Some components (context menus, tooltips, etc.) need browser-side JS for positioning and event handling. The JS runtime is pre-built and bundled in the repo — no build step required.
+
+**Get the JS string** (e.g. to inline in `<script>`):
+
+```clojure
+(require '[ui.css.gen :as css])
+(def runtime-js (css/build-js))           ; returns JS string
+```
+
+**Write to a file:**
+
+```clojure
+(css/build-js {:output "resources/public/ui-runtime.js"})
+```
+
+**Add to your HTML** — load before app code:
+
+```html
+<script>{runtime-js}</script>
+<!-- or as external file -->
+<script src="/ui-runtime.js"></script>
+```
+
+Without this script, components that need client-side interactivity (context menus, tooltips) won't work in hiccup/server-rendered targets.
+
 **Squint apps** — squint can't resolve git deps. Use `ui.setup/setup!` which symlinks sources AND generates CSS. Add `lib/ui` and `lib/theme.css` to `.gitignore`.
 
 **Updating** — bump the `:sha` in `bb.edn`/`deps.edn`, then re-run `bb ui:css` (or `bb frontend:setup` for squint apps).
@@ -93,14 +120,20 @@ A full working example lives in `examples/babashka-server/`. It demonstrates:
             [ui.button :as button]))
 
 (def theme-css (css/build-css))  ; generated once at boot
+(def runtime-js (css/build-js))  ; pre-built JS for interactive components
 
 (defn page []
   (str (h/html
     [:html
      [:head [:style (h/raw theme-css)]]
      [:body
-      (button/button {:variant :primary} "Click me")]])))
+      (button/button {:variant :primary} "Click me")
+      [:script (h/raw runtime-js)]]])))
+```
 
+The JS runtime is only needed for components with client-side interactivity (context menus, tooltips, etc.). If you only use static components like buttons and cards, you can skip it.
+
+```clojure
 (defn handler [_]
   {:status 200
    :headers {"Content-Type" "text/html"}

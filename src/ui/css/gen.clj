@@ -247,6 +247,27 @@ body {
        (spit output css))
      css)))
 
+(defn build-js
+  "Return the pre-built JS runtime string for hiccup targets.
+   The JS bundle is committed to the repo and loaded from the classpath.
+
+   Returns the JS string. Optionally writes to :output path.
+
+     ;; Get JS string (e.g. to inline in <script>)
+     (build-js)
+
+     ;; Write to file
+     (build-js {:output \"resources/public/ui-runtime.js\"})"
+  ([] (build-js {}))
+  ([{:keys [output]}]
+   (let [js (some-> (io/resource "ui/ui-runtime.js") slurp)]
+     (when (nil? js)
+       (throw (ex-info "ui-runtime.js not found on classpath" {})))
+     (when output
+       (fs/create-dirs (fs/parent output))
+       (spit output js))
+     js)))
+
 (defn build-theme!
   "Read tokens from file and write generated CSS to output.
    Used by the local bb build-theme task."
