@@ -71,15 +71,15 @@
              [:p.player-bar-title track-name]
              (when subtitle
                [:p.player-bar-subtitle subtitle])]
-            [:button.player-bar-icon-btn
-             (cond-> {:class (when favorited "player-bar-fav-active")
+            [:button
+             (cond-> {:class (str "player-bar-icon-btn" (when favorited " player-bar-fav-active"))
                       :title (if favorited "Remove from favorites" "Add to favorites")}
                on-favorite (assoc :on-click on-favorite))
              (icon/icon {:icon-name :heart :size :sm})]]
            ;; Center: transport controls
            [:div.player-bar-center
-            [:button.player-bar-icon-btn.player-bar-hide-sm
-             (cond-> {:class (when shuffle "active")
+            [:button
+             (cond-> {:class (str "player-bar-icon-btn player-bar-hide-sm" (when shuffle " active"))
                       :title "Shuffle"}
                on-shuffle (assoc :on-click on-shuffle))
              (icon/icon {:icon-name :shuffle :size :sm})]
@@ -95,8 +95,8 @@
              (cond-> {:title "Next"}
                on-next (assoc :on-click on-next))
              (icon/icon {:icon-name :skip-forward :size :sm})]
-            [:button.player-bar-icon-btn.player-bar-hide-sm
-             (cond-> {:class (when repeat "active")
+            [:button
+             (cond-> {:class (str "player-bar-icon-btn player-bar-hide-sm" (when repeat " active"))
                       :title "Repeat"}
                on-repeat (assoc :on-click on-repeat))
              (icon/icon {:icon-name :repeat :size :sm})]]
