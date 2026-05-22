@@ -2,8 +2,7 @@
   (:require [babashka.fs :as fs]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
-            [clojure.string :as str]
-            [jon.color-tools :as color]))
+            [clojure.string :as str]))
 
 (defn read-tokens
   "Read and parse the tokens EDN file."
@@ -61,10 +60,15 @@
         clamp (fn [x] (max 0 (min 255 (int (Math/round (* 255.0 (gamma (max 0.0 x))))))))]
     [(clamp r-lin) (clamp g-lin) (clamp b-lin)]))
 
+(defn rgb->hex
+  "Convert [r g b] (0-255 ints) to a hex color string."
+  [[r g b]]
+  (format "#%02x%02x%02x" r g b))
+
 (defn oklch->hex
   "Convert OKLCH [L C H] to hex string. Clamps to sRGB gamut."
   [[l c h]]
-  (color/rgb->hex (oklch->srgb [l c h])))
+  (rgb->hex (oklch->srgb [l c h])))
 
 ;; ── Scale generation ─────────────────────────────────────────────
 

@@ -72,9 +72,7 @@ A full working example lives in `examples/babashka-server/`. It demonstrates:
 ```edn
 {:deps {clj-ui-framework/clj-ui-framework
         {:git/url "https://github.com/floscr/clj-ui-framework"
-         :git/sha "<sha>"}
-        ;; Transitive dep — git deps don't resolve these automatically
-        com.github.jramosg/color-tools {:mvn/version "1.1.0"}}
+         :git/sha "<sha>"}}
  :paths ["src"]
 
  :tasks
@@ -113,8 +111,6 @@ A full working example lives in `examples/babashka-server/`. It demonstrates:
 ```
 
 Run with `bb serve`. No build step required — CSS is generated from tokens at startup.
-
-**Note:** `color-tools` must be listed explicitly because babashka git deps don't resolve transitive maven dependencies.
 
 ## Project Structure
 
