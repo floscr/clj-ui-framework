@@ -60,6 +60,62 @@ ui:css
 
 **Updating** — bump the `:sha` in `bb.edn`/`deps.edn`, then re-run `bb ui:css` (or `bb frontend:setup` for squint apps).
 
+### Example: Babashka Server
+
+A full working example lives in `examples/babashka-server/`. It demonstrates:
+- Using the framework as a git dep
+- Generating CSS at server boot (no build step, no static CSS files)
+- Rendering components via hiccup on the server
+
+**`bb.edn`:**
+
+```edn
+{:deps {clj-ui-framework/clj-ui-framework
+        {:git/url "https://github.com/floscr/clj-ui-framework"
+         :git/sha "<sha>"}
+        ;; Transitive dep — git deps don't resolve these automatically
+        com.github.jramosg/color-tools {:mvn/version "1.1.0"}}
+ :paths ["src"]
+
+ :tasks
+ {serve
+  {:doc "Start the example server"
+   :requires ([example.server :as server])
+   :task (do (server/start! {:port 8090})
+             (deref (promise)))}}}
+```
+
+**Server pattern** — generate CSS once, inline it in `<style>`:
+
+```clojure
+(ns example.server
+  (:require [org.httpkit.server :as http]
+            [hiccup2.core :as h]
+            [ui.css.gen :as css]
+            [ui.button :as button]))
+
+(def theme-css (css/build-css))  ; generated once at boot
+
+(defn page []
+  (str (h/html
+    [:html
+     [:head [:style (h/raw theme-css)]]
+     [:body
+      (button/button {:variant :primary} "Click me")]])))
+
+(defn handler [_]
+  {:status 200
+   :headers {"Content-Type" "text/html"}
+   :body (page)})
+
+(defn start! [{:keys [port]}]
+  (http/run-server #'handler {:port port}))
+```
+
+Run with `bb serve`. No build step required — CSS is generated from tokens at startup.
+
+**Note:** `color-tools` must be listed explicitly because babashka git deps don't resolve transitive maven dependencies.
+
 ## Project Structure
 
 ```
