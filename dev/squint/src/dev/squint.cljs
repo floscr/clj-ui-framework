@@ -27,22 +27,20 @@
             [ui.lightbox :as lightbox]
             [ui.context-menu :as context-menu]
             [ui.file-browser :as fb]
-            [ui.file-progress :as fp]))
+            [ui.file-progress :as fp]
+            [ui.theme-toggle :as theme-toggle]))
 
 ;; ── State ───────────────────────────────────────────────────────────
 
 (def !page (atom "components"))
+(def !theme-mode (atom "auto"))
 
 ;; ── Helpers ─────────────────────────────────────────────────────────
 
-(defn toggle-theme! [_e]
-  (let [el (.-documentElement js/document)
-        current (.. el -dataset -theme)]
-    (set! (.. el -dataset -noTransitions) "")
-    (set! (.. el -dataset -theme)
-          (if (= current "dark") "light" "dark"))
-    (js/requestAnimationFrame
-      (fn [] (.removeAttribute el "data-no-transitions")))))
+(defn set-theme! [mode]
+  (reset! !theme-mode mode)
+  (.set js/window.__uiTheme mode)
+  (render!))
 
 (defn toggle-sidebar! [_e]
   (when-let [layout (.querySelector js/document ".sidebar-layout")]
@@ -259,6 +257,24 @@
     (progress/progress {:value 50 :variant "success"})
     (progress/progress {:value 75 :variant "warning"})
     (progress/progress {:value 90 :variant "danger"})))
+
+(defn theme-toggle-demo []
+  (section "Theme Toggle"
+    [:div {:style {"display" "flex" "gap" "1.5rem" "align-items" "center" "flex-wrap" "wrap"}}
+     [:div {:style {"display" "flex" "flex-direction" "column" "gap" "0.5rem" "align-items" "center"}}
+      [:span {:style {"font-size" "var(--font-xs)" "color" "var(--fg-2)"}} "Default (md)"]
+      (theme-toggle/theme-toggle {:mode @!theme-mode
+                                  :on-change (fn [mode] (set-theme! mode))})]
+     [:div {:style {"display" "flex" "flex-direction" "column" "gap" "0.5rem" "align-items" "center"}}
+      [:span {:style {"font-size" "var(--font-xs)" "color" "var(--fg-2)"}} "Small"]
+      (theme-toggle/theme-toggle {:mode @!theme-mode :size "sm"
+                                  :on-change (fn [mode] (set-theme! mode))})]
+     [:div {:style {"display" "flex" "flex-direction" "column" "gap" "0.5rem" "align-items" "center"}}
+      [:span {:style {"font-size" "var(--font-xs)" "color" "var(--fg-2)"}} "Light selected"]
+      (theme-toggle/theme-toggle {:mode "light"})]
+     [:div {:style {"display" "flex" "flex-direction" "column" "gap" "0.5rem" "align-items" "center"}}
+      [:span {:style {"font-size" "var(--font-xs)" "color" "var(--fg-2)"}} "Dark selected"]
+      (theme-toggle/theme-toggle {:mode "dark"})]]))
 
 (defn switch-demo []
   (section "Switch"
@@ -592,6 +608,7 @@
    (spinner-demo)
    (skeleton-demo)
    (progress-demo)
+   (theme-toggle-demo)
    (switch-demo)
    (tooltip-demo)
    (breadcrumb-demo)
@@ -739,7 +756,8 @@
    {:title "Forms"
     :items [{:label "Form" :anchor "form"}
             {:label "Tag Input" :anchor "tag-input"}
-            {:label "Switch" :anchor "switch"}]}
+            {:label "Switch" :anchor "switch"}
+            {:label "Theme Toggle" :anchor "theme-toggle"}]}
    {:title "Data Display"
     :items [{:label "Table" :anchor "table"}
             {:label "Accordion" :anchor "accordion"}
@@ -1015,10 +1033,9 @@
                    (make-targets))))
       (sidebar/sidebar-separator)
       (sidebar/sidebar-group {:label "Theme"}
-        (sidebar/sidebar-menu {}
-          (sidebar/sidebar-menu-item
-            {:icon-name "sun" :on-click toggle-theme!}
-            "Toggle Dark Mode"))))
+        [:div {:style {"padding" "0.5rem 0.75rem"}}
+         (theme-toggle/theme-toggle {:mode @!theme-mode
+                                     :on-change (fn [mode] (set-theme! mode))})]))
     (sidebar/sidebar-footer {}
       (sidebar/sidebar-user {:user-name "Dev Mode" :email (str "squint · port " (own-port)) :avatar "sq"}))))
 
@@ -1049,6 +1066,12 @@
                            :on-active-change (fn [active?]
                                                (reset! !fb-body-drag-active active?)
                                                (render!))})
+  ;; Init theme runtime and sync atom
+  (when js/window.__uiTheme
+    (.init js/window.__uiTheme)
+    (reset! !theme-mode (.get js/window.__uiTheme))
+    (.subscribe js/window.__uiTheme
+      (fn [state] (reset! !theme-mode (.-mode state)) (render!))))
   (render!))
 
 (defn reload! []

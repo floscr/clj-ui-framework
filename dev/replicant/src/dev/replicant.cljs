@@ -27,13 +27,15 @@
             [ui.lightbox :as lightbox]
             [ui.context-menu :as context-menu]
             [ui.file-browser :as fb]
-            [ui.file-progress :as fp])
+            [ui.file-progress :as fp]
+            [ui.theme-toggle :as theme-toggle])
   (:require-macros [ui.macros :refer [inline-file]]))
 
 ;; ── State ───────────────────────────────────────────────────────────
 
 (defonce !page (atom :components))
 (defonce !ctx-log (atom []))
+(defonce !theme-mode (atom "auto"))
 
 ;; ── Helpers ─────────────────────────────────────────────────────────
 
@@ -240,6 +242,28 @@
     (progress/progress {:value 50 :variant :success})
     (progress/progress {:value 75 :variant :warning})
     (progress/progress {:value 90 :variant :danger})))
+
+(defn theme-toggle-demo []
+  (section "Theme Toggle"
+    [:div {:style {:display "flex" :gap "1.5rem" :align-items "center" :flex-wrap "wrap"}}
+     [:div {:style {:display "flex" :flex-direction "column" :gap "0.5rem" :align-items "center"}}
+      [:span {:style {:font-size "var(--font-xs)" :color "var(--fg-2)"}} "Default (md)"]
+      (theme-toggle/theme-toggle {:mode @!theme-mode
+                                  :on-change (fn [mode]
+                                               (reset! !theme-mode mode)
+                                               (.set js/window.__uiTheme mode))})]
+     [:div {:style {:display "flex" :flex-direction "column" :gap "0.5rem" :align-items "center"}}
+      [:span {:style {:font-size "var(--font-xs)" :color "var(--fg-2)"}} "Small"]
+      (theme-toggle/theme-toggle {:mode @!theme-mode :size :sm
+                                  :on-change (fn [mode]
+                                               (reset! !theme-mode mode)
+                                               (.set js/window.__uiTheme mode))})]
+     [:div {:style {:display "flex" :flex-direction "column" :gap "0.5rem" :align-items "center"}}
+      [:span {:style {:font-size "var(--font-xs)" :color "var(--fg-2)"}} "Light selected"]
+      (theme-toggle/theme-toggle {:mode "light"})]
+     [:div {:style {:display "flex" :flex-direction "column" :gap "0.5rem" :align-items "center"}}
+      [:span {:style {:font-size "var(--font-xs)" :color "var(--fg-2)"}} "Dark selected"]
+      (theme-toggle/theme-toggle {:mode "dark"})]]))
 
 (defn switch-demo []
   (section "Switch"
@@ -550,6 +574,7 @@
    (spinner-demo)
    (skeleton-demo)
    (progress-demo)
+   (theme-toggle-demo)
    (switch-demo)
    (tooltip-demo)
    (breadcrumb-demo)
@@ -677,7 +702,8 @@
    {:title "Forms"
     :items [{:label "Form" :anchor "form"}
             {:label "Tag Input" :anchor "tag-input"}
-            {:label "Switch" :anchor "switch"}]}
+            {:label "Switch" :anchor "switch"}
+            {:label "Theme Toggle" :anchor "theme-toggle"}]}
    {:title "Data Display"
     :items [{:label "Table" :anchor "table"}
             {:label "Accordion" :anchor "accordion"}
@@ -899,14 +925,9 @@
           (.scrollIntoView el #js {:behavior "smooth" :block "start"})))
       50)))
 
-(defn toggle-theme! [_e]
-  (let [el (.-documentElement js/document)
-        current (.. el -dataset -theme)]
-    (set! (.. el -dataset -noTransitions) "")
-    (set! (.. el -dataset -theme)
-          (if (= current "dark") "light" "dark"))
-    (js/requestAnimationFrame
-      #(js-delete (.-dataset el) "noTransitions"))))
+(defn set-theme! [mode]
+  (reset! !theme-mode mode)
+  (.set js/window.__uiTheme mode))
 
 (defn toggle-sidebar! [_e]
   (when-let [layout (.querySelector js/document ".sidebar-layout")]
@@ -959,10 +980,9 @@
               label))))
       (sidebar/sidebar-separator)
       (sidebar/sidebar-group {:label "Theme"}
-        (sidebar/sidebar-menu {}
-          (sidebar/sidebar-menu-item
-            {:icon-name :sun :on-click toggle-theme!}
-            "Toggle Dark Mode"))))
+        [:div {:style {:padding "0.5rem 0.75rem"}}
+         (theme-toggle/theme-toggle {:mode @!theme-mode
+                                     :on-change set-theme!})]))
     (sidebar/sidebar-footer {}
       (sidebar/sidebar-user {:user-name "Dev Mode" :email (str "replicant · port " (own-port)) :avatar "cl"}))))
 
@@ -995,12 +1015,19 @@
   (add-watch !cal-state :render (fn [_ _ _ _] (render!)))
   (add-watch !lightbox-state :render (fn [_ _ _ _] (render!)))
   (add-watch !ctx-log :render (fn [_ _ _ _] (render!)))
+  (add-watch !theme-mode :render (fn [_ _ _ _] (render!)))
   (add-watch !fb-view :render (fn [_ _ _ _] (render!)))
   (add-watch !fb-sort :render (fn [_ _ _ _] (render!)))
   (add-watch !fb-dropped-files :render (fn [_ _ _ _] (render!)))
   (add-watch !fb-body-drag-active :render (fn [_ _ _ _] (render!)))
   (fb/init-body-dropzone! {:on-files handle-dropped-files!
                            :on-active-change (fn [active?] (reset! !fb-body-drag-active active?))})
+  ;; Init theme runtime and sync atom
+  (when js/window.__uiTheme
+    (.init js/window.__uiTheme)
+    (reset! !theme-mode (.get js/window.__uiTheme))
+    (.subscribe js/window.__uiTheme
+      (fn [state] (reset! !theme-mode (.-mode state)))))
   (render!))
 
 (defn ^:export reload! []

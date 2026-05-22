@@ -30,7 +30,8 @@
             [ui.lightbox :as lightbox]
             [ui.context-menu :as context-menu]
             [ui.file-browser :as fb]
-            [ui.file-progress :as fp]))
+            [ui.file-progress :as fp]
+            [ui.theme-toggle :as theme-toggle]))
 
 ;; ── Query Params ────────────────────────────────────────────────────
 
@@ -46,13 +47,8 @@
     {}))
 
 (def theme-persistence-script
-  "/* Theme persistence: read from ?theme=, sync changes to URL & parent frame */
+  "/* Theme persistence: sync changes to URL & parent frame */
   (function() {
-    var params = new URLSearchParams(window.location.search);
-    var theme = params.get('theme');
-    if (theme === 'dark' || theme === 'light') {
-      document.documentElement.dataset.theme = theme;
-    }
     new MutationObserver(function(mutations) {
       for (var i = 0; i < mutations.length; i++) {
         if (mutations[i].attributeName === 'data-theme') {
@@ -79,6 +75,32 @@
         }
       } catch (ex) {}
     });
+  })();")
+
+(def theme-toggle-script
+  "/* Wire __uiTheme to sidebar + demo theme toggles */
+  (function() {
+    if (!window.__uiTheme) return;
+    window.__uiTheme.init();
+    function syncToggles(state) {
+      document.querySelectorAll('.theme-toggle').forEach(function(toggle) {
+        toggle.querySelectorAll('.theme-toggle-btn').forEach(function(btn, i) {
+          var modes = ['light', 'auto', 'dark'];
+          var isActive = (modes[i] === state.mode);
+          btn.classList.toggle('theme-toggle-btn-active', isActive);
+          btn.setAttribute('aria-checked', String(isActive));
+        });
+      });
+    }
+    window.__uiTheme.subscribe(syncToggles);
+    document.addEventListener('click', function(e) {
+      var btn = e.target.closest('.theme-toggle-btn');
+      if (!btn) return;
+      var modes = ['light', 'auto', 'dark'];
+      var i = Array.from(btn.parentElement.querySelectorAll('.theme-toggle-btn')).indexOf(btn);
+      if (i >= 0 && i < modes.length) window.__uiTheme.set(modes[i]);
+    });
+    syncToggles({ mode: window.__uiTheme.get(), effective: window.__uiTheme.effective() });
   })();")
 
 ;; ── Helpers ─────────────────────────────────────────────────────────
@@ -250,6 +272,22 @@
     (progress/progress {:value 50 :variant :success})
     (progress/progress {:value 75 :variant :warning})
     (progress/progress {:value 90 :variant :danger})))
+
+(defn theme-toggle-demo []
+  (section "Theme Toggle"
+    [:div {:style "display: flex; gap: 1.5rem; align-items: center; flex-wrap: wrap;"}
+     [:div {:style "display: flex; flex-direction: column; gap: 0.5rem; align-items: center;"}
+      [:span {:style "font-size: var(--font-xs); color: var(--fg-2);"} "Default (md)"]
+      (theme-toggle/theme-toggle {:mode "auto"})]
+     [:div {:style "display: flex; flex-direction: column; gap: 0.5rem; align-items: center;"}
+      [:span {:style "font-size: var(--font-xs); color: var(--fg-2);"} "Small"]
+      (theme-toggle/theme-toggle {:mode "auto" :size :sm})]
+     [:div {:style "display: flex; flex-direction: column; gap: 0.5rem; align-items: center;"}
+      [:span {:style "font-size: var(--font-xs); color: var(--fg-2);"} "Light selected"]
+      (theme-toggle/theme-toggle {:mode "light"})]
+     [:div {:style "display: flex; flex-direction: column; gap: 0.5rem; align-items: center;"}
+      [:span {:style "font-size: var(--font-xs); color: var(--fg-2);"} "Dark selected"]
+      (theme-toggle/theme-toggle {:mode "dark"})]]))
 
 (defn switch-demo []
   (section "Switch"
@@ -478,6 +516,7 @@
    (spinner-demo)
    (skeleton-demo)
    (progress-demo)
+   (theme-toggle-demo)
    (switch-demo)
    (tooltip-demo)
    (breadcrumb-demo)
@@ -724,7 +763,8 @@
    {:title "Forms"
     :items [{:label "Form" :anchor "form"}
             {:label "Tag Input" :anchor "tag-input"}
-            {:label "Switch" :anchor "switch"}]}
+            {:label "Switch" :anchor "switch"}
+            {:label "Theme Toggle" :anchor "theme-toggle"}]}
    {:title "Data Display"
     :items [{:label "Table" :anchor "table"}
             {:label "Accordion" :anchor "accordion"}
@@ -797,11 +837,9 @@
               label))))
       (sidebar/sidebar-separator)
       (sidebar/sidebar-group {:label "Theme"}
-        (sidebar/sidebar-menu {}
-          (sidebar/sidebar-menu-item
-            {:icon-name :sun
-             :attrs {:onclick "document.documentElement.dataset.noTransitions = ''; document.documentElement.dataset.theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'; requestAnimationFrame(() => { delete document.documentElement.dataset.noTransitions; })"}}
-            "Toggle Dark Mode"))))
+        [:div {:style "padding: 0.5rem 0.75rem;"}
+         (theme-toggle/theme-toggle {:mode "auto"
+                                     :attrs {:id "sidebar-theme-toggle"}})]))
     (sidebar/sidebar-footer {}
       (sidebar/sidebar-user {:user-name "Dev Mode" :email (str "hiccup · port " own-port) :avatar "bb"}))))
 
@@ -835,6 +873,7 @@
           [:script (h/raw live-reload-script)]]
          [:body
           [:script {:src "/ui-runtime.js"}]
+          [:script (h/raw theme-toggle-script)]
           [:script {:src "/theme-adapter.js" :defer true}]
           [:script {:src "/css-live-reload.js" :defer true}]
           (sidebar/sidebar-layout {}

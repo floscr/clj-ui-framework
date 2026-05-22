@@ -1,5 +1,23 @@
 (() => {
   // ../../../dev/squint/node_modules/squint-cljs/src/squint/core.js
+  function toFn(x) {
+    if (x == null) return x;
+    if (x instanceof Function) {
+      return x;
+    }
+    const t = typeof x;
+    if (t === "string") {
+      return (coll, d) => {
+        return get(coll, x, d);
+      };
+    }
+    if (t === "object") {
+      return (k, d) => {
+        return get(x, k, d);
+      };
+    }
+    return x;
+  }
   var has = Object.prototype.hasOwnProperty;
   function findKey(iter, tar, key) {
     for (key of iter.keys()) {
@@ -64,6 +82,69 @@
   }
   function _EQ_(...xs) {
     return walkArray(xs, (x, y) => dequal(x, y));
+  }
+  var MAP_TYPE = 1;
+  var ARRAY_TYPE = 2;
+  var OBJECT_TYPE = 3;
+  var LIST_TYPE = 4;
+  var SET_TYPE = 5;
+  var LAZY_ITERABLE_TYPE = 6;
+  function isObj(coll) {
+    return coll.constructor === Object;
+  }
+  function typeConst(obj) {
+    if (obj == null) {
+      return void 0;
+    }
+    if (isObj(obj)) {
+      return OBJECT_TYPE;
+    }
+    if (obj instanceof Map) return MAP_TYPE;
+    if (obj instanceof Set) return SET_TYPE;
+    if (obj instanceof List) return LIST_TYPE;
+    if (Array.isArray(obj)) return ARRAY_TYPE;
+    if (obj instanceof LazyIterable) return LAZY_ITERABLE_TYPE;
+    if (obj instanceof SortedSet) return SET_TYPE;
+    if (obj instanceof Object) return OBJECT_TYPE;
+    return void 0;
+  }
+  function get(coll, key, otherwise = void 0) {
+    if (coll == null) {
+      return otherwise;
+    }
+    let v;
+    if (isObj(coll)) {
+      v = coll[key];
+      if (v === void 0) {
+        return otherwise;
+      } else {
+        return v;
+      }
+    }
+    let g;
+    switch (typeConst(coll)) {
+      case SET_TYPE:
+        if (coll.has(key)) v = key;
+        break;
+      case MAP_TYPE:
+        v = coll.get(key);
+        break;
+      case ARRAY_TYPE:
+        v = coll[key];
+        break;
+      default:
+        g = coll["get"];
+        if (g instanceof Function) {
+          try {
+            v = coll.get(key);
+            break;
+          } catch (e) {
+          }
+        }
+        v = coll[key];
+        break;
+    }
+    return v !== void 0 ? v : otherwise;
   }
   function seqable_QMARK_(x) {
     return x === null || x === void 0 || // we used to check instanceof Object but this returns false for TC39 Records
@@ -146,7 +227,19 @@
   function reset_BANG_(atm, v) {
     atm._reset_BANG_(v);
   }
+  function swap_BANG_(atm, f, ...args) {
+    f = toFn(f);
+    const v = f(deref(atm), ...args);
+    reset_BANG_(atm, v);
+    return v;
+  }
   var IApply__apply = Symbol("IApply__apply");
+  var List = class extends Array {
+    constructor(...args) {
+      super();
+      this.push(...args);
+    }
+  };
   function concat1(colls) {
     return lazy(function* () {
       for (const coll of colls) {
@@ -160,10 +253,121 @@
   concat[IApply__apply] = (colls) => {
     return concat1(colls);
   };
+  function sort(f, coll) {
+    if (arguments.length === 1) {
+      coll = f;
+      f = void 0;
+    }
+    f = toFn(f);
+    coll = iterable(coll);
+    const clone = [...coll];
+    return clone.sort(f || compare);
+  }
+  function compare(x, y) {
+    if (x === y) {
+      return 0;
+    } else {
+      if (x == null) {
+        return -1;
+      }
+      if (y == null) {
+        return 1;
+      }
+      const tx = typeof x;
+      const ty = typeof y;
+      if (tx === "number" && ty === "number" || tx === "string" && ty === "string") {
+        if (x === y) {
+          return 0;
+        }
+        if (x < y) {
+          return -1;
+        }
+        return 1;
+      } else if (Array.isArray(x) && Array.isArray(y)) {
+        if (x.length < y.length) {
+          return -1;
+        } else if (x.length > y.length) {
+          return 1;
+        } else {
+          for (let i = 0; i < x.length; i++) {
+            const c = compare(x[i], y[i]);
+            if (c != 0) {
+              return c;
+            }
+          }
+          return 0;
+        }
+      } else {
+        throw new Error(`comparing ${tx} to ${ty}`);
+      }
+    }
+  }
   function truth_(x) {
     return x != null && x !== false;
   }
   var _metaSym = Symbol("meta");
+  var SortedSet = class _SortedSet {
+    constructor(xs) {
+      const isSorted = xs instanceof _SortedSet;
+      if (!isSorted) {
+        xs = sort(xs);
+      }
+      const s = new Set(xs);
+      this._elts = [...s];
+      this._set = s;
+    }
+    add(x) {
+      if (this._set.has(x)) return this;
+      const xs = this._elts;
+      let added = false;
+      for (let i = 0; i < xs.length; i++) {
+        if (compare(x, xs[i]) <= 0) {
+          xs.splice(i, 0, x);
+          added = true;
+          break;
+        }
+      }
+      if (!added) {
+        xs.push(x);
+        this._set.add(x);
+      } else {
+        this._set = new Set(xs);
+      }
+      this.size = xs.length;
+      return this;
+    }
+    delete(x) {
+      if (!this._set.has(x)) return this;
+      const xs = this._elts;
+      const idx = xs.indexOf(x);
+      xs.splice(idx, 1);
+      this._set = new Set(xs);
+      this.size = xs.length;
+      return this;
+    }
+    has(x) {
+      return this._set.has(x);
+    }
+    keys() {
+      return this.values();
+    }
+    values() {
+      return this._elts[Symbol.iterator]();
+    }
+    entries() {
+      return this._set.entries();
+    }
+    forEach(...xs) {
+      return this.set.forEach(...xs);
+    }
+    clear() {
+      this._elts = [];
+      this._set = new Set(this._elts);
+    }
+    [Symbol.iterator]() {
+      return this.keys();
+    }
+  };
 
   // .compiled/context_menu.mjs
   var get_state = function() {
@@ -209,6 +413,57 @@
     }
     ;
   };
+  var execute_item_BANG_ = function(item) {
+    const on_click1 = item["on-click"];
+    const url2 = item["url"];
+    if (truth_(on_click1)) {
+      return on_click1();
+    } else {
+      if (truth_(url2)) {
+        return window.location = url2;
+      }
+    }
+    ;
+  };
+  var show_confirm_BANG_ = function(menu, item) {
+    const confirm_val1 = item["confirm"];
+    const message2 = confirm_val1 === true ? "Are you sure?" : confirm_val1;
+    const _3 = menu.innerHTML = "";
+    const msg_el4 = document.createElement("div");
+    msg_el4.className = "context-menu-confirm-message";
+    msg_el4.textContent = message2;
+    menu.appendChild(msg_el4);
+    const actions5 = document.createElement("div");
+    actions5.className = "context-menu-confirm-actions";
+    const cancel_btn6 = document.createElement("button");
+    cancel_btn6.className = "context-menu-item";
+    cancel_btn6.textContent = "Cancel";
+    cancel_btn6.setAttribute("tabindex", "-1");
+    cancel_btn6.addEventListener("click", (function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      return dismiss_BANG_();
+    }));
+    actions5.appendChild(cancel_btn6);
+    const danger7 = item["variant"] === "danger";
+    const confirm_btn8 = document.createElement("button");
+    confirm_btn8.className = danger7 ? "context-menu-item context-menu-item--danger" : "context-menu-item";
+    confirm_btn8.textContent = "Confirm";
+    confirm_btn8.setAttribute("tabindex", "-1");
+    confirm_btn8.addEventListener("click", (function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      dismiss_BANG_();
+      return execute_item_BANG_(item);
+    }));
+    actions5.appendChild(confirm_btn8);
+    menu.appendChild(actions5);
+    const cancel9 = menu.querySelector(".context-menu-item");
+    if (truth_(cancel9)) {
+      return cancel9.focus();
+    }
+    ;
+  };
   var create_menu = function(items) {
     const menu1 = document.createElement("div");
     menu1.className = "context-menu";
@@ -250,14 +505,11 @@
         el5.addEventListener("click", (function(e) {
           e.preventDefault();
           e.stopPropagation();
-          dismiss_BANG_();
-          const on_click10 = item["on-click"];
-          if (truth_(on_click10)) {
-            return on_click10();
+          if (truth_(item["confirm"])) {
+            return show_confirm_BANG_(el5.closest(".context-menu"), item);
           } else {
-            if (truth_(url3)) {
-              return window.location = url3;
-            }
+            dismiss_BANG_();
+            return execute_item_BANG_(item);
           }
           ;
         }));
@@ -394,4 +646,149 @@
     return f1;
   })();
   window["__uiContextMenu"] = open_context_menu;
+
+  // .compiled/theme.mjs
+  var storage_key = "ui-theme";
+  var get_stored = function() {
+    return (() => {
+      try {
+        return localStorage.getItem(storage_key);
+      } catch (_e1) {
+        return null;
+      }
+    })();
+  };
+  var store_BANG_ = function(mode) {
+    return (() => {
+      try {
+        if (mode === "auto") {
+          return localStorage.removeItem(storage_key);
+        } else {
+          return localStorage.setItem(storage_key, mode);
+        }
+        ;
+      } catch (_e1) {
+        return null;
+      }
+    })();
+  };
+  var system_prefers_dark_QMARK_ = function() {
+    return window.matchMedia("(prefers-color-scheme: dark)").matches;
+  };
+  var resolve_effective = function(mode) {
+    const G__51 = mode;
+    switch (G__51) {
+      case "light":
+        return "light";
+        break;
+      case "dark":
+        return "dark";
+        break;
+      default:
+        if (truth_(system_prefers_dark_QMARK_())) {
+          return "dark";
+        } else {
+          return "light";
+        }
+    }
+    ;
+  };
+  var suppress_transitions_BANG_ = function() {
+    const el1 = document.documentElement;
+    el1.setAttribute("data-no-transitions", "");
+    el1.offsetHeight;
+    return requestAnimationFrame((function() {
+      return requestAnimationFrame((function() {
+        return el1.removeAttribute("data-no-transitions");
+      }));
+    }));
+  };
+  var apply_theme_BANG_ = function(mode) {
+    const el1 = document.documentElement;
+    suppress_transitions_BANG_();
+    const G__62 = mode;
+    switch (G__62) {
+      case "light":
+        return el1.setAttribute("data-theme", "light");
+        break;
+      case "dark":
+        return el1.setAttribute("data-theme", "dark");
+        break;
+      default:
+        return el1.removeAttribute("data-theme");
+    }
+    ;
+  };
+  var subscribers = atom([]);
+  var notify_BANG_ = function(mode, effective) {
+    const subs1 = deref(subscribers);
+    return subs1.forEach((function(f) {
+      return f({ "mode": mode, "effective": effective });
+    }));
+  };
+  var get_mode = function() {
+    const or__23426__auto__1 = get_stored();
+    if (truth_(or__23426__auto__1)) {
+      return or__23426__auto__1;
+    } else {
+      return "auto";
+    }
+    ;
+  };
+  var get_effective = function() {
+    return resolve_effective(get_mode());
+  };
+  var set_mode_BANG_ = function(mode) {
+    const m1 = truth_(get(/* @__PURE__ */ new Set(["auto", "light", "dark"]), mode)) ? mode : "auto";
+    store_BANG_(m1);
+    apply_theme_BANG_(m1);
+    return notify_BANG_(m1, resolve_effective(m1));
+  };
+  var toggle_BANG_ = function() {
+    const current1 = get_mode();
+    const next_mode2 = (() => {
+      const G__73 = current1;
+      switch (G__73) {
+        case "auto":
+          return "light";
+          break;
+        case "light":
+          return "dark";
+          break;
+        case "dark":
+          return "auto";
+          break;
+        default:
+          return "auto";
+      }
+      ;
+    })();
+    set_mode_BANG_(next_mode2);
+    return next_mode2;
+  };
+  var subscribe_BANG_ = function(f) {
+    swap_BANG_(subscribers, (function(subs) {
+      return subs.concat([f]);
+    }));
+    return function() {
+      return swap_BANG_(subscribers, (function(subs) {
+        return subs.filter((function(s) {
+          return !_EQ_(s, f);
+        }));
+      }));
+    };
+  };
+  var init_BANG_ = function() {
+    const mode1 = get_mode();
+    apply_theme_BANG_(mode1);
+    const mql2 = window.matchMedia("(prefers-color-scheme: dark)");
+    return mql2.addEventListener("change", (function(_e) {
+      if (get_mode() === "auto") {
+        apply_theme_BANG_("auto");
+        return notify_BANG_("auto", resolve_effective("auto"));
+      }
+      ;
+    }));
+  };
+  window["__uiTheme"] = { "init": init_BANG_, "set": set_mode_BANG_, "get": get_mode, "effective": get_effective, "toggle": toggle_BANG_, "subscribe": subscribe_BANG_ };
 })();

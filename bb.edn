@@ -60,7 +60,7 @@
              (shell {:dir "src/ui/js"
                      :extra-env {"NODE_PATH" mods}}
                     (str bin "esbuild")
-                    ".compiled/context_menu.mjs"
+                    ".compiled/index.mjs"
                     "--bundle" "--format=iife"
                     (str "--outfile=" root "/dist/ui-runtime.js")))
            (spit "src/ui/ui-runtime.js" (slurp "dist/ui-runtime.js"))
@@ -98,7 +98,8 @@
               [ui.player-bar-test]
               [ui.file-browser-test]
               [ui.file-progress-test]
-              [ui.theme-test])
+              [ui.theme-test]
+              [ui.theme-toggle-test])
    :task (let [{:keys [fail error]} (t/run-tests
                                       'ui.button-test
                                       'ui.alert-test
@@ -125,7 +126,8 @@
                                       'ui.player-bar-test
                                       'ui.file-browser-test
                                       'ui.file-progress-test
-                                      'ui.theme-test)]
+                                      'ui.theme-test
+                                      'ui.theme-toggle-test)]
            (when (pos? (+ fail error))
              (System/exit 1)))}
 
