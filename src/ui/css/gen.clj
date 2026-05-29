@@ -277,3 +277,81 @@ body {
     (fs/create-dirs (fs/parent output))
     (spit output css)
     (println (str "Generated " output " (" (count (str/split-lines css)) " lines)"))))
+
+;; ── Watch ────────────────────────────────────────────────────────
+
+(defn- collect-watch-files
+  "Collect all watchable files: framework CSS + tokens from classpath + extra :watch paths."
+  [ui-dir watch-paths]
+  (let [framework-css (when ui-dir
+                        (->> (fs/glob ui-dir "*.css")
+                             (map str)))
+        tokens-file   (when-let [r (io/resource "theme/tokens.edn")]
+                        [(.getFile r)])
+        extra         (mapcat (fn [p]
+                                (let [f (io/file p)]
+                                  (cond
+                                    (not (.exists f)) []
+                                    (.isDirectory f)  (map str (fs/glob p "**"))
+                                    :else             [p])))
+                              watch-paths)]
+    (distinct (concat framework-css tokens-file extra))))
+
+(defn- get-mtimes [paths]
+  (into {}
+    (keep (fn [p]
+            (when (fs/exists? p)
+              [p (fs/last-modified-time p)])))
+    paths))
+
+(defn watch-css
+  "Watch files and rebuild CSS on changes. Blocks the current thread.
+
+   Takes the same options as build-css, plus:
+     :watch      — vector of extra file paths or directories to watch
+     :interval   — poll interval in ms (default 500)
+     :on-rebuild — callback (fn [{:keys [output css]}]) called after each successful rebuild
+
+   Automatically watches:
+     - All src/ui/*.css component styles from the classpath
+     - theme/tokens.edn from the classpath
+     - Any extra files/directories in :watch
+
+   :output is required.
+
+   Example bb.edn task:
+
+     watch:css
+     {:requires ([ui.css.gen :as css])
+      :task (css/watch-css {:output \"resources/public/ui.css\"
+                            :watch [\"src/my-overrides.css\"]
+                            :scales {:color {:accent {:hue 220}}}})}"
+  [{:keys [output watch interval on-rebuild] :as opts}]
+  (assert output ":output is required for watch-css")
+  (let [build-opts (dissoc opts :watch :interval :on-rebuild)
+        ui-dir     (find-ui-dir)
+        interval   (or interval 500)]
+    ;; Initial build
+    (println "[watch-css] Initial build...")
+    (let [css (build-css build-opts)]
+      (println (str "[watch-css] Wrote " output))
+      (when on-rebuild
+        (on-rebuild {:output output :css css})))
+    (println (str "[watch-css] Watching for changes (poll " interval "ms)..."))
+    (loop [prev (get-mtimes (collect-watch-files ui-dir (or watch [])))]
+      (Thread/sleep interval)
+      (let [files (collect-watch-files ui-dir (or watch []))
+            curr  (get-mtimes files)]
+        (when (not= prev curr)
+          (let [changed (->> (keys curr)
+                             (filter #(not= (get prev %) (get curr %)))
+                             (map #(fs/file-name %)))]
+            (println (str "[watch-css] Changed: " (str/join ", " changed))))
+          (try
+            (let [css (build-css build-opts)]
+              (println (str "[watch-css] Rebuilt " output))
+              (when on-rebuild
+                (on-rebuild {:output output :css css})))
+            (catch Exception e
+              (println (str "[watch-css] ERROR: " (.getMessage e))))))
+        (recur curr)))))

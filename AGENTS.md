@@ -56,6 +56,32 @@ ui:css
 
 **Do not duplicate theme tokens** in your app's CSS. If colors/spacing look wrong, you're missing the generated CSS.
 
+**Watch mode** — auto-rebuild CSS when component styles or tokens change:
+
+```edn
+watch:css
+{:doc "Watch and rebuild UI CSS on changes"
+ :requires ([ui.css.gen :as css])
+ :task (css/watch-css {:output "resources/public/ui.css"})}
+```
+
+`watch-css` automatically watches all `src/ui/*.css` component styles and `theme/tokens.edn` from the classpath. Pass `:watch` to add extra files or directories:
+
+```edn
+watch:css
+{:requires ([ui.css.gen :as css])
+ :task (css/watch-css {:output "resources/public/ui.css"
+                       :watch ["src/my-app.css" "src/styles/"]
+                       :scales {:color {:accent {:hue 220}}}})}
+```
+
+Options (in addition to all `build-css` options):
+- `:watch` — vector of extra file paths or directories to watch
+- `:interval` — poll interval in ms (default 500)
+- `:on-rebuild` — callback `(fn [{:keys [output css]}])` called after each successful rebuild
+
+The function blocks the calling thread. Run it as a standalone bb task (`bb watch:css`).
+
 ### JS Runtime — Components with Client-Side Interactivity
 
 Some components (context menus, tooltips, etc.) need browser-side JS for positioning and event handling. The JS runtime is pre-built and bundled in the repo — no build step required.
