@@ -93,19 +93,22 @@
 (defn generate-color-scale
   "Generate CSS variables for a named OKLCH color scale.
    Each step is [label lightness] or [label lightness chroma].
-   Outputs oklch() CSS values for perceptual uniformity."
-  [scale-name {:keys [hue chroma steps]}]
-  (->> steps
-       (map (fn [step]
-              (let [[label lightness chr] (if (= 3 (count step))
-                                            step
-                                            [(first step) (second step) chroma])
-                    ;; Format: oklch(L C H)
-                    css-val (str "oklch(" (format "%.3f" (double lightness))
-                                " " (format "%.4f" (double chr))
-                                " " (format "%.1f" (double hue)) ")")]
-                (str "  --" (name scale-name) "-" label ": " css-val ";"))))
-       (str/join "\n")))
+   Outputs oklch() CSS values for perceptual uniformity.
+   Optional :chroma-scale multiplier (default 1.0) scales all chroma values."
+  [scale-name {:keys [hue chroma steps chroma-scale]}]
+  (let [cs (or chroma-scale 1.0)]
+    (->> steps
+         (map (fn [step]
+                (let [[label lightness chr] (if (= 3 (count step))
+                                              step
+                                              [(first step) (second step) chroma])
+                      chr (min 0.4 (* (double chr) (double cs)))
+                      ;; Format: oklch(L C H)
+                      css-val (str "oklch(" (format "%.3f" (double lightness))
+                                  " " (format "%.4f" chr)
+                                  " " (format "%.1f" (double hue)) ")")]
+                  (str "  --" (name scale-name) "-" label ": " css-val ";"))))
+         (str/join "\n"))))
 
 (defn generate-color-scales
   "Generate all color scale CSS variables."
@@ -223,6 +226,10 @@ body {
      ;; Custom accent color (deep-merged with defaults)
      (build-css {:scales {:color {:accent {:hue 200 :chroma 0.20
                                            :steps [[500 0.60]]}}}})
+
+     ;; Compact: just hue + chroma-scale (multiplier on default chroma)
+     (build-css {:scales {:color {:gray {:hue 255 :chroma-scale 0.5}
+                                  :accent {:hue 255 :chroma-scale 0.87}}}})
 
      ;; Override semantic tokens
      (build-css {:tokens {:accent \"var(--accent-600)\"}

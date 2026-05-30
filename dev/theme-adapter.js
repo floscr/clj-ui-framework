@@ -173,6 +173,75 @@
       }).join('\n');
   }
 
+  // ── Generate compact build-css opts ─────────────────────────────
+  // Only includes parameters that differ from defaults.
+  // Produces EDN suitable for passing to (build-css {...}).
+  function generateScalesEDN() {
+    var parts = [];
+    var colorParts = [];
+
+    // Gray
+    var grayOverrides = [];
+    if (state.grayHue !== DEFAULT.grayHue) grayOverrides.push(':hue ' + state.grayHue);
+    if (state.graySat !== DEFAULT.graySat) {
+      var cs = state.graySat.toFixed(2).replace(/0+$/, '').replace(/\.$/, '');
+      grayOverrides.push(':chroma-scale ' + cs);
+    }
+    if (grayOverrides.length) colorParts.push(':gray {' + grayOverrides.join(' ') + '}');
+
+    // Accent
+    var accentOverrides = [];
+    if (state.accentHue !== DEFAULT.accentHue) accentOverrides.push(':hue ' + state.accentHue);
+    if (state.accentSat !== DEFAULT.accentSat) {
+      var cs = state.accentSat.toFixed(2).replace(/0+$/, '').replace(/\.$/, '');
+      accentOverrides.push(':chroma-scale ' + cs);
+    }
+    if (accentOverrides.length) colorParts.push(':accent {' + accentOverrides.join(' ') + '}');
+
+    if (colorParts.length) parts.push(':color {' + colorParts.join('\n              ') + '}');
+
+    // Size
+    if (state.sizeBase !== DEFAULT.sizeBase) {
+      var sb = state.sizeBase.toFixed(2).replace(/0+$/, '').replace(/\.$/, '');
+      parts.push(':size {:base ' + sb + '}');
+    }
+
+    // Font
+    var fontOverrides = [];
+    if (state.fontBase !== DEFAULT.fontBase) {
+      var fb = state.fontBase.toFixed(2).replace(/0+$/, '').replace(/\.$/, '');
+      fontOverrides.push(':base ' + fb);
+    }
+    if (state.fontRatio !== DEFAULT.fontRatio) {
+      var fr = state.fontRatio.toFixed(2).replace(/0+$/, '').replace(/\.$/, '');
+      fontOverrides.push(':ratio ' + fr);
+    }
+    if (fontOverrides.length) parts.push(':font {' + fontOverrides.join(' ') + '}');
+
+    // Radius tokens
+    var radiusTokens = [];
+    if (state.radiusScale !== DEFAULT.radiusScale) {
+      RADIUS_DEFAULTS.forEach(function(r) {
+        radiusTokens.push(':radius-' + r[0] + ' "' + Math.round(r[1] * state.radiusScale) + 'px"');
+      });
+    }
+
+    // Build final EDN
+    var result = '';
+    if (parts.length) {
+      result += '{:scales {' + parts.join('\n          ') + '}';
+      if (radiusTokens.length) {
+        result += '\n :tokens {' + radiusTokens.join(' ') + '}';
+      }
+      result += '}';
+    } else if (radiusTokens.length) {
+      result += '{:tokens {' + radiusTokens.join(' ') + '}}';
+    } else {
+      result += '{} ;; default theme, no overrides';
+    }
+    return result;
+  }
+
   // ── DOM helpers ────────────────────────────────────────────────
   var panel, toggleBtn, swatchGray, swatchAccent, presetBtns = [], inputs = {};
 
@@ -322,7 +391,7 @@
     body.appendChild(radiusSection);
 
     // ─ Footer section ─
-    var footer = el('div', 'card-section');
+    var footer = el('div', 'card-section vstack gap-2');
     var copyBtn = el('button', 'btn btn-secondary btn-sm w-full', 'Copy EDN');
     copyBtn.addEventListener('click', function() {
       var edn = generateEDN();
@@ -331,7 +400,16 @@
         setTimeout(function() { copyBtn.textContent = 'Copy EDN'; }, 1500);
       });
     });
+    var copyScalesBtn = el('button', 'btn btn-ghost btn-sm w-full', 'Copy Scales');
+    copyScalesBtn.addEventListener('click', function() {
+      var edn = generateScalesEDN();
+      navigator.clipboard.writeText(edn).then(function() {
+        copyScalesBtn.textContent = 'Copied!';
+        setTimeout(function() { copyScalesBtn.textContent = 'Copy Scales'; }, 1500);
+      });
+    });
     footer.appendChild(copyBtn);
+    footer.appendChild(copyScalesBtn);
 
     // Assemble
     panel.appendChild(header);
