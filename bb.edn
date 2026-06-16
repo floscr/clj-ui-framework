@@ -149,6 +149,19 @@
            (dev.hiccup/start! {:port port})
            (deref (promise)))}
 
+  serve
+  {:doc "Production demo server — built assets, live reload disabled (PORT env, default 8080)"
+   :depends [build-theme]
+   :requires ([dev.hiccup]
+              [clojure.java.io :as io])
+   :task (do
+           (when-not (.exists (io/file "dist/ui-runtime.js"))
+             (io/make-parents "dist/ui-runtime.js")
+             (io/copy (io/file "src/ui/ui-runtime.js") (io/file "dist/ui-runtime.js")))
+           (let [port (or (some-> (System/getenv "PORT") parse-long) 8080)]
+             (dev.hiccup/start! {:port port :live-reload? false})
+             (deref (promise))))}
+
   dev-replicant
   {:doc "Start replicant dev server (PORT env var, default 3001)"
    :depends [build-theme ensure-npm]

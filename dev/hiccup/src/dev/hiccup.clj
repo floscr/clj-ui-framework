@@ -855,7 +855,7 @@
     }, 500);
   })();")
 
-(defn render-page [uri port]
+(defn render-page [uri port live-reload?]
   (let [params     (parse-query-params uri)
         theme      (get params "theme")
         path       (first (str/split uri #"\?" 2))
@@ -870,12 +870,12 @@
           [:link {:rel "stylesheet" :href "/theme.css"}]
           [:style (h/raw "html, body { margin: 0; padding: 0; }")]
           [:script (h/raw theme-persistence-script)]
-          [:script (h/raw live-reload-script)]]
+          (when live-reload? [:script (h/raw live-reload-script)])]
          [:body
           [:script {:src "/ui-runtime.js"}]
           [:script (h/raw theme-toggle-script)]
-          [:script {:src "/theme-adapter.js" :defer true}]
-          [:script {:src "/css-live-reload.js" :defer true}]
+          (when live-reload? [:script {:src "/theme-adapter.js" :defer true}])
+          (when live-reload? [:script {:src "/css-live-reload.js" :defer true}])
           (sidebar/sidebar-layout {}
             (app-sidebar active-page port)
             (sidebar/sidebar-overlay {})
@@ -946,6 +946,7 @@
 ;; ── Server ──────────────────────────────────────────────────────────
 
 (defonce !port (atom 3003))
+(defonce !live-reload (atom true))
 
 (defn handler [{:keys [uri]}]
   (let [port @!port
@@ -980,15 +981,17 @@
       (resolve-page path)
       {:status 200
        :headers {"Content-Type" "text/html; charset=utf-8"}
-       :body (render-page uri port)}
+       :body (render-page uri port @!live-reload)}
 
       :else
       {:status 404
        :headers {"Content-Type" "text/html; charset=utf-8"}
-       :body (render-page uri port)})))
+       :body (render-page uri port @!live-reload)})))
 
-(defn start! [{:keys [port] :or {port 3003}}]
+(defn start! [{:keys [port live-reload?] :or {port 3003 live-reload? true}}]
   (reset! !port port)
-  (start-watcher!)
-  (println (str "Hiccup server running at http://localhost:" port " (live reload enabled)"))
+  (reset! !live-reload live-reload?)
+  (when live-reload? (start-watcher!))
+  (println (str "Hiccup server running at http://localhost:" port
+                (if live-reload? " (live reload enabled)" " (production)")))
   (http/run-server #'handler {:port port}))

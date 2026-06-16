@@ -2,6 +2,10 @@
 
 A cross-target component library for Clojure (Hiccup), ClojureScript (Replicant), and Squint (Eucalypt). Components are `.cljc` files that compile to all three targets using reader conditionals.
 
+## Live Demo
+
+The full component gallery is deployed at **[ui.example.com](https://ui.example.com)** (Hiccup target, behind Tailscale). It is push-to-deploy via the `clj-ui-framework` project on the Hetzner host — pushing to the bare repo runs `bb build-theme` and restarts the server.
+
 ## Installation
 
 Add as a **git dependency** in `bb.edn` or `deps.edn`. Do **not** use git submodules or worktrees — they cause stale checkouts, missing theme CSS, and broken builds.
