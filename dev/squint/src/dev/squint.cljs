@@ -50,6 +50,14 @@
   (when-let [layout (.querySelector js/document ".sidebar-layout")]
     (.removeAttribute layout "data-sidebar-open")))
 
+(defn toggle-floating-sidebar! [_e]
+  (when-let [layout (.querySelector js/document ".sidebar-layout--floating")]
+    (.toggleAttribute layout "data-sidebar-open")))
+
+(defn close-floating-sidebar! [_e]
+  (when-let [layout (.querySelector js/document ".sidebar-layout--floating")]
+    (.removeAttribute layout "data-sidebar-open")))
+
 (defn section [title & children]
   (let [id (.toLowerCase title)]
     [:section {:id id :style {"margin-bottom" "2.5rem"}}
@@ -743,7 +751,49 @@
            [:div {:style {"aspect-ratio" "16/9" "background" "var(--bg-1)" "border-radius" "var(--radius-lg)" "border" "var(--border-0)"}}]
            [:div {:style {"aspect-ratio" "16/9" "background" "var(--bg-1)" "border-radius" "var(--radius-lg)" "border" "var(--border-0)"}}]
            [:div {:style {"aspect-ratio" "16/9" "background" "var(--bg-1)" "border-radius" "var(--radius-lg)" "border" "var(--border-0)"}}]]
-          [:div {:style {"margin-top" "1rem" "min-height" "120px" "background" "var(--bg-1)" "border-radius" "var(--radius-lg)" "border" "var(--border-0)"}}]])))])
+          [:div {:style {"margin-top" "1rem" "min-height" "120px" "background" "var(--bg-1)" "border-radius" "var(--radius-lg)" "border" "var(--border-0)"}}]])))
+   (section "Floating Sidebar (iOS)"
+     [:p {:style {"color" "var(--fg-2)" "font-size" "var(--font-sm)" "margin" "0"}}
+      "The " [:code "sidebar-layout--floating"] " modifier forces the off-canvas drawer at any size, "
+      "positioned relative to its container. Tap the hamburger to open, tap the dimmed backdrop to close."]
+     [:div {:style {"display" "flex" "justify-content" "center" "padding" "var(--size-4) 0"}}
+      ;; iPhone-sized frame (375 × 812)
+      [:div {:style {"width" "375px" "height" "812px" "max-width" "100%" "flex-shrink" "0"
+                     "border" "10px solid var(--fg-0)" "border-radius" "2.75rem" "overflow" "hidden"
+                     "background" "var(--bg-0)" "box-shadow" "var(--shadow-3)"}}
+       (sidebar/sidebar-layout {:class "sidebar-layout--floating" :attrs {:style {"height" "100%"}}}
+         (sidebar/sidebar {:attrs {:style {"width" "17rem"}}}
+           (sidebar/sidebar-header {}
+             (sidebar/sidebar-brand {:title "Pocket" :subtitle "Personal" :icon "P"}))
+           (sidebar/sidebar-content {}
+             (sidebar/sidebar-group {:label "Library"}
+               (sidebar/sidebar-menu {}
+                 (sidebar/sidebar-menu-item {:href "#" :icon-name "home" :active true} "Home")
+                 (sidebar/sidebar-menu-item {:href "#" :icon-name "search"} "Search")
+                 (sidebar/sidebar-menu-item {:href "#" :icon-name "star" :badge "12"} "Favorites")
+                 (sidebar/sidebar-menu-item {:href "#" :icon-name "clock"} "Recent")))
+             (sidebar/sidebar-group {:label "Account"}
+               (sidebar/sidebar-menu {}
+                 (sidebar/sidebar-menu-item {:href "#" :icon-name "bell"} "Notifications")
+                 (sidebar/sidebar-menu-item {:href "#" :icon-name "settings"} "Settings"))))
+           (sidebar/sidebar-footer {}
+             (sidebar/sidebar-user {:user-name "Jamie Rivera" :email "jamie@pocket.app"})))
+         (sidebar/sidebar-overlay {:on-click close-floating-sidebar!})
+         (sidebar/sidebar-layout-main {}
+           [:div {:style {"display" "flex" "flex-direction" "column" "height" "100%"}}
+            ;; Top bar
+            [:div {:style {"display" "flex" "align-items" "center" "gap" "var(--size-3)"
+                           "padding" "var(--size-3) var(--size-4)" "border-bottom" "var(--border-0)"}}
+             (sidebar/sidebar-mobile-toggle {:on-click toggle-floating-sidebar!})
+             [:h3 {:style {"margin" "0" "color" "var(--fg-0)" "font-size" "var(--font-md)"}} "Home"]]
+            ;; Content
+            [:div {:style {"flex" "1" "overflow-y" "auto" "padding" "var(--size-4)" "display" "flex" "flex-direction" "column" "gap" "var(--size-3)"}}
+             [:div {:style {"height" "140px" "background" "var(--bg-1)" "border-radius" "var(--radius-lg)" "border" "var(--border-0)"}}]
+             [:div {:style {"display" "grid" "grid-template-columns" "1fr 1fr" "gap" "var(--size-3)"}}
+              [:div {:style {"aspect-ratio" "1" "background" "var(--bg-1)" "border-radius" "var(--radius-lg)" "border" "var(--border-0)"}}]
+              [:div {:style {"aspect-ratio" "1" "background" "var(--bg-1)" "border-radius" "var(--radius-lg)" "border" "var(--border-0)"}}]]
+             [:div {:style {"height" "80px" "background" "var(--bg-1)" "border-radius" "var(--radius-lg)" "border" "var(--border-0)"}}]
+             [:div {:style {"height" "80px" "background" "var(--bg-1)" "border-radius" "var(--radius-lg)" "border" "var(--border-0)"}}]]]))]])])
 
 ;; ── Navigation ──────────────────────────────────────────────────────
 
