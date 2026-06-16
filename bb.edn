@@ -1,6 +1,6 @@
 {:deps {tmux-dev/tmux-dev {:git/url "https://git.example.com/floscr/tmux-dev"
                            :git/sha "3d9e53bc38b818bfcee312065ded0aef83bdecf4"}}
- :paths ["src" "test" "dev/hiccup/src"]
+ :paths ["src" "test" "dev/hiccup/src" "dev/shared/src"]
 
  :tasks
  {:requires ([tmux-dev.core :as td]
