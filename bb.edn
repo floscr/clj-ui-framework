@@ -94,6 +94,7 @@
               [ui.chip-test]
               [ui.tag-input-test]
               [ui.separator-test]
+              [ui.toolbar-test]
               [ui.calendar-test]
               [ui.calendar-events-test]
               [ui.player-bar-test]
@@ -123,6 +124,7 @@
                                       'ui.chip-test
                                       'ui.tag-input-test
                                       'ui.separator-test
+                                      'ui.toolbar-test
                                       'ui.calendar-test
                                       'ui.calendar-events-test
                                       'ui.player-bar-test

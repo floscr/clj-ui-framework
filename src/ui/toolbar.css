@@ -1,0 +1,53 @@
+/* ── Toolbar ──────────────────────────────────────────────────────── */
+/* Rounded container grouping buttons (typically icon buttons) with     */
+/* optional separators. Works standalone or inside a flush popover.     */
+
+.toolbar {
+  display: inline-flex;
+  align-items: stretch;
+  gap: 0;
+  background: var(--bg-1);
+  border: var(--border-0);
+  /* Fully-rounded pill: a large radius is clamped to half the height.
+     overflow:hidden clips the square button corners to the pill shape. */
+  border-radius: 9999px;
+  overflow: hidden;
+  box-shadow: var(--shadow-0);
+}
+
+.toolbar-vertical {
+  flex-direction: column;
+}
+
+/* Buttons fill the toolbar edge to edge with square corners; the pill
+   shape comes from the container clipping the ends. */
+.toolbar > .btn {
+  border-radius: 0;
+}
+
+/* ── Separator ────────────────────────────────────────────────────── */
+
+.toolbar-separator {
+  flex: none;
+  background: var(--gray-200);
+}
+
+.toolbar-horizontal > .toolbar-separator {
+  width: 1px;
+  align-self: stretch;
+}
+
+.toolbar-vertical > .toolbar-separator {
+  height: 1px;
+}
+
+/* Dark mode: lighter divider shade, matching the separator component */
+[data-theme="dark"] .toolbar-separator {
+  background: var(--gray-800);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .toolbar-separator {
+    background: var(--gray-800);
+  }
+}

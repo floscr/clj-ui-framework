@@ -46,6 +46,16 @@
 .popover-content--left   { transform-origin: center right; }
 .popover-content--right  { transform-origin: center left; }
 
+/* Flush: strip the panel chrome so inner content (e.g. a toolbar) defines
+   its own surface. Used for popover-triggered toolbars/menus. */
+.popover-content--flush {
+  padding: 0;
+  background: none;
+  border: none;
+  box-shadow: none;
+  max-width: none;
+}
+
 /* ── Sections ────────────────────────────────────────────────────── */
 
 .popover-header {

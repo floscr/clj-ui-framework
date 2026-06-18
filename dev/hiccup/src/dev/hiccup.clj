@@ -36,7 +36,7 @@
                                card-demo accordion-demo table-demo spinner-demo
                                skeleton-demo progress-demo switch-demo tooltip-demo
                                breadcrumb-demo separator-demo form-demo
-                               popover-demo]]))
+                               popover-demo toolbar-demo]]))
 
 ;; ── Query Params ────────────────────────────────────────────────────
 
@@ -289,6 +289,7 @@
    (dialog-demo)
    (context-menu-demo)
    (popover-demo)
+   (toolbar-demo)
    (spinner-demo)
    (skeleton-demo)
    (progress-demo)
@@ -595,7 +596,8 @@
             {:label "Skeleton" :anchor "skeleton"}
             {:label "Tooltip" :anchor "tooltip"}]}
    {:title "Layout"
-    :items [{:label "Separator" :anchor "separator"}]}
+    :items [{:label "Separator" :anchor "separator"}
+            {:label "Toolbar" :anchor "toolbar"}]}
    {:title "Overlay"
     :items [{:label "Lightbox" :anchor "lightbox"}]}
    {:title "Navigation"

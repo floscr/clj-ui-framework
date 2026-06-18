@@ -24,6 +24,7 @@
             [ui.breadcrumb :as breadcrumb]
             [ui.separator :as separator]
             [ui.popover :as popover]
+            [ui.toolbar :as toolbar]
             [ui.form :as form]))
 
 ;; ── Cross-target helpers ────────────────────────────────────────────
@@ -247,6 +248,40 @@
          (popover/popover-trigger {:target "popover-right" :class trigger-cls} "Side right")
          (popover/popover-content {:id "popover-right" :side :right :align :center}
            (popover/popover-title {} "Opens to the right"))]))))
+
+(defn toolbar-demo []
+  (let [trigger-cls (button/button-classes {:variant :secondary})
+        hstack {:display "flex" :gap "0.75rem" :flex-wrap "wrap" :align-items "center"}]
+    (section "Toolbar"
+      ;; Horizontal rounded toolbar with grouped icon buttons
+      [:div {}
+       (toolbar/toolbar {}
+         (button/button {:variant :ghost :icon :edit})
+         (button/button {:variant :ghost :icon :copy})
+         (button/button {:variant :ghost :icon :link})
+         (toolbar/toolbar-separator {})
+         (button/button {:variant :ghost :icon :star})
+         (button/button {:variant :ghost :icon :bookmark})
+         (toolbar/toolbar-separator {})
+         (button/button {:variant :ghost :icon :trash}))]
+      ;; Vertical toolbar
+      [:div {}
+       (toolbar/toolbar {:orientation :vertical}
+         (button/button {:variant :ghost :icon :plus})
+         (button/button {:variant :ghost :icon :minus})
+         (toolbar/toolbar-separator {})
+         (button/button {:variant :ghost :icon :search}))]
+      ;; Toolbar triggered by a popover, anchored to its trigger
+      (into [:div {:style (sx hstack)}]
+        [(popover/popover-trigger {:target "toolbar-popover" :class trigger-cls} "Show toolbar")
+         (popover/popover-content {:id "toolbar-popover" :side :top :align :center
+                                   :class "popover-content--flush"}
+           (toolbar/toolbar {}
+             (button/button {:variant :ghost :icon :star})
+             (button/button {:variant :ghost :icon :heart})
+             (button/button {:variant :ghost :icon :copy})
+             (toolbar/toolbar-separator {})
+             (button/button {:variant :ghost :icon :trash})))]))))
 
 (defn breadcrumb-demo []
   (section "Breadcrumb"

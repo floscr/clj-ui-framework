@@ -33,7 +33,7 @@
                                card-demo accordion-demo table-demo spinner-demo
                                skeleton-demo progress-demo switch-demo tooltip-demo
                                breadcrumb-demo separator-demo form-demo
-                               popover-demo]])
+                               popover-demo toolbar-demo]])
   (:require-macros [ui.macros :refer [inline-file]]))
 
 ;; ── State ───────────────────────────────────────────────────────────
@@ -345,6 +345,7 @@
    (dialog-demo)
    (context-menu-demo)
    (popover-demo)
+   (toolbar-demo)
    (spinner-demo)
    (skeleton-demo)
    (progress-demo)
