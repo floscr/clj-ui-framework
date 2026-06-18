@@ -798,7 +798,7 @@
         (apply sidebar/sidebar-menu {}
           (for [{:keys [label port active]} (make-targets)]
             (sidebar/sidebar-menu-item
-              {:href (str "http://localhost:" port)
+              {:href (str "//" (.-hostname js/window.location) ":" port)
                :icon-name :monitor
                :active active}
               label))))

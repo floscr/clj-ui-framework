@@ -25,6 +25,17 @@
    :cljs   (defn- kw-name [s] (name s))
    :clj    (defn- kw-name [s] (name s)))
 
+;; Replicant treats each element of a :class vector as a single DOMTokenList
+;; token, so a space-joined string (e.g. from button-classes) must be split
+;; into individual tokens first.
+#?(:cljs
+   (defn- conj-classes [base class]
+     (cond
+       (nil? class)    base
+       (string? class) (into base (remove str/blank? (str/split class #"\s+")))
+       (coll? class)   (into base class)
+       :else           (conj base class))))
+
 (defn trigger-attrs
   "Return the attribute map that turns any element into a popover trigger.
    Spread onto a button: (button {:attrs (trigger-attrs \"my-popover\")} ...)."
@@ -54,7 +65,7 @@
        (into [:button base-attrs] children))
 
      :cljs
-     (let [classes (cond-> ["popover-trigger"] class (conj class))
+     (let [classes (conj-classes ["popover-trigger"] class)
            base-attrs (merge {:class classes :popovertarget target :aria-haspopup "dialog"} attrs)]
        (into [:button base-attrs] children))
 
@@ -88,8 +99,7 @@
          (into [:div base-attrs] children))
 
        :cljs
-       (let [classes (cond-> ["popover-content" (str "popover-content--" side*)]
-                       class (conj class))
+       (let [classes (conj-classes ["popover-content" (str "popover-content--" side*)] class)
              base-attrs (merge {:class classes :popover "auto" :role "dialog"
                                 :data-popover-side side* :data-popover-align align*}
                                (when id {:id id})
@@ -113,7 +123,7 @@
   #?(:squint
      (into [:header (merge {:class (cond-> "popover-header" class (str " " class))} attrs)] children)
      :cljs
-     (into [:header (merge {:class (cond-> ["popover-header"] class (conj class))} attrs)] children)
+     (into [:header (merge {:class (conj-classes ["popover-header"] class)} attrs)] children)
      :clj
      (into [:header (merge {:class (cond-> "popover-header" class (str " " class))} attrs)] children)))
 
@@ -123,7 +133,7 @@
   #?(:squint
      (into [:h4 (merge {:class (cond-> "popover-title" class (str " " class))} attrs)] children)
      :cljs
-     (into [:h4 (merge {:class (cond-> ["popover-title"] class (conj class))} attrs)] children)
+     (into [:h4 (merge {:class (conj-classes ["popover-title"] class)} attrs)] children)
      :clj
      (into [:h4 (merge {:class (cond-> "popover-title" class (str " " class))} attrs)] children)))
 
@@ -133,6 +143,6 @@
   #?(:squint
      (into [:p (merge {:class (cond-> "popover-description" class (str " " class))} attrs)] children)
      :cljs
-     (into [:p (merge {:class (cond-> ["popover-description"] class (conj class))} attrs)] children)
+     (into [:p (merge {:class (conj-classes ["popover-description"] class)} attrs)] children)
      :clj
      (into [:p (merge {:class (cond-> "popover-description" class (str " " class))} attrs)] children)))

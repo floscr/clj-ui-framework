@@ -626,7 +626,16 @@
      {:label "Replicant" :port (+ base 1)}
      {:label "Squint"    :port (+ base 2)}]))
 
-(defn app-sidebar [active-page own-port]
+(defn req-hostname
+  "Extract the hostname from a request Host header, dropping any :port.
+   Falls back to localhost. Keeps the current host so target-switcher
+   links work over LAN/Tailscale, not just on localhost."
+  [host]
+  (if (and host (re-find #":\d+$" host))
+    (str/replace host #":\d+$" "")
+    (or host "localhost")))
+
+(defn app-sidebar [active-page own-port host]
   (sidebar/sidebar {}
     (sidebar/sidebar-header {}
       (sidebar/sidebar-brand {:title "Clojure UI Framework" :subtitle "Hiccup" :icon "U"}))
@@ -649,7 +658,7 @@
         (apply sidebar/sidebar-menu {}
           (for [{:keys [label port active]} (make-targets own-port)]
             (sidebar/sidebar-menu-item
-              {:href (str "http://localhost:" port)
+              {:href (str "//" (req-hostname host) ":" port)
                :icon-name :monitor
                :active active}
               label))))
@@ -673,7 +682,7 @@
     }, 500);
   })();")
 
-(defn render-page [uri port live-reload?]
+(defn render-page [uri port live-reload? host]
   (let [params     (parse-query-params uri)
         theme      (get params "theme")
         path       (first (str/split uri #"\?" 2))
@@ -695,7 +704,7 @@
           (when live-reload? [:script {:src "/theme-adapter.js" :defer true}])
           (when live-reload? [:script {:src "/css-live-reload.js" :defer true}])
           (sidebar/sidebar-layout {}
-            (app-sidebar active-page port)
+            (app-sidebar active-page port host)
             (sidebar/sidebar-overlay {})
             (sidebar/sidebar-layout-main {}
               [:div {:style "--body-padding-inline: 2rem; padding: 2rem; max-width: 960px;"}
@@ -766,8 +775,9 @@
 (defonce !port (atom 3003))
 (defonce !live-reload (atom true))
 
-(defn handler [{:keys [uri]}]
+(defn handler [{:keys [uri headers]}]
   (let [port @!port
+        host (get headers "host")
         path (first (str/split uri #"\?" 2))]
     (cond
       (= path "/dev/changes")
@@ -799,12 +809,12 @@
       (resolve-page path)
       {:status 200
        :headers {"Content-Type" "text/html; charset=utf-8"}
-       :body (render-page uri port @!live-reload)}
+       :body (render-page uri port @!live-reload host)}
 
       :else
       {:status 404
        :headers {"Content-Type" "text/html; charset=utf-8"}
-       :body (render-page uri port @!live-reload)})))
+       :body (render-page uri port @!live-reload host)})))
 
 (defn start! [{:keys [port live-reload?] :or {port 3003 live-reload? true}}]
   (reset! !port port)
