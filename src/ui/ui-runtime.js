@@ -647,6 +647,125 @@
   })();
   window["__uiContextMenu"] = open_context_menu;
 
+  // .compiled/popover.mjs
+  var gap = 8;
+  var edge = 8;
+  var clamp = function(v, lo, hi) {
+    return Math.max(lo, Math.min(v, hi));
+  };
+  var align_h = function(tr, cw, align) {
+    if (align === "start") {
+      return tr.left;
+    } else {
+      if (align === "end") {
+        return tr.right - cw;
+      } else {
+        if ("else") {
+          return tr.left + (tr.width - cw) / 2;
+        } else {
+          return null;
+        }
+      }
+    }
+    ;
+  };
+  var align_v = function(tr, ch, align) {
+    if (align === "start") {
+      return tr.top;
+    } else {
+      if (align === "end") {
+        return tr.bottom - ch;
+      } else {
+        if ("else") {
+          return tr.top + (tr.height - ch) / 2;
+        } else {
+          return null;
+        }
+      }
+    }
+    ;
+  };
+  var position_BANG_ = function(content, trigger) {
+    const side1 = (() => {
+      const or__23426__auto__2 = content.dataset.popoverSide;
+      if (truth_(or__23426__auto__2)) {
+        return or__23426__auto__2;
+      } else {
+        return "bottom";
+      }
+      ;
+    })();
+    const align3 = (() => {
+      const or__23426__auto__4 = content.dataset.popoverAlign;
+      if (truth_(or__23426__auto__4)) {
+        return or__23426__auto__4;
+      } else {
+        return "center";
+      }
+      ;
+    })();
+    const tr5 = trigger.getBoundingClientRect();
+    const cr6 = content.getBoundingClientRect();
+    const cw7 = cr6.width;
+    const ch8 = cr6.height;
+    const vw9 = window.innerWidth;
+    const vh10 = window.innerHeight;
+    const left11 = side1 === "left" ? tr5.left - cw7 - gap : side1 === "right" ? tr5.right + gap : "else" ? align_h(tr5, cw7, align3) : null;
+    const top12 = side1 === "top" ? tr5.top - ch8 - gap : side1 === "bottom" ? tr5.bottom + gap : "else" ? align_v(tr5, ch8, align3) : null;
+    content.style.left = `${clamp(left11, edge, vw9 - cw7 - edge) ?? ""}px`;
+    return content.style.top = `${clamp(top12, edge, vh10 - ch8 - edge) ?? ""}px`;
+  };
+  var current = { "content": null, "trigger": null };
+  var reposition_BANG_ = function() {
+    if (truth_(current.content)) {
+      return position_BANG_(current.content, current.trigger);
+    }
+    ;
+  };
+  var on_toggle = function(e) {
+    const content1 = e.target;
+    if (truth_((() => {
+      const and__23442__auto__2 = content1;
+      if (truth_(and__23442__auto__2)) {
+        const and__23442__auto__3 = content1.matches;
+        if (truth_(and__23442__auto__3)) {
+          return content1.matches("[popover].popover-content");
+        } else {
+          return and__23442__auto__3;
+        }
+        ;
+      } else {
+        return and__23442__auto__2;
+      }
+      ;
+    })())) {
+      if (e.newState === "open") {
+        const id4 = content1.id;
+        const trigger5 = truth_(id4) ? document.querySelector(`${'[popovertarget="'}${id4 ?? ""}${'"]'}`) : null;
+        if (truth_(trigger5)) {
+          current.content = content1;
+          current.trigger = trigger5;
+          return position_BANG_(content1, trigger5);
+        }
+        ;
+      } else {
+        if (current.content === content1) {
+          current.content = null;
+          return current.trigger = null;
+        }
+      }
+      ;
+    }
+    ;
+  };
+  var init_BANG_ = function() {
+    document.addEventListener("toggle", on_toggle, true);
+    window.addEventListener("scroll", reposition_BANG_, true);
+    return window.addEventListener("resize", reposition_BANG_);
+  };
+  init_BANG_();
+  window["__uiPopover"] = { "reposition": reposition_BANG_ };
+
   // .compiled/theme.mjs
   var storage_key = "ui-theme";
   var get_stored = function() {
@@ -778,7 +897,7 @@
       }));
     };
   };
-  var init_BANG_ = function() {
+  var init_BANG_2 = function() {
     const mode1 = get_mode();
     apply_theme_BANG_(mode1);
     const mql2 = window.matchMedia("(prefers-color-scheme: dark)");
@@ -790,5 +909,5 @@
       ;
     }));
   };
-  window["__uiTheme"] = { "init": init_BANG_, "set": set_mode_BANG_, "get": get_mode, "effective": get_effective, "toggle": toggle_BANG_, "subscribe": subscribe_BANG_ };
+  window["__uiTheme"] = { "init": init_BANG_2, "set": set_mode_BANG_, "get": get_mode, "effective": get_effective, "toggle": toggle_BANG_, "subscribe": subscribe_BANG_ };
 })();

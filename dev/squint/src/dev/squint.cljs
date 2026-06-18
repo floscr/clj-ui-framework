@@ -32,7 +32,8 @@
             [dev.demos :refer [section page-header button-demo alert-demo badge-demo
                                card-demo accordion-demo table-demo spinner-demo
                                skeleton-demo progress-demo switch-demo tooltip-demo
-                               breadcrumb-demo separator-demo form-demo]]))
+                               breadcrumb-demo separator-demo form-demo
+                               popover-demo]]))
 
 ;; ── State ───────────────────────────────────────────────────────────
 
@@ -383,6 +384,7 @@
    (table-demo)
    (dialog-demo)
    (context-menu-demo)
+   (popover-demo)
    (spinner-demo)
    (skeleton-demo)
    (progress-demo)

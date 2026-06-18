@@ -10,3 +10,63 @@
 .popover-bl { bottom: var(--size-4); left: var(--size-4); }
 .popover-tr { top: var(--size-4); right: var(--size-4); }
 .popover-tl { top: var(--size-4); left: var(--size-4); }
+
+/* ── Popover (anchored content panel) ─────────────────────────────── */
+/* Native Popover API panel, positioned relative to its trigger by the */
+/* JS runtime (__uiPopover) via :side / :align.                        */
+
+.popover-content {
+  position: fixed;
+  margin: 0;
+  inset: auto;
+  top: 0;
+  left: 0;
+  width: max-content;
+  max-width: min(20rem, calc(100vw - var(--size-4)));
+  padding: var(--size-4);
+  background: var(--bg-0);
+  color: var(--fg-0);
+  border: var(--border-0);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-3);
+  font-size: var(--font-sm);
+}
+
+.popover-content:popover-open {
+  animation: popover-in 0.12s ease;
+}
+
+@keyframes popover-in {
+  from { opacity: 0; transform: scale(0.97) translateY(var(--size-1)); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.popover-content--top    { transform-origin: bottom center; }
+.popover-content--bottom { transform-origin: top center; }
+.popover-content--left   { transform-origin: center right; }
+.popover-content--right  { transform-origin: center left; }
+
+/* ── Sections ────────────────────────────────────────────────────── */
+
+.popover-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-1);
+  margin-bottom: var(--size-3);
+}
+
+.popover-header:last-child { margin-bottom: 0; }
+
+.popover-title {
+  margin: 0;
+  font-size: var(--font-base);
+  font-weight: 600;
+  line-height: var(--size-5);
+}
+
+.popover-description {
+  margin: 0;
+  font-size: var(--font-sm);
+  color: var(--fg-2);
+  line-height: var(--size-5);
+}
