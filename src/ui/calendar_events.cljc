@@ -1,12 +1,8 @@
 (ns ui.calendar-events
   "Event-aware calendar components. See src/ui/calendar.md for full documentation."
   (:require [clojure.string :as str]
+            [ui.util :as util]
             [ui.calendar :as cal]))
-
-;; In squint, keywords are strings — name is identity
-#?(:squint (defn- kw-name [s] s)
-   :cljs   (defn- kw-name [s] (name s))
-   :clj    (defn- kw-name [s] (name s)))
 
 ;; ── Event Data Helpers ──────────────────────────────────────────────
 ;; Events are maps with:
@@ -22,7 +18,7 @@
 (defn event-color-class
   "Returns the CSS class for an event color."
   [color]
-  (let [c (some-> color kw-name)]
+  (let [c (some-> color util/kw-name)]
     (if (and c (contains? event-colors c))
       (str "cal-event-" c)
       "cal-event-default")))

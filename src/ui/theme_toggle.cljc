@@ -1,5 +1,6 @@
 (ns ui.theme-toggle
   (:require [clojure.string :as str]
+            [ui.util :as util]
             [ui.icon :as icon]))
 
 ;; ── Theme toggle ────────────────────────────────────────────────────
@@ -11,10 +12,6 @@
 ;; In server-rendered (CLJ) mode, emits the markup; the JS runtime
 ;; hydrates behavior on load.
 
-#?(:squint (defn- kw-name [s] s)
-   :cljs   (defn- kw-name [s] (name s))
-   :clj    (defn- kw-name [s] (name s)))
-
 (def ^:private modes
   [{:mode "light" :icon :sun   :label "Light theme"}
    {:mode "auto"  :icon :monitor :label "System theme"}
@@ -23,7 +20,7 @@
 (defn theme-toggle-class-list
   "Returns a vector of CSS class strings for the toggle container."
   [{:keys [size]}]
-  (let [s (or (some-> size kw-name) "md")]
+  (let [s (or (some-> size util/kw-name) "md")]
     (cond-> ["theme-toggle"]
       (not= s "md") (conj (str "theme-toggle-" s)))))
 

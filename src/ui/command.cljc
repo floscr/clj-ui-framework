@@ -22,24 +22,8 @@
 
    Items may carry :url (navigate on select, rendered as <a>) or, in
    replicant/squint, an :on-click callback. Selection always closes the dialog."
-  (:require [clojure.string :as str]
-            [ui.icon :as icon]))
-
-;; In squint, keywords are strings — name is identity
-#?(:squint (defn- kw-name [s] s)
-   :cljs   (defn- kw-name [s] (name s))
-   :clj    (defn- kw-name [s] (name s)))
-
-;; Replicant treats each element of a :class vector as a single DOMTokenList
-;; token, so a space-joined string (e.g. from button-classes) must be split
-;; into individual tokens first.
-#?(:cljs
-   (defn- conj-classes [base class]
-     (cond
-       (nil? class)    base
-       (string? class) (into base (remove str/blank? (str/split class #"\s+")))
-       (coll? class)   (into base class)
-       :else           (conj base class))))
+  (:require [ui.icon :as icon]
+            [ui.util :as util]))
 
 ;; ── Item ────────────────────────────────────────────────────────────
 
@@ -75,7 +59,7 @@
                                   (when shortcut-el [shortcut-el]))))
 
        :cljs
-       (let [classes (conj-classes ["command-item"] class)
+       (let [classes (util/conj-classes ["command-item"] class)
              base    (merge {:class classes :role "option"}
                             (when value {:data-command-value value})
                             (when disabled {:disabled true})
@@ -117,7 +101,7 @@
                                    [(into [:div {:class "command-group-items"}] children)])))
 
        :cljs
-       (let [classes (conj-classes ["command-group"] class)
+       (let [classes (util/conj-classes ["command-group"] class)
              base    (merge {:class classes :role "group"} attrs)]
          (into [:div base] (concat (when heading-el [heading-el])
                                    [(into [:div {:class ["command-group-items"]}] children)])))
@@ -162,7 +146,7 @@
                       (concat children [empty-el]))]))
 
        :cljs
-       (let [classes (conj-classes ["command-dialog"] class)
+       (let [classes (util/conj-classes ["command-dialog"] class)
              base    (merge {:class classes :role "dialog" :aria-modal "true"}
                             (when id {:id id})
                             (when hotkey {:data-command-hotkey hotkey})
@@ -204,7 +188,7 @@
        (into [:button base] children))
 
      :cljs
-     (let [classes (conj-classes ["command-trigger"] class)
+     (let [classes (util/conj-classes ["command-trigger"] class)
            base    (merge {:class classes :type "button" :aria-haspopup "dialog"
                            :data-command-target target
                            :on {:click (fn [_]

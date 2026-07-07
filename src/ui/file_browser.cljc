@@ -20,15 +20,11 @@
                      :multiple true
                      :on-files (fn [files] ...)})"
   (:require [clojure.string :as str]
+            [ui.util :as util]
             [ui.icon :as icon]
             [ui.progress :as progress]
             [ui.context-menu :as context-menu]
             [ui.file-progress :as fp]))
-
-;; In squint, keywords are strings — name is identity
-#?(:squint (defn- kw-name [s] s)
-   :cljs   (defn- kw-name [s] (name s))
-   :clj    (defn- kw-name [s] (name s)))
 
 ;; ── File type → icon mapping ────────────────────────────────────────
 
@@ -47,7 +43,7 @@
   "Returns the icon name for a file type.
    Returns a keyword in :clj/:cljs, a string in :squint."
   [file-type]
-  (let [t (kw-name (or file-type "file"))
+  (let [t (util/kw-name (or file-type "file"))
         icon-str (or (get type->icon-name t) "file")]
     #?(:squint icon-str
        :cljs   (keyword icon-str)
@@ -83,7 +79,7 @@
      :on-grid-click - handler for grid button
      :on-list-click - handler for list button"
   [{:keys [view on-grid-click on-list-click]}]
-  (let [v (kw-name (or view "grid"))
+  (let [v (util/kw-name (or view "grid"))
         grid-active? (= v "grid")
         list-active? (= v "list")]
     #?(:squint
@@ -227,7 +223,7 @@
     :label (or label "Type")
     :width (or width "100px")
     :render (fn [item]
-              (str/capitalize (kw-name (or (:file-type item) "file"))))}))
+              (str/capitalize (util/kw-name (or (:file-type item) "file"))))}))
 
 (def default-columns
   "Default column set: Name (with icon), Size, Modified, Type."
@@ -239,8 +235,8 @@
   "Renders a chevron icon indicating sort direction in a table header."
   [dir]
   (let [icon-name #?(:squint (if (= dir "asc") "chevron-up" "chevron-down")
-                     :cljs   (if (= (kw-name dir) "asc") :chevron-up :chevron-down)
-                     :clj    (if (= (kw-name dir) "asc") :chevron-up :chevron-down))]
+                     :cljs   (if (= (util/kw-name dir) "asc") :chevron-up :chevron-down)
+                     :clj    (if (= (util/kw-name dir) "asc") :chevron-up :chevron-down))]
     (icon/icon {:icon-name icon-name :size #?(:squint "sm" :cljs :sm :clj :sm)})))
 
 (defn- render-cell
@@ -330,7 +326,7 @@
                (into [:div {:class ["fb-table-header"]}]
                      (map (fn [col]
                             (let [k     (:key col)
-                                  active (= (kw-name k) (kw-name (or sort-key "")))]
+                                  active (= (util/kw-name k) (util/kw-name (or sort-key "")))]
                               [:div {:class (cond-> ["fb-table-th"]
                                               active    (conj "fb-table-th-active")
                                               sortable? (conj "fb-table-th-sortable")
@@ -366,7 +362,7 @@
                (into [:div {:class "fb-table-header"}]
                      (map (fn [col]
                             (let [k     (:key col)
-                                  active (= (kw-name k) (kw-name (or sort-key "")))]
+                                  active (= (util/kw-name k) (util/kw-name (or sort-key "")))]
                               [:div {:class (cond-> "fb-table-th"
                                               active    (str " fb-table-th-active")
                                               sortable? (str " fb-table-th-sortable")
@@ -397,14 +393,14 @@
   "Renders a chevron icon indicating sort direction."
   [dir]
   (let [icon-name #?(:squint (if (= dir "asc") "chevron-up" "chevron-down")
-                     :cljs   (if (= (kw-name dir) "asc") :chevron-up :chevron-down)
-                     :clj    (if (= (kw-name dir) "asc") :chevron-up :chevron-down))]
+                     :cljs   (if (= (util/kw-name dir) "asc") :chevron-up :chevron-down)
+                     :clj    (if (= (util/kw-name dir) "asc") :chevron-up :chevron-down))]
     (icon/icon {:icon-name icon-name :size #?(:squint "sm" :cljs :sm :clj :sm)})))
 
 (defn- header-cell
   "A single sortable column header cell."
   [label col-key sort-key sort-dir on-sort]
-  (let [active? (= (kw-name col-key) (kw-name (or sort-key "")))
+  (let [active? (= (util/kw-name col-key) (util/kw-name (or sort-key "")))
         sortable? (some? on-sort)]
     #?(:squint
        [:div {:class (cond-> "fb-list-header-cell"
@@ -479,7 +475,7 @@
   [{:keys [item selected class attrs on-click context-menu-items]}]
   (let [{:keys [name file-type size modified]} item
         selected? (boolean selected)
-        type-label (str/capitalize (kw-name (or file-type "file")))
+        type-label (str/capitalize (util/kw-name (or file-type "file")))
         inner
         #?(:squint
            [:div (merge {:class (cond-> "fb-item fb-item-list"

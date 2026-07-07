@@ -1,10 +1,6 @@
 (ns ui.chip
   (:require [clojure.string :as str]))
 
-#?(:squint (defn- kw-name [s] s)
-   :cljs   (defn- kw-name [s] (name s))
-   :clj    (defn- kw-name [s] (name s)))
-
 (defn chip-class-list
   "Returns a vector of CSS class strings for a chip."
   [{:keys [active]}]

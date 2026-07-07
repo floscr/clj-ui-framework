@@ -1,16 +1,13 @@
 (ns ui.progress
-  (:require [clojure.string :as str]))
-
-#?(:squint (defn- kw-name [s] s)
-   :cljs   (defn- kw-name [s] (name s))
-   :clj    (defn- kw-name [s] (name s)))
+  (:require [clojure.string :as str]
+            [ui.util :as util]))
 
 (defn progress-bar-class-list
   "Generate a vector of CSS class strings for the progress bar fill.
    Variants: nil (default/accent), :success, :warning, :danger."
   [{:keys [variant]}]
   (cond-> ["progress-bar"]
-    variant (conj (str "progress-bar--" (kw-name variant)))))
+    variant (conj (str "progress-bar--" (util/kw-name variant)))))
 
 (defn progress-bar-classes
   "Generate CSS class string for the progress bar fill."

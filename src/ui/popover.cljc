@@ -18,23 +18,7 @@
 
    The trigger's :target and the content's :id must match. To attach the
    trigger behaviour to an existing element, spread (trigger-attrs id) onto it."
-  (:require [clojure.string :as str]))
-
-;; In squint, keywords are strings — name is identity
-#?(:squint (defn- kw-name [s] s)
-   :cljs   (defn- kw-name [s] (name s))
-   :clj    (defn- kw-name [s] (name s)))
-
-;; Replicant treats each element of a :class vector as a single DOMTokenList
-;; token, so a space-joined string (e.g. from button-classes) must be split
-;; into individual tokens first.
-#?(:cljs
-   (defn- conj-classes [base class]
-     (cond
-       (nil? class)    base
-       (string? class) (into base (remove str/blank? (str/split class #"\s+")))
-       (coll? class)   (into base class)
-       :else           (conj base class))))
+  (:require [ui.util :as util]))
 
 (defn trigger-attrs
   "Return the attribute map that turns any element into a popover trigger.
@@ -46,7 +30,7 @@
 (defn content-class-list
   "Vector of CSS classes for a popover content panel given :side."
   [{:keys [side]}]
-  (let [s (or (some-> side kw-name) "bottom")]
+  (let [s (or (some-> side util/kw-name) "bottom")]
     ["popover-content" (str "popover-content--" s)]))
 
 ;; ── Trigger ─────────────────────────────────────────────────────────
@@ -65,7 +49,7 @@
        (into [:button base-attrs] children))
 
      :cljs
-     (let [classes (conj-classes ["popover-trigger"] class)
+     (let [classes (util/conj-classes ["popover-trigger"] class)
            base-attrs (merge {:class classes :popovertarget target :aria-haspopup "dialog"} attrs)]
        (into [:button base-attrs] children))
 
@@ -87,8 +71,8 @@
      :class - additional CSS classes
      :attrs - additional HTML attributes"
   [{:keys [id side align class attrs] :as _props} & children]
-  (let [side*  (or (some-> side kw-name) "bottom")
-        align* (or (some-> align kw-name) "center")]
+  (let [side*  (or (some-> side util/kw-name) "bottom")
+        align* (or (some-> align util/kw-name) "center")]
     #?(:squint
        (let [classes (cond-> (str "popover-content popover-content--" side*)
                        class (str " " class))
@@ -99,7 +83,7 @@
          (into [:div base-attrs] children))
 
        :cljs
-       (let [classes (conj-classes ["popover-content" (str "popover-content--" side*)] class)
+       (let [classes (util/conj-classes ["popover-content" (str "popover-content--" side*)] class)
              base-attrs (merge {:class classes :popover "auto" :role "dialog"
                                 :data-popover-side side* :data-popover-align align*}
                                (when id {:id id})
@@ -123,7 +107,7 @@
   #?(:squint
      (into [:header (merge {:class (cond-> "popover-header" class (str " " class))} attrs)] children)
      :cljs
-     (into [:header (merge {:class (conj-classes ["popover-header"] class)} attrs)] children)
+     (into [:header (merge {:class (util/conj-classes ["popover-header"] class)} attrs)] children)
      :clj
      (into [:header (merge {:class (cond-> "popover-header" class (str " " class))} attrs)] children)))
 
@@ -133,7 +117,7 @@
   #?(:squint
      (into [:h4 (merge {:class (cond-> "popover-title" class (str " " class))} attrs)] children)
      :cljs
-     (into [:h4 (merge {:class (conj-classes ["popover-title"] class)} attrs)] children)
+     (into [:h4 (merge {:class (util/conj-classes ["popover-title"] class)} attrs)] children)
      :clj
      (into [:h4 (merge {:class (cond-> "popover-title" class (str " " class))} attrs)] children)))
 
@@ -143,6 +127,6 @@
   #?(:squint
      (into [:p (merge {:class (cond-> "popover-description" class (str " " class))} attrs)] children)
      :cljs
-     (into [:p (merge {:class (conj-classes ["popover-description"] class)} attrs)] children)
+     (into [:p (merge {:class (util/conj-classes ["popover-description"] class)} attrs)] children)
      :clj
      (into [:p (merge {:class (cond-> "popover-description" class (str " " class))} attrs)] children)))

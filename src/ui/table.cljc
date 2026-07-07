@@ -1,16 +1,13 @@
 (ns ui.table
-  (:require [clojure.string :as str]))
-
-#?(:squint (defn- kw-name [s] s)
-   :cljs   (defn- kw-name [s] (name s))
-   :clj    (defn- kw-name [s] (name s)))
+  (:require [clojure.string :as str]
+            [ui.util :as util]))
 
 (defn table-class-list
   "Generate a vector of CSS class strings for a table.
    Variants: nil (default), :striped, :bordered."
   [{:keys [variant]}]
   (cond-> ["table"]
-    variant (conj (str "table--" (kw-name variant)))))
+    variant (conj (str "table--" (util/kw-name variant)))))
 
 (defn table-classes
   "Generate CSS class string for a table."

@@ -1,10 +1,6 @@
 (ns ui.card
-  (:require [clojure.string :as str]))
-
-;; In squint, keywords are strings — name is identity
-#?(:squint (defn- kw-name [s] s)
-   :cljs   (defn- kw-name [s] (name s))
-   :clj    (defn- kw-name [s] (name s)))
+  (:require [clojure.string :as str]
+            [ui.util :as util]))
 
 (defn card-class-list
   "Generate a vector of CSS class strings for a card."
@@ -78,7 +74,7 @@
    Options:
      :divider - :full (default) or :inset (borders have horizontal spacing from edges)"
   [{:keys [divider]}]
-  (let [d (or (some-> divider kw-name) "full")]
+  (let [d (or (some-> divider util/kw-name) "full")]
     (cond-> ["card-list"]
       (= d "inset") (conj "card-list-inset"))))
 

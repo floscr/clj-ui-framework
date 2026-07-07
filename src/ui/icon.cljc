@@ -1,10 +1,6 @@
 (ns ui.icon
-  (:require [clojure.string :as str]))
-
-;; In squint, keywords are strings — name is identity
-#?(:squint (defn- kw-name [s] s)
-   :cljs   (defn- kw-name [s] (name s))
-   :clj    (defn- kw-name [s] (name s)))
+  (:require [clojure.string :as str]
+            [ui.util :as util]))
 
 ;; ── Icon path data ──────────────────────────────────────────────────
 ;; All icons use 24×24 viewBox, stroke-based (Lucide-compatible).
@@ -405,7 +401,7 @@
   "Returns a vector of CSS class strings for an icon.
    Sizes: :sm (16px), :md (20px), :lg (24px), :xl (32px)."
   [{:keys [size]}]
-  (let [s (or (some-> size kw-name) default-size)]
+  (let [s (or (some-> size util/kw-name) default-size)]
     (cond-> ["icon"]
       (not= s "md") (conj (str "icon-" s)))))
 
@@ -426,7 +422,7 @@
 
    Returns hiccup SVG element. Returns nil for unknown icon names."
   [{:keys [icon-name size class attrs filled] :as _props}]
-  (let [n (kw-name icon-name)
+  (let [n (util/kw-name icon-name)
         kw #?(:squint n :cljs (keyword n) :clj (keyword n))
         paths (if filled
                 (or (get filled-icon-paths kw) (get icon-paths kw))

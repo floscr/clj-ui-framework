@@ -2,11 +2,6 @@
   (:require [clojure.string :as str]
             [ui.icon :as icon]))
 
-;; In squint, keywords are strings — name is identity
-#?(:squint (defn- kw-name [s] s)
-   :cljs   (defn- kw-name [s] (name s))
-   :clj    (defn- kw-name [s] (name s)))
-
 ;; ── Class helpers ───────────────────────────────────────────────────
 
 (defn tag-input-class-list

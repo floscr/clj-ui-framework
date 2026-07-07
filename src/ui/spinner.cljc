@@ -1,9 +1,6 @@
 (ns ui.spinner
-  (:require [clojure.string :as str]))
-
-#?(:squint (defn- kw-name [s] s)
-   :cljs   (defn- kw-name [s] (name s))
-   :clj    (defn- kw-name [s] (name s)))
+  (:require [clojure.string :as str]
+            [ui.util :as util]))
 
 (def default-size "md")
 
@@ -11,7 +8,7 @@
   "Generate a vector of CSS class strings for a spinner.
    Sizes: :sm, :md (default), :lg."
   [{:keys [size]}]
-  (let [s (or (some-> size kw-name) default-size)]
+  (let [s (or (some-> size util/kw-name) default-size)]
     (cond-> ["spinner"]
       (= s "sm") (conj "spinner-sm")
       (= s "lg") (conj "spinner-lg"))))

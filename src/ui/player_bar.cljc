@@ -2,10 +2,6 @@
   (:require [clojure.string :as str]
             [ui.icon :as icon]))
 
-#?(:squint (defn- kw-name [s] s)
-   :cljs   (defn- kw-name [s] (name s))
-   :clj    (defn- kw-name [s] (name s)))
-
 ;; ── Class helpers ───────────────────────────────────────────────────
 
 (defn player-bar-class-list

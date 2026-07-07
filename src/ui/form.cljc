@@ -1,12 +1,8 @@
 (ns ui.form
   (:require [clojure.string :as str]
+            [ui.util :as util]
             [ui.icon :as icon]
             [ui.tooltip :as tooltip]))
-
-;; In squint, keywords are strings — name is identity
-#?(:squint (defn- kw-name [s] s)
-   :cljs   (defn- kw-name [s] (name s))
-   :clj    (defn- kw-name [s] (name s)))
 
 ;; ── Form field wrapper ──────────────────────────────────────────────
 
@@ -108,7 +104,7 @@
      :class       - additional CSS classes
      :attrs       - additional HTML attributes"
   [{:keys [type placeholder value disabled error icon-left icon-right on-change class attrs] :as _props}]
-  (let [input-type (or (some-> type kw-name) "text")
+  (let [input-type (or (some-> type util/kw-name) "text")
         has-icons  (or icon-left icon-right)]
     #?(:squint
        (let [input-cls (cond-> (form-input-classes {:error error})

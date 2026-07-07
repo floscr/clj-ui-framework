@@ -1,17 +1,14 @@
 (ns ui.alert
   (:require [clojure.string :as str]
+            [ui.util :as util]
             [ui.icon :as icon]))
-
-#?(:squint (defn- kw-name [s] s)
-   :cljs   (defn- kw-name [s] (name s))
-   :clj    (defn- kw-name [s] (name s)))
 
 (defn alert-class-list
   "Generate a vector of CSS class strings for an alert.
    Variants: :success, :warning, :danger, :info (default: nil = neutral)."
   [{:keys [variant]}]
   (cond-> ["alert"]
-    variant (conj (str "alert-" (kw-name variant)))))
+    variant (conj (str "alert-" (util/kw-name variant)))))
 
 (defn alert-classes
   "Generate CSS class string for an alert."
@@ -35,7 +32,7 @@
      :class     - additional CSS classes
      :attrs     - additional HTML attributes"
   [{:keys [variant title icon-name class attrs] :as _props} & children]
-  (let [v     (some-> variant kw-name)
+  (let [v     (some-> variant util/kw-name)
         iname (cond
                 (false? icon-name) nil          ;; explicitly suppressed
                 icon-name          icon-name    ;; explicit override

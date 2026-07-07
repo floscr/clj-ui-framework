@@ -4,11 +4,6 @@
             [ui.button :as button]
             [ui.icon :as icon]))
 
-;; In squint, keywords are strings — name is identity
-#?(:squint (defn- kw-name [s] s)
-   :cljs   (defn- kw-name [s] (name s))
-   :clj    (defn- kw-name [s] (name s)))
-
 ;; ── Date Utilities ──────────────────────────────────────────────────
 ;; Pure functions — no JS Date dependency. Work across all targets.
 

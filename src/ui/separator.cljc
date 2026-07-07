@@ -1,15 +1,12 @@
 (ns ui.separator
-  (:require [clojure.string :as str]))
-
-#?(:squint (defn- kw-name [s] s)
-   :cljs   (defn- kw-name [s] (name s))
-   :clj    (defn- kw-name [s] (name s)))
+  (:require [clojure.string :as str]
+            [ui.util :as util]))
 
 (defn separator-class-list
   "Generate a vector of CSS class strings for a separator.
    Orientation: :horizontal (default), :vertical."
   [{:keys [orientation]}]
-  (let [o (or (some-> orientation kw-name) "horizontal")]
+  (let [o (or (some-> orientation util/kw-name) "horizontal")]
     ["separator" (str "separator-" o)]))
 
 (defn separator-classes
@@ -30,7 +27,7 @@
                      class (str " " class))
            base-attrs (merge {:class classes
                               :role "none"
-                              :data-orientation (or (some-> orientation kw-name) "horizontal")}
+                              :data-orientation (or (some-> orientation util/kw-name) "horizontal")}
                              attrs)]
        [:div base-attrs])
 
@@ -39,7 +36,7 @@
            classes (cond-> cls class (conj class))
            base-attrs (merge {:class classes
                               :role "none"
-                              :data-orientation (or (some-> orientation kw-name) "horizontal")}
+                              :data-orientation (or (some-> orientation util/kw-name) "horizontal")}
                              attrs)]
        [:div base-attrs])
 
@@ -48,6 +45,6 @@
                      class (str " " class))
            base-attrs (merge {:class classes
                               :role "none"
-                              :data-orientation (or (some-> orientation kw-name) "horizontal")}
+                              :data-orientation (or (some-> orientation util/kw-name) "horizontal")}
                              attrs)]
        [:div base-attrs])))

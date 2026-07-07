@@ -1,11 +1,7 @@
 (ns ui.button
   (:require [clojure.string :as str]
+            [ui.util :as util]
             [ui.icon :as icon]))
-
-;; In squint, keywords are strings — name is identity
-#?(:squint (defn- kw-name [s] s)
-   :cljs   (defn- kw-name [s] (name s))
-   :clj    (defn- kw-name [s] (name s)))
 
 (def default-variant "secondary")
 (def default-size "md")
@@ -16,8 +12,8 @@
    When :icon is provided (icon-only mode), adds \"btn-icon\".
    When :round is true and :icon is set, adds \"btn-icon-round\"."
   [{:keys [variant size icon round]}]
-  (let [v (or (some-> variant kw-name) default-variant)
-        s (or (some-> size kw-name) default-size)]
+  (let [v (or (some-> variant util/kw-name) default-variant)
+        s (or (some-> size util/kw-name) default-size)]
     (cond-> ["btn" (str "btn-" v)]
       (not= s "md")    (conj (str "btn-" s))
       icon              (conj "btn-icon")
@@ -44,7 +40,7 @@
      :class      - additional CSS classes (string or vector)
      :attrs      - additional HTML attributes map"
   [{:keys [variant size href on-click disabled icon-left icon-right icon round class attrs] :as _props} & children]
-  (let [icon-size (case (kw-name (or size default-size))
+  (let [icon-size (case (util/kw-name (or size default-size))
                     "sm" :sm
                     "lg" :md
                     #?(:squint "sm" :cljs :sm :clj :sm))]

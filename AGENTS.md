@@ -251,6 +251,25 @@ For conditional defs, use the splicing form inside `do`:
 | Events | None (use onclick string or HTMX) | `:on {:click handler}` | `:on-click handler` |
 | Children | Lazy seqs OK (hiccup2 flattens) | Lazy seqs OK (replicant flattens) | Must use `into` to flatten |
 
+## Shared Helpers (`ui.util`)
+
+`src/ui/util.cljc` holds the tiny cross-target shims every component needs, so
+they aren't re-defined in each file. Require it as `[ui.util :as util]`.
+
+| Helper | Targets | Purpose |
+|--------|---------|---------|
+| `util/kw-name` | all | Coerce a keyword (or string) prop to its plain string name. Squint: identity (keywords are already strings). `:clj`/`:cljs`: `(name kw)`, with a defensive `str` fallback for non-keywords. Use instead of raw `name`. |
+| `util/conj-classes` | `:cljs` only | Append a class onto a Replicant class **vector**. Splits a space-joined string (e.g. from another component's `*-classes` fn) into individual DOMTokenList tokens, splices in a collection, and no-ops on nil. Prevents Replicant's `InvalidCharacterError`. |
+
+**When to use `conj-classes`:** only in the `:cljs` branch, and only when the
+incoming `:class` prop may be a space-joined string. If `:class` is always a
+single token, a plain `(conj cls class)` is fine. It's `:cljs`-only because
+`:clj`/`:squint` build class **strings** directly and never touch class vectors.
+
+**Adding a new shared helper:** put it in `ui.util` only if it's genuinely
+cross-target boilerplate (papering over `:clj`/`:cljs`/`:squint` differences).
+Keep target-specific helpers local to their component.
+
 ## How to Add a New Component
 
 ### 1. Create `src/ui/COMPONENT.cljc`
@@ -259,18 +278,15 @@ Follow the button pattern:
 
 ```clojure
 (ns ui.card
-  (:require [clojure.string :as str]))
-
-;; Stub for squint (keywords are strings, name is identity)
-#?(:squint (defn- kw-name [s] s)
-   :cljs   (defn- kw-name [s] (name s))
-   :clj    (defn- kw-name [s] (name s)))
+  (:require [clojure.string :as str]
+            [ui.util :as util]))
 
 ;; Pure function for class generation — shared across all targets
+;; util/kw-name is the shared squint-safe keyword→string helper (see ui.util)
 (defn card-class-list
   "Returns a vector of CSS class strings."
   [{:keys [variant]}]
-  (let [v (or (some-> variant kw-name) "default")]
+  (let [v (or (some-> variant util/kw-name) "default")]
     ["card" (str "card--" v)]))
 
 (defn card-classes
@@ -288,6 +304,9 @@ Follow the button pattern:
        (into [:div base-attrs] children))
 
      :cljs
+     ;; Replicant needs a vector of individual class tokens. If `class` may be
+     ;; a space-joined string (e.g. from another component's *-classes fn), use
+     ;; (util/conj-classes cls class) instead of (conj cls class) to split it.
      (let [cls (card-class-list {:variant variant})
            classes (cond-> cls
                      class (conj class))
@@ -661,7 +680,7 @@ Runtime functions on `window` use the `__ui` prefix: `__uiContextMenu`, `__uiToo
 
 ## Squint Pitfalls
 
-1. **`name` is not available** — define `kw-name` stubs via reader conditionals
+1. **`name` is not available** — use `ui.util/kw-name` (the shared squint-safe helper) instead of `name`. Don't re-define local stubs.
 2. **Keywords are strings** — `:primary` becomes `"primary"` at runtime
 3. **Maps are JS objects** — style maps must use string keys: `{"display" "flex"}`, not `{:display "flex"}`
 4. **No lazy seq flattening in Eucalypt** — use `into` with `mapcat`/`map` to build hiccup vectors eagerly

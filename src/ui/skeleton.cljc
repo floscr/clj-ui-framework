@@ -1,16 +1,13 @@
 (ns ui.skeleton
-  (:require [clojure.string :as str]))
-
-#?(:squint (defn- kw-name [s] s)
-   :cljs   (defn- kw-name [s] (name s))
-   :clj    (defn- kw-name [s] (name s)))
+  (:require [clojure.string :as str]
+            [ui.util :as util]))
 
 (defn skeleton-class-list
   "Generate a vector of CSS class strings for a skeleton placeholder.
    Variants: :line (text line), :box (square), :circle, :heading."
   [{:keys [variant]}]
   (cond-> ["skeleton"]
-    variant (conj (str "skeleton--" (kw-name variant)))))
+    variant (conj (str "skeleton--" (util/kw-name variant)))))
 
 (defn skeleton-classes
   "Generate CSS class string for a skeleton."

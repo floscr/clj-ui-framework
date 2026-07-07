@@ -1,10 +1,7 @@
 (ns ui.badge
   (:require [clojure.string :as str]
+            [ui.util :as util]
             [ui.icon :as icon]))
-
-#?(:squint (defn- kw-name [s] s)
-   :cljs   (defn- kw-name [s] (name s))
-   :clj    (defn- kw-name [s] (name s)))
 
 (def default-variant "primary")
 
@@ -13,11 +10,11 @@
    Variants: :primary (default), :secondary, :outline, :success, :warning, :danger.
    Size: :sm for compact badges."
   [{:keys [variant size]}]
-  (let [v (or (some-> variant kw-name) default-variant)]
+  (let [v (or (some-> variant util/kw-name) default-variant)]
     (cond-> (if (= v "primary")
               ["badge"]
               ["badge" (str "badge-" v)])
-      (= (some-> size kw-name) "sm") (conj "badge-sm"))))
+      (= (some-> size util/kw-name) "sm") (conj "badge-sm"))))
 
 (defn badge-classes
   "Generate CSS class string for a badge."

@@ -10,17 +10,13 @@
        (button {:variant :ghost :icon :italic})
        (toolbar-separator {})
        (button {:variant :ghost :icon :link}))"
-  (:require [clojure.string :as str]))
-
-;; In squint, keywords are strings — name is identity
-#?(:squint (defn- kw-name [s] s)
-   :cljs   (defn- kw-name [s] (name s))
-   :clj    (defn- kw-name [s] (name s)))
+  (:require [clojure.string :as str]
+            [ui.util :as util]))
 
 (defn toolbar-class-list
   "Vector of CSS classes for a toolbar container given :orientation."
   [{:keys [orientation]}]
-  (let [o (or (some-> orientation kw-name) "horizontal")]
+  (let [o (or (some-> orientation util/kw-name) "horizontal")]
     ["toolbar" (str "toolbar-" o)]))
 
 (defn toolbar-classes
@@ -36,7 +32,7 @@
      :class       - additional CSS classes
      :attrs       - additional HTML attributes"
   [{:keys [orientation class attrs] :as _props} & children]
-  (let [o (or (some-> orientation kw-name) "horizontal")]
+  (let [o (or (some-> orientation util/kw-name) "horizontal")]
     #?(:squint
        (into [:div (merge {:class (cond-> (toolbar-classes {:orientation orientation})
                                     class (str " " class))

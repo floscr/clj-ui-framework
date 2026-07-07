@@ -18,14 +18,8 @@
                             :icon (icon/icon {:icon-name :file :size :sm})
                             :status :complete}))"
   (:require [ui.icon :as icon]
-            [ui.progress :as progress]))
-
-;; ── Helpers ──────────────────────────────────────────────────────────
-
-(defn- kw-name [s]
-  #?(:squint s
-     :cljs   (if (keyword? s) (name s) (str s))
-     :clj    (if (keyword? s) (name s) (str s))))
+            [ui.progress :as progress]
+            [ui.util :as util]))
 
 ;; ── File Progress Item ──────────────────────────────────────────────
 
@@ -42,7 +36,7 @@
      :class     - additional CSS classes
      :attrs     - additional HTML attributes"
   [{:keys [name size icon progress status on-remove class attrs]}]
-  (let [s (kw-name (or status "idle"))
+  (let [s (util/kw-name (or status "idle"))
         error?    (= s "error")
         complete? (= s "complete")]
     #?(:squint

@@ -17,12 +17,8 @@
    Squint/Replicant: items are passed directly to the same JS runtime.
    Items may additionally have :on-click callbacks."
   (:require [clojure.string :as str]
+            [ui.util :as util]
             [ui.icon :as icon]))
-
-;; In squint, keywords are strings — name is identity
-#?(:squint (defn- kw-name [s] s)
-   :cljs   (defn- kw-name [s] (name s))
-   :clj    (defn- kw-name [s] (name s)))
 
 ;; ── Icon path extraction ────────────────────────────────────────────
 ;; Extracts SVG path d-strings from the icon registry so the JS runtime
@@ -49,12 +45,12 @@
   "Normalize a menu item for the JS runtime.
    Adds :icon-paths from :icon, converts keyword values to strings."
   [item]
-  (if (and (:type item) (= (kw-name (:type item)) "separator"))
+  (if (and (:type item) (= (util/kw-name (:type item)) "separator"))
     {:type "separator"}
     (let [icon-name (:icon item)]
       (cond-> {:label (:label item)}
         (:url item)      (assoc :url (:url item))
-        (:variant item)  (assoc :variant (kw-name (:variant item)))
+        (:variant item)  (assoc :variant (util/kw-name (:variant item)))
         (:on-click item) (assoc :on-click (:on-click item))
         (:confirm item)  (assoc :confirm (let [c (:confirm item)]
                                             (if (string? c) c true)))
