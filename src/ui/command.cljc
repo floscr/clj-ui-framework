@@ -1,0 +1,222 @@
+(ns ui.command
+  "Command palette — a searchable command menu (cmdk-style) rendered in a
+   native <dialog>, with icons and keyboard-shortcut hints.
+
+   Built on the native <dialog> element (showModal gives backdrop, focus
+   trapping and Escape for free). Items render as static markup; a tiny JS
+   runtime (ui-runtime.js, compiled from squint) handles live filtering,
+   arrow-key navigation, Enter-to-select and the global open hotkey — so the
+   component works identically across hiccup, replicant and squint.
+
+   Usage (all targets):
+     (command-trigger {:target \"cmdk\"} \"Search…\")
+
+     (command-dialog {:id \"cmdk\" :placeholder \"Type a command or search…\"
+                      :hotkey \"mod+k\"}
+       (command-group {:heading \"Suggestions\"}
+         (command-item {:icon :calendar :shortcut \"⌘P\"} \"Calendar\")
+         (command-item {:icon :smile    :shortcut \"⌘B\"} \"Search Emoji\"))
+       (command-group {:heading \"Settings\"}
+         (command-item {:icon :user     :shortcut \"⌘S\"} \"Profile\")
+         (command-item {:icon :settings :shortcut \"⌘,\"} \"Settings\")))
+
+   Items may carry :url (navigate on select, rendered as <a>) or, in
+   replicant/squint, an :on-click callback. Selection always closes the dialog."
+  (:require [clojure.string :as str]
+            [ui.icon :as icon]))
+
+;; In squint, keywords are strings — name is identity
+#?(:squint (defn- kw-name [s] s)
+   :cljs   (defn- kw-name [s] (name s))
+   :clj    (defn- kw-name [s] (name s)))
+
+;; Replicant treats each element of a :class vector as a single DOMTokenList
+;; token, so a space-joined string (e.g. from button-classes) must be split
+;; into individual tokens first.
+#?(:cljs
+   (defn- conj-classes [base class]
+     (cond
+       (nil? class)    base
+       (string? class) (into base (remove str/blank? (str/split class #"\s+")))
+       (coll? class)   (into base class)
+       :else           (conj base class))))
+
+;; ── Item ────────────────────────────────────────────────────────────
+
+(defn command-item
+  "Render a single command item.
+
+   Props:
+     :icon     - icon name keyword (optional, e.g. :calendar)
+     :shortcut - keyboard shortcut hint string (optional, e.g. \"⌘P\")
+     :url      - if set, renders an <a> that navigates on select
+     :value    - explicit search text (defaults to the item's text content)
+     :on-click - selection callback (replicant/squint only)
+     :disabled - boolean
+     :class    - additional CSS classes
+     :attrs    - additional HTML attributes
+   Children form the item label."
+  [{:keys [icon shortcut url value on-click disabled class attrs] :as _props} & children]
+  (let [tag       (if url :a :button)
+        icon-el   (when icon (icon/icon {:icon-name icon :size :sm
+                                         :class "command-item-icon"}))
+        shortcut-el (when shortcut [:kbd {:class "command-shortcut"} shortcut])]
+    #?(:squint
+       (let [classes (cond-> "command-item" class (str " " class))
+             base    (merge {:class classes :role "option"}
+                            (when value {:data-command-value value})
+                            (when disabled {:disabled true})
+                            (when url {:href url})
+                            (when (= tag :button) {:type "button"})
+                            (when on-click {:on-click on-click})
+                            attrs)]
+         (into [tag base] (concat (when icon-el [icon-el])
+                                  [(into [:span {:class "command-item-label"}] children)]
+                                  (when shortcut-el [shortcut-el]))))
+
+       :cljs
+       (let [classes (conj-classes ["command-item"] class)
+             base    (merge {:class classes :role "option"}
+                            (when value {:data-command-value value})
+                            (when disabled {:disabled true})
+                            (when url {:href url})
+                            (when (= tag :button) {:type "button"})
+                            (when on-click {:on {:click on-click}})
+                            attrs)]
+         (into [tag base] (concat (when icon-el [icon-el])
+                                  [(into [:span {:class ["command-item-label"]}] children)]
+                                  (when shortcut-el [shortcut-el]))))
+
+       :clj
+       (let [classes (cond-> "command-item" class (str " " class))
+             base    (merge {:class classes :role "option"}
+                            (when value {:data-command-value value})
+                            (when disabled {:disabled true})
+                            (when url {:href url})
+                            (when (= tag :button) {:type "button"})
+                            attrs)]
+         (into [tag base] (concat (when icon-el [icon-el])
+                                  [(into [:span {:class "command-item-label"}] children)]
+                                  (when shortcut-el [shortcut-el])))))))
+
+;; ── Group ───────────────────────────────────────────────────────────
+
+(defn command-group
+  "Group command items under an optional heading.
+
+   Props:
+     :heading - group heading text (optional)
+     :class   - additional CSS classes
+     :attrs   - additional HTML attributes"
+  [{:keys [heading class attrs] :as _props} & children]
+  (let [heading-el (when heading [:div {:class "command-group-heading"} heading])]
+    #?(:squint
+       (let [classes (cond-> "command-group" class (str " " class))
+             base    (merge {:class classes :role "group"} attrs)]
+         (into [:div base] (concat (when heading-el [heading-el])
+                                   [(into [:div {:class "command-group-items"}] children)])))
+
+       :cljs
+       (let [classes (conj-classes ["command-group"] class)
+             base    (merge {:class classes :role "group"} attrs)]
+         (into [:div base] (concat (when heading-el [heading-el])
+                                   [(into [:div {:class ["command-group-items"]}] children)])))
+
+       :clj
+       (let [classes (cond-> "command-group" class (str " " class))
+             base    (merge {:class classes :role "group"} attrs)]
+         (into [:div base] (concat (when heading-el [heading-el])
+                                   [(into [:div {:class "command-group-items"}] children)]))))))
+
+;; ── Dialog ──────────────────────────────────────────────────────────
+
+(defn command-dialog
+  "Render a command palette as a native <dialog>.
+
+   Props:
+     :id          - dialog id, matched by command-trigger :target (required)
+     :placeholder - search input placeholder (default \"Type a command or search…\")
+     :hotkey      - global open shortcut, e.g. \"mod+k\" (mod = ⌘ on mac, Ctrl elsewhere)
+     :empty       - empty-state text when no items match (default \"No results found.\")
+     :class       - additional CSS classes
+     :attrs       - additional HTML attributes
+   Children are command-group / command-item forms."
+  [{:keys [id placeholder hotkey empty class attrs] :as _props} & children]
+  (let [placeholder* (or placeholder "Type a command or search…")
+        empty*       (or empty "No results found.")
+        search   [:div {:class "command-search"}
+                  (icon/icon {:icon-name :search :size :sm :class "command-search-icon"})
+                  [:input {:class "command-input" :type "text" :role "combobox"
+                           :placeholder placeholder* :autocomplete "off"
+                           :spellcheck "false" :aria-label placeholder*}]]
+        empty-el [:div {:class "command-empty"} empty*]]
+    #?(:squint
+       (let [classes (cond-> "command-dialog" class (str " " class))
+             base    (merge {:class classes :role "dialog" :aria-modal "true"}
+                            (when id {:id id})
+                            (when hotkey {:data-command-hotkey hotkey})
+                            attrs)]
+         (into [:dialog base]
+               [search
+                (into [:div {:class "command-list" :role "listbox"}]
+                      (concat children [empty-el]))]))
+
+       :cljs
+       (let [classes (conj-classes ["command-dialog"] class)
+             base    (merge {:class classes :role "dialog" :aria-modal "true"}
+                            (when id {:id id})
+                            (when hotkey {:data-command-hotkey hotkey})
+                            attrs)]
+         (into [:dialog base]
+               [search
+                (into [:div {:class ["command-list"] :role "listbox"}]
+                      (concat children [empty-el]))]))
+
+       :clj
+       (let [classes (cond-> "command-dialog" class (str " " class))
+             base    (merge {:class classes :role "dialog" :aria-modal "true"}
+                            (when id {:id id})
+                            (when hotkey {:data-command-hotkey hotkey})
+                            attrs)]
+         (into [:dialog base]
+               [search
+                (into [:div {:class "command-list" :role "listbox"}]
+                      (concat children [empty-el]))])))))
+
+;; ── Trigger ─────────────────────────────────────────────────────────
+
+(defn command-trigger
+  "Render a <button> that opens the matching command-dialog.
+
+   Props:
+     :target - id of the command-dialog to open (required)
+     :class  - additional CSS classes (e.g. button styling)
+     :attrs  - additional HTML attributes"
+  [{:keys [target class attrs] :as _props} & children]
+  #?(:squint
+     (let [classes (cond-> "command-trigger" class (str " " class))
+           base    (merge {:class classes :type "button" :aria-haspopup "dialog"
+                           :data-command-target target
+                           :on-click (fn [_]
+                                       (let [f (aget js/window "__uiCommand")]
+                                         (when f (.open f target))))}
+                          attrs)]
+       (into [:button base] children))
+
+     :cljs
+     (let [classes (conj-classes ["command-trigger"] class)
+           base    (merge {:class classes :type "button" :aria-haspopup "dialog"
+                           :data-command-target target
+                           :on {:click (fn [_]
+                                         (when-let [f (aget js/window "__uiCommand")]
+                                           (.open f target)))}}
+                          attrs)]
+       (into [:button base] children))
+
+     :clj
+     (let [classes (cond-> "command-trigger" class (str " " class))
+           base    (merge {:class classes :type "button" :aria-haspopup "dialog"
+                           :data-command-target target
+                           :onclick "window.__uiCommand&&window.__uiCommand.open(this.dataset.commandTarget)"}
+                          attrs)]
+       (into [:button base] children))))

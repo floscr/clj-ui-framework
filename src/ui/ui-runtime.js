@@ -369,6 +369,325 @@
     }
   };
 
+  // .compiled/command.mjs
+  var items = function(dialog) {
+    return Array.from(dialog.querySelectorAll(".command-item"));
+  };
+  var visible_items = function(dialog) {
+    return items(dialog).filter((function(el) {
+      return not(el.hidden) && not(el.disabled);
+    }));
+  };
+  var item_text = function(el) {
+    const v1 = el.dataset.commandValue;
+    return (() => {
+      const or__23426__auto__2 = v1;
+      if (truth_(or__23426__auto__2)) {
+        return or__23426__auto__2;
+      } else {
+        const or__23426__auto__3 = el.textContent;
+        if (truth_(or__23426__auto__3)) {
+          return or__23426__auto__3;
+        } else {
+          return "";
+        }
+        ;
+      }
+      ;
+    })().toLowerCase();
+  };
+  var active_item = function(dialog) {
+    return dialog.querySelector(".command-item--active");
+  };
+  var set_active_BANG_ = function(dialog, el) {
+    const prev1 = active_item(dialog);
+    if (truth_(prev1)) {
+      prev1.classList.remove("command-item--active");
+    }
+    ;
+    if (truth_(el)) {
+      el.classList.add("command-item--active");
+      if (truth_(el.scrollIntoView)) {
+        return el.scrollIntoView({ "block": "nearest" });
+      }
+      ;
+    }
+    ;
+  };
+  var move_active_BANG_ = function(dialog, dir) {
+    const vis1 = visible_items(dialog);
+    const len2 = vis1.length;
+    if (len2 > 0) {
+      const cur3 = active_item(dialog);
+      const idx4 = vis1.indexOf(cur3);
+      const next_i5 = dir === "down" ? idx4 < len2 - 1 ? idx4 + 1 : 0 : dir === "up" ? idx4 > 0 ? idx4 - 1 : len2 - 1 : dir === "home" ? 0 : dir === "end" ? len2 - 1 : "else" ? idx4 : null;
+      return set_active_BANG_(dialog, vis1[next_i5]);
+    }
+    ;
+  };
+  var filter_BANG_ = function(dialog, query) {
+    const q1 = (() => {
+      const or__23426__auto__2 = query;
+      if (truth_(or__23426__auto__2)) {
+        return or__23426__auto__2;
+      } else {
+        return "";
+      }
+      ;
+    })().trim().toLowerCase();
+    const list3 = dialog.querySelector(".command-list");
+    items(dialog).forEach((function(el) {
+      const match4 = (() => {
+        const or__23426__auto__5 = _EQ_(q1, "");
+        if (or__23426__auto__5) {
+          return or__23426__auto__5;
+        } else {
+          return item_text(el).includes(q1);
+        }
+        ;
+      })();
+      return el.hidden = not(match4);
+    }));
+    Array.from(dialog.querySelectorAll(".command-group")).forEach((function(grp) {
+      const any6 = Array.from(grp.querySelectorAll(".command-item")).some((function(el) {
+        return not(el.hidden);
+      }));
+      return grp.hidden = not(any6);
+    }));
+    const vis7 = visible_items(dialog);
+    if (vis7.length === 0) {
+      list3.classList.add("command-list--empty");
+    } else {
+      list3.classList.remove("command-list--empty");
+    }
+    ;
+    return set_active_BANG_(dialog, vis7.length > 0 ? vis7[0] : null);
+  };
+  var find_dialog = function(id) {
+    if (truth_(id)) {
+      return document.getElementById(id);
+    }
+    ;
+  };
+  var open = function(id) {
+    const dialog1 = find_dialog(id);
+    if (truth_((() => {
+      const and__23442__auto__2 = dialog1;
+      if (truth_(and__23442__auto__2)) {
+        return not(dialog1.open);
+      } else {
+        return and__23442__auto__2;
+      }
+      ;
+    })())) {
+      dialog1.showModal();
+      const input3 = dialog1.querySelector(".command-input");
+      if (truth_(input3)) {
+        input3.value = "";
+        input3.focus();
+      }
+      ;
+      return filter_BANG_(dialog1, "");
+    }
+    ;
+  };
+  var close = function(id) {
+    const dialog1 = find_dialog(id);
+    if (truth_((() => {
+      const and__23442__auto__2 = dialog1;
+      if (truth_(and__23442__auto__2)) {
+        return dialog1.open;
+      } else {
+        return and__23442__auto__2;
+      }
+      ;
+    })())) {
+      return dialog1.close();
+    }
+    ;
+  };
+  var toggle = function(id) {
+    const dialog1 = find_dialog(id);
+    if (truth_(dialog1)) {
+      if (truth_(dialog1.open)) {
+        return dialog1.close();
+      } else {
+        return open(id);
+      }
+      ;
+    }
+    ;
+  };
+  var select_BANG_ = function(dialog, el) {
+    if (truth_((() => {
+      const and__23442__auto__1 = el;
+      if (truth_(and__23442__auto__1)) {
+        return not(el.disabled);
+      } else {
+        return and__23442__auto__1;
+      }
+      ;
+    })())) {
+      dialog.close();
+      if (not(el.href)) {
+        el.click();
+      }
+      ;
+      if (truth_(el.href)) {
+        return window.location = el.href;
+      }
+      ;
+    }
+    ;
+  };
+  var hotkey_match_QMARK_ = function(spec, e) {
+    const ekey1 = e.key;
+    if (truth_(ekey1)) {
+      const parts2 = spec.toLowerCase().split("+");
+      const key3 = parts2[parts2.length - 1];
+      const mod_QMARK_4 = spec.includes("mod");
+      const shift_QMARK_5 = spec.includes("shift");
+      const alt_QMARK_6 = spec.includes("alt");
+      return _EQ_(ekey1.toLowerCase(), key3) && (_EQ_(mod_QMARK_4, (() => {
+        const or__23426__auto__7 = e.metaKey;
+        if (truth_(or__23426__auto__7)) {
+          return or__23426__auto__7;
+        } else {
+          return e.ctrlKey;
+        }
+        ;
+      })()) && (_EQ_(shift_QMARK_5, e.shiftKey) && _EQ_(alt_QMARK_6, e.altKey)));
+    }
+    ;
+  };
+  var on_global_key = function(e) {
+    const dialogs1 = Array.from(document.querySelectorAll(".command-dialog[data-command-hotkey]"));
+    return dialogs1.forEach((function(dialog) {
+      const spec2 = dialog.dataset.commandHotkey;
+      if (truth_((() => {
+        const and__23442__auto__3 = spec2;
+        if (truth_(and__23442__auto__3)) {
+          return hotkey_match_QMARK_(spec2, e);
+        } else {
+          return and__23442__auto__3;
+        }
+        ;
+      })())) {
+        e.preventDefault();
+        return toggle(dialog.id);
+      }
+      ;
+    }));
+  };
+  var open_dialog = function() {
+    return document.querySelector(".command-dialog[open]");
+  };
+  var on_input = function(e) {
+    const t1 = e.target;
+    if (truth_((() => {
+      const and__23442__auto__2 = t1.classList;
+      if (truth_(and__23442__auto__2)) {
+        return t1.classList.contains("command-input");
+      } else {
+        return and__23442__auto__2;
+      }
+      ;
+    })())) {
+      const dialog3 = t1.closest(".command-dialog");
+      if (truth_(dialog3)) {
+        return filter_BANG_(dialog3, t1.value);
+      }
+      ;
+    }
+    ;
+  };
+  var on_keydown = function(e) {
+    const dialog1 = open_dialog();
+    if (truth_(dialog1)) {
+      const key2 = e.key;
+      if (key2 === "ArrowDown") {
+        e.preventDefault();
+        return move_active_BANG_(dialog1, "down");
+      } else {
+        if (key2 === "ArrowUp") {
+          e.preventDefault();
+          return move_active_BANG_(dialog1, "up");
+        } else {
+          if (truth_(key2 === "Home" && e.metaKey)) {
+            e.preventDefault();
+            return move_active_BANG_(dialog1, "home");
+          } else {
+            if (truth_(key2 === "End" && e.metaKey)) {
+              e.preventDefault();
+              return move_active_BANG_(dialog1, "end");
+            } else {
+              if (key2 === "Enter") {
+                e.preventDefault();
+                return select_BANG_(dialog1, active_item(dialog1));
+              } else {
+                return null;
+              }
+            }
+          }
+        }
+      }
+      ;
+    }
+    ;
+  };
+  var on_click = function(e) {
+    const t1 = e.target;
+    const dialog2 = truth_(t1.closest) ? t1.closest(".command-dialog") : null;
+    if (truth_(dialog2)) {
+      const item3 = t1.closest(".command-item");
+      if (t1 === dialog2) {
+        return dialog2.close();
+      } else {
+        if (truth_(item3)) {
+          if (not(item3.disabled)) {
+            return dialog2.close();
+          }
+        } else {
+          return null;
+        }
+      }
+      ;
+    }
+    ;
+  };
+  var on_pointermove = function(e) {
+    const t1 = e.target;
+    if (truth_(t1.closest)) {
+      const item2 = t1.closest(".command-item");
+      if (truth_((() => {
+        const and__23442__auto__3 = item2;
+        if (truth_(and__23442__auto__3)) {
+          return not(item2.hidden) && not(item2.disabled);
+        } else {
+          return and__23442__auto__3;
+        }
+        ;
+      })())) {
+        const dialog4 = item2.closest(".command-dialog");
+        if (truth_(dialog4)) {
+          return set_active_BANG_(dialog4, item2);
+        }
+        ;
+      }
+      ;
+    }
+    ;
+  };
+  var init_BANG_ = function() {
+    document.addEventListener("input", on_input, true);
+    document.addEventListener("keydown", on_keydown, true);
+    document.addEventListener("keydown", on_global_key);
+    document.addEventListener("click", on_click);
+    return document.addEventListener("pointermove", on_pointermove, true);
+  };
+  init_BANG_();
+  window["__uiCommand"] = { "open": open, "close": close, "toggle": toggle };
+
   // .compiled/context_menu.mjs
   var get_state = function() {
     const or__23426__auto__1 = window["__uiCtxState"];
@@ -464,11 +783,11 @@
     }
     ;
   };
-  var create_menu = function(items) {
+  var create_menu = function(items2) {
     const menu1 = document.createElement("div");
     menu1.className = "context-menu";
     menu1.setAttribute("role", "menu");
-    items.forEach((function(item) {
+    items2.forEach((function(item) {
       if (item["type"] === "separator") {
         const sep2 = document.createElement("div");
         sep2.className = "context-menu-separator";
@@ -758,12 +1077,12 @@
     }
     ;
   };
-  var init_BANG_ = function() {
+  var init_BANG_2 = function() {
     document.addEventListener("toggle", on_toggle, true);
     window.addEventListener("scroll", reposition_BANG_, true);
     return window.addEventListener("resize", reposition_BANG_);
   };
-  init_BANG_();
+  init_BANG_2();
   window["__uiPopover"] = { "reposition": reposition_BANG_ };
 
   // .compiled/theme.mjs
@@ -897,7 +1216,7 @@
       }));
     };
   };
-  var init_BANG_2 = function() {
+  var init_BANG_3 = function() {
     const mode1 = get_mode();
     apply_theme_BANG_(mode1);
     const mql2 = window.matchMedia("(prefers-color-scheme: dark)");
@@ -909,5 +1228,5 @@
       ;
     }));
   };
-  window["__uiTheme"] = { "init": init_BANG_2, "set": set_mode_BANG_, "get": get_mode, "effective": get_effective, "toggle": toggle_BANG_, "subscribe": subscribe_BANG_ };
+  window["__uiTheme"] = { "init": init_BANG_3, "set": set_mode_BANG_, "get": get_mode, "effective": get_effective, "toggle": toggle_BANG_, "subscribe": subscribe_BANG_ };
 })();

@@ -23,7 +23,9 @@
             [ui.tooltip :as tooltip]
             [ui.breadcrumb :as breadcrumb]
             [ui.separator :as separator]
+            [ui.icon :as icon]
             [ui.popover :as popover]
+            [ui.command :as command]
             [ui.toolbar :as toolbar]
             [ui.form :as form]))
 
@@ -248,6 +250,27 @@
          (popover/popover-trigger {:target "popover-right" :class trigger-cls} "Side right")
          (popover/popover-content {:id "popover-right" :side :right :align :center}
            (popover/popover-title {} "Opens to the right"))]))))
+
+(defn command-demo []
+  (let [trigger-cls (button/button-classes {:variant :secondary})]
+    (section "Command"
+      [:p {:style (sx {:color "var(--fg-2)" :font-size "var(--font-sm)" :margin-bottom "0.75rem"})}
+       "Press " [:kbd {:class "command-shortcut"} "⌘K"] " or click the button. Type to filter, ↑↓ to navigate, ↵ to select."]
+      [:div {}
+       (command/command-trigger {:target "cmdk" :class trigger-cls}
+         (icon/icon {:icon-name :search :size :sm})
+         [:span "Search commands…"]
+         [:kbd {:class "command-shortcut"} "⌘K"])
+       (command/command-dialog {:id "cmdk" :hotkey "mod+k"
+                                :placeholder "Type a command or search…"}
+         (command/command-group {:heading "Suggestions"}
+           (command/command-item {:icon :calendar :shortcut "⌘P"} "Calendar")
+           (command/command-item {:icon :search   :shortcut "⌘F"} "Search Files")
+           (command/command-item {:icon :clock} "Recent"))
+         (command/command-group {:heading "Settings"}
+           (command/command-item {:icon :user     :shortcut "⌘P"} "Profile")
+           (command/command-item {:icon :mail     :shortcut "⌘B"} "Mail")
+           (command/command-item {:icon :settings :shortcut "⌘S"} "Settings")))])))
 
 (defn toolbar-demo []
   (let [trigger-cls (button/button-classes {:variant :secondary})

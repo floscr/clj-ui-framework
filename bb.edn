@@ -81,6 +81,7 @@
               [ui.table-test]
               [ui.dialog-test]
               [ui.popover-test]
+              [ui.command-test]
               [ui.spinner-test]
               [ui.skeleton-test]
               [ui.progress-test]
@@ -111,6 +112,7 @@
                                       'ui.table-test
                                       'ui.dialog-test
                                       'ui.popover-test
+                                      'ui.command-test
                                       'ui.spinner-test
                                       'ui.skeleton-test
                                       'ui.progress-test

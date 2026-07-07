@@ -1,4 +1,5 @@
 (ns index
-  (:require [context-menu]
+  (:require [command]
+            [context-menu]
             [popover]
             [theme]))

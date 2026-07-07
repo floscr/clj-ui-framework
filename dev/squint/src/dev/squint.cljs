@@ -33,7 +33,7 @@
                                card-demo accordion-demo table-demo spinner-demo
                                skeleton-demo progress-demo switch-demo tooltip-demo
                                breadcrumb-demo separator-demo form-demo
-                               popover-demo toolbar-demo]]))
+                               popover-demo command-demo toolbar-demo]]))
 
 ;; ── State ───────────────────────────────────────────────────────────
 
@@ -385,6 +385,7 @@
    (dialog-demo)
    (context-menu-demo)
    (popover-demo)
+   (command-demo)
    (toolbar-demo)
    (spinner-demo)
    (skeleton-demo)
@@ -589,6 +590,7 @@
     :items [{:label "Alert" :anchor "alert"}
             {:label "Dialog" :anchor "dialog"}
             {:label "Context Menu" :anchor "context-menu"}
+            {:label "Command" :anchor "command"}
             {:label "Spinner" :anchor "spinner"}
             {:label "Skeleton" :anchor "skeleton"}
             {:label "Tooltip" :anchor "tooltip"}]}
