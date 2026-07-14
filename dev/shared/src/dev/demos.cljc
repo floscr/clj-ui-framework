@@ -27,6 +27,7 @@
             [ui.popover :as popover]
             [ui.command :as command]
             [ui.toolbar :as toolbar]
+            [ui.tabs :as tabs]
             [ui.form :as form]))
 
 ;; ── Cross-target helpers ────────────────────────────────────────────
@@ -305,6 +306,25 @@
              (button/button {:variant :ghost :icon :copy})
              (toolbar/toolbar-separator {})
              (button/button {:variant :ghost :icon :trash})))]))))
+
+(defn tabs-demo []
+  (let [para (fn [txt] [:p {:class (cls "text-sm" "text-muted")
+                           :style (sx {:margin "0"})} txt])]
+    (section "Tabs"
+      ;; Boxed (default) — segmented control
+      (tabs/tabs
+        {:variant :boxed
+         :default "account"
+         :tabs [{:id "account"  :label "Account"  :content (para "Make changes to your account here.")}
+                {:id "password" :label "Password" :content (para "Change your password here.")}
+                {:id "settings" :label "Settings" :content (para "Manage your preferences.")}]})
+      ;; Line — underlined tabs
+      (tabs/tabs
+        {:variant :line
+         :default "overview"
+         :tabs [{:id "overview"  :label "Overview"  :content (para "A high-level summary of the project.")}
+                {:id "analytics" :label "Analytics" :content (para "Traffic and engagement metrics.")}
+                {:id "reports"   :label "Reports"   :content (para "Downloadable reports and exports.")}]}))))
 
 (defn breadcrumb-demo []
   (section "Breadcrumb"

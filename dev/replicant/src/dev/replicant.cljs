@@ -33,7 +33,7 @@
                                card-demo accordion-demo table-demo spinner-demo
                                skeleton-demo progress-demo switch-demo tooltip-demo
                                breadcrumb-demo separator-demo form-demo
-                               popover-demo command-demo toolbar-demo]])
+                               popover-demo command-demo toolbar-demo tabs-demo]])
   (:require-macros [ui.macros :refer [inline-file]]))
 
 ;; ── State ───────────────────────────────────────────────────────────
@@ -347,6 +347,7 @@
    (popover-demo)
    (command-demo)
    (toolbar-demo)
+   (tabs-demo)
    (spinner-demo)
    (skeleton-demo)
    (progress-demo)
@@ -548,7 +549,8 @@
     :items [{:label "Lightbox" :anchor "lightbox"}]}
    {:title "Navigation"
     :items [{:label "Breadcrumb" :anchor "breadcrumb"}
-            {:label "Pagination" :anchor "pagination"}]}])
+            {:label "Pagination" :anchor "pagination"}
+            {:label "Tabs" :anchor "tabs"}]}])
 
 (def sample-files
   [{:name "Documents"          :file-type :folder      :modified "May 10, 2026"}
