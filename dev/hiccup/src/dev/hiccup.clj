@@ -3,6 +3,7 @@
             [hiccup2.core :as h]
             [clojure.string :as str]
             [clojure.java.io :as io]
+            [clojure.java.shell :as sh]
             [babashka.fs :as fs]
             [ui.button :as button]
             [ui.alert :as alert]
@@ -39,6 +40,16 @@
                                popover-demo command-demo toolbar-demo tabs-demo]]))
 
 ;; ── Query Params ────────────────────────────────────────────────────
+
+(defn resolve-git-sha
+  "Full commit SHA of the running deploy, via git. Falls back to \"unknown\"."
+  []
+  (try
+    (let [{:keys [exit out]} (sh/sh "git" "rev-parse" "HEAD")]
+      (if (zero? exit) (str/trim out) "unknown"))
+    (catch Exception _ "unknown")))
+
+(def deployed-sha (resolve-git-sha))
 
 (defn parse-query-params
   "Parse query string from URI into a map."
@@ -715,7 +726,13 @@
             (sidebar/sidebar-layout-main {}
               [:div {:style "--body-padding-inline: 2rem; padding: 2rem; max-width: 960px;"}
                [:div {:style "display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;"}
-                (sidebar/sidebar-mobile-toggle {})]
+                (sidebar/sidebar-mobile-toggle {})
+                [:a.font-mono.text-xs.text-faint
+                 {:href (str "https://github.com/floscr/clj-ui-framework/commit/" deployed-sha)
+                  :target "_blank" :rel "noopener"
+                  :title "Deployed commit"
+                  :style "margin-left: auto; text-decoration: none;"}
+                 deployed-sha]]
                (case active-page
                  :components (components-page)
                  :calendar   (calendar-page)
