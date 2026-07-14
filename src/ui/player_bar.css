@@ -4,24 +4,44 @@
   width: 100%;
 }
 
-/* Progress slider at top */
+/* Progress slider at top.
+   The container keeps a fixed height so hover never shifts the row below.
+   The track and thumb are absolutely positioned and anchored to the BOTTOM,
+   so hover growth expands the bar UPWARD instead of pushing content down. */
 .player-bar-progress {
+  --player-bar-track-h: var(--size-1);
   width: 100%;
   height: var(--size-1);
   cursor: pointer;
   position: relative;
-  transition: height 0.1s;
 }
 
 .player-bar-progress:hover {
-  height: 6px;
+  --player-bar-track-h: 6px;
+}
+
+/* Invisible hit area extending upward — makes the thin bar easy to grab with a
+   mouse and tappable on touch. Clicks/taps here fire on the container, so
+   on-seek still maps the horizontal position correctly (the container's
+   bounding rect is unchanged; only the pointer target grows). */
+.player-bar-progress::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: calc(-1 * var(--player-bar-hit-area, var(--size-4)));
 }
 
 .player-bar-progress-track {
   position: absolute;
-  inset: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--player-bar-track-h);
   background: var(--bg-2);
   overflow: hidden;
+  transition: height 0.1s;
 }
 
 .player-bar-progress-fill {
@@ -32,13 +52,14 @@
 
 /* Scrubber thumb — visible on hover.
    Lives on the progress container (not the track) so overflow:hidden doesn't clip it.
-   Positioned via --progress custom property set inline on the element. */
+   Anchored to the track's vertical center (bottom-anchored) so it rises with the
+   track on hover. Positioned horizontally via --progress set inline on the element. */
 .player-bar-progress::after {
   content: "";
   position: absolute;
   left: var(--progress, 0%);
-  top: 50%;
-  translate: -50% -50%;
+  bottom: calc(var(--player-bar-track-h) / 2);
+  translate: -50% 50%;
   width: var(--size-3);
   height: var(--size-3);
   border-radius: 9999px;
@@ -46,7 +67,7 @@
   box-shadow: var(--shadow-1);
   opacity: 0;
   scale: 0.5;
-  transition: opacity 0.15s, scale 0.15s;
+  transition: opacity 0.15s, scale 0.15s, bottom 0.1s;
   z-index: 1;
   pointer-events: none;
 }
