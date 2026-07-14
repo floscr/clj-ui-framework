@@ -216,6 +216,27 @@ bb dev-squint     # Start squint dev only (port 3002)
 
 Replicant and squint need `npm install` in their dev directories first.
 
+## Deploying — CRITICAL
+
+**The deploy target is the `hetzner` remote, NOT `origin`.** Pushing to
+`hetzner` triggers a post-receive hook that regenerates `dist/theme.css`,
+copies assets to dev targets, and restarts the running service:
+
+```sh
+git push hetzner master   # deploys: rebuilds CSS + restarts service
+```
+
+`origin` (git.example.com) is the source-of-truth mirror consumers
+pull as a git dependency — push there too so downstream repos can bump the
+`:sha`. A full deploy pushes to **both**:
+
+```sh
+git push origin master
+git push hetzner master
+```
+
+Pushing is a shared, hard-to-reverse action — only deploy when explicitly asked.
+
 ## Reader Conditional Order — CRITICAL
 
 Squint reads `.cljc` files and matches `:cljs` if it appears before `:squint`. **Always put `:squint` first:**
