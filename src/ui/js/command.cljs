@@ -148,9 +148,14 @@
         (cond
           (= key "ArrowDown") (do (.preventDefault e) (move-active! dialog "down"))
           (= key "ArrowUp")   (do (.preventDefault e) (move-active! dialog "up"))
-          ;; Emacs-style Ctrl+n / Ctrl+p to move next / previous.
+          ;; Emacs-style Ctrl+n / Ctrl+p to move next / previous. Ctrl+N is a
+          ;; browser-reserved shortcut (new window) that page JS can't block in a
+          ;; normal tab — it only works in a standalone PWA. Ctrl+j / Ctrl+k are
+          ;; not reserved, so they work everywhere as the reliable next/prev pair.
           (and (= key "n") (.-ctrlKey e)) (do (.preventDefault e) (move-active! dialog "down"))
           (and (= key "p") (.-ctrlKey e)) (do (.preventDefault e) (move-active! dialog "up"))
+          (and (= key "j") (.-ctrlKey e)) (do (.preventDefault e) (move-active! dialog "down"))
+          (and (= key "k") (.-ctrlKey e)) (do (.preventDefault e) (move-active! dialog "up"))
           (and (= key "Home") (.-metaKey e)) (do (.preventDefault e) (move-active! dialog "home"))
           (and (= key "End")  (.-metaKey e)) (do (.preventDefault e) (move-active! dialog "end"))
           (= key "Enter")     (do (.preventDefault e) (select! dialog (active-item dialog))))))))
