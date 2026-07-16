@@ -148,6 +148,9 @@
         (cond
           (= key "ArrowDown") (do (.preventDefault e) (move-active! dialog "down"))
           (= key "ArrowUp")   (do (.preventDefault e) (move-active! dialog "up"))
+          ;; Emacs-style Ctrl+n / Ctrl+p to move next / previous.
+          (and (= key "n") (.-ctrlKey e)) (do (.preventDefault e) (move-active! dialog "down"))
+          (and (= key "p") (.-ctrlKey e)) (do (.preventDefault e) (move-active! dialog "up"))
           (and (= key "Home") (.-metaKey e)) (do (.preventDefault e) (move-active! dialog "home"))
           (and (= key "End")  (.-metaKey e)) (do (.preventDefault e) (move-active! dialog "end"))
           (= key "Enter")     (do (.preventDefault e) (select! dialog (active-item dialog))))))))
