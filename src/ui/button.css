@@ -38,6 +38,12 @@
   background: var(--bg-1);
 }
 
+/* Pressed state for segmented toggles (e.g. ui.grid layout-toggle). */
+.btn.btn-toggled {
+  background: var(--bg-2);
+  color: var(--fg-0);
+}
+
 .btn-danger {
   background: var(--danger);
   color: var(--fg-on-danger);

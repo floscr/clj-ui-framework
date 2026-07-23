@@ -1,51 +1,45 @@
-.container {
-  width: 100%;
-  max-width: 1280px;
-  margin-inline: auto;
-  padding-inline: 1rem;
-}
+/* ── Tile grid ───────────────────────────────────────────────────
+   Responsive auto-fill grid of tiles with an optional masonry layout.
+   Tile min-width is driven by --tile-min, set via size classes or an
+   inline override (the grid component's :min prop). */
 
-.row {
+.tile-grid {
+  --tile-min: 160px;
   display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  gap: 1.5rem;
-  width: 100%;
+  grid-template-columns: repeat(auto-fill, minmax(var(--tile-min), 1fr));
+  gap: var(--size-3);
 }
 
-.col { grid-column-end: span 12; }
-.col-1  { grid-column-end: span 1; }
-.col-2  { grid-column-end: span 2; }
-.col-3  { grid-column-end: span 3; }
-.col-4  { grid-column-end: span 4; }
-.col-5  { grid-column-end: span 5; }
-.col-6  { grid-column-end: span 6; }
-.col-7  { grid-column-end: span 7; }
-.col-8  { grid-column-end: span 8; }
-.col-9  { grid-column-end: span 9; }
-.col-10 { grid-column-end: span 10; }
-.col-11 { grid-column-end: span 11; }
-.col-12 { grid-column-end: span 12; }
+.tile-grid-s { --tile-min: 110px; }
+.tile-grid-l { --tile-min: 240px; }
+.tile-grid-xl { --tile-min: 340px; }
+.tile-grid-xxl { --tile-min: 480px; }
 
-.offset-1  { grid-column-start: 2; }
-.offset-2  { grid-column-start: 3; }
-.offset-3  { grid-column-start: 4; }
-.offset-4  { grid-column-start: 5; }
-.offset-5  { grid-column-start: 6; }
-.offset-6  { grid-column-start: 7; }
+/* Masonry: each tile keeps its natural height, packed left-to-right in
+   DOM order (unlike CSS columns, which flow top-to-bottom per column).
 
-.col-end {
-  grid-column-end: -1;
+   Firefox supports this natively via `grid-template-rows: masonry`. Every
+   other browser gets the identical result from the JS runtime
+   (src/ui/js/masonry.cljs, technique from
+   css-tricks.com/making-a-masonry-layout-that-works-today): the grid stays
+   a normal CSS Grid, then JS sets `grid-auto-rows: 0` + `row-gap: 1px` and
+   gives each tile a `grid-row-end: span <height>` derived from its
+   measured height, so items flow into rows and pack tightly. */
+.tile-grid-masonry {
+  grid-template-rows: masonry; /* Firefox native; ignored elsewhere (JS runtime) */
+  grid-auto-flow: dense;
+  /* Keep tiles at their content height instead of stretching to fill the
+     row span. Without this the JS runtime re-measures a stretched
+     (span-sized) height each pass, growing every tile by the row gap on a
+     runaway ResizeObserver loop. */
+  align-items: start;
 }
 
-@media (max-width: 768px) {
-  .row {
-    grid-template-columns: repeat(4, 1fr);
-    gap: 1rem;
-  }
-  .col, [class*="col-"] {
-    grid-column-end: span 4;
-  }
-  [class*="offset-"] {
-    grid-column-start: auto;
-  }
+/* Smaller tile minimums on narrow viewports. */
+@media (max-width: 640px) {
+  .tile-grid { --tile-min: 120px; }
+  .tile-grid-s { --tile-min: 95px; }
+  .tile-grid-l { --tile-min: 160px; }
+  .tile-grid-xl { --tile-min: 220px; }
+  .tile-grid-xxl { --tile-min: 320px; }
 }

@@ -20,6 +20,7 @@
             [ui.empty-state :as empty-state]
             [ui.drop-zone :as drop-zone]
             [ui.camera :as camera]
+            [ui.grid :as grid]
             [ui.processing-bar :as processing-bar]
             [ui.toast :as toast]
             [ui.skeleton :as skeleton]
@@ -272,6 +273,39 @@
         :on-switch #?(:squint (fn [] (toast/show-toast! {:message "Switch clicked" :variant :info}))
                       :cljs   (fn [] (toast/show-toast! {:message "Switch clicked" :variant :info}))
                       :clj    true)})]]))
+
+(defn- grid-tile
+  "Demo tile: a colored block. Square by default; give :h for a natural
+   height (masonry)."
+  [i & [h]]
+  [:div {:style (sx (cond-> {:background "var(--bg-2)"
+                             :border "var(--border-0)"
+                             :border-radius "var(--radius-md)"
+                             :display "flex"
+                             :align-items "center"
+                             :justify-content "center"
+                             :color "var(--fg-2)"
+                             :font-size "var(--font-sm)"}
+                      h       (assoc :height (str h "px"))
+                      (not h) (assoc :aspect-ratio "1")))}
+   (str i)])
+
+(def ^:private masonry-heights [120 190 90 150 220 110 170 130])
+
+(defn grid-demo []
+  (section "Grid"
+    [:div {:style (sx {:display "flex" :gap "1rem" :flex-wrap "wrap" :align-items "center"})}
+     (grid/layout-toggle {:value :grid})
+     (grid/size-stepper {:value :m})]
+    [:p {:class (cls "text-muted" "text-sm")} "Square grid (size :s)"]
+    (apply grid/grid {:size :s}
+           (map (fn [i] (grid-tile i)) (range 1 9)))
+    [:p {:class (cls "text-muted" "text-sm")} "Masonry (size :s) — needs the JS runtime outside Firefox"]
+    (apply grid/grid {:layout :masonry :size :s}
+           (map-indexed (fn [i h] (grid-tile (inc i) h)) masonry-heights))
+    [:p {:class (cls "text-muted" "text-sm")} "Custom :min \"180px\" override"]
+    (apply grid/grid {:min "180px"}
+           (map (fn [i] (grid-tile i)) (range 1 5)))))
 
 (defn skeleton-demo []
   (section "Skeleton"

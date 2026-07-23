@@ -108,6 +108,27 @@
     if (obj instanceof Object) return OBJECT_TYPE;
     return void 0;
   }
+  function nth(coll, idx, orElse) {
+    if (coll) {
+      var elt = void 0;
+      if (Array.isArray(coll)) {
+        elt = coll[idx];
+      } else {
+        const iter = iterable(coll);
+        let i = 0;
+        for (const value of iter) {
+          if (i++ == idx) {
+            elt = value;
+            break;
+          }
+        }
+      }
+      if (elt !== void 0) {
+        return elt;
+      }
+    }
+    return orElse;
+  }
   function get(coll, key, otherwise = void 0) {
     if (coll == null) {
       return otherwise;
@@ -162,6 +183,10 @@
     throw new TypeError(`${x} is not iterable`);
   }
   var IIterable = Symbol("Iterable");
+  function _iterator(coll) {
+    return coll[Symbol.iterator]();
+  }
+  var es6_iterator = _iterator;
   function first(coll) {
     const [first2] = iterable(coll);
     return first2;
@@ -187,6 +212,51 @@
   LazyIterable.prototype[IIterable] = true;
   function lazy(f) {
     return new LazyIterable(f);
+  }
+  function map(f, ...colls) {
+    f = toFn(f);
+    switch (colls.length) {
+      case 0:
+        return (rf) => {
+          return (...args) => {
+            switch (args.length) {
+              case 0: {
+                return rf();
+              }
+              case 1: {
+                return rf(args[0]);
+              }
+              case 2: {
+                return rf(args[0], f(args[1]));
+              }
+              default: {
+                return rf(args[0], f(...args.slice(1)));
+              }
+            }
+          };
+        };
+      case 1:
+        return lazy(function* () {
+          for (const x of iterable(colls[0])) {
+            yield f(x);
+          }
+        });
+      default:
+        return lazy(function* () {
+          const iters = colls.map((coll) => es6_iterator(iterable(coll)));
+          while (true) {
+            const args = [];
+            for (const i of iters) {
+              const nextVal = i.next();
+              if (nextVal.done) {
+                return;
+              }
+              args.push(nextVal.value);
+            }
+            yield f(...args);
+          }
+        });
+    }
   }
   function not(expr) {
     return !truth_(expr);
@@ -232,6 +302,30 @@
     const v = f(deref(atm), ...args);
     reset_BANG_(atm, v);
     return v;
+  }
+  function vector(...args) {
+    return args;
+  }
+  function mapv(...args) {
+    if (args.length === 2) {
+      const [_f, coll] = args;
+      const f = toFn(_f);
+      const iter = iterable(coll);
+      if (Array.isArray(iter)) {
+        const ret2 = new Array(iter.length);
+        for (var i = 0; i < iter.length; i++) {
+          ret2[i] = f(iter[i]);
+        }
+        return ret2;
+      } else {
+        var ret = [];
+        for (const x of iter) {
+          ret.push(f(x));
+        }
+        return ret;
+      }
+    }
+    return [...map(...args)];
   }
   var IApply__apply = Symbol("IApply__apply");
   var List = class extends Array {
@@ -1084,6 +1178,112 @@
   };
   init_BANG_2();
 
+  // .compiled/masonry.mjs
+  var raf = atom(null);
+  var observed = /* @__PURE__ */ new Set();
+  var ro = new ResizeObserver((function(_) {
+    return schedule_BANG_();
+  }));
+  var native_QMARK_ = function(container) {
+    return "masonry" === getComputedStyle(container).gridTemplateRows;
+  };
+  var clear_BANG_ = function(container) {
+    container.style.gridAutoRows = "";
+    container.style.removeProperty("row-gap");
+    for (let G__1 of iterable(Array.from(container.children))) {
+      const item2 = G__1;
+      item2.style.gridRowEnd = "";
+    }
+    return null;
+  };
+  var layout_BANG_ = function(container) {
+    const items1 = Array.from(container.children);
+    container.style.gridAutoRows = "0px";
+    container.style.setProperty("row-gap", "1px", "important");
+    const col_gap2 = parseFloat(getComputedStyle(container).columnGap);
+    const col_gap3 = truth_(isNaN(col_gap2)) ? 0 : col_gap2;
+    const heights4 = mapv((function(item) {
+      return item.getBoundingClientRect().height;
+    }), items1);
+    for (let G__5 of iterable(map(vector, items1, heights4))) {
+      const vec__69 = G__5;
+      const item10 = nth(vec__69, 0, null);
+      const h11 = nth(vec__69, 1, null);
+      item10.style.gridRowEnd = `${"span "}${Math.round(h11 + col_gap3) ?? ""}`;
+    }
+    return null;
+  };
+  var run_BANG_ = function() {
+    const els1 = Array.from(document.querySelectorAll(".tile-grid-masonry"));
+    for (let G__2 of iterable(els1)) {
+      const el3 = G__2;
+      if (truth_(observed.has(el3))) {
+      } else {
+        observed.add(el3);
+        ro.observe(el3);
+      }
+    }
+    ;
+    for (let G__4 of iterable(Array.from(observed))) {
+      const el5 = G__4;
+      if (truth_((() => {
+        const or__23426__auto__6 = not(el5.isConnected);
+        if (or__23426__auto__6) {
+          return or__23426__auto__6;
+        } else {
+          return not(el5.classList.contains("tile-grid-masonry"));
+        }
+        ;
+      })())) {
+        observed.delete(el5);
+        ro.unobserve(el5);
+        if (truth_(el5.isConnected)) {
+          clear_BANG_(el5);
+        }
+      }
+    }
+    ;
+    for (let G__7 of iterable(els1)) {
+      const el8 = G__7;
+      if (truth_(native_QMARK_(el8))) {
+        clear_BANG_(el8);
+      } else {
+        layout_BANG_(el8);
+      }
+    }
+    return null;
+  };
+  var schedule_BANG_ = function() {
+    if (truth_(deref(raf))) {
+      cancelAnimationFrame(deref(raf));
+    }
+    ;
+    return reset_BANG_(raf, requestAnimationFrame((function(_) {
+      reset_BANG_(raf, null);
+      return run_BANG_();
+    })));
+  };
+  var init_BANG_3 = function() {
+    schedule_BANG_();
+    const obs1 = new MutationObserver((function(_, _2) {
+      return schedule_BANG_();
+    }));
+    obs1.observe(document.body, { "childList": true, "subtree": true, "attributes": true, "attributeFilter": ["class"] });
+    return document.addEventListener("load", (function(e) {
+      const target3 = e.target;
+      if (truth_("IMG" === target3.tagName && target3.closest(".tile-grid-masonry"))) {
+        return schedule_BANG_();
+      }
+      ;
+    }), true);
+  };
+  window["__uiMasonry"] = schedule_BANG_;
+  if ("loading" === document.readyState) {
+    document.addEventListener("DOMContentLoaded", init_BANG_3);
+  } else {
+    init_BANG_3();
+  }
+
   // .compiled/popover.mjs
   var gap = 8;
   var edge = 8;
@@ -1195,12 +1395,12 @@
     }
     ;
   };
-  var init_BANG_3 = function() {
+  var init_BANG_4 = function() {
     document.addEventListener("toggle", on_toggle, true);
     window.addEventListener("scroll", reposition_BANG_, true);
     return window.addEventListener("resize", reposition_BANG_);
   };
-  init_BANG_3();
+  init_BANG_4();
   window["__uiPopover"] = { "reposition": reposition_BANG_ };
 
   // .compiled/theme.mjs
@@ -1334,7 +1534,7 @@
       }));
     };
   };
-  var init_BANG_4 = function() {
+  var init_BANG_5 = function() {
     const mode1 = get_mode();
     apply_theme_BANG_(mode1);
     const mql2 = window.matchMedia("(prefers-color-scheme: dark)");
@@ -1346,7 +1546,7 @@
       ;
     }));
   };
-  window["__uiTheme"] = { "init": init_BANG_4, "set": set_mode_BANG_, "get": get_mode, "effective": get_effective, "toggle": toggle_BANG_, "subscribe": subscribe_BANG_ };
+  window["__uiTheme"] = { "init": init_BANG_5, "set": set_mode_BANG_, "get": get_mode, "effective": get_effective, "toggle": toggle_BANG_, "subscribe": subscribe_BANG_ };
 
   // .compiled/toast.mjs
   var container_id = "ui-toast-container";
@@ -1434,7 +1634,7 @@
     }
     return null;
   };
-  var init_BANG_5 = function() {
+  var init_BANG_6 = function() {
     scan_BANG_();
     const obs1 = new MutationObserver((function(_, _2) {
       return scan_BANG_();
@@ -1443,8 +1643,8 @@
   };
   window["__uiToast"] = show_BANG_;
   if ("loading" === document.readyState) {
-    document.addEventListener("DOMContentLoaded", init_BANG_5);
+    document.addEventListener("DOMContentLoaded", init_BANG_6);
   } else {
-    init_BANG_5();
+    init_BANG_6();
   }
 })();
