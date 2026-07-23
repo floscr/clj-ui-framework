@@ -1,0 +1,93 @@
+/* Camera — viewfinder + native capture fallback (see ui.camera) */
+
+.camera-section {
+  position: relative;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: #000;
+  aspect-ratio: 4/3;
+}
+
+.camera-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.camera-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding-bottom: var(--size-6);
+  pointer-events: none;
+}
+
+.camera-crosshair {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80px;
+  height: 80px;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  border-radius: var(--radius-md);
+}
+
+.camera-capture-btn {
+  pointer-events: all;
+  width: var(--size-16);
+  height: var(--size-16);
+  border-radius: 50%;
+  border: 4px solid rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(4px);
+  cursor: pointer;
+  transition: transform 150ms ease, background 150ms ease;
+}
+
+.camera-capture-btn:hover {
+  transform: scale(1.08);
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.camera-capture-btn:active {
+  transform: scale(0.95);
+}
+
+.camera-switch-btn {
+  pointer-events: all;
+  position: absolute;
+  bottom: var(--size-6);
+  right: var(--size-4);
+  width: var(--size-10);
+  height: var(--size-10);
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  background: rgba(0, 0, 0, 0.3);
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+}
+
+.camera-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--size-3);
+  height: 100%;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  transition: background 200ms ease;
+}
+
+.camera-placeholder:hover {
+  background: rgba(255, 255, 255, 0.05);
+}

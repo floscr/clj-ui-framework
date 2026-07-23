@@ -106,6 +106,7 @@
               [ui.file-progress-test]
               [ui.processing-bar-test]
               [ui.toast-test]
+              [ui.camera-test]
               [ui.theme-test]
               [ui.theme-toggle-test])
    :task (let [{:keys [fail error]} (t/run-tests
@@ -142,6 +143,7 @@
                                       'ui.file-progress-test
                                       'ui.processing-bar-test
                                       'ui.toast-test
+                                      'ui.camera-test
                                       'ui.theme-test
                                       'ui.theme-toggle-test)]
            (when (pos? (+ fail error))

@@ -19,6 +19,7 @@
             [ui.spinner :as spinner]
             [ui.empty-state :as empty-state]
             [ui.drop-zone :as drop-zone]
+            [ui.camera :as camera]
             [ui.processing-bar :as processing-bar]
             [ui.toast :as toast]
             [ui.skeleton :as skeleton]
@@ -255,6 +256,22 @@
                                        :label "3 photos"
                                        :status "AI analyzing..."})
       (processing-bar/processing-item {:status "🔧 optimize-images"}))))
+
+(defn camera-demo []
+  (section "Camera"
+    [:div {:style (sx {:display "flex" :gap "1rem" :flex-wrap "wrap"})}
+     [:div {:style (sx {:width "280px"})}
+      (camera/camera-view {})]
+     [:div {:style (sx {:width "280px"})}
+      (camera/camera-view
+       {:active? true
+        :video-id "demo-camera-video"
+        :on-capture #?(:squint (fn [] (toast/show-toast! {:message "Capture clicked" :variant :info}))
+                       :cljs   (fn [] (toast/show-toast! {:message "Capture clicked" :variant :info}))
+                       :clj    nil)
+        :on-switch #?(:squint (fn [] (toast/show-toast! {:message "Switch clicked" :variant :info}))
+                      :cljs   (fn [] (toast/show-toast! {:message "Switch clicked" :variant :info}))
+                      :clj    true)})]]))
 
 (defn skeleton-demo []
   (section "Skeleton"
