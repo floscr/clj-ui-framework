@@ -30,12 +30,13 @@
             [ui.player-bar :as player-bar]
             [ui.lightbox :as lightbox]
             [ui.context-menu :as context-menu]
+            [ui.drop-zone :as drop-zone]
             [ui.file-browser :as fb]
             [ui.file-progress :as fp]
             [ui.theme-toggle :as theme-toggle]
             [dev.demos :refer [section page-header button-demo alert-demo badge-demo
                                card-demo accordion-demo table-demo spinner-demo
-                               empty-state-demo
+                               empty-state-demo drop-zone-demo
                                skeleton-demo progress-demo switch-demo tooltip-demo
                                breadcrumb-demo separator-demo form-demo
                                popover-demo command-demo toolbar-demo tabs-demo]]))
@@ -306,6 +307,7 @@
    (tabs-demo)
    (spinner-demo)
    (empty-state-demo)
+   (drop-zone-demo)
    (skeleton-demo)
    (progress-demo)
    (theme-toggle-demo)
@@ -404,9 +406,10 @@
    (section "Drop Zone"
      [:p {:style "color: var(--fg-2); font-size: var(--font-sm); margin-bottom: 0.5rem;"}
       "Drag & drop file upload area. Click to browse or drag files onto the zone."]
-     (fb/file-dropzone {:id "demo-upload"
-                        :accept "image/*,.pdf,.doc,.docx"
-                        :multiple true})
+     (drop-zone/drop-zone {:accept "image/*,.pdf,.doc,.docx"
+                           :multiple true
+                           :title "Drop files here or click to browse"
+                           :hint "Images and documents up to 10 MB"})
      (fp/file-progress-list {}
        (fp/file-progress-item {:name "project-proposal.pdf"
                                :size "2.4 MB"
@@ -428,17 +431,16 @@
                                :on-remove identity})))
 
    (section "Drop Zone — Disabled"
-     (fb/file-dropzone {:id "demo-upload-disabled"
-                        :disabled true
-                        :title "Uploads disabled"
-                        :subtitle "You don't have permission to upload"}))
+     (drop-zone/drop-zone {:disabled true
+                           :title "Uploads disabled"
+                           :hint "You don't have permission to upload"}))
 
    (section "Full-Page Drop Zone Overlay"
      [:p {:style "color: var(--fg-2); font-size: var(--font-sm); margin-bottom: 0.5rem;"}
       "In interactive targets (Replicant, Squint), dragging files anywhere on the page shows this overlay. Below is a static preview."]
      [:div {:style "position: relative; height: 300px; border: var(--border-0); border-radius: var(--radius-md); overflow: hidden;"}
-      (fb/file-dropzone-overlay {})])
-   [:style ".fb-dropzone-overlay { position: absolute !important; }"]])
+      (drop-zone/drop-zone-overlay {})])
+   [:style ".drop-zone-overlay { position: absolute !important; }"]])
 
 (def icon-categories
   [["Navigation"
@@ -610,6 +612,7 @@
             {:label "Command" :anchor "command"}
             {:label "Spinner" :anchor "spinner"}
             {:label "Empty State" :anchor "empty-state"}
+            {:label "Drop Zone" :anchor "drop-zone"}
             {:label "Skeleton" :anchor "skeleton"}
             {:label "Tooltip" :anchor "tooltip"}]}
    {:title "Layout"

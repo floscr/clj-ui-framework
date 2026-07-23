@@ -26,12 +26,13 @@
             [ui.player-bar :as player-bar]
             [ui.lightbox :as lightbox]
             [ui.context-menu :as context-menu]
+            [ui.drop-zone :as drop-zone]
             [ui.file-browser :as fb]
             [ui.file-progress :as fp]
             [ui.theme-toggle :as theme-toggle]
             [dev.demos :refer [section page-header button-demo alert-demo badge-demo
                                card-demo accordion-demo table-demo spinner-demo
-                               empty-state-demo
+                               empty-state-demo drop-zone-demo
                                skeleton-demo progress-demo switch-demo tooltip-demo
                                breadcrumb-demo separator-demo form-demo
                                popover-demo command-demo toolbar-demo tabs-demo]])
@@ -351,6 +352,7 @@
    (tabs-demo)
    (spinner-demo)
    (empty-state-demo)
+   (drop-zone-demo)
    (skeleton-demo)
    (progress-demo)
    (theme-toggle-demo)
@@ -544,6 +546,7 @@
             {:label "Command" :anchor "command"}
             {:label "Spinner" :anchor "spinner"}
             {:label "Empty State" :anchor "empty-state"}
+            {:label "Drop Zone" :anchor "drop-zone"}
             {:label "Skeleton" :anchor "skeleton"}
             {:label "Tooltip" :anchor "tooltip"}]}
    {:title "Layout"
@@ -607,14 +610,13 @@
       ("zip" "tar" "gz" "rar" "7z") :archive
       :file)))
 
-(defn- handle-dropped-files! [file-list]
-  (let [files (for [i (range (.-length file-list))]
-                (let [f (.item file-list i)]
-                  {:name (.-name f)
-                   :size (format-file-size (.-size f))
-                   :file-type (ext->file-type (.-name f))
-                   :progress (rand-int 100)
-                   :status :uploading}))
+(defn- handle-dropped-files! [files]
+  (let [files (for [f files]
+                {:name (.-name f)
+                 :size (format-file-size (.-size f))
+                 :file-type (ext->file-type (.-name f))
+                 :progress (rand-int 100)
+                 :status :uploading})
         ;; Deduplicate by name
         existing-names (set (map :name @!fb-dropped-files))]
     (swap! !fb-dropped-files into (remove #(existing-names (:name %)) files))))
@@ -709,10 +711,11 @@
      (section "Drop Zone"
        [:p {:style {:color "var(--fg-2)" :font-size "var(--font-sm)" :margin-bottom "0.5rem"}}
         "Drag & drop file upload area. Drop files or click to browse."]
-       (fb/file-dropzone {:id "demo-upload"
-                          :accept "image/*,.pdf,.doc,.docx"
-                          :multiple true
-                          :on-files handle-dropped-files!})
+       (drop-zone/drop-zone {:accept "image/*,.pdf,.doc,.docx"
+                             :multiple true
+                             :title "Drop files here or click to browse"
+                             :hint "Images and documents up to 10 MB"
+                             :on-files handle-dropped-files!})
        (when (seq @!fb-dropped-files)
          (apply fp/file-progress-list {}
            (for [f @!fb-dropped-files]
@@ -724,17 +727,16 @@
                                      :on-remove (fn [] (remove-dropped-file! (:name f)))})))))
 
      (section "Drop Zone \u2014 Disabled"
-       (fb/file-dropzone {:id "demo-upload-disabled"
-                          :disabled true
-                          :title "Uploads disabled"
-                          :subtitle "You don't have permission to upload"}))
+       (drop-zone/drop-zone {:disabled true
+                             :title "Uploads disabled"
+                             :hint "You don't have permission to upload"}))
 
      (section "Full-Page Drop Zone"
        [:p {:style {:color "var(--fg-2)" :font-size "var(--font-sm)" :margin-bottom "0.5rem"}}
         "Drag any file over the page to see the full-screen overlay. Files dropped anywhere are added to the queue above."])
 
      (when @!fb-body-drag-active
-       (fb/file-dropzone-overlay {}))]))
+       (drop-zone/drop-zone-overlay {}))]))
 
 (def nav-items
   [{:id :components :label "Components"  :icon-name :package}
@@ -852,8 +854,8 @@
   (add-watch !fb-sort :render (fn [_ _ _ _] (render!)))
   (add-watch !fb-dropped-files :render (fn [_ _ _ _] (render!)))
   (add-watch !fb-body-drag-active :render (fn [_ _ _ _] (render!)))
-  (fb/init-body-dropzone! {:on-files handle-dropped-files!
-                           :on-active-change (fn [active?] (reset! !fb-body-drag-active active?))})
+  (drop-zone/init-body-drop-zone! {:on-files handle-dropped-files!
+                                   :on-active-change (fn [active?] (reset! !fb-body-drag-active active?))})
   ;; Init theme runtime and sync atom
   (when js/window.__uiTheme
     (.init js/window.__uiTheme)

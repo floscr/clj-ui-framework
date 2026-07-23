@@ -118,7 +118,9 @@
             ;; Heading
             (heading-level line)
             (let [[n text] (heading-level line)
-                  tag (keyword (str "h" n))]
+                  tag #?(:squint (str "h" n)
+                         :cljs (keyword (str "h" n))
+                         :clj (keyword (str "h" n)))]
               (recur (inc i)
                      (conj result (into [tag {:class "md-heading"}] (parse-inline text)))))
 

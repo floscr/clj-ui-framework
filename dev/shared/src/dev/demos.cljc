@@ -18,6 +18,7 @@
             [ui.table :as table]
             [ui.spinner :as spinner]
             [ui.empty-state :as empty-state]
+            [ui.drop-zone :as drop-zone]
             [ui.skeleton :as skeleton]
             [ui.progress :as progress]
             [ui.switch :as switch]
@@ -202,6 +203,22 @@
     [:div {:style (sx {:border "var(--border-0)" :border-radius "var(--radius-md)" :margin-top "1rem"})}
      (empty-state/empty-state {:icon :inbox}
        [:p "No photos yet — upload or take one."])]))
+
+(defn drop-zone-demo []
+  (section "Drop Zone"
+    (drop-zone/drop-zone {:title "Upload photos"
+                          :hint "Drag & drop or click to select"})
+    (drop-zone/drop-zone {:size :lg
+                          :icon :image
+                          :title "Upload photos"
+                          :hint "Drag & drop or click to select"})
+    (drop-zone/drop-zone {}
+      [:div {:style (sx {:display "flex" :gap "0.5rem" :flex-wrap "wrap"})}
+       [:div {:style (sx {:width "64px" :height "64px" :border-radius "var(--radius-md)" :background "var(--bg-2)"})}]
+       [:div {:style (sx {:width "64px" :height "64px" :border-radius "var(--radius-md)" :background "var(--bg-2)"})}]
+       [:div {:style (sx {:width "64px" :height "64px" :border-radius "var(--radius-md)" :background "var(--bg-2)"})}]]
+      (drop-zone/file-label {}
+        [:span "+ Add more"]))))
 
 (defn skeleton-demo []
   (section "Skeleton"

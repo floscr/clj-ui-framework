@@ -1,0 +1,135 @@
+/* Drop zone — drag & drop file upload area */
+
+.drop-zone {
+  border: 2px dashed var(--fg-2);
+  border-radius: var(--radius-lg);
+  transition: border-color 200ms ease, background 200ms ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.drop-zone:hover,
+.drop-zone-active {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 5%, var(--bg-0));
+}
+
+.drop-zone-md { min-height: 120px; }
+.drop-zone-lg { min-height: 240px; }
+
+.drop-zone-disabled,
+.drop-zone-disabled:hover {
+  opacity: 0.5;
+  cursor: not-allowed;
+  border-color: var(--fg-2);
+  background: none;
+}
+
+.drop-zone-disabled .drop-zone-empty {
+  cursor: not-allowed;
+}
+
+/* Default empty state (label mode — whole zone opens the picker) */
+
+.drop-zone-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--size-2);
+  padding: var(--size-6) var(--size-4);
+  cursor: pointer;
+  flex: 1;
+}
+
+.drop-zone-lg .drop-zone-empty {
+  padding: var(--size-12) var(--size-4);
+}
+
+.drop-zone-icon {
+  color: var(--fg-2);
+  opacity: 0.8;
+}
+
+.drop-zone-title {
+  margin: 0;
+  font-size: var(--font-base);
+  font-weight: 600;
+  color: var(--fg-0);
+}
+
+.drop-zone-lg .drop-zone-title {
+  font-size: var(--font-md);
+}
+
+.drop-zone-hint {
+  margin: 0;
+  font-size: var(--font-sm);
+  color: var(--fg-2);
+}
+
+/* Custom-content mode */
+
+.drop-zone-content {
+  padding: var(--size-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-4);
+}
+
+/* Click-to-add affordance (file-label) */
+
+.drop-zone-add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--size-2);
+  padding: var(--size-3);
+  border: 1px dashed var(--fg-2);
+  border-radius: var(--radius-md);
+  color: var(--fg-1);
+  font-size: var(--font-sm);
+  cursor: pointer;
+  transition: border-color 150ms ease, color 150ms ease;
+}
+
+.drop-zone-add:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* Full-page drop overlay */
+
+.drop-zone-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.drop-zone-overlay-backdrop {
+  position: absolute;
+  inset: 0;
+  background: var(--bg-0);
+  opacity: 0.85;
+}
+
+.drop-zone-overlay-content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--size-3);
+  padding: var(--size-10) var(--size-8);
+  border: 2px dashed var(--accent);
+  border-radius: var(--radius-lg);
+  background: var(--bg-0);
+  box-shadow: var(--shadow-3);
+}
+
+.drop-zone-overlay-content .drop-zone-icon {
+  color: var(--accent);
+}

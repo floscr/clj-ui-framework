@@ -84,6 +84,7 @@
               [ui.command-test]
               [ui.spinner-test]
               [ui.empty-state-test]
+              [ui.drop-zone-test]
               [ui.skeleton-test]
               [ui.progress-test]
               [ui.switch-test]
@@ -117,6 +118,7 @@
                                       'ui.command-test
                                       'ui.spinner-test
                                       'ui.empty-state-test
+                                      'ui.drop-zone-test
                                       'ui.skeleton-test
                                       'ui.progress-test
                                       'ui.switch-test

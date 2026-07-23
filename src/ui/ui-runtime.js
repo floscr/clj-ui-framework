@@ -986,6 +986,101 @@
   })();
   window["__uiContextMenu"] = open_context_menu;
 
+  // .compiled/drop_zone.mjs
+  var closest_zone = function(el) {
+    if (truth_((() => {
+      const and__23442__auto__1 = el;
+      if (truth_(and__23442__auto__1)) {
+        return el.closest;
+      } else {
+        return and__23442__auto__1;
+      }
+      ;
+    })())) {
+      return el.closest("[data-ui-drop-zone]");
+    }
+    ;
+  };
+  var emit_files_BANG_ = function(zone, files) {
+    if (files.length > 0) {
+      return zone.dispatchEvent(new CustomEvent("ui:drop-zone-files", { "bubbles": true, "detail": { "files": files } }));
+    }
+    ;
+  };
+  var on_dragover = function(e) {
+    const temp__23062__auto__1 = closest_zone(e.target);
+    if (truth_(temp__23062__auto__1)) {
+      const zone2 = temp__23062__auto__1;
+      e.preventDefault();
+      return zone2.classList.add("drop-zone-active");
+    }
+    ;
+  };
+  var on_dragleave = function(e) {
+    const temp__23062__auto__1 = closest_zone(e.target);
+    if (truth_(temp__23062__auto__1)) {
+      const zone2 = temp__23062__auto__1;
+      if (truth_((() => {
+        const and__23442__auto__3 = e.relatedTarget;
+        if (truth_(and__23442__auto__3)) {
+          return zone2.contains(e.relatedTarget);
+        } else {
+          return and__23442__auto__3;
+        }
+        ;
+      })())) {
+        return null;
+      } else {
+        return zone2.classList.remove("drop-zone-active");
+      }
+      ;
+    }
+    ;
+  };
+  var on_drop = function(e) {
+    const temp__23062__auto__1 = closest_zone(e.target);
+    if (truth_(temp__23062__auto__1)) {
+      const zone2 = temp__23062__auto__1;
+      e.preventDefault();
+      zone2.classList.remove("drop-zone-active");
+      return emit_files_BANG_(zone2, Array.from(e.dataTransfer.files));
+    }
+    ;
+  };
+  var on_change = function(e) {
+    const input1 = e.target;
+    if (truth_((() => {
+      const and__23442__auto__2 = input1;
+      if (truth_(and__23442__auto__2)) {
+        const and__23442__auto__3 = input1.matches;
+        if (truth_(and__23442__auto__3)) {
+          return input1.matches('input[type="file"]');
+        } else {
+          return and__23442__auto__3;
+        }
+        ;
+      } else {
+        return and__23442__auto__2;
+      }
+      ;
+    })())) {
+      const temp__23062__auto__4 = closest_zone(input1);
+      if (truth_(temp__23062__auto__4)) {
+        const zone5 = temp__23062__auto__4;
+        return emit_files_BANG_(zone5, Array.from(input1.files));
+      }
+      ;
+    }
+    ;
+  };
+  var init_BANG_2 = function() {
+    document.addEventListener("dragover", on_dragover);
+    document.addEventListener("dragleave", on_dragleave);
+    document.addEventListener("drop", on_drop);
+    return document.addEventListener("change", on_change);
+  };
+  init_BANG_2();
+
   // .compiled/popover.mjs
   var gap = 8;
   var edge = 8;
@@ -1097,12 +1192,12 @@
     }
     ;
   };
-  var init_BANG_2 = function() {
+  var init_BANG_3 = function() {
     document.addEventListener("toggle", on_toggle, true);
     window.addEventListener("scroll", reposition_BANG_, true);
     return window.addEventListener("resize", reposition_BANG_);
   };
-  init_BANG_2();
+  init_BANG_3();
   window["__uiPopover"] = { "reposition": reposition_BANG_ };
 
   // .compiled/theme.mjs
@@ -1236,7 +1331,7 @@
       }));
     };
   };
-  var init_BANG_3 = function() {
+  var init_BANG_4 = function() {
     const mode1 = get_mode();
     apply_theme_BANG_(mode1);
     const mql2 = window.matchMedia("(prefers-color-scheme: dark)");
@@ -1248,5 +1343,5 @@
       ;
     }));
   };
-  window["__uiTheme"] = { "init": init_BANG_3, "set": set_mode_BANG_, "get": get_mode, "effective": get_effective, "toggle": toggle_BANG_, "subscribe": subscribe_BANG_ };
+  window["__uiTheme"] = { "init": init_BANG_4, "set": set_mode_BANG_, "get": get_mode, "effective": get_effective, "toggle": toggle_BANG_, "subscribe": subscribe_BANG_ };
 })();
