@@ -63,13 +63,13 @@
 
 (defn check-hiccup []
   (try
-    (let [body (:body (http/get "http://localhost:4003" {:throw false :timeout 3000}))]
+    (let [body (:body (http/get "http://localhost:3003" {:throw false :timeout 3000}))]
       (if (str/includes? (or body "") "sidebar-layout")
         (println-ok "Hiccup — serving (sidebar-layout found)")
         (do (println-err "Hiccup — responds but page content missing")
             (fail!))))
     (catch Exception _
-      (println-warn "Hiccup — not responding on :4003"))))
+      (println-warn "Hiccup — not responding on :3003"))))
 
 ;; ── 3. Squint compiled output ───────────────────────────────────────
 
