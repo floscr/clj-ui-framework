@@ -7,6 +7,9 @@
     (is (= ["spinner"] (spinner/spinner-class-list {})))
     (is (= ["spinner"] (spinner/spinner-class-list {:size :md}))))
 
+  (testing "extra-small size"
+    (is (= ["spinner" "spinner-xs"] (spinner/spinner-class-list {:size :xs}))))
+
   (testing "small size"
     (is (= ["spinner" "spinner-sm"] (spinner/spinner-class-list {:size :sm}))))
 

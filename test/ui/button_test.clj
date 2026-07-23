@@ -11,6 +11,7 @@
     (is (= ["btn" "btn-primary"] (button/button-class-list {:variant :primary})))
     (is (= ["btn" "btn-ghost"] (button/button-class-list {:variant :ghost})))
     (is (= ["btn" "btn-danger"] (button/button-class-list {:variant :danger})))
+    (is (= ["btn" "btn-success"] (button/button-class-list {:variant :success})))
     (is (= ["btn" "btn-link"] (button/button-class-list {:variant :link}))))
 
   (testing "explicit size"
@@ -98,6 +99,37 @@
       (is (= :a (first result)))
       (is (= "https://example.com" (get-in result [1 :href])))
       (is (= "btn btn-link" (get-in result [1 :class]))))))
+
+(deftest button-loading-test
+  (testing "loading adds btn-loading class"
+    (is (= ["btn" "btn-secondary" "btn-loading"]
+           (button/button-class-list {:loading true})))
+    (is (= ["btn" "btn-primary" "btn-sm" "btn-loading"]
+           (button/button-class-list {:variant :primary :size :sm :loading true}))))
+
+  (testing "loading button is disabled"
+    (let [result (button/button {:variant :primary :loading true} "Saving")]
+      (is (true? (get-in result [1 :disabled])))))
+
+  (testing "loading button renders spinner before children"
+    (let [result (button/button {:variant :primary :loading true} "Saving")]
+      (is (= :span (first (nth result 2))))
+      (is (= "spinner spinner-sm" (get-in (nth result 2) [1 :class])))
+      (is (= "Saving" (nth result 3)))))
+
+  (testing "sm loading button uses xs spinner"
+    (let [result (button/button {:variant :primary :size :sm :loading true} "Saving")]
+      (is (= "spinner spinner-xs" (get-in (nth result 2) [1 :class])))))
+
+  (testing "loading replaces icon-left with spinner"
+    (let [result (button/button {:variant :primary :icon-left :plus :loading true} "Add")]
+      (is (= :span (first (nth result 2))))
+      (is (= "Add" (nth result 3)))))
+
+  (testing "loading replaces icon-only icon with spinner"
+    (let [result (button/button {:variant :primary :icon :plus :loading true})]
+      (is (= :span (first (nth result 2))))
+      (is (= "spinner spinner-sm" (get-in (nth result 2) [1 :class]))))))
 
 (deftest button-icon-class-list-test
   (testing "icon-only adds btn-icon class"

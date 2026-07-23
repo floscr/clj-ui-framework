@@ -6,10 +6,11 @@
 
 (defn spinner-class-list
   "Generate a vector of CSS class strings for a spinner.
-   Sizes: :sm, :md (default), :lg."
+   Sizes: :xs, :sm, :md (default), :lg."
   [{:keys [size]}]
   (let [s (or (some-> size util/kw-name) default-size)]
     (cond-> ["spinner"]
+      (= s "xs") (conj "spinner-xs")
       (= s "sm") (conj "spinner-sm")
       (= s "lg") (conj "spinner-lg"))))
 
@@ -22,7 +23,7 @@
   "Render a spinner element.
 
    Props:
-     :size  - :sm, :md, :lg
+     :size  - :xs, :sm, :md, :lg
      :class - additional CSS classes
      :attrs - additional HTML attributes"
   [{:keys [size class attrs] :as _props}]

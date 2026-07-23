@@ -17,6 +17,7 @@
             [ui.accordion :as accordion]
             [ui.table :as table]
             [ui.spinner :as spinner]
+            [ui.empty-state :as empty-state]
             [ui.skeleton :as skeleton]
             [ui.progress :as progress]
             [ui.switch :as switch]
@@ -59,7 +60,7 @@
 ;; ── Layout helpers ──────────────────────────────────────────────────
 
 (defn section [title & children]
-  (let [id (str/lower-case title)]
+  (let [id (-> title str/lower-case (str/replace #"\s+" "-"))]
     [:section {:id id :style (sx {:margin-bottom "2.5rem"})}
      [:h3 {:style (sx {:color "var(--fg-1)" :margin-bottom "1rem"
                        :border-bottom "var(--border-0)" :padding-bottom "0.5rem"})} title]
@@ -74,7 +75,7 @@
 
 ;; ── Shared data ─────────────────────────────────────────────────────
 
-(def button-variants [:primary :secondary :ghost :danger])
+(def button-variants [:primary :secondary :ghost :danger :success])
 (def button-sizes [:sm :md :lg])
 
 ;; ── Component demos (static, stateless) ─────────────────────────────
@@ -116,7 +117,14 @@
              (button/button {:variant :secondary :icon :pause :round true})
              (button/button {:variant :ghost :icon :heart :round true})
              (button/button {:variant :primary :icon :plus :size :sm :round true})
-             (button/button {:variant :primary :icon :plus :size :lg :round true})]))))
+             (button/button {:variant :primary :icon :plus :size :lg :round true})])
+      (into [:div {:style (sx hstack)}]
+            [(button/button {:variant :primary :loading true} "Saving…")
+             (button/button {:variant :success :loading true} "Publishing…")
+             (button/button {:variant :secondary :loading true :size :sm} "Loading sm")
+             (button/button {:variant :secondary :loading true :size :lg} "Loading lg")
+             (button/button {:variant :primary :icon-left :upload :loading true} "Uploading…")
+             (button/button {:variant :primary :icon :plus :loading true})]))))
 
 (defn alert-demo []
   (section "Alert"
@@ -182,9 +190,18 @@
 (defn spinner-demo []
   (section "Spinner"
     [:div {:style (sx {:display "flex" :gap "1.5rem" :align-items "center"})}
+     (spinner/spinner {:size :xs})
      (spinner/spinner {:size :sm})
      (spinner/spinner {})
      (spinner/spinner {:size :lg})]))
+
+(defn empty-state-demo []
+  (section "Empty State"
+    [:div {:style (sx {:border "var(--border-0)" :border-radius "var(--radius-md)"})}
+     (empty-state/empty-state {} "No items yet")]
+    [:div {:style (sx {:border "var(--border-0)" :border-radius "var(--radius-md)" :margin-top "1rem"})}
+     (empty-state/empty-state {:icon :inbox}
+       [:p "No photos yet — upload or take one."])]))
 
 (defn skeleton-demo []
   (section "Skeleton"

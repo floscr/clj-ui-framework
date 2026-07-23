@@ -46,6 +46,14 @@
   filter: brightness(1.1);
 }
 
+.btn-success {
+  background: var(--success);
+  color: var(--fg-on-success);
+}
+.btn-success:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+
 .btn-link {
   background: transparent;
   color: var(--accent);
@@ -96,6 +104,15 @@ a.btn-link {
 
 .btn-icon-round {
   border-radius: 9999px;
+}
+
+/* ── Loading ─────────────────────────────────────────────────── */
+
+/* Spinner inside a loading button adapts to the button's text color
+   so it stays visible on any variant (primary, success, ghost, …). */
+.btn-loading .spinner {
+  border-color: color-mix(in srgb, currentColor 30%, transparent);
+  border-top-color: currentColor;
 }
 
 /* ── Disabled ────────────────────────────────────────────────── */
