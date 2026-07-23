@@ -36,10 +36,15 @@
    For non-squint apps, use ui.css.gen/build-css directly.
 
    Options:
-     :link-target   — path where the src symlink is created (e.g. \"app/lib/ui\")
-     :theme-target  — path where theme.css is written (e.g. \"app/lib/theme.css\")
-     :theme         — optional token overrides (same as build-css opts)"
-  [{:keys [link-target theme-target theme]}]
+     :link-target    — path where the src symlink is created (e.g. \"app/lib/ui\")
+     :theme-target   — path where theme.css is written (e.g. \"app/lib/theme.css\")
+     :runtime-target — optional path where the JS runtime (ui-runtime.js) is
+                       written (e.g. \"app/lib/ui-runtime.js\"). Needed by
+                       components with browser-side behavior (context menus,
+                       toasts, masonry, …). Reference it from index.html as
+                       <script type=\"module\" src=\"lib/ui-runtime.js\">
+     :theme          — optional token overrides (same as build-css opts)"
+  [{:keys [link-target theme-target runtime-target theme]}]
   (let [ui-src (find-ui-src)]
     (when-not ui-src
       (println "ERROR: clj-ui-framework not found on classpath.")
@@ -55,4 +60,8 @@
       (println "Linked" link-target "→" ui-src))
 
     ;; Generate CSS
-    (css/build-css (merge theme {:output theme-target}))))
+    (css/build-css (merge theme {:output theme-target}))
+
+    ;; Copy JS runtime
+    (when runtime-target
+      (css/build-js {:output runtime-target}))))
