@@ -3,4 +3,5 @@
             [context-menu]
             [drop-zone]
             [popover]
-            [theme]))
+            [theme]
+            [toast]))

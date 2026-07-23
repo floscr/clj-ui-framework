@@ -305,6 +305,9 @@
   function truth_(x) {
     return x != null && x !== false;
   }
+  function number_QMARK_(x) {
+    return typeof x == "number";
+  }
   var _metaSym = Symbol("meta");
   var SortedSet = class _SortedSet {
     constructor(xs) {
@@ -1344,4 +1347,104 @@
     }));
   };
   window["__uiTheme"] = { "init": init_BANG_4, "set": set_mode_BANG_, "get": get_mode, "effective": get_effective, "toggle": toggle_BANG_, "subscribe": subscribe_BANG_ };
+
+  // .compiled/toast.mjs
+  var container_id = "ui-toast-container";
+  var ensure_container_BANG_ = function() {
+    const or__23426__auto__1 = document.getElementById(container_id);
+    if (truth_(or__23426__auto__1)) {
+      return or__23426__auto__1;
+    } else {
+      const el2 = document.createElement("div");
+      el2.id = container_id;
+      el2.className = "toast-container";
+      document.body.appendChild(el2);
+      return el2;
+    }
+    ;
+  };
+  var dismiss_BANG_2 = function(el) {
+    if (truth_(el["__uiToastDismissed"])) {
+      return null;
+    } else {
+      el["__uiToastDismissed"] = true;
+      el.classList.add("toast-leaving");
+      return setTimeout((function() {
+        return el.remove();
+      }), 300);
+    }
+    ;
+  };
+  var show_BANG_ = function(message, opts) {
+    const opts1 = (() => {
+      const or__23426__auto__2 = opts;
+      if (truth_(or__23426__auto__2)) {
+        return or__23426__auto__2;
+      } else {
+        return {};
+      }
+      ;
+    })();
+    const variant3 = (() => {
+      const or__23426__auto__4 = opts1["variant"];
+      if (truth_(or__23426__auto__4)) {
+        return or__23426__auto__4;
+      } else {
+        return "info";
+      }
+      ;
+    })();
+    const raw_dur5 = opts1["duration"];
+    const duration6 = truth_(number_QMARK_(raw_dur5)) ? raw_dur5 : 5e3;
+    const container7 = ensure_container_BANG_();
+    const el8 = document.createElement("div");
+    el8.className = `${"toast toast-"}${variant3 ?? ""}`;
+    el8.textContent = `${message ?? ""}`;
+    el8.setAttribute("role", "status");
+    el8.addEventListener("click", (function(_) {
+      return dismiss_BANG_2(el8);
+    }));
+    container7.appendChild(el8);
+    if (duration6 > 0) {
+      setTimeout((function() {
+        return dismiss_BANG_2(el8);
+      }), duration6);
+    }
+    ;
+    return el8;
+  };
+  var consume_BANG_ = function(el) {
+    const msg1 = el.getAttribute("data-ui-toast");
+    const dur2 = el.getAttribute("data-duration");
+    el.remove();
+    return show_BANG_(msg1, { "variant": (() => {
+      const or__23426__auto__3 = el.getAttribute("data-variant");
+      if (truth_(or__23426__auto__3)) {
+        return or__23426__auto__3;
+      } else {
+        return "info";
+      }
+      ;
+    })(), "duration": truth_(dur2) ? parseInt(dur2, 10) : null });
+  };
+  var scan_BANG_ = function() {
+    for (let G__1 of iterable(Array.from(document.querySelectorAll("[data-ui-toast]")))) {
+      const el2 = G__1;
+      consume_BANG_(el2);
+    }
+    return null;
+  };
+  var init_BANG_5 = function() {
+    scan_BANG_();
+    const obs1 = new MutationObserver((function(_, _2) {
+      return scan_BANG_();
+    }));
+    return obs1.observe(document.body, { "childList": true, "subtree": true });
+  };
+  window["__uiToast"] = show_BANG_;
+  if ("loading" === document.readyState) {
+    document.addEventListener("DOMContentLoaded", init_BANG_5);
+  } else {
+    init_BANG_5();
+  }
 })();

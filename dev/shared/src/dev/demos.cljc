@@ -20,6 +20,7 @@
             [ui.empty-state :as empty-state]
             [ui.drop-zone :as drop-zone]
             [ui.processing-bar :as processing-bar]
+            [ui.toast :as toast]
             [ui.skeleton :as skeleton]
             [ui.progress :as progress]
             [ui.switch :as switch]
@@ -220,6 +221,32 @@
        [:div {:style (sx {:width "64px" :height "64px" :border-radius "var(--radius-md)" :background "var(--bg-2)"})}]]
       (drop-zone/file-label {}
         [:span "+ Add more"]))))
+
+(def toast-variants [:info :success :warning :danger])
+
+#?(:squint (defn- toast-click [v]
+             (fn [_] (toast/show-toast! {:message (str "Toast — " v) :variant v})))
+   :cljs   (defn- toast-click [v]
+             (fn [_] (toast/show-toast! {:message (str "Toast — " (kw-name v)) :variant v})))
+   :clj    (defn- toast-click [_v] nil))
+
+(defn toast-demo []
+  (section "Toast"
+    (into [:div {:style (sx {:display "flex" :gap "0.75rem" :flex-wrap "wrap"})}]
+          (map (fn [v]
+                 (button/button
+                  (cond-> {:variant :secondary
+                           :on-click (toast-click v)}
+                    #?(:squint false :cljs false :clj true)
+                    (assoc :attrs {:onclick (str "__uiToast('Toast — " (kw-name v)
+                                                 "', {variant: '" (kw-name v) "'})")}))
+                  (str "Show " (kw-name v))))
+               toast-variants))
+    [:div {:style (sx {:display "flex" :flex-direction "column" :gap "0.5rem" :align-items "flex-start"})}
+     (toast/toast {:variant :info} "Static toast preview")
+     (toast/toast {:variant :success} "✓ Saved")
+     (toast/toast {:variant :warning} "Careful with this")
+     (toast/toast {:variant :danger} "✗ Something failed")]))
 
 (defn processing-bar-demo []
   (section "Processing Bar"
