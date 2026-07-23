@@ -34,13 +34,14 @@
      :icon     - icon name keyword (optional, e.g. :calendar)
      :shortcut - keyboard shortcut hint string (optional, e.g. \"⌘P\")
      :url      - if set, renders an <a> that navigates on select
+     :description - secondary subline text shown under the label (optional)
      :value    - explicit search text (defaults to the item's text content)
      :on-click - selection callback (replicant/squint only)
      :disabled - boolean
      :class    - additional CSS classes
      :attrs    - additional HTML attributes
    Children form the item label."
-  [{:keys [icon shortcut url value on-click disabled class attrs] :as _props} & children]
+  [{:keys [icon shortcut description url value on-click disabled class attrs] :as _props} & children]
   (let [tag       (if url :a :button)
         icon-el   (when icon (icon/icon {:icon-name icon :size :sm
                                          :class "command-item-icon"}))
@@ -53,9 +54,14 @@
                             (when url {:href url})
                             (when (= tag :button) {:type "button"})
                             (when on-click {:on-click on-click})
-                            attrs)]
+                            attrs)
+             label-el (into [:span {:class "command-item-label"}] children)
+             text-el  (if (seq description)
+                        [:span {:class "command-item-text"} label-el
+                         [:span {:class "command-item-desc"} description]]
+                        label-el)]
          (into [tag base] (concat (when icon-el [icon-el])
-                                  [(into [:span {:class "command-item-label"}] children)]
+                                  [text-el]
                                   (when shortcut-el [shortcut-el]))))
 
        :cljs
@@ -66,9 +72,14 @@
                             (when url {:href url})
                             (when (= tag :button) {:type "button"})
                             (when on-click {:on {:click on-click}})
-                            attrs)]
+                            attrs)
+             label-el (into [:span {:class ["command-item-label"]}] children)
+             text-el  (if (seq description)
+                        [:span {:class ["command-item-text"]} label-el
+                         [:span {:class ["command-item-desc"]} description]]
+                        label-el)]
          (into [tag base] (concat (when icon-el [icon-el])
-                                  [(into [:span {:class ["command-item-label"]}] children)]
+                                  [text-el]
                                   (when shortcut-el [shortcut-el]))))
 
        :clj
@@ -78,9 +89,14 @@
                             (when disabled {:disabled true})
                             (when url {:href url})
                             (when (= tag :button) {:type "button"})
-                            attrs)]
+                            attrs)
+             label-el (into [:span {:class "command-item-label"}] children)
+             text-el  (if (seq description)
+                        [:span {:class "command-item-text"} label-el
+                         [:span {:class "command-item-desc"} description]]
+                        label-el)]
          (into [tag base] (concat (when icon-el [icon-el])
-                                  [(into [:span {:class "command-item-label"}] children)]
+                                  [text-el]
                                   (when shortcut-el [shortcut-el])))))))
 
 ;; ── Group ───────────────────────────────────────────────────────────

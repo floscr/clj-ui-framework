@@ -137,6 +137,26 @@
   text-overflow: ellipsis;
 }
 
+/* Stacked label + subline (set via command-item :description). */
+.command-item-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.command-item-text .command-item-label {
+  flex: 0 0 auto;
+}
+
+.command-item-desc {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: var(--font-xs);
+  color: var(--fg-2);
+}
+
 /* Active item — set by the JS runtime during keyboard/pointer navigation. */
 .command-item--active,
 .command-item:hover:not(:disabled) {
