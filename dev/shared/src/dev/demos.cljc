@@ -19,6 +19,7 @@
             [ui.spinner :as spinner]
             [ui.empty-state :as empty-state]
             [ui.drop-zone :as drop-zone]
+            [ui.processing-bar :as processing-bar]
             [ui.skeleton :as skeleton]
             [ui.progress :as progress]
             [ui.switch :as switch]
@@ -219,6 +220,14 @@
        [:div {:style (sx {:width "64px" :height "64px" :border-radius "var(--radius-md)" :background "var(--bg-2)"})}]]
       (drop-zone/file-label {}
         [:span "+ Add more"]))))
+
+(defn processing-bar-demo []
+  (section "Processing Bar"
+    (processing-bar/processing-bar {:title "⏳ 2 uploads processing..."}
+      (processing-bar/processing-item {:thumb "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36'%3E%3Crect fill='%234f46e5' width='36' height='36'/%3E%3C/svg%3E"
+                                       :label "3 photos"
+                                       :status "AI analyzing..."})
+      (processing-bar/processing-item {:status "🔧 optimize-images"}))))
 
 (defn skeleton-demo []
   (section "Skeleton"

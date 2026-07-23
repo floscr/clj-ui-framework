@@ -104,6 +104,7 @@
               [ui.player-bar-test]
               [ui.file-browser-test]
               [ui.file-progress-test]
+              [ui.processing-bar-test]
               [ui.theme-test]
               [ui.theme-toggle-test])
    :task (let [{:keys [fail error]} (t/run-tests
@@ -138,6 +139,7 @@
                                       'ui.player-bar-test
                                       'ui.file-browser-test
                                       'ui.file-progress-test
+                                      'ui.processing-bar-test
                                       'ui.theme-test
                                       'ui.theme-toggle-test)]
            (when (pos? (+ fail error))

@@ -36,7 +36,7 @@
             [ui.theme-toggle :as theme-toggle]
             [dev.demos :refer [section page-header button-demo alert-demo badge-demo
                                card-demo accordion-demo table-demo spinner-demo
-                               empty-state-demo drop-zone-demo
+                               empty-state-demo drop-zone-demo processing-bar-demo
                                skeleton-demo progress-demo switch-demo tooltip-demo
                                breadcrumb-demo separator-demo form-demo
                                popover-demo command-demo toolbar-demo tabs-demo]]))
@@ -308,6 +308,7 @@
    (spinner-demo)
    (empty-state-demo)
    (drop-zone-demo)
+   (processing-bar-demo)
    (skeleton-demo)
    (progress-demo)
    (theme-toggle-demo)
@@ -613,6 +614,7 @@
             {:label "Spinner" :anchor "spinner"}
             {:label "Empty State" :anchor "empty-state"}
             {:label "Drop Zone" :anchor "drop-zone"}
+            {:label "Processing Bar" :anchor "processing-bar"}
             {:label "Skeleton" :anchor "skeleton"}
             {:label "Tooltip" :anchor "tooltip"}]}
    {:title "Layout"
