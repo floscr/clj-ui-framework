@@ -89,13 +89,16 @@
                                        :height {:ideal 1080}}})
                (.then (fn [stream]
                         (reset! stream* stream)
+                        ;; on-active first: the consumer typically flips
+                        ;; state that renders the <video>; the rAF then
+                        ;; finds it and attaches the stream.
+                        (when on-active (on-active))
                         (js/requestAnimationFrame
                          (fn []
                            (when-let [video (js/document.getElementById
                                              (or video-id "ui-camera-video"))]
                              (set! (.-srcObject video) stream)
-                             (.play video))))
-                        (when on-active (on-active))))
+                             (.play video))))))
                (.catch (fn [err]
                          (when on-error (on-error err)))))))
 
@@ -190,13 +193,16 @@
                                                 :height {:ideal 1080}}}))
                (.then (fn [stream]
                         (reset! stream* stream)
+                        ;; on-active first: the consumer typically flips
+                        ;; state that renders the <video>; the rAF then
+                        ;; finds it and attaches the stream.
+                        (when on-active (on-active))
                         (js/requestAnimationFrame
                          (fn []
                            (when-let [video (js/document.getElementById
                                              (or video-id "ui-camera-video"))]
                              (set! (.-srcObject video) stream)
-                             (.play video))))
-                        (when on-active (on-active))))
+                             (.play video))))))
                (.catch (fn [err]
                          (when on-error (on-error err)))))))
 
