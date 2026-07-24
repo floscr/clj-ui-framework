@@ -10,9 +10,11 @@
       a mouse to a tablet).
 
    2. On touch devices, hardens the page against zoom gestures:
-      - rewrites (or creates) the viewport meta with
-        maximum-scale=1 / user-scalable=no / viewport-fit=cover
-        (also prevents the iOS zoom-on-input-focus)
+      - merges maximum-scale=1 / user-scalable=no / viewport-fit=cover
+        into the viewport meta (creating it if missing), preserving
+        any app-specific properties already there (e.g.
+        interactive-widget=resizes-content). Also prevents the iOS
+        zoom-on-input-focus.
       - blocks the iOS Safari pinch gesture (gesturestart), which
         ignores user-scalable=no
 
@@ -23,19 +25,43 @@
    side-effect require of [ui.js.touch] (squint/replicant SPAs).
 
    Imperative API: window.__uiTouch() re-syncs the class and returns
-   whether touch mode is active.")
+   whether touch mode is active."
+  (:require [clojure.string :as str]))
 
 (def ^:private mq (js/window.matchMedia "(hover: none)"))
 
-(def ^:private viewport-content
-  "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover")
+(def ^:private viewport-overrides
+  [["width" "device-width"]
+   ["initial-scale" "1.0"]
+   ["maximum-scale" "1.0"]
+   ["user-scalable" "no"]
+   ["viewport-fit" "cover"]])
+
+(defn- merge-viewport
+  "Merge the zoom-hardening properties into an existing viewport content
+   string, preserving app-specific properties (order: existing first)."
+  [existing]
+  (let [entries (->> (.split (or existing "") ",")
+                     (map (fn [s] (.trim s)))
+                     (remove (fn [s] (= "" s)))
+                     (map (fn [s]
+                            (let [i (.indexOf s "=")]
+                              (if (neg? i)
+                                [s nil]
+                                [(.trim (.slice s 0 i)) (.trim (.slice s (inc i)))])))))
+        override-keys (set (map first viewport-overrides))
+        kept (remove (fn [[k _]] (contains? override-keys k)) entries)]
+    (->> (concat kept viewport-overrides)
+         (map (fn [[k v]] (if (nil? v) k (str k "=" v))))
+         (str/join ", "))))
 
 (defn- harden-viewport! []
   (if-let [meta-el (js/document.querySelector "meta[name=viewport]")]
-    (.setAttribute meta-el "content" viewport-content)
+    (.setAttribute meta-el "content"
+                   (merge-viewport (.getAttribute meta-el "content")))
     (let [m (js/document.createElement "meta")]
       (.setAttribute m "name" "viewport")
-      (.setAttribute m "content" viewport-content)
+      (.setAttribute m "content" (merge-viewport nil))
       (.appendChild (.-head js/document) m))))
 
 (defn- sync! []

@@ -108,6 +108,17 @@
     if (obj instanceof Object) return OBJECT_TYPE;
     return void 0;
   }
+  function contains_QMARK_(coll, v) {
+    switch (typeConst(coll)) {
+      case SET_TYPE:
+      case MAP_TYPE:
+        return coll.has(v);
+      case void 0:
+        return false;
+      default:
+        return v in coll;
+    }
+  }
   function nth(coll, idx, orElse) {
     if (coll) {
       var elt = void 0;
@@ -258,6 +269,44 @@
         });
     }
   }
+  function filter1(pred) {
+    return (rf) => {
+      return (...args) => {
+        switch (args.length) {
+          case 0:
+            return rf();
+          case 1:
+            return rf(args[0]);
+          case 2: {
+            const result = args[0];
+            const input = args[1];
+            if (truth_(pred(input))) {
+              return rf(result, input);
+            } else return result;
+          }
+        }
+      };
+    };
+  }
+  function filter(pred, coll) {
+    if (arguments.length === 1) {
+      return filter1(pred);
+    }
+    pred = toFn(pred);
+    return lazy(function* () {
+      for (const x of iterable(coll)) {
+        if (truth_(pred(x))) {
+          yield x;
+        }
+      }
+    });
+  }
+  function remove(pred, coll) {
+    if (arguments.length === 1) {
+      return filter1(complement(pred));
+    }
+    return filter(complement(pred), coll);
+  }
   function not(expr) {
     return !truth_(expr);
   }
@@ -327,7 +376,14 @@
     }
     return [...map(...args)];
   }
+  function set(coll) {
+    return new Set(iterable(coll));
+  }
   var IApply__apply = Symbol("IApply__apply");
+  function complement(f) {
+    f = toFn(f);
+    return (...args) => not(f(...args));
+  }
   var List = class extends Array {
     constructor(...args) {
       super();
@@ -1667,18 +1723,78 @@
     init_BANG_6();
   }
 
+  // ../../../dev/squint/node_modules/squint-cljs/src/squint/string.js
+  function join(sep, coll) {
+    if (coll === void 0) {
+      coll = sep;
+      sep = "";
+    }
+    if (coll instanceof Array) {
+      return coll.join(sep);
+    }
+    let ret = "";
+    let addSep = false;
+    for (const o of iterable(coll)) {
+      if (addSep) ret += sep;
+      ret += o;
+      addSep = true;
+    }
+    return ret;
+  }
+
   // .compiled/touch.mjs
   var mq = window.matchMedia("(hover: none)");
-  var viewport_content = "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover";
+  var viewport_overrides = [["width", "device-width"], ["initial-scale", "1.0"], ["maximum-scale", "1.0"], ["user-scalable", "no"], ["viewport-fit", "cover"]];
+  var merge_viewport = function(existing) {
+    const entries1 = map((function(s) {
+      const i2 = s.indexOf("=");
+      if (i2 < 0) {
+        return [s, null];
+      } else {
+        return [s.slice(0, i2).trim(), s.slice(i2 + 1).trim()];
+      }
+      ;
+    }), remove((function(s) {
+      return _EQ_("", s);
+    }), map((function(s) {
+      return s.trim();
+    }), (() => {
+      const or__23426__auto__3 = existing;
+      if (truth_(or__23426__auto__3)) {
+        return or__23426__auto__3;
+      } else {
+        return "";
+      }
+      ;
+    })().split(","))));
+    const override_keys4 = set(map(first, viewport_overrides));
+    const kept5 = remove((function(p__8) {
+      const vec__69 = p__8;
+      const k10 = nth(vec__69, 0, null);
+      const _11 = nth(vec__69, 1, null);
+      return contains_QMARK_(override_keys4, k10);
+    }), entries1);
+    return join(", ", map((function(p__9) {
+      const vec__1215 = p__9;
+      const k16 = nth(vec__1215, 0, null);
+      const v17 = nth(vec__1215, 1, null);
+      if (v17 == null) {
+        return k16;
+      } else {
+        return `${k16 ?? ""}${"="}${v17 ?? ""}`;
+      }
+      ;
+    }), concat(kept5, viewport_overrides)));
+  };
   var harden_viewport_BANG_ = function() {
     const temp__23007__auto__1 = document.querySelector("meta[name=viewport]");
     if (truth_(temp__23007__auto__1)) {
       const meta_el2 = temp__23007__auto__1;
-      return meta_el2.setAttribute("content", viewport_content);
+      return meta_el2.setAttribute("content", merge_viewport(meta_el2.getAttribute("content")));
     } else {
       const m3 = document.createElement("meta");
       m3.setAttribute("name", "viewport");
-      m3.setAttribute("content", viewport_content);
+      m3.setAttribute("content", merge_viewport(null));
       return document.head.appendChild(m3);
     }
     ;
