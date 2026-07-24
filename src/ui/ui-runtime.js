@@ -566,6 +566,24 @@
     }
     ;
   };
+  var observe_list_BANG_ = function(dialog) {
+    const temp__23062__auto__1 = dialog["__cmdListObs"];
+    if (truth_(temp__23062__auto__1)) {
+      const prev2 = temp__23062__auto__1;
+      prev2.disconnect();
+    }
+    ;
+    const list3 = dialog.querySelector(".command-list");
+    if (truth_(list3)) {
+      const obs4 = new MutationObserver((function(_, _5) {
+        const input6 = dialog.querySelector(".command-input");
+        return filter_BANG_(dialog, truth_(input6) ? input6.value : "");
+      }));
+      obs4.observe(list3, { "childList": true, "subtree": true });
+      return dialog["__cmdListObs"] = obs4;
+    }
+    ;
+  };
   var open = function(id) {
     const dialog1 = find_dialog(id);
     if (truth_((() => {
@@ -584,7 +602,8 @@
         input3.focus();
       }
       ;
-      return filter_BANG_(dialog1, "");
+      filter_BANG_(dialog1, "");
+      return observe_list_BANG_(dialog1);
     }
     ;
   };

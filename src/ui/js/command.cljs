@@ -78,6 +78,26 @@
 (defn- find-dialog [id]
   (when id (.getElementById js/document id)))
 
+;; Items may be populated asynchronously (e.g. a list fetched after the dialog
+;; opens, or a framework re-render that swaps in a sub-page). filter! only runs
+;; on open and on input, so those late items would keep a stale
+;; "command-list--empty" state — showing "No results found." over real rows.
+;; Watch the open dialog's list and re-run filter! with the current query when
+;; its contents change. class/attribute writes from filter! itself don't
+;; retrigger it (we observe childList only). The observer is stored on the
+;; dialog element and replaced on the next open, so at most one runs per dialog.
+(defn- observe-list! [dialog]
+  (when-let [prev (aget dialog "__cmdListObs")]
+    (.disconnect prev))
+  (let [list (.querySelector dialog ".command-list")]
+    (when list
+      (let [obs (js/MutationObserver.
+                 (fn [_ _]
+                   (let [input (.querySelector dialog ".command-input")]
+                     (filter! dialog (if input (.-value input) "")))))]
+        (.observe obs list #js {:childList true :subtree true})
+        (aset dialog "__cmdListObs" obs)))))
+
 (defn open [id]
   (let [dialog (find-dialog id)]
     (when (and dialog (not (.-open dialog)))
@@ -86,7 +106,8 @@
         (when input
           (set! (.-value input) "")
           (.focus input)))
-      (filter! dialog ""))))
+      (filter! dialog "")
+      (observe-list! dialog))))
 
 (defn close [id]
   (let [dialog (find-dialog id)]
