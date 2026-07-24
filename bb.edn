@@ -1,6 +1,6 @@
 {:deps {tmux-dev/tmux-dev {:git/url "https://git.example.com/floscr/tmux-dev"
                            :git/sha "3d9e53bc38b818bfcee312065ded0aef83bdecf4"}}
- :paths ["src" "test" "dev/hiccup/src" "dev/shared/src"]
+ :paths ["src" "test" "dev/hiccup/src" "dev/shared/src" "scripts"]
 
  :tasks
  {:requires ([tmux-dev.core :as td]
@@ -222,6 +222,31 @@
   dev:status
   {:doc "Show dev server status"
    :task (td/status dev-config)}
+
+  list-components
+  {:doc "List all UI components and their public API"
+   :requires ([tools.registry :as registry])
+   :task (registry/print-components!)}
+
+  list-icons
+  {:doc "List all icons (* = dedicated filled variant)"
+   :requires ([tools.registry :as registry])
+   :task (registry/print-icons!)}
+
+  gen-docs
+  {:doc "Generate docs/components.md (component + icon listing)"
+   :requires ([tools.registry :as registry])
+   :task (registry/gen-docs!)}
+
+  scan-consumers
+  {:doc "Scan code dirs for projects depending on clj-ui-framework"
+   :requires ([tools.consumers :as consumers])
+   :task (consumers/scan! *command-line-args*)}
+
+  sync-consumer-agents
+  {:doc "Upsert the UI-framework section into consumers' AGENTS.md"
+   :requires ([tools.consumers :as consumers])
+   :task (consumers/sync-agents! *command-line-args*)}
 
   check-dev
   {:doc "Check all ui-dev tmux panes for errors and verify dev servers"

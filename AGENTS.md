@@ -212,6 +212,11 @@ bb dev:status     # Show dev server status
 bb dev-hiccup     # Start hiccup server only (port 3003)
 bb dev-replicant  # Start replicant dev only (port 3001)
 bb dev-squint     # Start squint dev only (port 3002)
+bb list-components        # List all components + public API
+bb list-icons             # List all icons (* = dedicated filled variant)
+bb gen-docs               # Regenerate docs/components.md
+bb scan-consumers         # Find repos depending on this framework
+bb sync-consumer-agents   # Upsert UI-framework note into consumers' AGENTS.md
 ```
 
 Replicant and squint need `npm install` in their dev directories first.
@@ -409,6 +414,7 @@ Add the component to all three dev targets so it renders in the visual test page
 ```sh
 bb build-theme   # Regenerate CSS with new component styles
 bb test          # All tests pass
+bb gen-docs      # Refresh docs/components.md (component/icon listing)
 ```
 
 ### 6. Never start dev servers from the agent — CRITICAL
@@ -438,6 +444,29 @@ If a compiled squint file is empty (1 line = just the import), touch the source 
 ```sh
 touch src/ui/<module>.cljc
 ```
+
+## Consumer Tooling & Docs
+
+`docs/components.md` is the generated listing of every component (with
+public API) and every icon. Regenerate with `bb gen-docs` whenever a
+component or icon is added/removed — consumers' AGENTS.md files point to it.
+
+- `bb scan-consumers [roots...]` — walks `~/Code` and `~/.config/dotfiles`
+  (or the given roots) for `bb.edn`/`deps.edn` that depend on this
+  framework: git deps under any coordinate name, vendored
+  `deps/clj-ui-framework` checkouts, and transitive consumers via
+  `:local/root` libs (e.g. bb-services through server-lib). Reports each
+  project's pinned sha vs the current HEAD (`STALE` markers show who needs
+  a bump after a release).
+- `bb sync-consumer-agents [roots...]` — upserts a marker-delimited
+  "UI Framework" section (`<!-- clj-ui-framework:begin/end -->`) into each
+  consumer project's `AGENTS.md`, pointing agents at this repo's AGENTS.md
+  and `docs/components.md`. Idempotent; run it after changing the section
+  template in `scripts/tools/consumers.clj` or when new consumers appear.
+
+The implementation lives in `scripts/tools/` (`tools.registry`,
+`tools.consumers`) — local bb tasks only, not shipped to consumers
+(`deps.edn` `:paths` stays `["src"]`).
 
 ## Theme System
 
