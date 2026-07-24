@@ -1666,4 +1666,21 @@
   } else {
     init_BANG_6();
   }
+
+  // .compiled/touch.mjs
+  var mq = window.matchMedia("(hover: none)");
+  var sync_BANG_ = function() {
+    const touch_QMARK_1 = mq.matches;
+    const cl2 = document.documentElement.classList;
+    if (truth_(touch_QMARK_1)) {
+      cl2.add("clj-ui-touch");
+    } else {
+      cl2.remove("clj-ui-touch");
+    }
+    ;
+    return touch_QMARK_1;
+  };
+  window["__uiTouch"] = sync_BANG_;
+  sync_BANG_();
+  mq.addEventListener("change", sync_BANG_);
 })();

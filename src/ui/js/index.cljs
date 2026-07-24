@@ -5,4 +5,5 @@
             [masonry]
             [popover]
             [theme]
-            [toast]))
+            [toast]
+            [touch]))

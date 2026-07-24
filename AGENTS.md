@@ -629,16 +629,29 @@ Framework components already following this: tooltip (`ui/tooltip.css`,
 
 ## Touch Alternatives (`.clj-ui-touch`)
 
-The class `.clj-ui-touch` on an ancestor element (typically `<html>` or `<body>`) activates touch-friendly alternatives throughout the UI. This is a **consumer responsibility** — the framework provides the CSS rules, the app applies the class.
+The class `.clj-ui-touch` on `<html>` activates touch-friendly alternatives throughout the UI.
 
-### How to apply
+### How it's applied — automatic via the JS runtime
 
-```js
-// Detect touch and apply at startup
-if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
-  document.documentElement.classList.add('clj-ui-touch');
-}
-```
+The `ui.js.touch` runtime module detects touch devices and applies/removes the
+class on `<html>` automatically. Detection uses `matchMedia("(hover: none)")`
+— the primary input can't hover — mirroring the `@media (hover: hover)` gating
+in component CSS, and stays in sync when the media query changes (e.g.
+attaching a mouse to a tablet). `window.__uiTouch()` re-syncs on demand.
+
+Apps get it for free depending on target:
+
+- **Hiccup/server-rendered apps** — nothing to do; it's bundled in
+  `ui-runtime.js` (`css/build-js`).
+- **Squint/Replicant SPAs** — add a side-effect require, same as the other
+  runtime modules:
+
+  ```clojure
+  (:require [ui.js.touch])
+  ```
+
+Do **not** write per-app detection snippets (`'ontouchstart' in window`
+etc.) — use the runtime module so detection stays consistent.
 
 ### What changes
 
