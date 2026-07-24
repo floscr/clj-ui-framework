@@ -45,7 +45,12 @@
     ;; tile (O(n) layouts) — painfully slow in Firefox. This does one.
     (let [col-gap (js/parseFloat (.-columnGap (js/getComputedStyle container)))
           col-gap (if (js/isNaN col-gap) 0 col-gap)
-          heights (mapv (fn [item] (.-height (.getBoundingClientRect item))) items)]
+          ;; offsetHeight, not getBoundingClientRect: gBCR includes CSS
+          ;; transforms, so a tile mid press-feedback (scale 0.97 from
+          ;; ui/js/gestures) would measure ~3% short and shift the grid
+          ;; if a relayout fires during the press. offsetHeight is the
+          ;; untransformed border-box height.
+          heights (mapv (fn [item] (.-offsetHeight item)) items)]
       (doseq [[item h] (map vector items heights)]
         (set! (.. item -style -gridRowEnd)
               (str "span " (js/Math.round (+ h col-gap))))))))
