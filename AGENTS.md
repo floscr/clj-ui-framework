@@ -703,6 +703,55 @@ Use `.clj-ui-touch` as an ancestor selector to override hover-dependent interact
 
 **Convention:** touch rules go directly after the hover rule they override, with a `/* Touch: ... */` comment. The hover rules themselves must live inside `@media (hover: hover)`.
 
+## Long-Press → Context Menu (`ui.js.gestures`) — automatic
+
+iOS Safari never fires `contextmenu` from a long-press (Android does), so
+right-click menus would be unreachable on iPhone. The `ui.js.gestures`
+runtime module (bundled in ui-runtime.js) fixes this globally: a
+document-level long-press recognizer (Pointer Events, touch pointers only)
+dispatches a **synthetic `contextmenu` MouseEvent** on the pressed element
+after 500ms. Every existing contextmenu wiring — `context-menu-trigger`
+wrappers, app-level `:on-context-menu` handlers, hiccup inline handlers —
+works on touch with zero changes.
+
+**Opt-in surface** (which elements respond to long-press):
+
+- `.context-menu-trigger` — everything wrapped in
+  `ui.context-menu/context-menu-trigger` gets it automatically
+- `[data-long-press]` — add this attribute to any element with a custom
+  `contextmenu` handler (e.g. an imperative `window.__uiContextMenu` call)
+
+```clojure
+;; custom handler + touch long-press support:
+[:div {:data-long-press "true"
+       :on-context-menu (fn [e] (open-my-menu! e))}
+ ...]
+```
+
+**Built-in behaviors** — do NOT reimplement these per-app:
+
+- movement beyond 10px or release before 500ms cancels the press
+- a native contextmenu during the press (Android long-press) cancels the
+  synthetic one — no double-open
+- the click following a fired long-press is suppressed, so the press
+  doesn't also activate the element underneath
+- `.clj-ui-touch` CSS disables the iOS press callout / text selection on
+  the opt-in surface (ui/context_menu.css)
+
+**Rule: never hand-roll long-press recognizers in apps** (touchstart
+timers, click-suppression atoms, etc.) — add `data-long-press` (or use the
+trigger wrapper) and handle `contextmenu`.
+
+Imperative API: `window.__uiLongPress(el, x, y)` dispatches the same
+synthetic contextmenu (rarely needed).
+
+Squint/Replicant SPAs that don't load ui-runtime.js get it with a
+side-effect require, like the other runtime modules:
+
+```clojure
+(:require [ui.js.gestures])
+```
+
 ## Icons (`ui.icon`)
 
 Inline SVG icons using Lucide-compatible 24×24 paths. All icons are defined in `src/ui/icon.cljc`.
