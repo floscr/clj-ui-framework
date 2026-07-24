@@ -613,6 +613,32 @@ the built-in utility instead of writing custom CSS:
 - `.hover-reveal-item` — each control to hide until hover/focus-within
 - On touch devices (`hover: none`) the items are simply always visible
 
+### Baseline mobile optimizations — automatic
+
+The framework ships mobile hardening on two layers; apps must **not**
+duplicate these per-app:
+
+**CSS (`ui/mobile.css`, part of the generated theme):**
+
+- `text-size-adjust: 100%` — no text inflation on orientation change
+- `-webkit-tap-highlight-color: transparent` — no gray tap flash
+- `touch-action: manipulation` on interactive elements (`a`, `button`,
+  inputs, `label`, `summary`, `[role=button]`) — kills double-tap-to-zoom
+  and the 300ms click delay while keeping scrolling intact
+
+**JS runtime (`ui.js.touch`, touch devices only):**
+
+- Rewrites (or creates) the viewport meta to
+  `width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover`
+  — disables the zoom gesture on Android and iOS zoom-on-input-focus
+- Blocks the iOS Safari pinch gesture (`gesturestart` preventDefault),
+  which ignores `user-scalable=no`
+- Desktop is untouched (trackpad pinch zoom keeps working)
+
+Apps keep a plain `<meta name="viewport" content="width=device-width, initial-scale=1.0">`
+in their HTML — the runtime upgrades it on touch devices. Don't hand-write
+`user-scalable=no` metas or `gesturestart` handlers in apps.
+
 ### Checklist for new components
 
 1. **No bare hover-reveals** — grep your CSS for `:hover` rules that change

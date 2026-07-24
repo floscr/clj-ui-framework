@@ -1669,6 +1669,20 @@
 
   // .compiled/touch.mjs
   var mq = window.matchMedia("(hover: none)");
+  var viewport_content = "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover";
+  var harden_viewport_BANG_ = function() {
+    const temp__23007__auto__1 = document.querySelector("meta[name=viewport]");
+    if (truth_(temp__23007__auto__1)) {
+      const meta_el2 = temp__23007__auto__1;
+      return meta_el2.setAttribute("content", viewport_content);
+    } else {
+      const m3 = document.createElement("meta");
+      m3.setAttribute("name", "viewport");
+      m3.setAttribute("content", viewport_content);
+      return document.head.appendChild(m3);
+    }
+    ;
+  };
   var sync_BANG_ = function() {
     const touch_QMARK_1 = mq.matches;
     const cl2 = document.documentElement.classList;
@@ -1681,6 +1695,11 @@
     return touch_QMARK_1;
   };
   window["__uiTouch"] = sync_BANG_;
-  sync_BANG_();
+  if (truth_(sync_BANG_())) {
+    harden_viewport_BANG_();
+    document.addEventListener("gesturestart", (function(e) {
+      return e.preventDefault();
+    }));
+  }
   mq.addEventListener("change", sync_BANG_);
 })();

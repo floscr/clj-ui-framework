@@ -1,0 +1,28 @@
+/* ── Mobile base optimizations ────────────────────────────────── */
+/* Applied globally via the generated theme. Complemented by the    */
+/* ui.js.touch runtime module, which hardens the viewport meta and  */
+/* blocks the iOS pinch gesture on touch devices.                   */
+
+html {
+  /* Don't let mobile browsers inflate text on orientation change */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* Remove the gray/blue tap flash on iOS and Android */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Kill the double-tap-to-zoom gesture (and its 300ms click delay)
+   on interactive elements. `manipulation` still allows scrolling. */
+a,
+button,
+input,
+select,
+textarea,
+label,
+summary,
+[role="button"] {
+  touch-action: manipulation;
+}
