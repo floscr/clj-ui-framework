@@ -138,14 +138,17 @@
      :placeholder - search input placeholder (default \"Type a command or search…\")
      :hotkey      - global open shortcut, e.g. \"mod+k\" (mod = ⌘ on mac, Ctrl elsewhere)
      :empty       - empty-state text when no items match (default \"No results found.\")
+     :leading     - hiccup rendered in place of the default search icon (optional);
+                    e.g. a clickable back button (use class \"command-search-back\")
      :class       - additional CSS classes
      :attrs       - additional HTML attributes
    Children are command-group / command-item forms."
-  [{:keys [id placeholder hotkey empty class attrs] :as _props} & children]
+  [{:keys [id placeholder hotkey empty leading class attrs] :as _props} & children]
   (let [placeholder* (or placeholder "Type a command or search…")
         empty*       (or empty "No results found.")
+        leading*     (or leading (icon/icon {:icon-name :search :size :sm :class "command-search-icon"}))
         search   [:div {:class "command-search"}
-                  (icon/icon {:icon-name :search :size :sm :class "command-search-icon"})
+                  leading*
                   [:input {:class "command-input" :type "text" :role "combobox"
                            :placeholder placeholder* :autocomplete "off"
                            :spellcheck "false" :aria-label placeholder*}]]

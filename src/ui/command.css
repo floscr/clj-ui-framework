@@ -50,6 +50,23 @@
   flex-shrink: 0;
 }
 
+/* Clickable leading element (e.g. a back button) via the :leading slot. */
+.command-search-back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  color: var(--fg-2);
+  background: none;
+  border: none;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.command-search-back:hover {
+  color: var(--fg-0);
+}
+
 .command-input {
   flex: 1;
   min-width: 0;
