@@ -19,6 +19,9 @@
      long-press itself) cancels the synthetic one — no double-open
    - the click that follows a fired long-press is suppressed, so the
      press doesn't also activate the element underneath
+   - the pressed element gets a `.clj-ui-pressing` class while the
+     press is pending (CSS scales it down slightly for feedback);
+     removed on fire/cancel/release
    - pair with ui/context_menu.css: `.clj-ui-touch` disables the iOS
      press callout / text selection on the opt-in surface
 
@@ -28,14 +31,20 @@
 (def ^:private press-ms 500)
 (def ^:private slop-px 10)
 (def ^:private selector ".context-menu-trigger, [data-long-press]")
+(def ^:private press-class "clj-ui-pressing")
 
 ;; {:el .. :x .. :y .. :timer ..} while a press is pending, else nil
 (def ^:private press (atom nil))
 (def ^:private suppress-click? (atom false))
 
+(defn- clear-press-visual! [el]
+  (when el
+    (.remove (.-classList el) press-class)))
+
 (defn- cancel! []
   (when-let [p @press]
     (js/clearTimeout (:timer p))
+    (clear-press-visual! (:el p))
     (reset! press nil)))
 
 (defn- dispatch-contextmenu!
@@ -55,11 +64,13 @@
       (cancel!)
       (let [x (.-clientX e)
             y (.-clientY e)]
+        (.add (.-classList el) press-class)
         (reset! press
                 {:el el :x x :y y
                  :timer (js/setTimeout
                          (fn []
                            (reset! press nil)
+                           (clear-press-visual! el)
                            (reset! suppress-click? true)
                            (dispatch-contextmenu! el x y))
                          press-ms)})))))

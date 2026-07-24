@@ -735,6 +735,9 @@ works on touch with zero changes.
   synthetic one — no double-open
 - the click following a fired long-press is suppressed, so the press
   doesn't also activate the element underneath
+- the pressed element gets `.clj-ui-pressing` while the press is pending —
+  CSS scales it down slightly (`scale(0.97)`, iOS-style press feedback);
+  removed on fire/cancel/release
 - `.clj-ui-touch` CSS disables the iOS press callout / text selection on
   the opt-in surface (ui/context_menu.css)
 
