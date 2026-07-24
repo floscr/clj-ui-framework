@@ -70,6 +70,27 @@
   border: 0;
 }
 
+/* ── Hover reveal ─────────────────────────────────────────────── */
+/* Hide controls until their container is hovered — but ONLY on    */
+/* devices that actually hover. On touch devices the items stay    */
+/* visible, which also avoids the iOS first-tap-as-hover bug (a    */
+/* bare :hover reveal makes iOS suppress the first tap's click,    */
+/* forcing a double-tap). Put .hover-reveal on the container and   */
+/* .hover-reveal-item on each control it should reveal.            */
+/* :focus-within keeps the controls reachable by keyboard.         */
+
+@media (hover: hover) {
+  .hover-reveal .hover-reveal-item {
+    opacity: 0;
+    transition: opacity 120ms ease;
+  }
+
+  .hover-reveal:hover .hover-reveal-item,
+  .hover-reveal:focus-within .hover-reveal-item {
+    opacity: 1;
+  }
+}
+
 /* ── Hit area expand ──────────────────────────────────────────── */
 /* Expands the clickable/tappable area beyond visual bounds using  */
 /* a ::before pseudo-element. Apply .hit-area and set --hit-area   */

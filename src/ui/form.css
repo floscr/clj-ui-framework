@@ -333,10 +333,6 @@
   transform: translateY(4px);
 }
 
-.tooltip.form-error-icon:hover::after {
-  transform: translateY(0);
-}
-
 .tooltip.form-error-icon::before {
   border-top-color: color-mix(in srgb, var(--danger) 18%, var(--bg-1));
   left: auto;
@@ -344,8 +340,16 @@
   transform: translateY(4px);
 }
 
-.tooltip.form-error-icon:hover::before {
-  transform: translateY(0);
+/* Hover-reveal transforms — gated like the tooltip reveal itself
+   (see ui/tooltip.css). */
+@media (hover: hover) {
+  .tooltip.form-error-icon:hover::after {
+    transform: translateY(0);
+  }
+
+  .tooltip.form-error-icon:hover::before {
+    transform: translateY(0);
+  }
 }
 
 /* ── Fieldset & Legend ──────────────────────────────────────────── */

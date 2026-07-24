@@ -543,6 +543,7 @@ Toggle with: `document.documentElement.dataset.theme = "dark" | "light"`
 | **Color** | `.text-muted` (fg-1), `.text-faint` (fg-2) |
 | **Sizing** | `.w-full` |
 | **A11y** | `.sr-only` (visually hidden, screen-reader accessible) |
+| **Hover reveal** | `.hover-reveal` (container) + `.hover-reveal-item` (controls) — hidden until hover, but only on hover-capable devices; always visible on touch |
 | **Hit area** | `.hit-area` + `.hit-area-{2,3,4,6}` (expand clickable area via `::before` pseudo-element) |
 | **Full bleed** | `.full-bleed` (escape body padding), `.full-bleed-padded` (escape + re-apply padding inside), `.full-bleed-flush` (escape + strip border/radius) — requires `--body-padding-inline` on ancestor |
 
@@ -562,6 +563,69 @@ Toggle with: `document.documentElement.dataset.theme = "dark" | "light"`
 ```
 
 Custom properties: `--hit-area` (all sides), `--hit-area-t`, `--hit-area-r`, `--hit-area-b`, `--hit-area-l` (per-side overrides).
+
+## Mobile & Touch Friendliness — CRITICAL
+
+### The iOS first-tap-as-hover bug
+
+Any bare `:hover` rule that **reveals or hides content** (opacity, visibility,
+display, generated content, size changes) makes iOS Safari treat the first tap
+as a hover: the reveal happens, but that tap's click is suppressed — the user
+must tap **twice** to activate the element. This is the single most common
+mobile bug in consumer apps (e.g. a photo tile whose checkbox appears on
+`.tile:hover` needed a double-tap to open the lightbox).
+
+Style-only hovers (background, color, filter, underline) do **not** trigger
+this and need no guard.
+
+### Rule: gate every hover-reveal behind `@media (hover: hover)`
+
+```css
+/* WRONG — iOS needs a double-tap to click .card */
+.card .card-actions { opacity: 0; }
+.card:hover .card-actions { opacity: 1; }
+
+/* CORRECT — touch devices never get the hover trap; controls stay visible */
+@media (hover: hover) {
+  .card .card-actions { opacity: 0; }
+  .card:hover .card-actions,
+  .card:focus-within .card-actions { opacity: 1; }
+}
+```
+
+On touch devices the ungated default applies — design it so that's the
+**always-visible** state (hide only inside the media query, never outside it).
+Add `:focus-within` so keyboard users can reach the controls too.
+
+### Prefer the `.hover-reveal` utility
+
+For the common "controls appear when the container is hovered" pattern, use
+the built-in utility instead of writing custom CSS:
+
+```html
+<div class="tile hover-reveal">
+  <img src="...">
+  <button class="tile-check hover-reveal-item">✓</button>
+</div>
+```
+
+- `.hover-reveal` — the hoverable container
+- `.hover-reveal-item` — each control to hide until hover/focus-within
+- On touch devices (`hover: none`) the items are simply always visible
+
+### Checklist for new components
+
+1. **No bare hover-reveals** — grep your CSS for `:hover` rules that change
+   `opacity`/`visibility`/`display`/`transform`-into-view on *other* elements
+   or pseudo-elements; wrap them in `@media (hover: hover)`.
+2. **Decide the touch state** — always-visible (default outside the media
+   query) or an explicit `.clj-ui-touch` override (see next section).
+3. **Tap targets** — use `.hit-area` / `--hit-area-*` so controls hit ≥44px.
+4. **Keyboard** — pair `:hover` with `:focus-within`/`:focus-visible`.
+
+Framework components already following this: tooltip (`ui/tooltip.css`,
+`ui/form.css` error tooltips) and the player-bar scrubber
+(`ui/player_bar.css`).
 
 ## Touch Alternatives (`.clj-ui-touch`)
 
@@ -587,15 +651,18 @@ if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
 Use `.clj-ui-touch` as an ancestor selector to override hover-dependent interactions:
 
 ```css
-/* Default: hidden, shown on hover */
-.my-handle { opacity: 0; }
-.my-container:hover .my-handle { opacity: 1; }
+/* Default: hidden, shown on hover — gated so touch never gets the
+   first-tap-as-hover trap (see "Mobile & Touch Friendliness") */
+@media (hover: hover) {
+  .my-handle { opacity: 0; }
+  .my-container:hover .my-handle { opacity: 1; }
+}
 
 /* Touch: always visible */
 .clj-ui-touch .my-handle { opacity: 1; }
 ```
 
-**Convention:** touch rules go directly after the hover rule they override, with a `/* Touch: ... */` comment.
+**Convention:** touch rules go directly after the hover rule they override, with a `/* Touch: ... */` comment. The hover rules themselves must live inside `@media (hover: hover)`.
 
 ## Icons (`ui.icon`)
 

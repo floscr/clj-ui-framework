@@ -16,8 +16,13 @@
   position: relative;
 }
 
-.player-bar-progress:hover {
-  --player-bar-track-h: 6px;
+/* Hover growth/reveal only on devices that actually hover — a bare :hover
+   reveal makes iOS consume the first tap as hover, so seeking would need a
+   double-tap. See AGENTS.md "Mobile & Touch Friendliness". */
+@media (hover: hover) {
+  .player-bar-progress:hover {
+    --player-bar-track-h: 6px;
+  }
 }
 
 /* Invisible hit area extending upward — makes the thin bar easy to grab with a
@@ -72,9 +77,11 @@
   pointer-events: none;
 }
 
-.player-bar-progress:hover::after {
-  opacity: 1;
-  scale: 1;
+@media (hover: hover) {
+  .player-bar-progress:hover::after {
+    opacity: 1;
+    scale: 1;
+  }
 }
 
 /* Touch: always show scrubber */
