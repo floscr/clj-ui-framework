@@ -737,7 +737,9 @@ works on touch with zero changes.
   doesn't also activate the element underneath
 - the pressed element gets `.clj-ui-pressing` while the press is pending —
   CSS scales it down slightly (`scale(0.97)`, iOS-style press feedback);
-  removed on fire/cancel/release
+  the scale is held while the context menu is open and animates back when
+  the menu dismisses (the runtime menu fires a `clj-ui-menu-dismiss`
+  document event; next-pointerdown is the fallback for custom handlers)
 - `.clj-ui-touch` CSS disables the iOS press callout / text selection on
   the opt-in surface (ui/context_menu.css)
 

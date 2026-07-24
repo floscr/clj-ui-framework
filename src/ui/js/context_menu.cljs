@@ -41,7 +41,9 @@
   (let [state (get-state)]
     (when (.-menu state)
       (.remove (.-menu state))
-      (set! (.-menu state) nil))
+      (set! (.-menu state) nil)
+      ;; let ui/js/gestures release the held press visual in sync
+      (.dispatchEvent js/document (js/CustomEvent. "clj-ui-menu-dismiss")))
     (when (.-cleanup state)
       ((.-cleanup state))
       (set! (.-cleanup state) nil))))

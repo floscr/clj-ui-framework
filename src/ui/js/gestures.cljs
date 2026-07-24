@@ -20,8 +20,11 @@
    - the click that follows a fired long-press is suppressed, so the
      press doesn't also activate the element underneath
    - the pressed element gets a `.clj-ui-pressing` class while the
-     press is pending (CSS scales it down slightly for feedback);
-     removed on fire/cancel/release
+     press is pending (CSS scales it down slightly for feedback); the
+     scale is kept while the context menu is open and animates back
+     when the menu dismisses (`clj-ui-menu-dismiss` document event
+     from ui/js/context_menu, with a next-pointerdown fallback for
+     custom contextmenu handlers)
    - pair with ui/context_menu.css: `.clj-ui-touch` disables the iOS
      press callout / text selection on the opt-in surface
 
@@ -36,10 +39,18 @@
 ;; {:el .. :x .. :y .. :timer ..} while a press is pending, else nil
 (def ^:private press (atom nil))
 (def ^:private suppress-click? (atom false))
+;; element that fired a long-press and keeps .clj-ui-pressing while
+;; the context menu is open
+(def ^:private held (atom nil))
 
 (defn- clear-press-visual! [el]
   (when el
     (.remove (.-classList el) press-class)))
+
+(defn- clear-held! []
+  (when-let [el @held]
+    (clear-press-visual! el)
+    (reset! held nil)))
 
 (defn- cancel! []
   (when-let [p @press]
@@ -59,6 +70,9 @@
 
 (defn- on-pointerdown [e]
   (reset! suppress-click? false)
+  ;; any new pointer interaction releases a held press (fallback for
+  ;; contextmenu handlers that don't go through the runtime menu)
+  (clear-held!)
   (when (= (.-pointerType e) "touch")
     (when-let [el (some-> (.-target e) (.closest selector))]
       (cancel!)
@@ -70,7 +84,8 @@
                  :timer (js/setTimeout
                          (fn []
                            (reset! press nil)
-                           (clear-press-visual! el)
+                           ;; keep .clj-ui-pressing while the menu is open
+                           (reset! held el)
                            (reset! suppress-click? true)
                            (dispatch-contextmenu! el x y))
                          press-ms)})))))
@@ -86,10 +101,14 @@
 
 (defn- on-native-contextmenu [e]
   ;; Android long-press fires contextmenu natively — drop the pending
-  ;; synthetic one so the menu doesn't open twice. Synthetic events
-  ;; have isTrusted=false and must pass through untouched.
+  ;; synthetic one so the menu doesn't open twice, but keep the press
+  ;; visual held while the menu is open (same as the synthetic path).
+  ;; Synthetic events have isTrusted=false and must pass through.
   (when (.-isTrusted e)
-    (cancel!)))
+    (when-let [p @press]
+      (js/clearTimeout (:timer p))
+      (reset! press nil)
+      (reset! held (:el p)))))
 
 (defn- on-click-capture [e]
   (when @suppress-click?
@@ -103,5 +122,7 @@
 (.addEventListener js/document "pointercancel" on-pointer-end true)
 (.addEventListener js/document "contextmenu" on-native-contextmenu true)
 (.addEventListener js/document "click" on-click-capture true)
+;; the context-menu runtime announces dismissal — animate the scale back
+(.addEventListener js/document "clj-ui-menu-dismiss" (fn [_] (clear-held!)))
 
 (aset js/window "__uiLongPress" dispatch-contextmenu!)
