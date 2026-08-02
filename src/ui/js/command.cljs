@@ -28,13 +28,15 @@
 (defn- active-item [dialog]
   (.querySelector dialog ".command-item--active"))
 
-(defn- set-active! [dialog el]
-  (let [prev (active-item dialog)]
-    (when prev (.remove (.-classList prev) "command-item--active")))
-  (when el
-    (.add (.-classList el) "command-item--active")
-    (when (.-scrollIntoView el)
-      (.scrollIntoView el #js {:block "nearest"}))))
+(defn- set-active!
+  ([dialog el] (set-active! dialog el true))
+  ([dialog el scroll?]
+   (let [prev (active-item dialog)]
+     (when prev (.remove (.-classList prev) "command-item--active")))
+   (when el
+     (.add (.-classList el) "command-item--active")
+     (when (and scroll? (.-scrollIntoView el))
+       (.scrollIntoView el #js {:block "nearest"})))))
 
 (defn- move-active! [dialog dir]
   (let [vis (visible-items dialog)
@@ -193,12 +195,17 @@
           item (when (not (.-disabled item)) (.close dialog)))))))
 
 (defn- on-pointermove [e]
-  (let [t (.-target e)]
-    (when (.-closest t)
-      (let [item (.closest t ".command-item")]
-        (when (and item (not (.-hidden item)) (not (.-disabled item)))
-          (let [dialog (.closest item ".command-dialog")]
-            (when dialog (set-active! dialog item))))))))
+  ;; Touch scrolling on iOS emits pointermove; activating the item under the
+  ;; finger (and scrolling it into view) fights the scroll and glues the
+  ;; highlight to the finger. Hover-activation is a mouse affordance only, so
+  ;; skip touch pointers and never scroll on pointer-driven activation.
+  (when (not= (.-pointerType e) "touch")
+    (let [t (.-target e)]
+      (when (.-closest t)
+        (let [item (.closest t ".command-item")]
+          (when (and item (not (.-hidden item)) (not (.-disabled item)))
+            (let [dialog (.closest item ".command-dialog")]
+              (when dialog (set-active! dialog item false)))))))))
 
 ;; ── Init ────────────────────────────────────────────────────────────
 
