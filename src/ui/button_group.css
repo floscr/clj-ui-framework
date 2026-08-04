@@ -73,8 +73,7 @@
 
 .button-group-boxed {
   gap: var(--size-1);
-  background: var(--bg-0);
-  border: var(--border-0);
+  background: var(--bg-2);
   border-radius: var(--radius-md);
   padding: var(--size-1);
 }
@@ -93,7 +92,7 @@
 }
 
 .button-group-boxed .button-group-item.is-active {
-  background: var(--bg-2);
+  background: var(--bg-0);
   color: var(--fg-0);
   box-shadow: var(--shadow-0);
 }
