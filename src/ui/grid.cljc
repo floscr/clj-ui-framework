@@ -78,13 +78,15 @@
                   (default: grid / masonry)
      :on-change - called with the option's :value on click
                   (browser targets)
+     :boxed     - render inside a bordered box (segmented control)
      :class     - additional CSS classes
      :attrs     - additional HTML attributes map
 
    For server-rendered pages give each option an :href — the buttons
    render as links (e.g. \"/?view=grid\")."
-  [{:keys [value options on-change class attrs]}]
+  [{:keys [value options on-change boxed class attrs]}]
   (let [options (or options default-layout-options)
+        base-class (cond-> "toolbar-group" boxed (str " toolbar-group-boxed"))
         current (some-> value util/kw-name)
         btns (map (fn [{:keys [value icon label href]}]
                     (let [active? (= current (some-> value util/kw-name))]
@@ -100,18 +102,18 @@
                                 :aria-pressed (if active? "true" "false")}})))
                   options)]
     #?(:squint
-       (into [:div (merge {:class (cond-> "toolbar-group"
+       (into [:div (merge {:class (cond-> base-class
                                     class (str " " class))}
                           attrs)]
              btns)
 
        :cljs
-       (into [:div (merge {:class (util/conj-classes ["toolbar-group"] class)}
+       (into [:div (merge {:class (util/conj-classes (str/split base-class #" ") class)}
                           attrs)]
              btns)
 
        :clj
-       (into [:div (merge {:class (cond-> "toolbar-group"
+       (into [:div (merge {:class (cond-> base-class
                                     class (str " " class))}
                           attrs)]
              btns))))

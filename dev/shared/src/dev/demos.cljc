@@ -297,6 +297,7 @@
   (section "Grid"
     [:div {:style (sx {:display "flex" :gap "1rem" :flex-wrap "wrap" :align-items "center"})}
      (grid/layout-toggle {:value :grid})
+     (grid/layout-toggle {:value :grid :boxed true})
      (grid/size-stepper {:value :m})]
     [:p {:class (cls "text-muted" "text-sm")} "Square grid (size :s)"]
     (apply grid/grid {:size :s}
