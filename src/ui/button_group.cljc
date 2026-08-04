@@ -87,18 +87,21 @@
      :active   - boolean; highlights the item as selected
      :icon     - icon name keyword (e.g. :grid); icon-only when no children
      :count    - optional number/string rendered as a muted trailing badge
+     :href     - URL string; when set, renders as <a> (a nav segment)
      :on-click - click handler (ignored in :clj target)
      :class    - additional CSS classes
      :attrs    - additional HTML attributes"
-  [{:keys [active icon count on-click class attrs] :as _props} & children]
+  [{:keys [active icon count href on-click class attrs] :as _props} & children]
   (let [icon-only? (and (some? icon) (empty? children))
-        icon-el    (when icon (icon/icon {:icon-name icon :size :sm}))]
+        icon-el    (when icon (icon/icon {:icon-name icon :size :sm}))
+        tag        (if href :a :button)]
     #?(:squint
        (let [classes    (cond-> (button-group-item-classes {:active active :icon-only icon-only?})
                           class (str " " class))
              base-attrs (cond-> (merge {:class classes} attrs)
+                          href     (assoc :href href)
                           on-click (assoc :on-click on-click))]
-         (into [:button base-attrs]
+         (into [tag base-attrs]
                (cond-> []
                  icon          (conj icon-el)
                  true          (into children)
@@ -108,8 +111,9 @@
        (let [classes    (cond-> (button-group-item-class-list {:active active :icon-only icon-only?})
                           class (conj class))
              base-attrs (cond-> (merge {:class classes} attrs)
+                          href     (assoc :href href)
                           on-click (assoc-in [:on :click] on-click))]
-         (into [:button base-attrs]
+         (into [tag base-attrs]
                (cond-> []
                  icon          (conj icon-el)
                  true          (into children)
@@ -118,8 +122,9 @@
        :clj
        (let [classes    (cond-> (button-group-item-classes {:active active :icon-only icon-only?})
                           class (str " " class))
-             base-attrs (merge {:class classes} attrs)]
-         (into [:button base-attrs]
+             base-attrs (cond-> (merge {:class classes} attrs)
+                          href (assoc :href href))]
+         (into [tag base-attrs]
                (cond-> []
                  icon          (conj icon-el)
                  true          (into children)
