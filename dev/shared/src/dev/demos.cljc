@@ -33,6 +33,7 @@
             [ui.popover :as popover]
             [ui.command :as command]
             [ui.toolbar :as toolbar]
+            [ui.button-group :as button-group]
             [ui.tabs :as tabs]
             [ui.form :as form]))
 
@@ -446,6 +447,76 @@
          :tabs [{:id "overview"  :label "Overview"  :content (para "A high-level summary of the project.")}
                 {:id "analytics" :label "Analytics" :content (para "Traffic and engagement metrics.")}
                 {:id "reports"   :label "Reports"   :content (para "Downloadable reports and exports.")}]}))))
+
+(defn button-group-demo []
+  (let [row {:display "flex" :gap "1rem" :flex-wrap "wrap" :align-items "center"}]
+    (section "Button group"
+      ;; Boxed flavor — filter segments with counts (like tabs-boxed)
+      (into [:div {:style (sx row)}]
+        [(button-group/button-group {:variant :boxed}
+           (button-group/button-group-item {:active true :count 353} "All")
+           (button-group/button-group-item {:count 28} "Downloaded")
+           (button-group/button-group-item {:count 325} "Missing"))])
+      ;; Boxed flavor — icon toolbar with separators (view / stepper / settings)
+      (into [:div {:style (sx row)}]
+        [(button-group/button-group {:variant :boxed}
+           (button-group/button-group-item {:icon :grid :active true})
+           (button-group/button-group-item {:icon :layout-dashboard})
+           (button-group/button-group-separator {})
+           (button-group/button-group-item {:icon :minus})
+           (button-group/button-group-item {:icon :plus})
+           (button-group/button-group-separator {})
+           (button-group/button-group-item {:icon :settings}))])
+      ;; Ghost flavor — container-less, tight cluster; active item filled
+      (into [:div {:style (sx row)}]
+        [(button-group/button-group {}
+           (button-group/button-group-item {:icon :grid :active true})
+           (button-group/button-group-item {:icon :layout-dashboard})
+           (button-group/button-group-separator {})
+           (button-group/button-group-item {:icon :settings}))]))))
+
+(defn header-patterns-demo []
+  ;; Composed inspiration — clean app header bars assembled from existing
+  ;; pieces (button, button-group, form-input, icon). Not a component; copy
+  ;; the composition into an app and adapt. Design language: transparent nav
+  ;; with a hairline bottom border, one accent primary action, background-only
+  ;; search, and bordered button groups for related multi-button clusters.
+  (let [nav   {:display "flex" :align-items "center" :gap "1.5rem"
+               :min-height "3.5rem" :padding "0 1.25rem"}
+        frame {:border "var(--border-0)" :border-radius "var(--radius-md)"
+               :background "var(--bg-0)" :overflow "hidden"}
+        row1  (assoc nav :border-bottom "var(--border-0)")
+        spacer [:div {:style (sx {:flex "1"})}]]
+    (section "Header patterns"
+      ;; 1 · Photos-style — title, boxed icon group, standalone action, primary CTA
+      [:div {:style (sx frame)}
+       (into [:div {:style (sx nav)}]
+         [[:strong {:style (sx {:color "var(--fg-0)" :font-size "var(--font-md)"})} "Photos"]
+          spacer
+          (button-group/button-group {:variant :boxed}
+            (button-group/button-group-item {:icon :grid :active true})
+            (button-group/button-group-item {:icon :layout-dashboard})
+            (button-group/button-group-separator {})
+            (button-group/button-group-item {:icon :minus})
+            (button-group/button-group-item {:icon :plus})
+            (button-group/button-group-separator {})
+            (button-group/button-group-item {:icon :settings}))
+          (button/button {:variant :ghost :icon :camera})
+          (button/button {:variant :primary :icon-left :upload} "Upload")])]
+      ;; 2 · Two-row — tabs/title + refresh; second row search + filter group with counts
+      [:div {:style (sx frame)}
+       (into [:div {:style (sx row1)}]
+         [[:strong {:style (sx {:color "var(--fg-0)" :font-size "var(--font-md)"})} "Watchlist"]
+          [:span {:class (cls "text-sm" "text-muted")} "353 films"]
+          spacer
+          (button/button {:variant :ghost :icon :refresh})])
+       (into [:div {:style (sx nav)}]
+         [[:div {:style (sx {:flex "1"})}
+           (form/form-input {:icon-left :search :placeholder "Search all movies…"})]
+          (button-group/button-group {:variant :boxed}
+            (button-group/button-group-item {:active true :count 353} "All")
+            (button-group/button-group-item {:count 28} "Downloaded")
+            (button-group/button-group-item {:count 325} "Missing"))])])))
 
 (defn breadcrumb-demo []
   (section "Breadcrumb"

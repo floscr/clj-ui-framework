@@ -40,7 +40,7 @@
                                toast-demo camera-demo grid-demo
                                skeleton-demo progress-demo switch-demo tooltip-demo
                                breadcrumb-demo separator-demo form-demo
-                               popover-demo command-demo toolbar-demo tabs-demo]]))
+                               popover-demo command-demo toolbar-demo button-group-demo header-patterns-demo tabs-demo]]))
 
 ;; ── Query Params ────────────────────────────────────────────────────
 
@@ -305,6 +305,8 @@
    (popover-demo)
    (command-demo)
    (toolbar-demo)
+   (button-group-demo)
+   (header-patterns-demo)
    (tabs-demo)
    (spinner-demo)
    (empty-state-demo)
@@ -626,7 +628,9 @@
             {:label "Tooltip" :anchor "tooltip"}]}
    {:title "Layout"
     :items [{:label "Separator" :anchor "separator"}
-            {:label "Toolbar" :anchor "toolbar"}]}
+            {:label "Toolbar" :anchor "toolbar"}
+            {:label "Button Group" :anchor "button-group"}
+            {:label "Header Patterns" :anchor "header-patterns"}]}
    {:title "Overlay"
     :items [{:label "Lightbox" :anchor "lightbox"}]}
    {:title "Navigation"

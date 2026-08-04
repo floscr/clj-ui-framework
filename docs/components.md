@@ -4,7 +4,7 @@
 > See `AGENTS.md` for conventions, per-target pitfalls, and how to
 > add new components and icons.
 
-## Components (41)
+## Components (42)
 
 | Component | Namespace | Description | Public API |
 |-----------|-----------|-------------|------------|
@@ -13,6 +13,7 @@
 | badge | `ui.badge` |  | `badge-class-list`, `badge-classes`, `badge` |
 | breadcrumb | `ui.breadcrumb` |  | `breadcrumb` |
 | button | `ui.button` |  | `button-class-list`, `button-classes`, `button` |
+| button_group | `ui.button-group` | Button group — a cluster of related buttons rendered as a segmented | `button-group-class-list`, `button-group-classes`, `button-group-item-class-list`, `button-group-item-classes`, `button-group`, `button-group-item`, `button-group-separator` |
 | calendar | `ui.calendar` | Month-grid date picker. See src/ui/calendar.md for full documentation. | `leap-year?`, `days-in-month`, `day-of-week`, `first-day-of-week`, `pad2`, `date-str`, `month-name`, `short-month-name`, `prev-month`, `next-month`, `calendar-days`, `calendar-class-list`, `calendar-classes`, `day-cell-class-list`, `day-cell-classes`, `calendar-header`, `calendar-weekdays`, `calendar-day`, `calendar` |
 | calendar_events | `ui.calendar-events` | Event-aware calendar components. See src/ui/calendar.md for full documentation. | `event-color-class`, `events-for-date`, `format-time`, `event-time-display`, `event-pill-class-list`, `event-pill-classes`, `ticker-day-class-list`, `ticker-day-classes`, `agenda-event-class-list`, `agenda-event-classes`, `event-pill`, `event-day-cell`, `calendar-event-grid`, `ticker-dot`, `ticker-day-item`, `ticker-strip`, `agenda-event-row`, `agenda-day-group`, `agenda-list` |
 | camera | `ui.camera` | Camera capture: capability detection, getUserMedia stream helpers, and | `camera-view` |

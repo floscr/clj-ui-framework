@@ -36,7 +36,7 @@
                                toast-demo camera-demo grid-demo
                                skeleton-demo progress-demo switch-demo tooltip-demo
                                breadcrumb-demo separator-demo form-demo
-                               popover-demo command-demo toolbar-demo tabs-demo]]))
+                               popover-demo command-demo toolbar-demo button-group-demo header-patterns-demo tabs-demo]]))
 
 ;; ── State ───────────────────────────────────────────────────────────
 
@@ -390,6 +390,8 @@
    (popover-demo)
    (command-demo)
    (toolbar-demo)
+   (button-group-demo)
+   (header-patterns-demo)
    (tabs-demo)
    (spinner-demo)
    (empty-state-demo)

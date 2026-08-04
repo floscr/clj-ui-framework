@@ -74,6 +74,7 @@
   {:doc "Run all unit tests"
    :requires ([clojure.test :as t]
               [ui.button-test]
+              [ui.button-group-test]
               [ui.alert-test]
               [ui.badge-test]
               [ui.card-test]
@@ -112,6 +113,7 @@
               [ui.theme-toggle-test])
    :task (let [{:keys [fail error]} (t/run-tests
                                       'ui.button-test
+                                      'ui.button-group-test
                                       'ui.alert-test
                                       'ui.badge-test
                                       'ui.card-test
