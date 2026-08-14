@@ -589,6 +589,9 @@
        (form/form-input {:placeholder "subdomain"})
        (button/button {:variant :primary :size :sm} "Go"))]
     [:div {:style (sx {:max-width "480px" :margin-top "1.5rem"})}
+     [:h4 {:style (sx {:margin-bottom "0.75rem"})} "Search bar preset"]
+     (form/search-bar {:placeholder "Search…"})]
+    [:div {:style (sx {:max-width "480px" :margin-top "1.5rem"})}
      [:h4 {:style (sx {:margin-bottom "0.75rem"})} "Validation error"]
      (form/form-field {:label "Email" :error "Please enter a valid email address."}
        (form/form-input {:type :email :error true :value "invalid-email"}))]))

@@ -1,6 +1,7 @@
 (ns ui.form
   (:require [clojure.string :as str]
             [ui.util :as util]
+            [ui.button :as button]
             [ui.icon :as icon]
             [ui.tooltip :as tooltip]))
 
@@ -554,3 +555,65 @@
      (let [classes (cond-> "form-group-addon"
                      class (str " " class))]
        (into [:span (merge {:class classes} attrs)] children))))
+
+;; ── Search bar preset ───────────────────────────────────────────────
+
+(defn search-bar
+  "Preset for the common search-bar pattern: an icon text input joined to a
+   submit button inside a form-group. Composes form-group + form-input (with
+   a left icon) + a primary button so the group's seam, border-radius, and
+   the icon-input `.form-input-wrap` corner handling are all taken care of —
+   don't hand-assemble this, it's easy to get the joined corners wrong.
+
+   When :action or :on-submit is given, the group is wrapped in a <form> so it
+   submits as a GET-style search.
+
+   Props:
+     :name         - input name attribute (default \"q\")
+     :value        - current query value
+     :placeholder  - input placeholder (default \"Search…\")
+     :icon         - left icon keyword (default :search)
+     :button-label - submit button label (default \"Search\")
+     :disabled     - boolean, disables input + button
+     :action       - form action URL; wraps in <form method=\"get\">
+     :on-change    - input change handler (:cljs/:squint)
+     :on-submit    - form submit handler (:cljs/:squint)
+     :class        - additional classes on the form-group
+     :attrs        - additional attributes on the input
+     :form-attrs   - additional attributes on the wrapping <form>"
+  [{:keys [name value placeholder icon button-label disabled action
+           on-change on-submit class attrs form-attrs] :as _props}]
+  (let [ic     (or icon :search)
+        input  (form-input (cond-> {:type :text
+                                    :icon-left ic
+                                    :placeholder (or placeholder "Search…")
+                                    :value value
+                                    :disabled disabled
+                                    :attrs (merge {:name (or name "q")
+                                                   :autocomplete "off"}
+                                                  attrs)}
+                             on-change (assoc :on-change on-change)))
+        submit (button/button {:variant :primary
+                               :disabled disabled
+                               :attrs {:type "submit"}}
+                 (or button-label "Search"))
+        group  (form-group {:class class} input submit)
+        wrap?  (or action on-submit)]
+    (if wrap?
+      #?(:squint
+         (into [:form (cond-> (merge {:method "get"} form-attrs)
+                        action    (assoc :action action)
+                        on-submit (assoc :on-submit on-submit))]
+               [group])
+
+         :cljs
+         [:form (cond-> (merge {:method "get"} form-attrs)
+                  action    (assoc :action action)
+                  on-submit (assoc-in [:on :submit] on-submit))
+          group]
+
+         :clj
+         [:form (cond-> (merge {:method "get"} form-attrs)
+                  action (assoc :action action))
+          group])
+      group)))

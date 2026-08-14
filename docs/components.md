@@ -26,7 +26,7 @@
 | empty_state | `ui.empty-state` |  | `empty-state-class-list`, `empty-state-classes`, `empty-state` |
 | file_browser | `ui.file-browser` | File browser components — grid/list views. | `file-type->icon`, `file-type-icon`, `file-view-toggle`, `file-item-grid`, `col-name`, `col-size`, `col-modified`, `col-type`, `file-table`, `file-list-header`, `file-item-list` |
 | file_progress | `ui.file-progress` | File progress list — shows files with upload/processing status. | `file-progress-item`, `file-progress-list` |
-| form | `ui.form` |  | `form-field-class-list`, `form-field-classes`, `form-field`, `form-input-class-list`, `form-input-classes`, `form-input`, `form-textarea-class-list`, `form-textarea-classes`, `form-textarea`, `form-textarea-auto`, `form-select`, `form-checkbox`, `form-radio-group`, `form-file`, `form-range`, `form-group`, `form-group-addon` |
+| form | `ui.form` |  | `form-field-class-list`, `form-field-classes`, `form-field`, `form-input-class-list`, `form-input-classes`, `form-input`, `form-textarea-class-list`, `form-textarea-classes`, `form-textarea`, `form-textarea-auto`, `form-select`, `form-checkbox`, `form-radio-group`, `form-file`, `form-range`, `form-group`, `form-group-addon`, `search-bar` |
 | grid | `ui.grid` | Responsive tile grid with square and masonry layouts, plus toolbar | `grid-class-list`, `grid-classes`, `grid`, `layout-toggle`, `step-size`, `size-stepper` |
 | icon | `ui.icon` |  | `icon-class-list`, `icon-classes`, `icon` |
 | lightbox | `ui.lightbox` | Lightbox component for fullscreen image viewing. | `lightbox`, `image-thumbnail` |

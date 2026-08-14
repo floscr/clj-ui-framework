@@ -300,3 +300,57 @@
       (is (= :span (first result)))
       (is (= "form-group-addon" (get-in result [1 :class])))
       (is (= "https://" (nth result 2))))))
+
+;; ── search-bar preset ───────────────────────────────────────────────
+
+(deftest search-bar-defaults-test
+  (testing "without :action renders a bare form-group"
+    (let [result (form/search-bar {})]
+      (is (= :div (first result)))
+      (is (= "form-group" (get-in result [1 :class])))))
+  (testing "input is icon-wrapped with defaults"
+    (let [group (form/search-bar {})
+          wrap  (nth group 2)
+          input (nth wrap 3)]
+      (is (= "form-input-wrap" (get-in wrap [1 :class])))
+      (is (= "q" (get-in input [1 :name])))
+      (is (= "Search\u2026" (get-in input [1 :placeholder])))
+      (is (clojure.string/includes? (get-in input [1 :class]) "form-input--icon-left"))))
+  (testing "submit button defaults to primary + type=submit"
+    (let [group  (form/search-bar {})
+          button (nth group 3)]
+      (is (clojure.string/includes? (get-in button [1 :class]) "btn-primary"))
+      (is (= "submit" (get-in button [1 :type])))
+      (is (= "Search" (last button))))))
+
+(deftest search-bar-custom-test
+  (testing "custom name, placeholder, label"
+    (let [group  (form/search-bar {:name "query" :placeholder "Find\u2026"
+                                   :button-label "Go"})
+          wrap   (nth group 2)
+          input  (nth wrap 3)
+          button (nth group 3)]
+      (is (= "query" (get-in input [1 :name])))
+      (is (= "Find\u2026" (get-in input [1 :placeholder])))
+      (is (= "Go" (last button)))))
+  (testing "value is passed through"
+    (let [group (form/search-bar {:value "cats"})
+          input (nth (nth group 2) 3)]
+      (is (= "cats" (get-in input [1 :value])))))
+  (testing "disabled disables input and button"
+    (let [group  (form/search-bar {:disabled true})
+          input  (nth (nth group 2) 3)
+          button (nth group 3)]
+      (is (true? (get-in input [1 :disabled])))
+      (is (true? (get-in button [1 :disabled]))))))
+
+(deftest search-bar-form-wrapper-test
+  (testing ":action wraps in a GET form"
+    (let [result (form/search-bar {:action "/search"})]
+      (is (= :form (first result)))
+      (is (= "/search" (get-in result [1 :action])))
+      (is (= "get" (get-in result [1 :method])))
+      (is (= "form-group" (get-in (nth result 2) [1 :class])))))
+  (testing ":form-attrs merge onto the form"
+    (let [result (form/search-bar {:action "/s" :form-attrs {:style "flex:1;"}})]
+      (is (= "flex:1;" (get-in result [1 :style]))))))
