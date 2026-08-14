@@ -36,7 +36,10 @@
      :on-shuffle    - click handler
      :on-repeat     - click handler
      :on-favorite   - click handler
-     :on-seek       - click handler for progress bar
+     :on-seek       - seek handler for the progress bar (squint/cljs only).
+                      Fires on tap and continuously while dragging to scrub;
+                      receives the pointer event (read .clientX + the
+                      currentTarget's bounding rect to compute the position)
      :on-volume     - click handler
      :class         - additional CSS classes
      :attrs         - additional HTML attributes"
@@ -54,7 +57,12 @@
           ;; Progress slider
           [:div.player-bar-progress
            (cond-> {:style {"--progress" pct}}
-             on-seek (assoc :on-click on-seek))
+             on-seek (merge {:on-pointerdown (fn [e]
+                                               (.setPointerCapture (.-currentTarget e) (.-pointerId e))
+                                               (on-seek e))
+                             :on-pointermove (fn [e]
+                                               (when (pos? (.-buttons e))
+                                                 (on-seek e)))}))
            [:div.player-bar-progress-track
             [:div.player-bar-progress-fill {:style {"width" pct}}]]]
           ;; Main row
@@ -113,7 +121,12 @@
           ;; Progress slider
           [:div (cond-> {:class ["player-bar-progress"]
                         :style {:--progress pct}}
-                  on-seek (assoc :on {:click on-seek}))
+                  on-seek (assoc :on {:pointerdown (fn [e]
+                                                     (.setPointerCapture (.-currentTarget e) (.-pointerId e))
+                                                     (on-seek e))
+                                      :pointermove (fn [e]
+                                                     (when (pos? (.-buttons e))
+                                                       (on-seek e)))}))
            [:div {:class ["player-bar-progress-track"]}
             [:div {:class ["player-bar-progress-fill"]
                    :style {:width pct}}]]]
