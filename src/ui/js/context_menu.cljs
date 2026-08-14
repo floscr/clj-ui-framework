@@ -215,6 +215,10 @@
     ;; Dismiss listeners
     (let [on-click  (fn [e]
                       (when (not (.contains menu (.-target e)))
+                        ;; consume the tap: only close the menu, don't
+                        ;; activate whatever is underneath
+                        (.preventDefault e)
+                        (.stopPropagation e)
                         (dismiss!)))
           on-key    (fn [e]
                       (let [key (.-key e)]

@@ -1144,6 +1144,8 @@
       focus_first_item_BANG_(menu10);
       const on_click12 = (function(e) {
         if (not(menu10.contains(e.target))) {
+          e.preventDefault();
+          e.stopPropagation();
           return dismiss_BANG_();
         }
         ;
