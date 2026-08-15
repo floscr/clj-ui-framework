@@ -341,10 +341,10 @@
       (is (= "q" (get-in input [1 :name])))
       (is (= "Search\u2026" (get-in input [1 :placeholder])))
       (is (clojure.string/includes? (get-in input [1 :class]) "form-input--icon-left"))))
-  (testing "submit button defaults to primary + type=submit"
+  (testing "submit button defaults to secondary + type=submit"
     (let [group  (form/search-bar {})
           button (nth group 3)]
-      (is (clojure.string/includes? (get-in button [1 :class]) "btn-primary"))
+      (is (clojure.string/includes? (get-in button [1 :class]) "btn-secondary"))
       (is (= "submit" (get-in button [1 :type])))
       (is (= "Search" (last button))))))
 

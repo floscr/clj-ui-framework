@@ -569,7 +569,7 @@
                                                    :autocomplete "off"}
                                                   attrs)}
                              on-change (assoc :on-change on-change)))
-        submit (button/button {:variant :primary
+        submit (button/button {:variant :secondary
                                :disabled disabled
                                :attrs {:type "submit"}}
                  (or button-label "Search"))
