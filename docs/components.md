@@ -4,7 +4,7 @@
 > See `AGENTS.md` for conventions, per-target pitfalls, and how to
 > add new components and icons.
 
-## Components (42)
+## Components (43)
 
 | Component | Namespace | Description | Public API |
 |-----------|-----------|-------------|------------|
@@ -36,6 +36,7 @@
 | popover | `ui.popover` | Popover — rich content in a floating panel, triggered by a button. | `trigger-attrs`, `content-class-list`, `popover-trigger`, `popover-content`, `popover-header`, `popover-title`, `popover-description` |
 | processing_bar | `ui.processing-bar` | Processing bar — compact panel showing background jobs in progress. | `processing-item`, `processing-bar` |
 | progress | `ui.progress` |  | `progress-bar-class-list`, `progress-bar-classes`, `progress` |
+| select | `ui.select` | Custom select component — a framework-drawn dropdown replacing the | `normalize-options`, `selected-label`, `select` |
 | separator | `ui.separator` |  | `separator-class-list`, `separator-classes`, `separator` |
 | sidebar | `ui.sidebar` |  | `sidebar-layout-class-list`, `sidebar-layout-classes`, `sidebar-layout`, `sidebar-layout-main`, `sidebar-class-list`, `sidebar-classes`, `sidebar`, `sidebar-header`, `sidebar-brand-class-list`, `sidebar-brand-classes`, `sidebar-brand`, `sidebar-search-class-list`, `sidebar-search-classes`, `sidebar-search`, `sidebar-content`, `sidebar-group-class-list`, `sidebar-group-classes`, `sidebar-group`, `sidebar-menu`, `sidebar-menu-item-class-list`, `sidebar-menu-item-classes`, `sidebar-menu-item`, `sidebar-collapsible`, `sidebar-mobile-toggle-class-list`, `sidebar-mobile-toggle-classes`, `sidebar-mobile-toggle`, `sidebar-overlay`, `sidebar-separator`, `sidebar-footer`, `sidebar-user` |
 | skeleton | `ui.skeleton` |  | `skeleton-class-list`, `skeleton-classes`, `skeleton` |

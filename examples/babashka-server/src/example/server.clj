@@ -18,6 +18,11 @@
   "Bundled CSS string — generated at startup from framework defaults."
   (css/build-css))
 
+(def runtime-js
+  "Pre-built JS runtime — powers interactive components (e.g. the custom
+   select's dropdown). Loaded once as an inline <script>."
+  (css/build-js))
+
 ;; To customize the theme, pass overrides:
 ;; (def theme-css
 ;;   (css/build-css {:scales {:color {:accent {:hue 220}}}   ; blue accent
@@ -125,7 +130,8 @@
                :style "color: var(--accent);"}
            "clj-ui-framework"]
           " · CSS generated at boot via "
-          [:code "ui.css.gen/build-css"]]]]])))
+          [:code "ui.css.gen/build-css"]]]
+        [:script (h/raw runtime-js)]]])))
 
 ;; ── Server ──────────────────────────────────────────────────────────
 

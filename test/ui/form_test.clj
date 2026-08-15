@@ -164,28 +164,53 @@
 ;; ── form-select ─────────────────────────────────────────────────────
 
 (deftest form-select-component-test
-  (testing "basic select with options"
-    (let [result (form/form-select {:options [{:value "a" :label "Option A"}
-                                              {:value "b" :label "Option B"}]})]
-      (is (= :select (first result)))
-      (is (= "form-select" (get-in result [1 :class])))
-      ;; two options
-      (is (= 4 (count result)))))
+  (testing "basic select delegates to the custom ui.select trigger"
+    (let [result  (form/form-select {:options [{:value "a" :label "Option A"}
+                                               {:value "b" :label "Option B"}]})
+          trigger (nth result 2)]
+      (is (= :div (first result)))
+      (is (= "select" (get-in result [1 :class])))
+      (is (= :button (first trigger)))
+      (is (= "select-trigger" (get-in trigger [1 :class])))
+      ;; options are serialized for the JS runtime
+      (is (re-find #"Option A" (get-in trigger [1 :data-select-options])))
+      (is (re-find #"Option B" (get-in trigger [1 :data-select-options])))))
 
-  (testing "with placeholder"
-    (let [result (form/form-select {:placeholder "Pick one"
-                                    :options [{:value "a" :label "A"}]})]
-      ;; select + option A + placeholder option
-      (is (some #(and (vector? %) (= "Pick one" (nth % 2 nil)))
-                (rest (rest result))))))
+  (testing "with placeholder shows it as the trigger label"
+    (let [result  (form/form-select {:placeholder "Pick one"
+                                     :options [{:value "a" :label "A"}]})
+          trigger (nth result 2)
+          span    (nth trigger 2)]
+      (is (= "Pick one" (nth span 2)))))
+
+  (testing "selected value shows its label"
+    (let [result  (form/form-select {:value "b"
+                                     :options [{:value "a" :label "A"}
+                                               {:value "b" :label "Bee"}]})
+          trigger (nth result 2)
+          span    (nth trigger 2)]
+      (is (= "Bee" (nth span 2)))
+      (is (= "b" (get-in trigger [1 :data-select-value])))))
 
   (testing "disabled"
-    (let [result (form/form-select {:disabled true :options []})]
-      (is (true? (get-in result [1 :disabled])))))
+    (let [result  (form/form-select {:disabled true :options []})
+          trigger (nth result 2)]
+      (is (true? (get-in trigger [1 :disabled])))))
+
+  (testing "name emits a hidden input"
+    (let [result (form/form-select {:name "role" :value "a"
+                                    :options [{:value "a" :label "A"}]})
+          input  (nth result 3)]
+      (is (= :input (first input)))
+      (is (= "hidden" (get-in input [1 :type])))
+      (is (= "role" (get-in input [1 :name])))
+      (is (= "a" (get-in input [1 :value])))))
 
   (testing "string options"
-    (let [result (form/form-select {:options ["Foo" "Bar"]})]
-      (is (= 4 (count result))))))
+    (let [result  (form/form-select {:options ["Foo" "Bar"]})
+          trigger (nth result 2)]
+      (is (re-find #"Foo" (get-in trigger [1 :data-select-options])))
+      (is (re-find #"Bar" (get-in trigger [1 :data-select-options]))))))
 
 ;; ── form-checkbox ───────────────────────────────────────────────────
 

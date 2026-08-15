@@ -3,6 +3,7 @@
             [ui.util :as util]
             [ui.button :as button]
             [ui.icon :as icon]
+            [ui.select :as select]
             [ui.tooltip :as tooltip]))
 
 ;; ── Form field wrapper ──────────────────────────────────────────────
@@ -271,52 +272,27 @@
 ;; ── Select ──────────────────────────────────────────────────────────
 
 (defn form-select
-  "Render a select dropdown element.
+  "Render a select dropdown. Delegates to the custom ui.select component
+   (a framework-drawn dropdown, no longer a native <select>).
 
    Props:
      :options     - vector of {:value \"v\" :label \"Label\"} or strings
-     :placeholder - placeholder option text
+     :placeholder - placeholder shown when nothing is selected
      :value       - currently selected value
      :disabled    - boolean
-     :on-change   - change handler (ignored in :clj target)
+     :on-change   - change handler; receives the selected value string
+     :name        - form field name (:clj emits a hidden <input>)
      :class       - additional CSS classes
      :attrs       - additional HTML attributes"
-  [{:keys [options placeholder value disabled on-change class attrs] :as _props}]
-  (let [opts (mapv (fn [o]
-                     (if (string? o)
-                       {:value o :label o}
-                       o))
-                   options)]
-    #?(:squint
-       (let [classes (cond-> "form-select"
-                       class (str " " class))]
-         (into [:select (cond-> (merge {:class classes} attrs)
-                          disabled  (assoc :disabled true)
-                          on-change (assoc :on-change on-change))]
-               (cond-> (mapv (fn [o]
-                               [:option {:value (:value o)} (:label o)])
-                             opts)
-                 placeholder (into [[:option {:value "" :disabled true :selected (nil? value)} placeholder]]))))
-
-       :cljs
-       (let [cls (cond-> ["form-select"] class (conj class))]
-         (into [:select (cond-> (merge {:class cls} attrs)
-                          disabled  (assoc :disabled true)
-                          on-change (assoc-in [:on :change] on-change))]
-               (cond-> (mapv (fn [o]
-                               [:option {:value (:value o)} (:label o)])
-                             opts)
-                 placeholder (into [[:option {:value "" :disabled true :selected (nil? value)} placeholder]]))))
-
-       :clj
-       (let [classes (cond-> "form-select"
-                       class (str " " class))]
-         (into [:select (cond-> (merge {:class classes} attrs)
-                          disabled (assoc :disabled true))]
-               (cond-> (mapv (fn [o]
-                               [:option {:value (:value o)} (:label o)])
-                             opts)
-                 placeholder (into [[:option {:value "" :disabled true :selected (nil? value)} placeholder]])))))))
+  [{:keys [options placeholder value disabled on-change name class attrs] :as _props}]
+  (select/select {:options options
+                  :placeholder placeholder
+                  :value value
+                  :disabled disabled
+                  :on-change on-change
+                  :name (or name (:name attrs))
+                  :class class
+                  :attrs (dissoc attrs :name)}))
 
 ;; ── Checkbox ────────────────────────────────────────────────────────
 

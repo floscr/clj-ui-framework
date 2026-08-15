@@ -5,6 +5,7 @@
             [gestures]
             [masonry]
             [popover]
+            [select]
             [theme]
             [toast]
             [touch]))
