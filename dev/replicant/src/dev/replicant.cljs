@@ -35,7 +35,7 @@
                                empty-state-demo drop-zone-demo processing-bar-demo
                                toast-demo camera-demo grid-demo
                                skeleton-demo progress-demo switch-demo tooltip-demo
-                               breadcrumb-demo separator-demo form-demo
+                               breadcrumb-demo separator-demo form-demo chat-demo
                                popover-demo command-demo toolbar-demo button-group-demo header-patterns-demo tabs-demo]])
   (:require-macros [ui.macros :refer [inline-file]]))
 
@@ -369,6 +369,7 @@
    (pagination-demo)
    (separator-demo)
    (form-demo)
+   (chat-demo)
    (tag-input-demo)
    (lightbox-demo)])
 
@@ -539,6 +540,7 @@
             {:label "Player Bar" :anchor "player-bar"}]}
    {:title "Forms"
     :items [{:label "Form" :anchor "form"}
+            {:label "Chat" :anchor "chat"}
             {:label "Tag Input" :anchor "tag-input"}
             {:label "Switch" :anchor "switch"}
             {:label "Theme Toggle" :anchor "theme-toggle"}]}

@@ -1,0 +1,73 @@
+/* Chat — conversation log, bubbles, thinking indicator, input bar */
+
+.chat-log {
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-3);
+}
+
+.chat-bubble {
+  max-width: 85%;
+  padding: var(--size-3);
+  border-radius: var(--radius-md);
+  overflow-wrap: anywhere;
+}
+
+.chat-bubble-user {
+  align-self: flex-end;
+  background: var(--accent);
+  color: var(--fg-on-accent);
+}
+
+.chat-bubble-assistant {
+  align-self: flex-start;
+  background: var(--bg-1);
+  border: var(--border-0);
+}
+
+/* Markdown content sits flush against the bubble padding */
+.chat-bubble > :first-child {
+  margin-top: 0;
+}
+
+.chat-bubble > :last-child {
+  margin-bottom: 0;
+}
+
+.chat-bubble-pending {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--size-2);
+  color: var(--fg-2);
+  font-size: var(--font-sm);
+}
+
+.chat-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: var(--size-2);
+  margin-bottom: var(--size-2);
+}
+
+.chat-input {
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-2);
+}
+
+.chat-input-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--size-2);
+}
+
+.chat-hint {
+  margin-right: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--size-1);
+  font-size: var(--font-xs);
+  color: var(--fg-2);
+}

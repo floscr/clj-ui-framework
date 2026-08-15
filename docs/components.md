@@ -4,7 +4,7 @@
 > See `AGENTS.md` for conventions, per-target pitfalls, and how to
 > add new components and icons.
 
-## Components (43)
+## Components (44)
 
 | Component | Namespace | Description | Public API |
 |-----------|-----------|-------------|------------|
@@ -18,6 +18,7 @@
 | calendar_events | `ui.calendar-events` | Event-aware calendar components. See src/ui/calendar.md for full documentation. | `event-color-class`, `events-for-date`, `format-time`, `event-time-display`, `event-pill-class-list`, `event-pill-classes`, `ticker-day-class-list`, `ticker-day-classes`, `agenda-event-class-list`, `agenda-event-classes`, `event-pill`, `event-day-cell`, `calendar-event-grid`, `ticker-dot`, `ticker-day-item`, `ticker-strip`, `agenda-event-row`, `agenda-day-group`, `agenda-list` |
 | camera | `ui.camera` | Camera capture: capability detection, getUserMedia stream helpers, and | `camera-view` |
 | card | `ui.card` |  | `card-class-list`, `card-classes`, `card`, `card-header`, `card-body`, `card-footer`, `card-list-class-list`, `card-list-classes`, `card-list`, `card-list-item` |
+| chat | `ui.chat` | Chat conversation components: message log, bubbles, thinking indicator, | `chat-bubble-class-list`, `chat-bubble-classes`, `chat-log`, `chat-bubble`, `chat-thinking`, `chat-toolbar`, `chat-input` |
 | chip | `ui.chip` |  | `chip-class-list`, `chip-classes`, `chip` |
 | command | `ui.command` | Command palette — a searchable command menu (cmdk-style) rendered in a | `command-item`, `command-group`, `command-dialog`, `command-trigger` |
 | context_menu | `ui.context-menu` | Context menu component — right-click menu for wrapped elements. | `icon-paths-for`, `normalize-item`, `context-menu-trigger` |
