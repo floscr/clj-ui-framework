@@ -3,12 +3,17 @@
 
 .command-dialog {
   position: fixed;
-  inset: 0;
+  left: 0;
+  right: 0;
   z-index: 50;
   width: min(100% - 2rem, 40rem);
-  max-height: 60vh;
-  margin: auto;
-  margin-top: 12vh;
+  /* --command-top / --command-max-h are set by the JS runtime from
+     visualViewport while the on-screen keyboard is open, pinning the dialog
+     into the visible band above it. Defaults match the old centered look. */
+  top: var(--command-top, 12vh);
+  max-height: var(--command-max-h, 60vh);
+  margin-inline: auto;
+  margin-top: 0;
   padding: 0;
   background: var(--bg-0);
   color: var(--fg-0);
@@ -89,6 +94,8 @@
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   padding: var(--size-2);
   scroll-padding-block: var(--size-2);
 }

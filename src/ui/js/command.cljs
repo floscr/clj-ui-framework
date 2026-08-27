@@ -100,6 +100,39 @@
         (.observe obs list #js {:childList true :subtree true})
         (aset dialog "__cmdListObs" obs)))))
 
+;; ── Keyboard-aware sizing ───────────────────────────────────────────
+;; iOS Safari does not shrink the layout viewport when the on-screen keyboard
+;; opens, so a vh-sized centered <dialog> keeps its full height and its lower
+;; half — including the scrollable list — hides behind the keyboard (and the
+;; off-screen scroll area can't be reached). While the keyboard is up we pin the
+;; dialog into the visible band above it via --command-top / --command-max-h,
+;; read from visualViewport. When it's down we clear them so the CSS defaults
+;; (centered 12vh / 60vh) apply.
+
+(defn- viewport [] (.-visualViewport js/window))
+
+(defn- clear-viewport! [dialog]
+  (let [s (.-style dialog)]
+    (.removeProperty s "--command-top")
+    (.removeProperty s "--command-max-h")))
+
+(defn- sync-viewport! [dialog]
+  (let [vv (viewport)]
+    (when (and dialog vv)
+      (let [h  (.-height vv)
+            kb (- (.-innerHeight js/window) h)]
+        ;; Only override once the keyboard actually eats space; otherwise leave
+        ;; the desktop / no-keyboard look untouched.
+        (if (> kb 120)
+          (let [off     (.-offsetTop vv)
+                top-gap (js/Math.max 12 (js/Math.round (* h 0.08)))
+                bot-gap (js/Math.max 12 (js/Math.round (* h 0.06)))
+                max-h   (js/Math.max 160 (- h top-gap bot-gap))
+                s       (.-style dialog)]
+            (.setProperty s "--command-top" (str (+ off top-gap) "px"))
+            (.setProperty s "--command-max-h" (str max-h "px")))
+          (clear-viewport! dialog))))))
+
 (defn open [id]
   (let [dialog (find-dialog id)]
     (when (and dialog (not (.-open dialog)))
@@ -109,7 +142,8 @@
           (set! (.-value input) "")
           (.focus input)))
       (filter! dialog "")
-      (observe-list! dialog))))
+      (observe-list! dialog)
+      (sync-viewport! dialog))))
 
 (defn close [id]
   (let [dialog (find-dialog id)]
@@ -209,12 +243,26 @@
 
 ;; ── Init ────────────────────────────────────────────────────────────
 
+(defn- on-viewport-change []
+  (when-let [dialog (open-dialog)]
+    (sync-viewport! dialog)))
+
+(defn- on-dialog-close [e]
+  (let [t (.-target e)]
+    (when (and t (.-classList t) (.contains (.-classList t) "command-dialog"))
+      (clear-viewport! t))))
+
 (defn init! []
   (.addEventListener js/document "input" on-input true)
   (.addEventListener js/document "keydown" on-keydown true)
   (.addEventListener js/document "keydown" on-global-key)
   (.addEventListener js/document "click" on-click)
-  (.addEventListener js/document "pointermove" on-pointermove true))
+  (.addEventListener js/document "pointermove" on-pointermove true)
+  ;; Native <dialog> "close" doesn't bubble — capture it to reset keyboard sizing.
+  (.addEventListener js/document "close" on-dialog-close true)
+  (when-let [vv (viewport)]
+    (.addEventListener vv "resize" on-viewport-change)
+    (.addEventListener vv "scroll" on-viewport-change)))
 
 (init!)
 
