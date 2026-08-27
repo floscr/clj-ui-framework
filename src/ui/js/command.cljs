@@ -119,13 +119,16 @@
 (defn- sync-viewport! [dialog]
   (let [vv (viewport)]
     (when (and dialog vv)
-      (let [h  (.-height vv)
-            kb (- (.-innerHeight js/window) h)]
-        ;; Only override once the keyboard actually eats space; otherwise leave
-        ;; the desktop / no-keyboard look untouched.
-        (if (> kb 120)
-          (let [off     (.-offsetTop vv)
-                top-gap (js/Math.max 12 (js/Math.round (* h 0.08)))
+      (let [h   (.-height vv)
+            off (.-offsetTop vv)
+            kb  (- (.-innerHeight js/window) h)]
+        ;; Fire when the keyboard eats space (kb) OR when the visual viewport is
+        ;; displaced downward (off). The latter matters on iOS when the page
+        ;; behind the dialog is scroll-locked via `body{position:fixed}`, which
+        ;; collapses `innerHeight` to `visualViewport.height` (kb reads 0) even
+        ;; though the keyboard is up and the viewport is offset.
+        (if (or (> kb 120) (> off 1))
+          (let [top-gap (js/Math.max 12 (js/Math.round (* h 0.08)))
                 bot-gap (js/Math.max 12 (js/Math.round (* h 0.06)))
                 max-h   (js/Math.max 160 (- h top-gap bot-gap))
                 s       (.-style dialog)]
