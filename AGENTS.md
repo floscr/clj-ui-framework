@@ -980,6 +980,19 @@ Runtime functions on `window` use the `__ui` prefix: `__uiContextMenu`, `__uiToo
    ```
 
    This applies to any element with shorthand classes and a dynamic `:class` attribute. The same issue occurs with `[:div.dl-bar {:class status}]` — use `[:div {:class (str "dl-bar" (when status (str " " status)))}]` instead.
+9. **Never pass `false` to a boolean HTML attribute** (`disabled`, `readonly`, `required`, `hidden`, …) — use `(when cond true)` or omit the key. Eucalypt's attribute setter only *removes* an attribute when the value is `nil`; **any** other value, including `false`, calls `setAttributeNS(null, k, v)`, which *sets* the attribute. For boolean HTML attributes presence alone activates them, so `:disabled false` renders `disabled="false"` → still disabled.
+
+   **Wrong — button is permanently disabled (the `or` yields `false`, not `nil`):**
+   ```clojure
+   [:button {:disabled (or (not ok?) submitting?)} "Save"]
+   ```
+
+   **Right — attribute is present only when truthy, absent (nil) otherwise:**
+   ```clojure
+   [:button {:disabled (when (or (not ok?) submitting?) true)} "Save"]
+   ```
+
+   The `ui.button` component already does this via `(cond-> attrs disabled (assoc :disabled true))` — the pitfall only bites raw `[:button]`/`[:input]` hiccup. **Exception:** `checked` and `selected` are special-cased by Eucalypt (set as a DOM *property*, `element[k] = v`), so `false` correctly unchecks/deselects them — no `when` needed there.
 
 ## Replicant Pitfalls
 
