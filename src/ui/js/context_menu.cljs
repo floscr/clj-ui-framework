@@ -20,11 +20,11 @@
   (let [ns-uri "http://www.w3.org/2000/svg"
         svg    (.createElementNS js/document ns-uri "svg")]
     (.setAttribute svg "viewBox" "0 0 24 24")
-    (.setAttribute svg "width" "16")
-    (.setAttribute svg "height" "16")
+    (.setAttribute svg "width" "18")
+    (.setAttribute svg "height" "18")
     (.setAttribute svg "fill" "none")
     (.setAttribute svg "stroke" "currentColor")
-    (.setAttribute svg "stroke-width" "2")
+    (.setAttribute svg "stroke-width" "1.6")
     (.setAttribute svg "stroke-linecap" "round")
     (.setAttribute svg "stroke-linejoin" "round")
     (.setAttribute svg "style" "flex-shrink:0")
