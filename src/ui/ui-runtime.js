@@ -1010,22 +1010,26 @@
     }
     ;
   };
-  var create_icon = function(paths) {
+  var create_icon = function(elements) {
     const ns_uri1 = "http://www.w3.org/2000/svg";
     const svg2 = document.createElementNS(ns_uri1, "svg");
     svg2.setAttribute("viewBox", "0 0 24 24");
-    svg2.setAttribute("width", "16");
-    svg2.setAttribute("height", "16");
+    svg2.setAttribute("width", "18");
+    svg2.setAttribute("height", "18");
     svg2.setAttribute("fill", "none");
     svg2.setAttribute("stroke", "currentColor");
-    svg2.setAttribute("stroke-width", "2");
+    svg2.setAttribute("stroke-width", "1.6");
     svg2.setAttribute("stroke-linecap", "round");
     svg2.setAttribute("stroke-linejoin", "round");
     svg2.setAttribute("style", "flex-shrink:0");
-    paths.forEach((function(d) {
-      const p3 = document.createElementNS(ns_uri1, "path");
-      p3.setAttribute("d", d);
-      return svg2.appendChild(p3);
+    elements.forEach((function(el) {
+      const tag3 = el[0];
+      const attrs4 = el[1];
+      const node5 = document.createElementNS(ns_uri1, tag3);
+      attrs4.forEach((function(pair) {
+        return node5.setAttribute(pair[0], pair[1]);
+      }));
+      return svg2.appendChild(node5);
     }));
     return svg2;
   };

@@ -25,7 +25,13 @@
 ;; can render icons without importing the full icon module.
 
 (defn icon-paths-for
-  "Return a vector of SVG path d-strings for the given icon name, or nil."
+  "Return the SVG child elements for the given icon name, or nil.
+
+   Each element is [tag-string [[attr-name attr-value] ...]] with every
+   value stringified, so the JS runtime can build it via createElementNS
+   without any platform-specific map handling. Emits ALL element kinds
+   (path/circle/rect/line/polyline/polygon), not just <path>, so composite
+   icons (e.g. :clock, :circle-check, :copy) render fully."
   [icon-name]
   (when icon-name
     (let [k #?(:squint icon-name
@@ -33,10 +39,10 @@
                :clj    (if (keyword? icon-name) icon-name (keyword icon-name)))
           elements (get icon/icon-paths k)]
       (when elements
-        (vec (keep (fn [[tag attrs]]
-                     (when (= tag #?(:squint "path" :cljs :path :clj :path))
-                       (:d attrs)))
-                   elements))))))
+        (vec (map (fn [[tag attrs]]
+                    [(util/kw-name tag)
+                     (vec (map (fn [[ak av]] [(util/kw-name ak) (str av)]) attrs))])
+                  elements))))))
 
 ;; ── Item normalization ──────────────────────────────────────────────
 ;; Converts an item map into a flat structure suitable for the JS runtime.

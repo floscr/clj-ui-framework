@@ -16,7 +16,7 @@
 
 ;; ── SVG Icon Creation ───────────────────────────────────────────────
 
-(defn- create-icon [paths]
+(defn- create-icon [elements]
   (let [ns-uri "http://www.w3.org/2000/svg"
         svg    (.createElementNS js/document ns-uri "svg")]
     (.setAttribute svg "viewBox" "0 0 24 24")
@@ -28,11 +28,16 @@
     (.setAttribute svg "stroke-linecap" "round")
     (.setAttribute svg "stroke-linejoin" "round")
     (.setAttribute svg "style" "flex-shrink:0")
-    (.forEach paths
-      (fn [d]
-        (let [p (.createElementNS js/document ns-uri "path")]
-          (.setAttribute p "d" d)
-          (.appendChild svg p))))
+    ;; Each element is [tag-string [[attr-name attr-value] ...]].
+    (.forEach elements
+      (fn [el]
+        (let [tag   (aget el 0)
+              attrs (aget el 1)
+              node  (.createElementNS js/document ns-uri tag)]
+          (.forEach attrs
+            (fn [pair]
+              (.setAttribute node (aget pair 0) (aget pair 1))))
+          (.appendChild svg node))))
     svg))
 
 ;; ── Dismiss ─────────────────────────────────────────────────────────
