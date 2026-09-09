@@ -13,15 +13,52 @@
 (defn- items [dialog]
   (js/Array.from (.querySelectorAll dialog ".command-item")))
 
-(defn- visible-items [dialog]
-  (.filter (items dialog)
-           (fn [el]
-             (and (not (.-hidden el))
-                  (not (.-disabled el))))))
+(defn- item-order [el]
+  (js/Number (or (.. el -style -order) 0)))
+
+(defn- visible-items
+  "Visible, enabled items in *visual* order. filter! ranks matches within
+   each flex-column group via `style.order`, so DOM order alone is wrong
+   while a query is active — re-sort per group (stable, so equal ranks keep
+   DOM order) to keep keyboard nav aligned with what the user sees."
+  [dialog]
+  (let [vis (.filter (items dialog)
+                     (fn [el]
+                       (and (not (.-hidden el))
+                            (not (.-disabled el)))))
+        container (fn [el] (or (.closest el ".command-group") dialog))
+        containers #js []]
+    (.forEach vis (fn [el]
+                    (let [c (container el)]
+                      (when-not (.includes containers c)
+                        (.push containers c)))))
+    (.flatMap containers
+              (fn [c]
+                (.sort (.filter vis (fn [el] (identical? c (container el))))
+                       (fn [a b] (- (item-order a) (item-order b))))))))
 
 (defn- item-text [el]
   (let [v (.. el -dataset -commandValue)]
     (.toLowerCase (or v (.-textContent el) ""))))
+
+(defn- item-label [el]
+  (let [lbl (.querySelector el ".command-item-label")]
+    (.toLowerCase (or (and lbl (.-textContent lbl)) (.-textContent el) ""))))
+
+(defn- match-score
+  "Rank a matching item for query q — lower is better. Matches on the visible
+   label beat matches that only hit the hidden search value (:value keywords,
+   project paths, …): 0 exact label · 1 label prefix · 2 label word-start ·
+   3 label substring · 4 value-only."
+  [el q]
+  (let [label (item-label el)]
+    (cond
+      (= label q)           0
+      (.startsWith label q) 1
+      (.some (.split label #"[^a-z0-9]+")
+             (fn [w] (.startsWith w q))) 2
+      (.includes label q)   3
+      :else                 4)))
 
 ;; ── Active highlight ────────────────────────────────────────────────
 
@@ -61,7 +98,13 @@
     (.forEach (items dialog)
               (fn [el]
                 (let [match (or (= q "") (.includes (item-text el) q))]
-                  (set! (.-hidden el) (not match)))))
+                  (set! (.-hidden el) (not match))
+                  ;; Rank matches by quality via flex `order` (the group item
+                  ;; container is a flex column) so better matches float to
+                  ;; the top of their group without touching DOM order.
+                  (if (or (= q "") (not match))
+                    (.removeProperty (.-style el) "order")
+                    (set! (.. el -style -order) (match-score el q))))))
     ;; Hide groups whose items are all filtered out.
     (.forEach (js/Array.from (.querySelectorAll dialog ".command-group"))
               (fn [grp]
@@ -216,6 +259,12 @@
           (and (= key "p") (.-ctrlKey e)) (do (.preventDefault e) (move-active! dialog "up"))
           (and (= key "j") (.-ctrlKey e)) (do (.preventDefault e) (move-active! dialog "down"))
           (and (= key "k") (.-ctrlKey e)) (do (.preventDefault e) (move-active! dialog "up"))
+          ;; Alt-modified pairs as well — Alt+letter is never browser-reserved,
+          ;; so Alt+j/k and Alt+n/p work in any normal tab.
+          (and (= key "j") (.-altKey e)) (do (.preventDefault e) (move-active! dialog "down"))
+          (and (= key "k") (.-altKey e)) (do (.preventDefault e) (move-active! dialog "up"))
+          (and (= key "n") (.-altKey e)) (do (.preventDefault e) (move-active! dialog "down"))
+          (and (= key "p") (.-altKey e)) (do (.preventDefault e) (move-active! dialog "up"))
           (and (= key "Home") (.-metaKey e)) (do (.preventDefault e) (move-active! dialog "home"))
           (and (= key "End")  (.-metaKey e)) (do (.preventDefault e) (move-active! dialog "end"))
           (= key "Enter")     (do (.preventDefault e) (select! dialog (active-item dialog))))))))

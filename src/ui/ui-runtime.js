@@ -536,9 +536,46 @@
   var items = function(dialog) {
     return Array.from(dialog.querySelectorAll(".command-item"));
   };
+  var item_order = function(el) {
+    return Number((() => {
+      const or__23426__auto__1 = el.style.order;
+      if (truth_(or__23426__auto__1)) {
+        return or__23426__auto__1;
+      } else {
+        return 0;
+      }
+      ;
+    })());
+  };
   var visible_items = function(dialog) {
-    return items(dialog).filter((function(el) {
+    const vis1 = items(dialog).filter((function(el) {
       return not(el.hidden) && not(el.disabled);
+    }));
+    const container2 = (function(el) {
+      const or__23426__auto__3 = el.closest(".command-group");
+      if (truth_(or__23426__auto__3)) {
+        return or__23426__auto__3;
+      } else {
+        return dialog;
+      }
+      ;
+    });
+    const containers4 = [];
+    vis1.forEach((function(el) {
+      const c5 = container2(el);
+      if (truth_(containers4.includes(c5))) {
+        return null;
+      } else {
+        return containers4.push(c5);
+      }
+      ;
+    }));
+    return containers4.flatMap((function(c) {
+      return vis1.filter((function(el) {
+        return c === container2(el);
+      })).sort((function(a, b) {
+        return item_order(a) - item_order(b);
+      }));
     }));
   };
   var item_text = function(el) {
@@ -558,6 +595,59 @@
       }
       ;
     })().toLowerCase();
+  };
+  var item_label = function(el) {
+    const lbl1 = el.querySelector(".command-item-label");
+    return (() => {
+      const or__23426__auto__2 = (() => {
+        const and__23442__auto__3 = lbl1;
+        if (truth_(and__23442__auto__3)) {
+          return lbl1.textContent;
+        } else {
+          return and__23442__auto__3;
+        }
+        ;
+      })();
+      if (truth_(or__23426__auto__2)) {
+        return or__23426__auto__2;
+      } else {
+        const or__23426__auto__4 = el.textContent;
+        if (truth_(or__23426__auto__4)) {
+          return or__23426__auto__4;
+        } else {
+          return "";
+        }
+        ;
+      }
+      ;
+    })().toLowerCase();
+  };
+  var match_score = function(el, q) {
+    const label1 = item_label(el);
+    if (_EQ_(label1, q)) {
+      return 0;
+    } else {
+      if (truth_(label1.startsWith(q))) {
+        return 1;
+      } else {
+        if (truth_(label1.split(/[^a-z0-9]+/).some((function(w) {
+          return w.startsWith(q);
+        })))) {
+          return 2;
+        } else {
+          if (truth_(label1.includes(q))) {
+            return 3;
+          } else {
+            if ("else") {
+              return 4;
+            } else {
+              return null;
+            }
+          }
+        }
+      }
+    }
+    ;
   };
   var active_item = function(dialog) {
     return dialog.querySelector(".command-item--active");
@@ -638,22 +728,36 @@
         }
         ;
       })();
-      return el.hidden = not(match4);
+      el.hidden = not(match4);
+      if (truth_((() => {
+        const or__23426__auto__6 = _EQ_(q1, "");
+        if (or__23426__auto__6) {
+          return or__23426__auto__6;
+        } else {
+          return not(match4);
+        }
+        ;
+      })())) {
+        return el.style.removeProperty("order");
+      } else {
+        return el.style.order = match_score(el, q1);
+      }
+      ;
     }));
     Array.from(dialog.querySelectorAll(".command-group")).forEach((function(grp) {
-      const any6 = Array.from(grp.querySelectorAll(".command-item")).some((function(el) {
+      const any7 = Array.from(grp.querySelectorAll(".command-item")).some((function(el) {
         return not(el.hidden);
       }));
-      return grp.hidden = not(any6);
+      return grp.hidden = not(any7);
     }));
-    const vis7 = visible_items(dialog);
-    if (vis7.length === 0) {
+    const vis8 = visible_items(dialog);
+    if (vis8.length === 0) {
       list3.classList.add("command-list--empty");
     } else {
       list3.classList.remove("command-list--empty");
     }
     ;
-    return set_active_BANG_(dialog, vis7.length > 0 ? vis7[0] : null);
+    return set_active_BANG_(dialog, vis8.length > 0 ? vis8[0] : null);
   };
   var find_dialog = function(id) {
     if (truth_(id)) {
@@ -885,19 +989,39 @@
                   e.preventDefault();
                   return move_active_BANG_(dialog1, "up");
                 } else {
-                  if (truth_(key2 === "Home" && e.metaKey)) {
+                  if (truth_(key2 === "j" && e.altKey)) {
                     e.preventDefault();
-                    return move_active_BANG_(dialog1, "home");
+                    return move_active_BANG_(dialog1, "down");
                   } else {
-                    if (truth_(key2 === "End" && e.metaKey)) {
+                    if (truth_(key2 === "k" && e.altKey)) {
                       e.preventDefault();
-                      return move_active_BANG_(dialog1, "end");
+                      return move_active_BANG_(dialog1, "up");
                     } else {
-                      if (key2 === "Enter") {
+                      if (truth_(key2 === "n" && e.altKey)) {
                         e.preventDefault();
-                        return select_BANG_(dialog1, active_item(dialog1));
+                        return move_active_BANG_(dialog1, "down");
                       } else {
-                        return null;
+                        if (truth_(key2 === "p" && e.altKey)) {
+                          e.preventDefault();
+                          return move_active_BANG_(dialog1, "up");
+                        } else {
+                          if (truth_(key2 === "Home" && e.metaKey)) {
+                            e.preventDefault();
+                            return move_active_BANG_(dialog1, "home");
+                          } else {
+                            if (truth_(key2 === "End" && e.metaKey)) {
+                              e.preventDefault();
+                              return move_active_BANG_(dialog1, "end");
+                            } else {
+                              if (key2 === "Enter") {
+                                e.preventDefault();
+                                return select_BANG_(dialog1, active_item(dialog1));
+                              } else {
+                                return null;
+                              }
+                            }
+                          }
+                        }
                       }
                     }
                   }
