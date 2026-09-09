@@ -417,6 +417,12 @@
     const clone = [...coll];
     return clone.sort(f || compare);
   }
+  function max(x, y, ...more) {
+    if (y == void 0) {
+      return x;
+    }
+    return Math.max(x, y, ...more);
+  }
   function compare(x, y) {
     if (x === y) {
       return 0;
@@ -1004,7 +1010,7 @@
     if (truth_(or__23426__auto__1)) {
       return or__23426__auto__1;
     } else {
-      const s2 = { "menu": null, "cleanup": null };
+      const s2 = { "menu": null, "cleanup": null, "growthObserver": null };
       window["__uiCtxState"] = s2;
       return s2;
     }
@@ -1039,6 +1045,11 @@
       state1.menu.remove();
       state1.menu = null;
       document.dispatchEvent(new CustomEvent("clj-ui-menu-dismiss"));
+    }
+    ;
+    if (truth_(state1.growthObserver)) {
+      state1.growthObserver.disconnect();
+      state1.growthObserver = null;
     }
     ;
     if (truth_(state1.cleanup)) {
@@ -1153,17 +1164,32 @@
     }));
     return menu1;
   };
+  var clamp_to_viewport_BANG_ = function(menu) {
+    const x1 = parseFloat(menu.style.left);
+    const y2 = parseFloat(menu.style.top);
+    const w3 = menu.offsetWidth;
+    const h4 = menu.offsetHeight;
+    const vw5 = window.innerWidth;
+    const vh6 = window.innerHeight;
+    if (x1 + w3 > vw5 - 8) {
+      menu.style.left = `${max(8, vw5 - w3 - 8) ?? ""}px`;
+    }
+    ;
+    if (y2 + h4 > vh6 - 8) {
+      return menu.style.top = `${max(8, vh6 - h4 - 8) ?? ""}px`;
+    }
+    ;
+  };
   var position_menu_BANG_ = function(menu, x, y) {
     menu.style.left = `${x ?? ""}px`;
     menu.style.top = `${y ?? ""}px`;
     document.body.appendChild(menu);
-    const rect1 = menu.getBoundingClientRect();
-    const vw2 = window.innerWidth;
-    const vh3 = window.innerHeight;
-    const new_x4 = x + rect1.width > vw2 ? vw2 - rect1.width - 8 : x;
-    const new_y5 = y + rect1.height > vh3 ? vh3 - rect1.height - 8 : y;
-    menu.style.left = `${new_x4 ?? ""}px`;
-    return menu.style.top = `${new_y5 ?? ""}px`;
+    clamp_to_viewport_BANG_(menu);
+    const mo1 = new MutationObserver((function(_) {
+      return clamp_to_viewport_BANG_(menu);
+    }));
+    mo1.observe(menu, { "childList": true, "subtree": true });
+    return get_state().growthObserver = mo1;
   };
   var focus_first_item_BANG_ = function(menu) {
     const first_item1 = menu.querySelector(".context-menu-item");

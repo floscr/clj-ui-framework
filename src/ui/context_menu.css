@@ -39,7 +39,12 @@
   border: var(--border-0);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-3);
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
+  /* Never taller than the viewport — scroll instead of overflowing.
+     dvh tracks mobile browser chrome; vh is the fallback. */
+  max-height: calc(100vh - 16px);
+  max-height: calc(100dvh - 16px);
   animation: context-menu-in 0.12s ease;
   list-style: none;
   margin: 0;

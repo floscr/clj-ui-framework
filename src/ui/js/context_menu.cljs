@@ -10,7 +10,7 @@
 
 (defn- get-state []
   (or (aget js/window "__uiCtxState")
-      (let [s #js {:menu nil :cleanup nil}]
+      (let [s #js {:menu nil :cleanup nil :growthObserver nil}]
         (aset js/window "__uiCtxState" s)
         s)))
 
@@ -49,6 +49,9 @@
       (set! (.-menu state) nil)
       ;; let ui/js/gestures release the held press visual in sync
       (.dispatchEvent js/document (js/CustomEvent. "clj-ui-menu-dismiss")))
+    (when (.-growthObserver state)
+      (.disconnect (.-growthObserver state))
+      (set! (.-growthObserver state) nil))
     (when (.-cleanup state)
       ((.-cleanup state))
       (set! (.-cleanup state) nil))))
@@ -154,23 +157,37 @@
 
 ;; ── Positioning ─────────────────────────────────────────────────────
 
+(defn- clamp-to-viewport!
+  "Keep `menu` fully on-screen: if it overflows the right or bottom viewport
+   edge, pull it back (never past the 8px top/left margin). Measures via
+   style left/top + offsetWidth/Height — NOT getBoundingClientRect — so the
+   open animation's transform scale can't skew the numbers. Respects any
+   repositioning done after open."
+  [menu]
+  (let [x  (js/parseFloat (.. menu -style -left))
+        y  (js/parseFloat (.. menu -style -top))
+        w  (.-offsetWidth menu)
+        h  (.-offsetHeight menu)
+        vw (.-innerWidth js/window)
+        vh (.-innerHeight js/window)]
+    (when (> (+ x w) (- vw 8))
+      (set! (.. menu -style -left) (str (max 8 (- vw w 8)) "px")))
+    (when (> (+ y h) (- vh 8))
+      (set! (.. menu -style -top) (str (max 8 (- vh h 8)) "px")))))
+
 (defn- position-menu! [menu x y]
   (set! (.. menu -style -left) (str x "px"))
   (set! (.. menu -style -top)  (str y "px"))
   ;; Append first so we can measure
   (.appendChild js/document.body menu)
-  ;; Clamp to viewport
-  (let [rect  (.getBoundingClientRect menu)
-        vw    (.-innerWidth js/window)
-        vh    (.-innerHeight js/window)
-        new-x (if (> (+ x (.-width rect)) vw)
-                (- vw (.-width rect) 8)
-                x)
-        new-y (if (> (+ y (.-height rect)) vh)
-                (- vh (.-height rect) 8)
-                y)]
-    (set! (.. menu -style -left) (str new-x "px"))
-    (set! (.. menu -style -top)  (str new-y "px"))))
+  (clamp-to-viewport! menu)
+  ;; Re-clamp when the menu's contents change after open — apps may inject
+  ;; extra DOM (action bars, search inputs) post-positioning, which would
+  ;; otherwise push the menu past the bottom edge. MutationObserver fires as
+  ;; a microtask (childList only, so our own style writes don't retrigger).
+  (let [mo (js/MutationObserver. (fn [_] (clamp-to-viewport! menu)))]
+    (.observe mo menu #js {:childList true :subtree true})
+    (set! (.-growthObserver (get-state)) mo)))
 
 ;; ── Keyboard Navigation ─────────────────────────────────────────────
 
