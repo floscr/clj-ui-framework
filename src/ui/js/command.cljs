@@ -89,6 +89,29 @@
                      :else idx)]
         (set-active! dialog (aget vis next-i))))))
 
+(defn- move-group!
+  "Jump the active highlight to the first visible item of the next/previous
+   .command-group (ungrouped items count as one dialog-level group)."
+  [dialog dir]
+  (let [vis (visible-items dialog)
+        len (.-length vis)]
+    (when (> len 0)
+      (let [group-of (fn [el] (or (and el (.closest el ".command-group")) dialog))
+            groups   #js []]
+        (.forEach vis (fn [el]
+                        (let [g (group-of el)]
+                          (when-not (.includes groups g)
+                            (.push groups g)))))
+        (let [glen   (.-length groups)
+              cur    (active-item dialog)
+              gidx   (.indexOf groups (group-of cur))
+              next-g (if (= dir "down")
+                       (if (< gidx (- glen 1)) (+ gidx 1) 0)
+                       (if (> gidx 0) (- gidx 1) (- glen 1)))
+              target (aget groups next-g)]
+          (set-active! dialog
+                       (.find vis (fn [el] (identical? (group-of el) target)))))))))
+
 ;; ── Filtering ───────────────────────────────────────────────────────
 
 (defn- filter! [dialog query]
@@ -260,7 +283,13 @@
           (and (= key "j") (.-ctrlKey e)) (do (.preventDefault e) (move-active! dialog "down"))
           (and (= key "k") (.-ctrlKey e)) (do (.preventDefault e) (move-active! dialog "up"))
           ;; Alt-modified pairs as well — Alt+letter is never browser-reserved,
-          ;; so Alt+j/k and Alt+n/p work in any normal tab.
+          ;; so Alt+j/k and Alt+n/p work in any normal tab. Alt+Shift+j/k
+          ;; jumps by section (first item of the next/previous group); with
+          ;; Shift held the key reports uppercase, so match both cases.
+          (and (or (= key "J") (= key "j")) (.-altKey e) (.-shiftKey e))
+          (do (.preventDefault e) (move-group! dialog "down"))
+          (and (or (= key "K") (= key "k")) (.-altKey e) (.-shiftKey e))
+          (do (.preventDefault e) (move-group! dialog "up"))
           (and (= key "j") (.-altKey e)) (do (.preventDefault e) (move-active! dialog "down"))
           (and (= key "k") (.-altKey e)) (do (.preventDefault e) (move-active! dialog "up"))
           (and (= key "n") (.-altKey e)) (do (.preventDefault e) (move-active! dialog "down"))
