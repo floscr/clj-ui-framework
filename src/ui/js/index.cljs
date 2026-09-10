@@ -2,6 +2,7 @@
   (:require [command]
             [context-menu]
             [drop-zone]
+            [flip]
             [gestures]
             [masonry]
             [panels]
