@@ -37,8 +37,13 @@
                (spit "dev/replicant/public/css-live-reload.js" lr)
                (spit "dev/squint/public/css-live-reload.js" lr)
                (println "Copied css-live-reload.js to dev targets")
-             (when (.exists (io/file "dist/ui-runtime.js"))
-               (let [rt (slurp "dist/ui-runtime.js")]
+             ;; src/ui/ui-runtime.js is the committed source of truth
+             ;; (build-js-runtime writes dist + src identically). Refresh
+             ;; dist from it so a stale gitignored dist/ui-runtime.js on
+             ;; the deploy server never shadows a newly pushed runtime.
+             (when (.exists (io/file "src/ui/ui-runtime.js"))
+               (let [rt (slurp "src/ui/ui-runtime.js")]
+                 (spit "dist/ui-runtime.js" rt)
                  (spit "dev/replicant/public/ui-runtime.js" rt)
                  (spit "dev/squint/public/ui-runtime.js" rt)
                  (println "Copied ui-runtime.js to dev targets"))))
@@ -198,13 +203,11 @@
    :depends [build-theme]
    :requires ([dev.hiccup]
               [clojure.java.io :as io])
-   :task (do
-           (when-not (.exists (io/file "dist/ui-runtime.js"))
-             (io/make-parents "dist/ui-runtime.js")
-             (io/copy (io/file "src/ui/ui-runtime.js") (io/file "dist/ui-runtime.js")))
-           (let [port (or (some-> (System/getenv "PORT") parse-long) 8080)]
-             (dev.hiccup/start! {:port port :live-reload? false})
-             (deref (promise))))}
+   :task (let [port (or (some-> (System/getenv "PORT") parse-long) 8080)]
+           ;; build-theme (dependency) refreshes dist/ui-runtime.js from
+           ;; the committed src/ui/ui-runtime.js
+           (dev.hiccup/start! {:port port :live-reload? false})
+           (deref (promise)))}
 
   dev-replicant
   {:doc "Start replicant dev server (PORT env var, default 3001)"
