@@ -1,5 +1,5 @@
 # Build artifacts
-dist/
+/dist/
 
 # Dev target build outputs
 dev/replicant/public/js/
@@ -8,7 +8,9 @@ dev/replicant/public/theme-adapter.js
 dev/replicant/public/css-live-reload.js
 dev/replicant/public/ui-runtime.js
 dev/replicant/.shadow-cljs/
+dev/replicant/prod/js/manifest.edn
 dev/squint/.compiled/
+dev/squint/.vite/
 src/ui/js/.compiled/
 dev/squint/public/
 dev/squint/node_modules/

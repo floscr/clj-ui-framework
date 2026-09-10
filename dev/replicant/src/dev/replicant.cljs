@@ -793,11 +793,16 @@
     (if (js/isNaN p) 3001 p)))
 
 (defn make-targets []
-  (let [port (own-port)
-        base (- port 1)]
-    [{:label "Hiccup"    :port (+ base 3)}
-     {:label "Replicant" :port (+ base 1) :active true}
-     {:label "Squint"    :port (+ base 2)}]))
+  (if (= "" (.-port js/window.location))
+    ;; portless (production behind a reverse proxy) — path-mounted builds
+    [{:label "Hiccup"    :href "/"}
+     {:label "Replicant" :href "/replicant/" :active true}
+     {:label "Squint"    :href "/squint/"}]
+    (let [base (- (own-port) 1)
+          hostname (.-hostname js/window.location)]
+      [{:label "Hiccup"    :href (str "//" hostname ":" (+ base 3))}
+       {:label "Replicant" :href (str "//" hostname ":" (+ base 1)) :active true}
+       {:label "Squint"    :href (str "//" hostname ":" (+ base 2))}])))
 
 (defn app-sidebar [active-page]
   (sidebar/sidebar {}
@@ -821,9 +826,9 @@
       (sidebar/sidebar-separator)
       (sidebar/sidebar-group {:label "Targets"}
         (apply sidebar/sidebar-menu {}
-          (for [{:keys [label port active]} (make-targets)]
+          (for [{:keys [label href active]} (make-targets)]
             (sidebar/sidebar-menu-item
-              {:href (str "//" (.-hostname js/window.location) ":" port)
+              {:href href
                :icon-name :monitor
                :active active}
               label))))

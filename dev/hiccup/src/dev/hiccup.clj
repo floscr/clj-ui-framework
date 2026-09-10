@@ -660,12 +660,6 @@
 
 ;; ── App Shell ───────────────────────────────────────────────────────
 
-(defn make-targets [own-port]
-  (let [base (- own-port 3)]
-    [{:label "Hiccup"    :port (+ base 3) :active true}
-     {:label "Replicant" :port (+ base 1)}
-     {:label "Squint"    :port (+ base 2)}]))
-
 (defn req-hostname
   "Extract the hostname from a request Host header, dropping any :port.
    Falls back to localhost. Keeps the current host so target-switcher
@@ -674,6 +668,22 @@
   (if (and host (re-find #":\d+$" host))
     (str/replace host #":\d+$" "")
     (or host "localhost")))
+
+(defn make-targets
+  "Target-switcher links. Accessed via an explicit :port (dev servers) →
+   sibling ports on the same host. Accessed portless (production behind
+   a reverse proxy) → the SPA builds served under /replicant/ and
+   /squint/."
+  [own-port host]
+  (if (and host (not (re-find #":\d+$" host)))
+    [{:label "Hiccup"    :href "/" :active true}
+     {:label "Replicant" :href "/replicant/"}
+     {:label "Squint"    :href "/squint/"}]
+    (let [base (- own-port 3)
+          hostname (req-hostname host)]
+      [{:label "Hiccup"    :href (str "//" hostname ":" (+ base 3)) :active true}
+       {:label "Replicant" :href (str "//" hostname ":" (+ base 1))}
+       {:label "Squint"    :href (str "//" hostname ":" (+ base 2))}])))
 
 (defn app-sidebar [active-page own-port host]
   (sidebar/sidebar {}
@@ -696,9 +706,9 @@
       (sidebar/sidebar-separator)
       (sidebar/sidebar-group {:label "Targets"}
         (apply sidebar/sidebar-menu {}
-          (for [{:keys [label port active]} (make-targets own-port)]
+          (for [{:keys [label href active]} (make-targets own-port host)]
             (sidebar/sidebar-menu-item
-              {:href (str "//" (req-hostname host) ":" port)
+              {:href href
                :icon-name :monitor
                :active active}
               label))))
@@ -821,10 +831,49 @@
 (defonce !port (atom 3003))
 (defonce !live-reload (atom true))
 
+(def ^:private content-types
+  {"html" "text/html; charset=utf-8"
+   "css" "text/css"
+   "js" "application/javascript"
+   "mjs" "application/javascript"
+   "json" "application/json"
+   "map" "application/json"
+   "svg" "image/svg+xml"
+   "png" "image/png"
+   "md" "text/markdown"
+   "woff2" "font/woff2"})
+
+(defn- serve-file [^java.io.File f]
+  (let [ext (last (str/split (.getName f) #"\."))]
+    {:status 200
+     :headers {"Content-Type" (get content-types ext "application/octet-stream")}
+     :body f}))
+
+(defn- spa-response
+  "Serve a static SPA build mounted at /<prefix>/. `rel` is the path
+   under the mount; searched across `roots` in order (later roots let
+   generated assets like theme.css come from the dev public dir)."
+  [roots rel]
+  (let [rel (if (str/blank? rel) "index.html" rel)]
+    (when-not (str/includes? rel "..")
+      (some (fn [root]
+              (let [f (io/file root rel)]
+                (when (.isFile f) (serve-file f))))
+            roots))))
+
+(def ^:private spa-mounts
+  {"replicant" ["dev/replicant/prod" "dev/replicant/public"]
+   "squint" ["dev/squint/dist" "dev/squint/public"]})
+
 (defn handler [{:keys [uri headers]}]
   (let [port @!port
         host (get headers "host")
-        path (first (str/split uri #"\?" 2))]
+        path (first (str/split uri #"\?" 2))
+        spa (when-let [[_ mount rel] (re-matches #"/(replicant|squint)(?:/(.*))?" path)]
+              (if (nil? rel)
+                ;; no trailing slash — relative asset URLs need one
+                {:status 301 :headers {"Location" (str path "/")}}
+                (spa-response (spa-mounts mount) rel)))]
     (cond
       (= path "/dev/changes")
       {:status 200
@@ -851,6 +900,8 @@
       {:status 200
        :headers {"Content-Type" "application/javascript"}
        :body (slurp "dev/css-live-reload.js")}
+
+      spa spa
 
       (resolve-page path)
       {:status 200

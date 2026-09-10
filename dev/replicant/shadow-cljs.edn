@@ -6,4 +6,12 @@
    :output-dir "public/js"
    :asset-path "/js"
    :modules {:main {:init-fn dev.replicant/init!}}
-   :devtools {:after-load dev.replicant/reload!}}}}
+   :devtools {:after-load dev.replicant/reload!}}
+  ;; Production bundle served by the hiccup server at /replicant/js/ —
+  ;; separate output dir so a dev-mode main.js never shadows the
+  ;; committed release artifact.
+  :release
+  {:target :browser
+   :output-dir "prod/js"
+   :asset-path "/replicant/js"
+   :modules {:main {:init-fn dev.replicant/init!}}}}}

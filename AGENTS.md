@@ -240,6 +240,17 @@ git push origin master
 git push hetzner master
 ```
 
+The production server (ui.example.com) serves all three
+targets: hiccup renders live, while the Replicant and Squint SPAs are
+served as **committed static builds** at `/replicant/` and `/squint/`
+(the server has no node/npm — same reason `src/ui/ui-runtime.js` is
+committed). After changing components or the dev SPA pages, rebuild and
+commit the artifacts before deploying:
+
+```sh
+bb build-demos   # → dev/replicant/prod/js/main.js + dev/squint/dist/
+```
+
 Pushing is a shared, hard-to-reverse action — only deploy when explicitly asked.
 
 ## Rolling Out a Shared Resource to All Consumers

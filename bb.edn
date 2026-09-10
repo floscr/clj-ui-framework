@@ -66,6 +66,20 @@
            (spit "src/ui/ui-runtime.js" (slurp "dist/ui-runtime.js"))
            (println "Built dist/ui-runtime.js + src/ui/ui-runtime.js"))}
 
+  build-replicant
+  {:doc "Release build of the replicant demo (dev/replicant/prod/js/main.js)"
+   :depends [build-theme ensure-npm]
+   :task (shell {:dir "dev/replicant"} "npx" "shadow-cljs" "release" "release")}
+
+  build-squint
+  {:doc "Release build of the squint demo (dev/squint/dist/)"
+   :depends [build-theme ensure-npm]
+   :task (shell {:dir "dev/squint"} "npm" "run" "build")}
+
+  build-demos
+  {:doc "Release-build both SPA demos for the production server (/replicant, /squint)"
+   :depends [build-replicant build-squint]}
+
   watch-theme
   {:doc "Watch src/ui/*.css and tokens.edn, rebuild theme on changes"
    :task (load-file "scripts/watch-theme.bb")}
