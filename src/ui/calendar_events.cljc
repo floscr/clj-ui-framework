@@ -200,12 +200,13 @@
      :selected-date - YYYY-MM-DD string of selected date
      :on-select     - callback for day selection
      :on-event-click - callback for event click
+     :on-more-click - callback (fn [date-str]) for the '+N more' overflow indicator
      :indicator     - :pills (default) shows in-cell event pills;
                       :dots shows a compact row of coloured dots (mobile-friendly)
      :max-visible   - max events to show before '+N more' (pills mode, default 3)
      :max-dots      - max dots to show (dots mode, default 4)"
   [{:keys [day events today-str selected-date on-select on-event-click
-           on-event-context-menu indicator max-visible max-dots]}]
+           on-event-context-menu on-more-click indicator max-visible max-dots]}]
   (let [{:keys [current-month? date-str]} day
         d           (:day day)
         today?      (= date-str today-str)
@@ -237,7 +238,10 @@
                                              :on-context-menu on-event-context-menu}))
                       visible-evts)
                  (when (pos? overflow)
-                   [[:div {:class "cal-event-more"} (str "+" overflow " more")]]))))]
+                   [[:div {:class "cal-event-more"
+                           :on-click (when on-more-click
+                                       (fn [e] (.stopPropagation e) (on-more-click date-str)))}
+                     (str "+" overflow " more")]]))))]
 
        :cljs
        [:div {:class (cond-> (conj (cal/day-cell-class-list cls-opts) "cal-event-day")
@@ -257,7 +261,10 @@
                                              :on-context-menu on-event-context-menu}))
                       visible-evts)
                  (when (pos? overflow)
-                   [[:div {:class ["cal-event-more"]} (str "+" overflow " more")]]))))]
+                   [[:div {:class ["cal-event-more"]
+                           :on (when on-more-click
+                                 {:click (fn [e] (.stopPropagation e) (on-more-click date-str))})}
+                     (str "+" overflow " more")]]))))]
 
        :clj
        [:div {:class (str (cal/day-cell-classes cls-opts) " cal-event-day"
