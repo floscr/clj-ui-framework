@@ -756,7 +756,7 @@
      :hour-height    - pixels per hour (default 56)
      :class          - extra classes
      :attrs          - extra attributes"
-  [{:keys [days events today-str now-minutes on-event-click hour-height class attrs]}]
+  [{:keys [days events today-str now-minutes on-event-click on-event-context-menu hour-height class attrs]}]
   (let [dates      (mapv :date days)
         date-set   (set dates)
         in-week    (filterv (fn [e] (contains? date-set (:date e))) events)
@@ -798,7 +798,12 @@
                                                          (when (= (:date d) today-str) " is-today"))}]
                                        (map (fn [evt]
                                               [:div {:class (str "cal-week-alldayevent " (event-color-class (:color evt)))
-                                                     :on-click (when on-event-click (fn [_e] (on-event-click evt)))}
+                                                     :on-click (when on-event-click (fn [_e] (on-event-click evt)))
+                                                     :on-contextmenu (when on-event-context-menu
+                                                                       (fn [e]
+                                                                         (.preventDefault e)
+                                                                         (.stopPropagation e)
+                                                                         (on-event-context-menu evt e)))}
                                                [:span {:class "cal-week-alldayevent-dot"}]
                                                [:span {:class "cal-week-alldayevent-title"} (:title evt)]])
                                             (events-for-date all-day (:date d)))))
@@ -822,7 +827,12 @@
                                                   [:div {:class (str "cal-week-event " (event-color-class (:color evt)))
                                                          :style {"top" (str (px (- s start-off)) "px")
                                                                  "height" (str (px dur) "px")}
-                                                         :on-click (when on-event-click (fn [_e] (on-event-click evt)))}
+                                                         :on-click (when on-event-click (fn [_e] (on-event-click evt)))
+                                                         :on-contextmenu (when on-event-context-menu
+                                                                           (fn [e]
+                                                                             (.preventDefault e)
+                                                                             (.stopPropagation e)
+                                                                             (on-event-context-menu evt e)))}
                                                    [:div {:class "cal-week-event-head"}
                                                     [:span {:class "cal-week-event-title"} (:title evt)]
                                                     (when-let [dd (format-duration dur)]
@@ -858,7 +868,13 @@
                                  (into [:div {:class ["cal-week-alldaycol" (when (= (:date d) today-str) "is-today")]}]
                                        (map (fn [evt]
                                               [:div {:class ["cal-week-alldayevent" (event-color-class (:color evt))]
-                                                     :on (when on-event-click {:click (fn [_e] (on-event-click evt))})}
+                                                     :on (cond-> {}
+                                                           on-event-click (assoc :click (fn [_e] (on-event-click evt)))
+                                                           on-event-context-menu (assoc :contextmenu
+                                                                                        (fn [e]
+                                                                                          (.preventDefault e)
+                                                                                          (.stopPropagation e)
+                                                                                          (on-event-context-menu evt e))))}
                                                [:span {:class ["cal-week-alldayevent-dot"]}]
                                                [:span {:class ["cal-week-alldayevent-title"]} (:title evt)]])
                                             (events-for-date all-day (:date d)))))
@@ -881,7 +897,13 @@
                                                   [:div {:class ["cal-week-event" (event-color-class (:color evt))]
                                                          :style {:top (str (px (- s start-off)) "px")
                                                                  :height (str (px dur) "px")}
-                                                         :on (when on-event-click {:click (fn [_e] (on-event-click evt))})}
+                                                         :on (cond-> {}
+                                                               on-event-click (assoc :click (fn [_e] (on-event-click evt)))
+                                                               on-event-context-menu (assoc :contextmenu
+                                                                                            (fn [e]
+                                                                                              (.preventDefault e)
+                                                                                              (.stopPropagation e)
+                                                                                              (on-event-context-menu evt e))))}
                                                    [:div {:class ["cal-week-event-head"]}
                                                     [:span {:class ["cal-week-event-title"]} (:title evt)]
                                                     (when-let [dd (format-duration dur)]
