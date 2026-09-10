@@ -24,10 +24,11 @@
       "cal-event-default")))
 
 (defn events-for-date
-  "Filter events matching a date string, sorted by time-start."
+  "Filter events matching a date string, sorted by time-start. Untimed
+   all-day events sort first (empty string precedes any 'HH:MM')."
   [events date-str]
   (let [matching (filterv (fn [evt] (= date-str (:date evt))) events)]
-    (sort-by (fn [evt] (or (:time-start evt) "99:99")) matching)))
+    (sort-by (fn [evt] (or (:time-start evt) "")) matching)))
 
 (defn format-time
   "Format a HH:MM time string for display."
@@ -45,6 +46,54 @@
       (if end
         (str (format-time start) " \u2013 " (format-time end))
         (format-time start)))))
+
+(defn parse-int*
+  "Parse an integer string, cross-target."
+  [s]
+  #?(:squint (js/parseInt s 10)
+     :cljs (js/parseInt s 10)
+     :clj (Integer/parseInt s)))
+
+(defn round*
+  "Round a number to the nearest integer, cross-target."
+  [x]
+  #?(:squint (js/Math.round x)
+     :cljs (js/Math.round x)
+     :clj (Math/round (double x))))
+
+(defn hhmm->minutes
+  "Convert a 'HH:MM' string to minutes-from-midnight, or nil."
+  [time-str]
+  (when time-str
+    (let [parts (str/split time-str #":")]
+      (+ (* 60 (parse-int* (first parts)))
+         (parse-int* (second parts))))))
+
+(defn event-duration-minutes
+  "Duration of an event in minutes. Falls back to 60 when there is a
+   start but no end. Returns nil when there is no start time."
+  [evt]
+  (let [s (hhmm->minutes (:time-start evt))
+        e (hhmm->minutes (:time-end evt))]
+    (when s
+      (if (and e (> e s)) (- e s) 60))))
+
+(defn format-duration
+  "Format a minute count as '1h', '1h 30m' or '45m'."
+  [mins]
+  (when (and mins (pos? mins))
+    (let [h (quot mins 60)
+          m (rem mins 60)]
+      (cond
+        (and (pos? h) (pos? m)) (str h "h " m "m")
+        (pos? h)                (str h "h")
+        :else                   (str m "m")))))
+
+(defn format-hour-label
+  "Format an hour (0–24) as a zero-padded 24-hour label like '11:00' or '13:00'."
+  [hour]
+  (let [h24 (mod hour 24)]
+    (str (when (< h24 10) "0") h24 ":00")))
 
 ;; ── Class Generation ────────────────────────────────────────────────
 
@@ -130,7 +179,7 @@
         [:span {:class "cal-event-title"} title]])))
 
 (defn event-day-cell
-  "Render a day cell with event pills for the calendar event grid.
+  "Render a day cell for the calendar event grid.
 
    Props:
      :day           - day info map from calendar-days
@@ -139,55 +188,79 @@
      :selected-date - YYYY-MM-DD string of selected date
      :on-select     - callback for day selection
      :on-event-click - callback for event click
-     :max-visible   - max events to show before '+N more' (default 3)"
-  [{:keys [day events today-str selected-date on-select on-event-click max-visible]}]
+     :indicator     - :pills (default) shows in-cell event pills;
+                      :dots shows a compact row of coloured dots (mobile-friendly)
+     :max-visible   - max events to show before '+N more' (pills mode, default 3)
+     :max-dots      - max dots to show (dots mode, default 4)"
+  [{:keys [day events today-str selected-date on-select on-event-click
+           indicator max-visible max-dots]}]
   (let [{:keys [current-month? date-str]} day
         d           (:day day)
         today?      (= date-str today-str)
         selected?   (= date-str selected-date)
         day-events  (events-for-date events date-str)
+        dots?       (= indicator :dots)
         max-vis     (or max-visible 3)
         visible-evts (take max-vis day-events)
         overflow    (- (count day-events) max-vis)
+        dot-evts    (take (or max-dots 4) day-events)
         cls-opts    {:today? today?
                      :selected? selected?
                      :current-month? current-month?}]
     #?(:squint
-       [:div {:class (str (cal/day-cell-classes cls-opts) " cal-event-day")
+       [:div {:class (str (cal/day-cell-classes cls-opts) " cal-event-day"
+                          (when dots? " cal-event-day-dots"))
               :on-click (when (and on-select (not (empty? date-str)))
                           (fn [_e] (on-select date-str)))
               :data-date date-str}
         [:div {:class "cal-day-number"} (str d)]
-        (into [:div {:class "cal-day-events"}]
-              (concat
-               (map (fn [evt] (event-pill {:event evt :on-click on-event-click}))
-                    visible-evts)
-               (when (pos? overflow)
-                 [[:div {:class "cal-event-more"} (str "+" overflow " more")]])))]
+        (if dots?
+          (into [:div {:class "cal-day-dots"}]
+                (map (fn [evt]
+                       [:span {:class (str "cal-day-dot " (event-color-class (:color evt)))}])
+                     dot-evts))
+          (into [:div {:class "cal-day-events"}]
+                (concat
+                 (map (fn [evt] (event-pill {:event evt :on-click on-event-click}))
+                      visible-evts)
+                 (when (pos? overflow)
+                   [[:div {:class "cal-event-more"} (str "+" overflow " more")]]))))]
 
        :cljs
-       [:div {:class (conj (cal/day-cell-class-list cls-opts) "cal-event-day")
+       [:div {:class (cond-> (conj (cal/day-cell-class-list cls-opts) "cal-event-day")
+                       dots? (conj "cal-event-day-dots"))
               :on (when on-select
                     {:click (fn [_e] (on-select date-str))})
               :data-date date-str}
         [:div {:class ["cal-day-number"]} (str d)]
-        (into [:div {:class ["cal-day-events"]}]
-              (concat
-               (map (fn [evt] (event-pill {:event evt :on-click on-event-click}))
-                    visible-evts)
-               (when (pos? overflow)
-                 [[:div {:class ["cal-event-more"]} (str "+" overflow " more")]])))]
+        (if dots?
+          (into [:div {:class ["cal-day-dots"]}]
+                (map (fn [evt]
+                       [:span {:class ["cal-day-dot" (event-color-class (:color evt))]}])
+                     dot-evts))
+          (into [:div {:class ["cal-day-events"]}]
+                (concat
+                 (map (fn [evt] (event-pill {:event evt :on-click on-event-click}))
+                      visible-evts)
+                 (when (pos? overflow)
+                   [[:div {:class ["cal-event-more"]} (str "+" overflow " more")]]))))]
 
        :clj
-       [:div {:class (str (cal/day-cell-classes cls-opts) " cal-event-day")
+       [:div {:class (str (cal/day-cell-classes cls-opts) " cal-event-day"
+                          (when dots? " cal-event-day-dots"))
               :data-date date-str}
         [:div {:class "cal-day-number"} (str d)]
-        (into [:div {:class "cal-day-events"}]
-              (concat
-               (map (fn [evt] (event-pill {:event evt}))
-                    visible-evts)
-               (when (pos? overflow)
-                 [[:div {:class "cal-event-more"} (str "+" overflow " more")]])))])))
+        (if dots?
+          (into [:div {:class "cal-day-dots"}]
+                (map (fn [evt]
+                       [:span {:class (str "cal-day-dot " (event-color-class (:color evt)))}])
+                     dot-evts))
+          (into [:div {:class "cal-day-events"}]
+                (concat
+                 (map (fn [evt] (event-pill {:event evt}))
+                      visible-evts)
+                 (when (pos? overflow)
+                   [[:div {:class "cal-event-more"} (str "+" overflow " more")]]))))])))
 
 (defn calendar-event-grid
   "Render a month grid calendar with events displayed in day cells.
@@ -497,3 +570,130 @@
            [:div base-attrs
             [:div {:class "cal-agenda-empty"} "No events"]]
            (into [:div base-attrs] groups))))))
+
+(defn day-timeline
+  "Render a single-day vertical timeline: an hour gutter down the left with
+   colored event cards positioned and sized by start time and duration, plus
+   an optional blue 'now' indicator line.
+
+   Events without a :time-start are ignored (they have no place on the
+   timeline). The visible hour range is derived from the day's events,
+   falling back to 8 AM – 6 PM when the day is empty.
+
+   Props:
+     :events         - all events (filtered to :date internally)
+     :date           - 'YYYY-MM-DD' day to render
+     :today-str      - today's date string (enables the now line)
+     :now-minutes    - current time as minutes-from-midnight; shows the now
+                       line when :date is today and it falls in range
+     :on-event-click - callback receiving the clicked event map
+     :hour-height    - pixels per hour (default 72)
+     :class          - extra classes
+     :attrs          - extra attributes"
+  [{:keys [events date today-str now-minutes on-event-click hour-height class attrs]}]
+  (let [day-evts   (events-for-date events date)
+        timed      (filterv :time-start day-evts)
+        hour-h     (or hour-height 72)
+        px-min     (/ hour-h 60)
+        px         (fn [mins] (round* (* px-min mins)))
+        starts     (mapv #(hhmm->minutes (:time-start %)) timed)
+        ends       (mapv (fn [e] (+ (hhmm->minutes (:time-start e))
+                                    (event-duration-minutes e)))
+                         timed)
+        min-start  (if (seq starts) (apply min starts) (* 8 60))
+        max-end    (if (seq ends) (apply max ends) (* 18 60))
+        start-hour (quot min-start 60)
+        end-hour   (quot (+ max-end 59) 60)
+        start-off  (* start-hour 60)
+        hours      (vec (range start-hour (inc end-hour)))
+        total-px   (px (* (- end-hour start-hour) 60))
+        show-now?  (boolean (and now-minutes (= date today-str)
+                                 (>= now-minutes start-off)
+                                 (<= now-minutes (* end-hour 60))))
+        now-px     (when show-now? (px (- now-minutes start-off)))]
+    #?(:squint
+       (let [classes (cond-> "cal-day-timeline" class (str " " class))
+             rows (map (fn [h]
+                         [:div {:class "cal-timeline-row"
+                                :style {"top" (str (px (- (* h 60) start-off)) "px")}}
+                          [:span {:class "cal-timeline-time"} (format-hour-label h)]
+                          [:div {:class "cal-timeline-line"}]])
+                       hours)
+             cards (map (fn [evt]
+                          (let [s   (hhmm->minutes (:time-start evt))
+                                dur (event-duration-minutes evt)]
+                            [:div {:class (str "cal-timeline-event " (event-color-class (:color evt)))
+                                   :style {"top" (str (px (- s start-off)) "px")
+                                           "height" (str (px dur) "px")}
+                                   :on-click (when on-event-click
+                                               (fn [_e] (on-event-click evt)))}
+                             [:div {:class "cal-timeline-event-head"}
+                              [:span {:class "cal-timeline-event-title"} (:title evt)]
+                              (when-let [d (format-duration dur)]
+                                [:span {:class "cal-timeline-event-dur"} d])]]))
+                        timed)
+             now-node (when show-now?
+                        [:div {:class "cal-timeline-now"
+                               :style {"top" (str now-px "px")}}
+                         [:span {:class "cal-timeline-now-dot"}]])]
+         [:div (merge {:class classes} attrs)
+          (into [:div {:class "cal-timeline-track"
+                       :style {"height" (str total-px "px")}}]
+                (concat rows cards (when now-node [now-node])))])
+
+       :cljs
+       (let [classes (cond-> ["cal-day-timeline"] class (conj class))
+             rows (map (fn [h]
+                         [:div {:class ["cal-timeline-row"]
+                                :style {:top (str (px (- (* h 60) start-off)) "px")}}
+                          [:span {:class ["cal-timeline-time"]} (format-hour-label h)]
+                          [:div {:class ["cal-timeline-line"]}]])
+                       hours)
+             cards (map (fn [evt]
+                          (let [s   (hhmm->minutes (:time-start evt))
+                                dur (event-duration-minutes evt)]
+                            [:div {:class ["cal-timeline-event" (event-color-class (:color evt))]
+                                   :style {:top (str (px (- s start-off)) "px")
+                                           :height (str (px dur) "px")}
+                                   :on (when on-event-click
+                                         {:click (fn [_e] (on-event-click evt))})}
+                             [:div {:class ["cal-timeline-event-head"]}
+                              [:span {:class ["cal-timeline-event-title"]} (:title evt)]
+                              (when-let [d (format-duration dur)]
+                                [:span {:class ["cal-timeline-event-dur"]} d])]]))
+                        timed)
+             now-node (when show-now?
+                        [:div {:class ["cal-timeline-now"]
+                               :style {:top (str now-px "px")}}
+                         [:span {:class ["cal-timeline-now-dot"]}]])]
+         [:div (merge {:class classes} attrs)
+          (into [:div {:class ["cal-timeline-track"]
+                       :style {:height (str total-px "px")}}]
+                (concat rows cards (when now-node [now-node])))])
+
+       :clj
+       (let [classes (cond-> "cal-day-timeline" class (str " " class))
+             rows (map (fn [h]
+                         [:div {:class "cal-timeline-row"
+                                :style (str "top: " (px (- (* h 60) start-off)) "px")}
+                          [:span {:class "cal-timeline-time"} (format-hour-label h)]
+                          [:div {:class "cal-timeline-line"}]])
+                       hours)
+             cards (map (fn [evt]
+                          (let [s   (hhmm->minutes (:time-start evt))
+                                dur (event-duration-minutes evt)]
+                            [:div {:class (str "cal-timeline-event " (event-color-class (:color evt)))
+                                   :style (str "top: " (px (- s start-off)) "px; height: " (px dur) "px")}
+                             [:div {:class "cal-timeline-event-head"}
+                              [:span {:class "cal-timeline-event-title"} (:title evt)]
+                              (when-let [d (format-duration dur)]
+                                [:span {:class "cal-timeline-event-dur"} d])]]))
+                        timed)
+             now-node (when show-now?
+                        [:div {:class "cal-timeline-now"
+                               :style (str "top: " now-px "px")}
+                         [:span {:class "cal-timeline-now-dot"}]])]
+         [:div (merge {:class classes} attrs)
+          (into [:div {:class "cal-timeline-track"
+                       :style (str "height: " total-px "px")}]
+                (concat rows cards (when now-node [now-node])))]))))

@@ -73,6 +73,103 @@
   background: var(--bg-2);
 }
 
+/* ── Dots Indicator Mode ─────────────────────────────────────────── */
+/* Airy, borderless day cell for mobile calendars: centered number in a
+   circular hit target with a compact row of coloured event dots below.
+   Opt in via (event-day-cell {:indicator :dots}); pills mode is unchanged. */
+
+.cal-grid-dots {
+  gap: 0;
+}
+
+/* Kill the grid lines and outside-day fill inherited from the base event
+   grid (those rules match .cal-grid-events .cal-day at higher specificity). */
+.cal-grid-dots .cal-day {
+  border: none;
+  background: transparent;
+}
+
+.cal-event-day-dots {
+  border: none;
+  aspect-ratio: 1 / 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--size-1);
+  padding: var(--size-1);
+  overflow: visible;
+}
+
+.cal-event-day-dots .cal-day-number {
+  font-size: var(--font-sm);
+  font-weight: 500;
+  color: var(--fg-0);
+  width: var(--size-8);
+  height: var(--size-8);
+  margin-bottom: 0;
+  border-radius: 9999px;
+  transition: background 0.15s, color 0.15s;
+}
+
+/* Today: filled accent circle */
+.cal-event-day-dots.cal-day-today .cal-day-number {
+  background: var(--accent);
+  color: var(--fg-on-accent);
+  font-weight: 600;
+}
+
+/* Selected: soft accent tint (whole-cell fill from base is cancelled) */
+.cal-event-day-dots.cal-day-selected {
+  background: transparent;
+}
+
+.cal-event-day-dots.cal-day-selected .cal-day-number {
+  background: var(--accent-100);
+  color: var(--accent-800);
+  font-weight: 600;
+}
+
+.cal-event-day-dots.cal-day-today.cal-day-selected .cal-day-number {
+  background: var(--accent);
+  color: var(--fg-on-accent);
+}
+
+.cal-event-day-dots.cal-day-outside .cal-day-number {
+  color: var(--fg-2);
+  opacity: 0.4;
+}
+
+/* Hover moves onto the number circle, not the whole cell */
+.cal-event-day-dots:hover:not(.cal-day-outside) {
+  background: transparent;
+}
+
+.cal-event-day-dots:hover:not(.cal-day-outside):not(.cal-day-today):not(.cal-day-selected) .cal-day-number {
+  background: var(--bg-2);
+}
+
+.cal-day-dots {
+  display: flex;
+  gap: var(--size-1);
+  align-items: center;
+  justify-content: center;
+  min-height: calc(var(--size-1) * 1.5);
+  width: 100%;
+}
+
+.cal-day-dot {
+  width: calc(var(--size-1) * 1.5);
+  height: calc(var(--size-1) * 1.5);
+  border-radius: 9999px;
+  flex-shrink: 0;
+}
+
+.cal-day-dot.cal-event-accent { background: var(--accent-500); }
+.cal-day-dot.cal-event-danger { background: var(--danger-500); }
+.cal-day-dot.cal-event-success { background: var(--success-500); }
+.cal-day-dot.cal-event-warning { background: var(--warning-500); }
+.cal-day-dot.cal-event-default { background: var(--gray-400); }
+
 /* ── Day Events Container ────────────────────────────────────────── */
 
 .cal-day-events {
@@ -439,6 +536,121 @@
   font-size: var(--font-sm);
 }
 
+/* ── Day Timeline ────────────────────────────────────────────────── */
+
+.cal-day-timeline {
+  position: relative;
+  padding: var(--size-4) var(--size-2) var(--size-6);
+}
+
+.cal-timeline-track {
+  position: relative;
+}
+
+/* Hour rows: a left-aligned time label plus a full-width separator line,
+   vertically centered on the hour boundary. */
+.cal-timeline-row {
+  position: absolute;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.cal-timeline-time {
+  width: var(--size-12);
+  flex-shrink: 0;
+  padding-right: var(--size-3);
+  font-size: var(--font-xs);
+  font-weight: 500;
+  color: var(--fg-2);
+  text-align: left;
+  font-variant-numeric: tabular-nums;
+}
+
+.cal-timeline-line {
+  flex: 1;
+  height: 0;
+  border-top: 1px solid var(--gray-200);
+}
+
+/* Event cards positioned by start time (top) and duration (height).
+   Swiss minimal-grid treatment: borderless, a thin colored left rule, and a
+   faint left-to-right tint instead of a filled card. */
+.cal-timeline-event {
+  position: absolute;
+  left: var(--size-12);
+  right: var(--size-2);
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-1);
+  min-height: var(--size-7);
+  padding: var(--size-2) var(--size-3);
+  border-radius: var(--radius-sm);
+  border-left-width: 2px;
+  border-left-style: solid;
+  overflow: hidden;
+  cursor: pointer;
+  transition: filter 0.12s;
+}
+
+.cal-timeline-event:hover {
+  filter: brightness(0.97);
+}
+
+.cal-timeline-event-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--size-2);
+}
+
+.cal-timeline-event-title {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--font-sm);
+  font-weight: 600;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cal-timeline-event-dur {
+  flex-shrink: 0;
+  font-size: var(--font-xs);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  opacity: 0.55;
+}
+
+/* "Now" indicator line — thin accent rule. */
+.cal-timeline-now {
+  position: absolute;
+  left: var(--size-12);
+  right: 0;
+  height: 0;
+  z-index: 3;
+  border-top: 1.5px solid var(--accent-500);
+  pointer-events: none;
+}
+
+.cal-timeline-now-dot {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: var(--size-2);
+  height: var(--size-2);
+  border-radius: 50%;
+  background: var(--accent-500);
+  transform: translate(-50%, -50%);
+}
+
 /* ── Responsive ──────────────────────────────────────────────────── */
 
 @media (max-width: 768px) {
@@ -450,6 +662,13 @@
     width: var(--size-5);
     height: var(--size-5);
     font-size: var(--font-xs);
+  }
+
+  /* Dots mode keeps a comfortable circular tap target on mobile */
+  .cal-event-day-dots .cal-day-number {
+    width: var(--size-7);
+    height: var(--size-7);
+    font-size: var(--font-sm);
   }
 
   .cal-event-pill {
@@ -480,5 +699,15 @@
 
   .cal-agenda-day-header {
     padding: var(--size-2) var(--size-3) var(--size-1);
+  }
+
+  .cal-timeline-time {
+    width: var(--size-11);
+    font-size: var(--font-xs);
+  }
+
+  .cal-timeline-event,
+  .cal-timeline-now {
+    left: var(--size-11);
   }
 }
