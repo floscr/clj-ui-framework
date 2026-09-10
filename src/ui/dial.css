@@ -182,6 +182,12 @@
   border: none;
   outline: none;
   padding: 0 var(--size-1);
+  cursor: ew-resize;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.dial-num:focus {
   cursor: text;
   -webkit-user-select: text;
   user-select: text;

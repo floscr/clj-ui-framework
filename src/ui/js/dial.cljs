@@ -350,18 +350,39 @@
     (add! field fill lab num)
     (add! r field)
     (attr! field "tabindex" "0")
-    (let [dragging #js {:on false}]
+    (let [drag #js {:on false :moved false :startx 0 :onnum false}]
       (on! field "pointerdown"
            (fn [e]
-             (when (not= (.-target e) num)
+             ;; while the number is being edited, let native caret / text
+             ;; selection work — don't hijack the press for scrubbing
+             (when-not (and (= (.-target e) num) (= js/document.activeElement num))
                (.preventDefault e)
-               (.focus field)
+               (when (= js/document.activeElement num) (.blur num))
                (.setPointerCapture field (.-pointerId e))
-               (aset dragging "on" true) (set-at (.-clientX e)))))
+               (aset drag "on" true)
+               (aset drag "moved" false)
+               (aset drag "startx" (.-clientX e))
+               (aset drag "onnum" (= (.-target e) num))
+               ;; a press on the track jumps at once; a press on the number
+               ;; waits to see if it's a click (edit) or a drag (scrub)
+               (when-not (aget drag "onnum") (set-at (.-clientX e))))))
       (on! field "pointermove"
-           (fn [e] (when (aget dragging "on") (set-at (.-clientX e)))))
-      (on! field "pointerup" (fn [_] (aset dragging "on" false)))
-      (on! field "pointercancel" (fn [_] (aset dragging "on" false))))
+           (fn [e]
+             (when (aget drag "on")
+               (when (> (js/Math.abs (- (.-clientX e) (aget drag "startx"))) 3)
+                 (aset drag "moved" true))
+               (when (or (aget drag "moved") (not (aget drag "onnum")))
+                 (set-at (.-clientX e))))))
+      (on! field "pointerup"
+           (fn [e]
+             (when (aget drag "on")
+               (aset drag "on" false)
+               (when (.hasPointerCapture field (.-pointerId e))
+                 (.releasePointerCapture field (.-pointerId e)))
+               (if (and (aget drag "onnum") (not (aget drag "moved")))
+                 (do (.focus num) (.select num))
+                 (.focus field)))))
+      (on! field "pointercancel" (fn [_] (aset drag "on" false))))
     (on! num "focus" (fn [_] (.select num)))
     (on! num "change"
          (fn [_] (let [v (js/parseFloat (.-value num))]
