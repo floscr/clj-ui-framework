@@ -5,7 +5,7 @@
 
 .dialkit-root {
   position: fixed;
-  z-index: 2147483000;
+  z-index: 9998;
   display: flex;
   flex-direction: column;
   gap: var(--size-2);
