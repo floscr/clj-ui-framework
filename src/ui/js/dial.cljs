@@ -350,38 +350,25 @@
     (add! field fill lab num)
     (add! r field)
     (attr! field "tabindex" "0")
-    (let [drag #js {:on false :moved false :startx 0 :onnum false}]
+    (let [drag #js {:on false}]
       (on! field "pointerdown"
            (fn [e]
-             ;; while the number is being edited, let native caret / text
-             ;; selection work — don't hijack the press for scrubbing
-             (when-not (and (= (.-target e) num) (= js/document.activeElement num))
+             ;; the number is click-to-edit only — pressing it never scrubs;
+             ;; scrubbing happens on the rest of the track
+             (when (not= (.-target e) num)
                (.preventDefault e)
-               (when (= js/document.activeElement num) (.blur num))
                (.setPointerCapture field (.-pointerId e))
                (aset drag "on" true)
-               (aset drag "moved" false)
-               (aset drag "startx" (.-clientX e))
-               (aset drag "onnum" (= (.-target e) num))
-               ;; a press on the track jumps at once; a press on the number
-               ;; waits to see if it's a click (edit) or a drag (scrub)
-               (when-not (aget drag "onnum") (set-at (.-clientX e))))))
+               (set-at (.-clientX e)))))
       (on! field "pointermove"
-           (fn [e]
-             (when (aget drag "on")
-               (when (> (js/Math.abs (- (.-clientX e) (aget drag "startx"))) 3)
-                 (aset drag "moved" true))
-               (when (or (aget drag "moved") (not (aget drag "onnum")))
-                 (set-at (.-clientX e))))))
+           (fn [e] (when (aget drag "on") (set-at (.-clientX e)))))
       (on! field "pointerup"
            (fn [e]
              (when (aget drag "on")
                (aset drag "on" false)
                (when (.hasPointerCapture field (.-pointerId e))
                  (.releasePointerCapture field (.-pointerId e)))
-               (if (and (aget drag "onnum") (not (aget drag "moved")))
-                 (do (.focus num) (.select num))
-                 (.focus field)))))
+               (.focus field))))
       (on! field "pointercancel" (fn [_] (aset drag "on" false))))
     (on! num "focus" (fn [_] (.select num)))
     (on! num "change"

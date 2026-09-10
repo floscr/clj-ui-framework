@@ -2465,48 +2465,19 @@
     add_BANG_(field9, fill10, lab11, num12);
     add_BANG_(r8, field9);
     attr_BANG_(field9, "tabindex", "0");
-    const drag21 = { "on": false, "moved": false, "startx": 0, "onnum": false };
+    const drag21 = { "on": false };
     on_BANG_(field9, "pointerdown", (function(e) {
-      if (truth_(_EQ_(e.target, num12) && _EQ_(document.activeElement, num12))) {
-        return null;
-      } else {
+      if (!_EQ_(e.target, num12)) {
         e.preventDefault();
-        if (_EQ_(document.activeElement, num12)) {
-          num12.blur();
-        }
-        ;
         field9.setPointerCapture(e.pointerId);
         drag21["on"] = true;
-        drag21["moved"] = false;
-        drag21["startx"] = e.clientX;
-        drag21["onnum"] = _EQ_(e.target, num12);
-        if (truth_(drag21["onnum"])) {
-          return null;
-        } else {
-          return set_at16(e.clientX);
-        }
-        ;
+        return set_at16(e.clientX);
       }
       ;
     }));
     on_BANG_(field9, "pointermove", (function(e) {
       if (truth_(drag21["on"])) {
-        if (Math.abs(e.clientX - drag21["startx"]) > 3) {
-          drag21["moved"] = true;
-        }
-        ;
-        if (truth_((() => {
-          const or__23426__auto__22 = drag21["moved"];
-          if (truth_(or__23426__auto__22)) {
-            return or__23426__auto__22;
-          } else {
-            return not(drag21["onnum"]);
-          }
-          ;
-        })())) {
-          return set_at16(e.clientX);
-        }
-        ;
+        return set_at16(e.clientX);
       }
       ;
     }));
@@ -2517,21 +2488,7 @@
           field9.releasePointerCapture(e.pointerId);
         }
         ;
-        if (truth_((() => {
-          const and__23442__auto__23 = drag21["onnum"];
-          if (truth_(and__23442__auto__23)) {
-            return not(drag21["moved"]);
-          } else {
-            return and__23442__auto__23;
-          }
-          ;
-        })())) {
-          num12.focus();
-          return num12.select();
-        } else {
-          return field9.focus();
-        }
-        ;
+        return field9.focus();
       }
       ;
     }));
@@ -2542,11 +2499,11 @@
       return num12.select();
     }));
     on_BANG_(num12, "change", (function(_) {
-      const v24 = parseFloat(num12.value);
-      if (truth_(isFinite(v24))) {
-        const v225 = clamp(round_step(v24, step7), min5, max6);
-        commit_BANG_(panel, path3, v225);
-        return paint14(v225);
+      const v22 = parseFloat(num12.value);
+      if (truth_(isFinite(v22))) {
+        const v223 = clamp(round_step(v22, step7), min5, max6);
+        commit_BANG_(panel, path3, v223);
+        return paint14(v223);
       } else {
         return paint14(cur13());
       }
@@ -2554,29 +2511,29 @@
     }));
     on_BANG_(field9, "keydown", (function(e) {
       if (!_EQ_(e.target, num12)) {
-        const k26 = e.key;
-        const big27 = (() => {
-          const or__23426__auto__28 = e.shiftKey;
-          if (truth_(or__23426__auto__28)) {
-            return or__23426__auto__28;
+        const k24 = e.key;
+        const big25 = (() => {
+          const or__23426__auto__26 = e.shiftKey;
+          if (truth_(or__23426__auto__26)) {
+            return or__23426__auto__26;
           } else {
-            const or__23426__auto__29 = k26 === "PageUp";
-            if (or__23426__auto__29) {
-              return or__23426__auto__29;
+            const or__23426__auto__27 = k24 === "PageUp";
+            if (or__23426__auto__27) {
+              return or__23426__auto__27;
             } else {
-              return k26 === "PageDown";
+              return k24 === "PageDown";
             }
             ;
           }
           ;
         })();
-        const d30 = step7 * (truth_(big27) ? 10 : 1);
+        const d28 = step7 * (truth_(big25) ? 10 : 1);
         if (truth_((() => {
-          const or__23426__auto__31 = k26 === "Enter";
-          if (or__23426__auto__31) {
-            return or__23426__auto__31;
+          const or__23426__auto__29 = k24 === "Enter";
+          if (or__23426__auto__29) {
+            return or__23426__auto__29;
           } else {
-            return k26 === " ";
+            return k24 === " ";
           }
           ;
         })())) {
@@ -2585,51 +2542,51 @@
           return num12.select();
         } else {
           if (truth_((() => {
-            const or__23426__auto__32 = k26 === "ArrowUp";
-            if (or__23426__auto__32) {
-              return or__23426__auto__32;
+            const or__23426__auto__30 = k24 === "ArrowUp";
+            if (or__23426__auto__30) {
+              return or__23426__auto__30;
             } else {
-              const or__23426__auto__33 = k26 === "ArrowRight";
-              if (or__23426__auto__33) {
-                return or__23426__auto__33;
+              const or__23426__auto__31 = k24 === "ArrowRight";
+              if (or__23426__auto__31) {
+                return or__23426__auto__31;
               } else {
-                return k26 === "PageUp";
+                return k24 === "PageUp";
               }
               ;
             }
             ;
           })())) {
             e.preventDefault();
-            const v34 = clamp(cur13() + d30, min5, max6);
-            commit_BANG_(panel, path3, v34);
-            return paint14(v34);
+            const v32 = clamp(cur13() + d28, min5, max6);
+            commit_BANG_(panel, path3, v32);
+            return paint14(v32);
           } else {
             if (truth_((() => {
-              const or__23426__auto__35 = k26 === "ArrowDown";
-              if (or__23426__auto__35) {
-                return or__23426__auto__35;
+              const or__23426__auto__33 = k24 === "ArrowDown";
+              if (or__23426__auto__33) {
+                return or__23426__auto__33;
               } else {
-                const or__23426__auto__36 = k26 === "ArrowLeft";
-                if (or__23426__auto__36) {
-                  return or__23426__auto__36;
+                const or__23426__auto__34 = k24 === "ArrowLeft";
+                if (or__23426__auto__34) {
+                  return or__23426__auto__34;
                 } else {
-                  return k26 === "PageDown";
+                  return k24 === "PageDown";
                 }
                 ;
               }
               ;
             })())) {
               e.preventDefault();
-              const v37 = clamp(cur13() - d30, min5, max6);
-              commit_BANG_(panel, path3, v37);
-              return paint14(v37);
+              const v35 = clamp(cur13() - d28, min5, max6);
+              commit_BANG_(panel, path3, v35);
+              return paint14(v35);
             } else {
-              if (k26 === "Home") {
+              if (k24 === "Home") {
                 e.preventDefault();
                 commit_BANG_(panel, path3, min5);
                 return paint14(min5);
               } else {
-                if (k26 === "End") {
+                if (k24 === "End") {
                   e.preventDefault();
                   commit_BANG_(panel, path3, max6);
                   return paint14(max6);
