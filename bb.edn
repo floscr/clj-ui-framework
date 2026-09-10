@@ -113,7 +113,8 @@
               [ui.theme-test]
               [ui.theme-toggle-test]
               [ui.chat-test]
-              [ui.panels-test])
+              [ui.panels-test]
+              [ui.hover-test])
    :task (let [{:keys [fail error]} (t/run-tests
                                       'ui.button-test
                                       'ui.button-group-test
@@ -155,7 +156,8 @@
                                       'ui.theme-test
                                       'ui.theme-toggle-test
                                       'ui.chat-test
-                                      'ui.panels-test)]
+                                      'ui.panels-test
+                                      'ui.hover-test)]
            (when (pos? (+ fail error))
              (System/exit 1)))}
 

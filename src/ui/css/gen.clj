@@ -167,6 +167,139 @@ body {
        (map #(slurp (str %)))
        (str/join "\n\n")))
 
+;; ── Sticky-hover guard ───────────────────────────────────────────
+;; On touch devices a tap triggers :hover and it sticks (no pointer
+;; leave), leaving a highlight glued under the finger. The fix is to
+;; gate hover styles behind @media (hover: hover). Rather than rely on
+;; every author remembering that, we rewrite the CSS at build time:
+;; authors write plain `:hover`, the build makes it touch-safe.
+
+(defn- css-match-close
+  "Index of the `}` that closes the block starting at `start` in `s`,
+   skipping comments and strings. Returns (count s) if unbalanced."
+  [^String s start]
+  (let [n (count s)]
+    (loop [i start depth 0]
+      (if (>= i n)
+        n
+        (let [c (.charAt s i)]
+          (cond
+            (and (= c \/) (< (inc i) n) (= (.charAt s (inc i)) \*))
+            (let [e (str/index-of s "*/" (+ i 2))] (recur (if e (+ e 2) n) depth))
+            (or (= c \") (= c \'))
+            (recur (loop [j (inc i)]
+                     (cond (>= j n) n
+                           (= (.charAt s j) \\) (recur (+ j 2))
+                           (= (.charAt s j) c) (inc j)
+                           :else (recur (inc j))))
+                   depth)
+            (= c \{) (recur (inc i) (inc depth))
+            (= c \}) (if (zero? depth) i (recur (inc i) (dec depth)))
+            :else (recur (inc i) depth)))))))
+
+(defn- css-parse-blocks
+  "Split a CSS body into segments: {:type :text :raw s} for trailing
+   text, or {:type :block :prelude p :inner i}. A block's prelude holds
+   any preceding whitespace/comments, so formatting round-trips."
+  [^String body]
+  (let [n (count body)]
+    (loop [i 0 seg-start 0 segs []]
+      (if (>= i n)
+        (if (< seg-start n)
+          (conj segs {:type :text :raw (subs body seg-start)})
+          segs)
+        (let [c (.charAt body i)]
+          (cond
+            (and (= c \/) (< (inc i) n) (= (.charAt body (inc i)) \*))
+            (let [e (str/index-of body "*/" (+ i 2))] (recur (if e (+ e 2) n) seg-start segs))
+            (or (= c \") (= c \'))
+            (recur (loop [j (inc i)]
+                     (cond (>= j n) n
+                           (= (.charAt body j) \\) (recur (+ j 2))
+                           (= (.charAt body j) c) (inc j)
+                           :else (recur (inc j))))
+                   seg-start segs)
+            (= c \{)
+            (let [close (css-match-close body (inc i))]
+              (recur (inc close) (inc close)
+                     (conj segs {:type :block
+                                 :prelude (subs body seg-start i)
+                                 :inner (subs body (inc i) close)})))
+            :else (recur (inc i) seg-start segs)))))))
+
+(defn- css-split-commas
+  "Split a selector list on commas not nested in (), [] or a string."
+  [^String s]
+  (let [n (count s)]
+    (loop [i 0 depth 0 in-str nil start 0 acc []]
+      (if (>= i n)
+        (conj acc (subs s start))
+        (let [c (.charAt s i)]
+          (cond
+            in-str (recur (inc i) depth (if (= c in-str) nil in-str) start acc)
+            (or (= c \") (= c \')) (recur (inc i) depth c start acc)
+            (or (= c \() (= c \[)) (recur (inc i) (inc depth) in-str start acc)
+            (or (= c \)) (= c \])) (recur (inc i) (dec depth) in-str start acc)
+            (and (= c \,) (zero? depth)) (recur (inc i) depth in-str (inc i) (conj acc (subs s start i)))
+            :else (recur (inc i) depth in-str start acc)))))))
+
+(defn- css-split-gap
+  "Split a prelude into [leading-ws+comments, selector-or-at-rule]."
+  [^String prelude]
+  (let [n (count prelude)]
+    (loop [i 0]
+      (if (>= i n)
+        [prelude ""]
+        (let [c (.charAt prelude i)]
+          (cond
+            (Character/isWhitespace c) (recur (inc i))
+            (and (= c \/) (< (inc i) n) (= (.charAt prelude (inc i)) \*))
+            (let [e (str/index-of prelude "*/" (+ i 2))] (recur (if e (+ e 2) n)))
+            :else [(subs prelude 0 i) (subs prelude i)]))))))
+
+(defn- css-hover-media? [sel]
+  (and (str/starts-with? sel "@")
+       (re-find #"@media\b" sel)
+       (re-find #"hover\s*:" sel)))
+
+(defn- css-recurse-at? [sel]
+  (and (str/starts-with? sel "@")
+       (re-find #"^@(media|supports|layer|container)\b" sel)
+       (not (css-hover-media? sel))))
+
+(declare wrap-hover-media)
+
+(defn- css-emit-block [gap sel inner]
+  (cond
+    (str/starts-with? sel "@")
+    (if (css-recurse-at? sel)
+      (str gap sel "{" (wrap-hover-media inner) "}")
+      (str gap sel "{" inner "}"))
+    :else
+    (let [sels  (map str/trim (css-split-commas sel))
+          hov   (filter #(str/includes? % ":hover") sels)
+          other (remove #(str/includes? % ":hover") sels)]
+      (if (empty? hov)
+        (str gap sel "{" inner "}")
+        (str gap
+             (when (seq other) (str (str/join ", " other) "{" inner "}\n"))
+             "@media (hover: hover){" (str/join ", " hov) "{" inner "}}")))))
+
+(defn wrap-hover-media
+  "Gate every `:hover` rule behind @media (hover: hover) so hover styles
+   don't stick after a tap on touch devices. Grouped selectors are split
+   so non-hover parts (e.g. :focus-visible, state classes) stay ungated.
+   Idempotent: rules already inside an @media (hover: …) block are left
+   untouched. Pure string transform — authors keep writing plain :hover."
+  [css]
+  (->> (css-parse-blocks css)
+       (map (fn [{:keys [type raw prelude inner]}]
+              (if (= type :text)
+                raw
+                (let [[gap sel] (css-split-gap prelude)]
+                  (css-emit-block gap sel inner)))))
+       (apply str)))
+
 ;; ── Classpath helpers ────────────────────────────────────────────
 
 (defn- deep-merge
@@ -209,7 +342,8 @@ body {
                           "\n  }\n}")
          base        (base-css)
          components  (collect-component-css component-dir)]
-     (str/join "\n\n" [root-block dark-attr dark-media base components ""]))))
+     (wrap-hover-media
+      (str/join "\n\n" [root-block dark-attr dark-media base components ""])))))
 
 (defn build-css
   "Generate bundled CSS string with theme tokens and all component styles.
