@@ -164,11 +164,14 @@
   flex-shrink: 0;
 }
 
-.cal-day-dot.cal-event-accent { background: var(--accent-500); }
-.cal-day-dot.cal-event-danger { background: var(--danger-500); }
-.cal-day-dot.cal-event-success { background: var(--success-500); }
-.cal-day-dot.cal-event-warning { background: var(--warning-500); }
-.cal-day-dot.cal-event-default { background: var(--gray-400); }
+/* Use the theme-aware semantic tokens (they lighten to -400 in dark mode)
+   so month-grid dots stay legible on a dark background, matching the
+   ticker and agenda dots. */
+.cal-day-dot.cal-event-accent { background: var(--accent); }
+.cal-day-dot.cal-event-danger { background: var(--danger); }
+.cal-day-dot.cal-event-success { background: var(--success); }
+.cal-day-dot.cal-event-warning { background: var(--warning); }
+.cal-day-dot.cal-event-default { background: var(--fg-2); }
 
 /* ── Day Events Container ────────────────────────────────────────── */
 
@@ -311,6 +314,45 @@
     color: var(--gray-200);
     border-left-color: var(--gray-500);
   }
+}
+
+/* ── Dot dark-mode fix ───────────────────────────────────────────────
+   Dots (.cal-*-dot) reuse the .cal-event-<color> modifier, so the pill
+   dark overrides above (equal specificity, later in source) would repaint
+   them near-black (--*-950). Re-assert the dot colours with higher
+   specificity so they stay legible on a dark background. */
+[data-theme="dark"] .cal-day-dot.cal-event-accent,
+[data-theme="dark"] .cal-ticker-dot.cal-event-accent,
+[data-theme="dark"] .cal-agenda-dot.cal-event-accent { background: var(--accent-400); }
+[data-theme="dark"] .cal-day-dot.cal-event-danger,
+[data-theme="dark"] .cal-ticker-dot.cal-event-danger,
+[data-theme="dark"] .cal-agenda-dot.cal-event-danger { background: var(--danger-400); }
+[data-theme="dark"] .cal-day-dot.cal-event-success,
+[data-theme="dark"] .cal-ticker-dot.cal-event-success,
+[data-theme="dark"] .cal-agenda-dot.cal-event-success { background: var(--success-400); }
+[data-theme="dark"] .cal-day-dot.cal-event-warning,
+[data-theme="dark"] .cal-ticker-dot.cal-event-warning,
+[data-theme="dark"] .cal-agenda-dot.cal-event-warning { background: var(--warning-400); }
+[data-theme="dark"] .cal-day-dot.cal-event-default,
+[data-theme="dark"] .cal-ticker-dot.cal-event-default,
+[data-theme="dark"] .cal-agenda-dot.cal-event-default { background: var(--gray-400); }
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .cal-day-dot.cal-event-accent,
+  :root:not([data-theme="light"]) .cal-ticker-dot.cal-event-accent,
+  :root:not([data-theme="light"]) .cal-agenda-dot.cal-event-accent { background: var(--accent-400); }
+  :root:not([data-theme="light"]) .cal-day-dot.cal-event-danger,
+  :root:not([data-theme="light"]) .cal-ticker-dot.cal-event-danger,
+  :root:not([data-theme="light"]) .cal-agenda-dot.cal-event-danger { background: var(--danger-400); }
+  :root:not([data-theme="light"]) .cal-day-dot.cal-event-success,
+  :root:not([data-theme="light"]) .cal-ticker-dot.cal-event-success,
+  :root:not([data-theme="light"]) .cal-agenda-dot.cal-event-success { background: var(--success-400); }
+  :root:not([data-theme="light"]) .cal-day-dot.cal-event-warning,
+  :root:not([data-theme="light"]) .cal-ticker-dot.cal-event-warning,
+  :root:not([data-theme="light"]) .cal-agenda-dot.cal-event-warning { background: var(--warning-400); }
+  :root:not([data-theme="light"]) .cal-day-dot.cal-event-default,
+  :root:not([data-theme="light"]) .cal-ticker-dot.cal-event-default,
+  :root:not([data-theme="light"]) .cal-agenda-dot.cal-event-default { background: var(--gray-400); }
 }
 
 /* ── Event More Indicator ────────────────────────────────────────── */
