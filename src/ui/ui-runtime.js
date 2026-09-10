@@ -385,43 +385,6 @@
     const [_, v] = iterable(coll);
     return v;
   }
-  var Reduced = class {
-    value;
-    constructor(x) {
-      this.value = x;
-    }
-    _deref() {
-      return this.value;
-    }
-  };
-  function reduce(f, arg1, arg2) {
-    f = toFn(f);
-    let coll, val;
-    if (arguments.length === 2) {
-      const iter = iterable(arg1)[Symbol.iterator]();
-      const vd = iter.next();
-      if (vd.done) {
-        val = f();
-      } else {
-        val = vd.value;
-      }
-      coll = iter;
-    } else {
-      val = arg1;
-      coll = iterable(arg2);
-    }
-    if (val instanceof Reduced) {
-      return val.value;
-    }
-    for (const x of coll) {
-      val = f(val, x);
-      if (val instanceof Reduced) {
-        val = val.value;
-        break;
-      }
-    }
-    return val;
-  }
   var tolr = false;
   var LazyIterable = class {
     constructor(gen) {
@@ -3843,1002 +3806,6 @@
   window["__uiDial"] = use_dial;
   window["DialStore"] = dial_store;
 
-  // .compiled/dial_timeline.mjs
-  var tof2 = function(v) {
-    return typeof v;
-  };
-  var mk2 = function(tag, class$) {
-    const e1 = document.createElement(tag);
-    if (truth_(class$)) {
-      e1.className = class$;
-    }
-    ;
-    return e1;
-  };
-  var add_BANG_2 = (() => {
-    const f14 = (function(var_args) {
-      const args151 = [];
-      const len__23321__auto__2 = arguments.length;
-      let i163 = 0;
-      while (true) {
-        if (i163 < len__23321__auto__2) {
-          args151.push(arguments[i163]);
-          let G__4 = i163 + 1;
-          i163 = G__4;
-          continue;
-        }
-        ;
-        break;
-      }
-      ;
-      const argseq__23513__auto__5 = 1 < args151.length ? args151.slice(1) : null;
-      return f14.cljs$core$IFn$_invoke$arity$variadic(arguments[0], argseq__23513__auto__5);
-    });
-    f14.cljs$core$IFn$_invoke$arity$variadic = (function(parent, children) {
-      for (let G__6 of iterable(children)) {
-        const c7 = G__6;
-        if (truth_(c7)) {
-          parent.appendChild(c7);
-        }
-      }
-      ;
-      return parent;
-    });
-    f14.cljs$lang$maxFixedArity = 1;
-    return f14;
-  })();
-  var txt_BANG_2 = function(e, s) {
-    e.textContent = `${s ?? ""}`;
-    return e;
-  };
-  var on_BANG_2 = function(e, ev, f) {
-    e.addEventListener(ev, f);
-    return e;
-  };
-  var attr_BANG_2 = function(e, k, v) {
-    e.setAttribute(k, v);
-    return e;
-  };
-  var clamp2 = function(v, lo, hi) {
-    return Math.max(lo, Math.min(v, hi));
-  };
-  var fmt_clock = function(sec) {
-    const s1 = Math.max(0, sec);
-    const whole2 = Math.floor(s1);
-    const tenths3 = Math.floor(10 * (s1 - whole2));
-    return `${whole2 ?? ""}${"."}${tenths3 ?? ""}s`;
-  };
-  var cubic_bezier_y = function(e, p) {
-    const t1 = p;
-    const mt2 = 1 - t1;
-    return 3 * mt2 * mt2 * t1 * e[1] + 3 * mt2 * t1 * t1 * e[3] + t1 * t1 * t1;
-  };
-  var sample_spring2 = function(visual_dur, bounce, t) {
-    const zeta1 = clamp2(1 - bounce, 0.05, 1);
-    const omega2 = 2 * Math.PI / Math.max(0.05, visual_dur);
-    if (zeta1 < 1) {
-      const wd3 = omega2 * Math.sqrt(1 - zeta1 * zeta1);
-      return 1 - Math.exp(-zeta1 * omega2 * t) * (Math.cos(wd3 * t) + zeta1 * omega2 / wd3 * Math.sin(wd3 * t));
-    } else {
-      return 1 - Math.exp(-omega2 * t) * (1 + omega2 * t);
-    }
-    ;
-  };
-  var transition_duration = function(tr, fallback) {
-    if (tr == null) {
-      return fallback;
-    } else {
-      if (tr["type"] === "easing") {
-        const or__23426__auto__1 = tr["duration"];
-        if (truth_(or__23426__auto__1)) {
-          return or__23426__auto__1;
-        } else {
-          return 0.3;
-        }
-        ;
-      } else {
-        if (truth_(tr["stiffness"])) {
-          const k2 = tr["stiffness"];
-          const m3 = (() => {
-            const or__23426__auto__4 = tr["mass"];
-            if (truth_(or__23426__auto__4)) {
-              return or__23426__auto__4;
-            } else {
-              return 1;
-            }
-            ;
-          })();
-          return clamp2(4 * Math.sqrt(m3 / k2), 0.2, 3);
-        } else {
-          if ("else") {
-            const or__23426__auto__5 = tr["visualDuration"];
-            if (truth_(or__23426__auto__5)) {
-              return or__23426__auto__5;
-            } else {
-              return 0.5;
-            }
-            ;
-          } else {
-            return null;
-          }
-        }
-      }
-    }
-    ;
-  };
-  var ease_factor = function(tr, p) {
-    if (tr == null) {
-      return p;
-    } else {
-      if (tr["type"] === "easing") {
-        return cubic_bezier_y((() => {
-          const or__23426__auto__1 = tr["ease"];
-          if (truth_(or__23426__auto__1)) {
-            return or__23426__auto__1;
-          } else {
-            return [0.25, 0.1, 0.25, 1];
-          }
-          ;
-        })(), p);
-      } else {
-        if (truth_(tr["stiffness"])) {
-          return sample_spring2(0.5, 0.25, p * 1);
-        } else {
-          if ("else") {
-            return sample_spring2((() => {
-              const or__23426__auto__2 = tr["visualDuration"];
-              if (truth_(or__23426__auto__2)) {
-                return or__23426__auto__2;
-              } else {
-                return 0.5;
-              }
-              ;
-            })(), (() => {
-              const or__23426__auto__3 = tr["bounce"];
-              if (truth_(or__23426__auto__3)) {
-                return or__23426__auto__3;
-              } else {
-                return 0.2;
-              }
-              ;
-            })(), p * 1);
-          } else {
-            return null;
-          }
-        }
-      }
-    }
-    ;
-  };
-  var lerp_map = function(from, to, factor) {
-    const out1 = {};
-    const keys2 = Array.from(new Set(Object.keys((() => {
-      const or__23426__auto__3 = from;
-      if (truth_(or__23426__auto__3)) {
-        return or__23426__auto__3;
-      } else {
-        return {};
-      }
-      ;
-    })()).concat(Object.keys((() => {
-      const or__23426__auto__4 = to;
-      if (truth_(or__23426__auto__4)) {
-        return or__23426__auto__4;
-      } else {
-        return {};
-      }
-      ;
-    })()))));
-    for (let G__5 of iterable(keys2)) {
-      const k6 = G__5;
-      const a7 = truth_((() => {
-        const and__23442__auto__8 = from;
-        if (truth_(and__23442__auto__8)) {
-          return !_EQ_(from[k6], void 0);
-        } else {
-          return and__23442__auto__8;
-        }
-        ;
-      })()) ? from[k6] : to[k6];
-      const b9 = truth_((() => {
-        const and__23442__auto__10 = to;
-        if (truth_(and__23442__auto__10)) {
-          return !_EQ_(to[k6], void 0);
-        } else {
-          return and__23442__auto__10;
-        }
-        ;
-      })()) ? to[k6] : from[k6];
-      out1[k6] = a7 + (b9 - a7) * factor;
-    }
-    ;
-    return out1;
-  };
-  var clip_QMARK_ = function(v) {
-    return tof2(v) === "object" && (not(Array.isArray(v)) && (() => {
-      const or__23426__auto__1 = !_EQ_(v["at"], void 0);
-      if (or__23426__auto__1) {
-        return or__23426__auto__1;
-      } else {
-        const or__23426__auto__2 = v["from"];
-        if (truth_(or__23426__auto__2)) {
-          return or__23426__auto__2;
-        } else {
-          const or__23426__auto__3 = v["to"];
-          if (truth_(or__23426__auto__3)) {
-            return or__23426__auto__3;
-          } else {
-            const or__23426__auto__4 = v["steps"];
-            if (truth_(or__23426__auto__4)) {
-              return or__23426__auto__4;
-            } else {
-              return v["props"];
-            }
-            ;
-          }
-          ;
-        }
-        ;
-      }
-      ;
-    })());
-  };
-  var parse_clip = function(v) {
-    const at1 = (() => {
-      const or__23426__auto__2 = v["at"];
-      if (truth_(or__23426__auto__2)) {
-        return or__23426__auto__2;
-      } else {
-        return 0;
-      }
-      ;
-    })();
-    const tr3 = v["transition"];
-    const loop_QMARK_4 = boolean$(v["loop"]);
-    if (truth_(v["props"])) {
-      const tracks5 = {};
-      const names6 = Object.keys(v["props"]);
-      for (let G__7 of iterable(names6)) {
-        const nm8 = G__7;
-        const tk9 = v["props"][nm8];
-        const steps10 = (() => {
-          const or__23426__auto__11 = tk9["steps"];
-          if (truth_(or__23426__auto__11)) {
-            return or__23426__auto__11;
-          } else {
-            return [{ "duration": transition_duration((() => {
-              const or__23426__auto__12 = tk9["transition"];
-              if (truth_(or__23426__auto__12)) {
-                return or__23426__auto__12;
-              } else {
-                return tr3;
-              }
-              ;
-            })(), 0.5), "to": tk9["to"], "transition": tk9["transition"] }];
-          }
-          ;
-        })();
-        const dur13 = reduce((function(a, s) {
-          return a + (() => {
-            const or__23426__auto__14 = s["duration"];
-            if (truth_(or__23426__auto__14)) {
-              return or__23426__auto__14;
-            } else {
-              return 0.5;
-            }
-            ;
-          })();
-        }), 0, steps10);
-        tracks5[nm8] = { "from": tk9["from"], "delay": (() => {
-          const or__23426__auto__15 = tk9["delay"];
-          if (truth_(or__23426__auto__15)) {
-            return or__23426__auto__15;
-          } else {
-            return 0;
-          }
-          ;
-        })(), "steps": steps10, "transition": (() => {
-          const or__23426__auto__16 = tk9["transition"];
-          if (truth_(or__23426__auto__16)) {
-            return or__23426__auto__16;
-          } else {
-            return tr3;
-          }
-          ;
-        })(), "dur": dur13 };
-      }
-      ;
-      const dur17 = reduce((function(a, nm) {
-        return Math.max(a, tracks5[nm]["delay"] + tracks5[nm]["dur"]);
-      }), 0, names6);
-      return { "kind": "props", "at": at1, "duration": (() => {
-        const or__23426__auto__18 = v["duration"];
-        if (truth_(or__23426__auto__18)) {
-          return or__23426__auto__18;
-        } else {
-          return dur17;
-        }
-        ;
-      })(), "loop": loop_QMARK_4, "tracks": tracks5, "transition": tr3 };
-    } else {
-      if (truth_(v["steps"])) {
-        const steps19 = v["steps"];
-        const dur20 = reduce((function(a, s) {
-          return a + (() => {
-            const or__23426__auto__21 = s["duration"];
-            if (truth_(or__23426__auto__21)) {
-              return or__23426__auto__21;
-            } else {
-              return 0.5;
-            }
-            ;
-          })();
-        }), 0, steps19);
-        return { "kind": "sequence", "at": at1, "duration": (() => {
-          const or__23426__auto__22 = v["duration"];
-          if (truth_(or__23426__auto__22)) {
-            return or__23426__auto__22;
-          } else {
-            return dur20;
-          }
-          ;
-        })(), "loop": loop_QMARK_4, "from": v["from"], "steps": steps19, "transition": tr3 };
-      } else {
-        if (truth_((() => {
-          const or__23426__auto__23 = v["from"];
-          if (truth_(or__23426__auto__23)) {
-            return or__23426__auto__23;
-          } else {
-            return v["to"];
-          }
-          ;
-        })())) {
-          return { "kind": "single", "at": at1, "duration": (() => {
-            const or__23426__auto__24 = v["duration"];
-            if (truth_(or__23426__auto__24)) {
-              return or__23426__auto__24;
-            } else {
-              return transition_duration(tr3, 0.5);
-            }
-            ;
-          })(), "loop": loop_QMARK_4, "from": v["from"], "to": v["to"], "transition": tr3 };
-        } else {
-          if ("else") {
-            return { "kind": "marker", "at": at1, "duration": (() => {
-              const or__23426__auto__25 = v["duration"];
-              if (truth_(or__23426__auto__25)) {
-                return or__23426__auto__25;
-              } else {
-                return 0;
-              }
-              ;
-            })(), "loop": false };
-          } else {
-            return null;
-          }
-        }
-      }
-    }
-    ;
-  };
-  var parse_node2 = function(nm, v) {
-    if (truth_(clip_QMARK_(v))) {
-      return { "name": nm, "clip": parse_clip(v) };
-    } else {
-      return { "name": nm, "group": mapv((function(k) {
-        return parse_node2(k, v[k]);
-      }), Object.keys(v)) };
-    }
-    ;
-  };
-  var parse_config2 = function(config) {
-    return mapv((function(k) {
-      return parse_node2(k, config[k]);
-    }), Object.keys(config));
-  };
-  var clip_end = function(clip) {
-    return clip["at"] + clip["duration"];
-  };
-  var sample_single = function(clip, local) {
-    const dur1 = Math.max(1e-4, clip["duration"]);
-    const p2 = clamp2(local / dur1, 0, 1);
-    const f3 = ease_factor(clip["transition"], p2);
-    return { "progress": p2, "from": clip["from"], "to": clip["to"], "current": lerp_map(clip["from"], clip["to"], f3), "animate": p2 >= 1 ? clip["to"] : clip["from"] };
-  };
-  var sample_sequence = function(clip, local) {
-    const steps1 = clip["steps"];
-    const state2 = JSON.parse(JSON.stringify((() => {
-      const or__23426__auto__3 = clip["from"];
-      if (truth_(or__23426__auto__3)) {
-        return or__23426__auto__3;
-      } else {
-        return {};
-      }
-      ;
-    })()));
-    let i4 = 0;
-    let acc5 = 0;
-    let cur6 = state2;
-    let stepidx7 = 0;
-    while (true) {
-      if (i4 >= steps1.length) {
-        return { "progress": 1, "from": clip["from"], "to": cur6, "current": cur6, "step": steps1.length - 1, "animate": cur6 };
-      } else {
-        const s8 = steps1[i4];
-        const d9 = (() => {
-          const or__23426__auto__10 = s8["duration"];
-          if (truth_(or__23426__auto__10)) {
-            return or__23426__auto__10;
-          } else {
-            return 0.5;
-          }
-          ;
-        })();
-        const to11 = (() => {
-          const or__23426__auto__12 = s8["to"];
-          if (truth_(or__23426__auto__12)) {
-            return or__23426__auto__12;
-          } else {
-            return cur6;
-          }
-          ;
-        })();
-        if (local <= acc5 + d9) {
-          const lp13 = clamp2((local - acc5) / Math.max(1e-4, d9), 0, 1);
-          const f14 = ease_factor((() => {
-            const or__23426__auto__15 = s8["transition"];
-            if (truth_(or__23426__auto__15)) {
-              return or__23426__auto__15;
-            } else {
-              return clip["transition"];
-            }
-            ;
-          })(), lp13);
-          return { "progress": clamp2(local / Math.max(1e-4, clip["duration"]), 0, 1), "from": clip["from"], "to": to11, "step": i4, "current": lerp_map(cur6, to11, f14), "animate": lp13 >= 1 ? to11 : cur6 };
-        } else {
-          let G__16 = i4 + 1;
-          let G__17 = acc5 + d9;
-          let G__18 = (() => {
-            const m19 = Object.assign({}, cur6);
-            return Object.assign(m19, to11);
-          })();
-          let G__20 = i4;
-          i4 = G__16;
-          acc5 = G__17;
-          cur6 = G__18;
-          stepidx7 = G__20;
-          continue;
-        }
-        ;
-      }
-      ;
-      ;
-      break;
-    }
-    ;
-  };
-  var sample_track = function(track, local) {
-    const delay1 = track["delay"];
-    const lt2 = local - delay1;
-    if (lt2 < 0) {
-      return track["from"];
-    } else {
-      const steps3 = track["steps"];
-      let i4 = 0;
-      let acc5 = 0;
-      let cur6 = track["from"];
-      while (true) {
-        if (i4 >= steps3.length) {
-          return cur6;
-        } else {
-          const s7 = steps3[i4];
-          const d8 = (() => {
-            const or__23426__auto__9 = s7["duration"];
-            if (truth_(or__23426__auto__9)) {
-              return or__23426__auto__9;
-            } else {
-              return 0.5;
-            }
-            ;
-          })();
-          const to10 = s7["to"];
-          if (lt2 <= acc5 + d8) {
-            const lp11 = clamp2((lt2 - acc5) / Math.max(1e-4, d8), 0, 1);
-            const f12 = ease_factor((() => {
-              const or__23426__auto__13 = s7["transition"];
-              if (truth_(or__23426__auto__13)) {
-                return or__23426__auto__13;
-              } else {
-                return track["transition"];
-              }
-              ;
-            })(), lp11);
-            return cur6 + (to10 - cur6) * f12;
-          } else {
-            let G__14 = i4 + 1;
-            let G__15 = acc5 + d8;
-            let G__16 = to10;
-            i4 = G__14;
-            acc5 = G__15;
-            cur6 = G__16;
-            continue;
-          }
-          ;
-        }
-        ;
-        ;
-        break;
-      }
-      ;
-    }
-    ;
-  };
-  var sample_props = function(clip, local) {
-    const tracks1 = clip["tracks"];
-    const cur2 = {};
-    const from3 = {};
-    const to4 = {};
-    for (let G__5 of iterable(Object.keys(tracks1))) {
-      const nm6 = G__5;
-      const tk7 = tracks1[nm6];
-      const steps8 = tk7["steps"];
-      cur2[nm6] = sample_track(tk7, local);
-      from3[nm6] = tk7["from"];
-      to4[nm6] = steps8[steps8.length - 1]["to"];
-    }
-    ;
-    return { "progress": clamp2(local / Math.max(1e-4, clip["duration"]), 0, 1), "current": cur2, "from": from3, "to": to4, "animate": cur2 };
-  };
-  var sample_clip = function(clip, t) {
-    const at1 = clip["at"];
-    const dur2 = clip["duration"];
-    const raw3 = t - at1;
-    const started4 = t >= at1;
-    const cyc5 = Math.max(1e-4, dur2);
-    const local6 = truth_(clip["loop"]) ? raw3 < 0 ? 0 : Math.min(cyc5, raw3 - cyc5 * Math.floor(raw3 / cyc5)) : clamp2(raw3, 0, dur2);
-    const active7 = started4 && (() => {
-      const or__23426__auto__8 = clip["loop"];
-      if (truth_(or__23426__auto__8)) {
-        return or__23426__auto__8;
-      } else {
-        return t <= clip_end(clip);
-      }
-      ;
-    })();
-    const done9 = not(clip["loop"]) && t > clip_end(clip);
-    const base10 = clip["kind"] === "props" ? sample_props(clip, local6) : clip["kind"] === "sequence" ? sample_sequence(clip, local6) : clip["kind"] === "single" ? sample_single(clip, local6) : "else" ? { "progress": clamp2(local6 / cyc5, 0, 1), "current": {} } : null;
-    const css11 = (() => {
-      const tr12 = clip["transition"];
-      if (truth_((() => {
-        const and__23442__auto__13 = tr12;
-        if (truth_(and__23442__auto__13)) {
-          return tr12["type"] === "easing";
-        } else {
-          return and__23442__auto__13;
-        }
-        ;
-      })())) {
-        return { "duration": `${clip["duration"] ?? ""}s`, "timingFunction": `${"cubic-bezier("}${(() => {
-          const or__23426__auto__14 = tr12["ease"];
-          if (truth_(or__23426__auto__14)) {
-            return or__23426__auto__14;
-          } else {
-            return [0.25, 0.1, 0.25, 1];
-          }
-          ;
-        })().join(",") ?? ""}${")"}` };
-      } else {
-        return { "duration": `${clip["duration"] ?? ""}s`, "timingFunction": "ease" };
-      }
-      ;
-    })();
-    Object.assign(base10, { "at": at1, "duration": dur2, "loop": truth_(clip["loop"]) ? "repeat" : "off", "started": started4, "active": active7, "done": done9, "transition": clip["transition"], "css": css11 });
-    return base10;
-  };
-  var node_values = function(node, t) {
-    if (truth_(node["clip"])) {
-      return sample_clip(node["clip"], t);
-    } else {
-      const g1 = {};
-      for (let G__2 of iterable(node["group"])) {
-        const child3 = G__2;
-        g1[child3["name"]] = node_values(child3, t);
-      }
-      ;
-      return g1;
-    }
-    ;
-  };
-  var total_duration = function(nodes) {
-    const walk1 = (function(node) {
-      if (truth_(node["clip"])) {
-        return clip_end(node["clip"]);
-      } else {
-        return reduce((function(a, c) {
-          return Math.max(a, walk1(c));
-        }), 0, node["group"]);
-      }
-      ;
-    });
-    return reduce((function(a, n) {
-      return Math.max(a, walk1(n));
-    }), 1e-4, nodes);
-  };
-  var snapshot = function(tl) {
-    const t1 = get(tl, "time");
-    const out2 = {};
-    for (let G__3 of iterable(get(tl, "nodes"))) {
-      const node4 = G__3;
-      out2[node4["name"]] = node_values(node4, t1);
-    }
-    ;
-    out2["time"] = t1;
-    out2["playing"] = get(tl, "playing");
-    out2["duration"] = get(tl, "duration");
-    return out2;
-  };
-  var notify_BANG_2 = function(tl) {
-    const snap1 = snapshot(tl);
-    const temp__23062__auto__2 = get(tl, "onChange");
-    if (truth_(temp__23062__auto__2)) {
-      const cb3 = temp__23062__auto__2;
-      cb3(snap1);
-    }
-    ;
-    for (let G__4 of iterable(Array.from(get(tl, "subs")))) {
-      const s5 = G__4;
-      s5(snap1);
-    }
-    return null;
-  };
-  var tick_BANG_ = function(tl, now) {
-    const last1 = get(tl, "last");
-    const dt2 = truth_(last1) ? (now - last1) / 1e3 : 0;
-    tl["last"] = now;
-    if (truth_(get(tl, "playing"))) {
-      const t3 = get(tl, "time") + dt2;
-      const dur4 = get(tl, "duration");
-      const lp5 = get(tl, "loopOpt");
-      if (t3 < dur4) {
-        tl["time"] = t3;
-      } else {
-        if (lp5 === true) {
-          tl["time"] = t3 - dur4;
-        } else {
-          if (truth_((() => {
-            const and__23442__auto__6 = lp5;
-            if (truth_(and__23442__auto__6)) {
-              return !(lp5 === true) && !(lp5 === false);
-            } else {
-              return and__23442__auto__6;
-            }
-            ;
-          })())) {
-            const from7 = (() => {
-              const or__23426__auto__8 = lp5["from"];
-              if (truth_(or__23426__auto__8)) {
-                return or__23426__auto__8;
-              } else {
-                return 0;
-              }
-              ;
-            })();
-            tl["time"] = from7 + (t3 - dur4);
-          } else {
-            if ("else") {
-              tl["time"] = dur4;
-              tl["playing"] = false;
-            } else {
-            }
-          }
-        }
-      }
-    }
-    ;
-    notify_BANG_2(tl);
-    paint_dock_BANG_(tl);
-    return tl["raf"] = requestAnimationFrame((function(n) {
-      return tick_BANG_(tl, n);
-    }));
-  };
-  var play_BANG_ = function(tl) {
-    return tl["playing"] = true;
-  };
-  var pause_BANG_ = function(tl) {
-    return tl["playing"] = false;
-  };
-  var seek_BANG_ = function(tl, s) {
-    tl["time"] = clamp2(s, 0, get(tl, "duration"));
-    notify_BANG_2(tl);
-    return paint_dock_BANG_(tl);
-  };
-  var replay_BANG_ = function(tl) {
-    tl["time"] = 0;
-    return tl["playing"] = true;
-  };
-  var dock_el = atom(null);
-  var timelines = atom([]);
-  var px_per_sec = function(tl) {
-    const ruler1 = get(tl, "ruler");
-    if (truth_(ruler1)) {
-      return ruler1.clientWidth / Math.max(1e-4, get(tl, "zoom") * get(tl, "duration"));
-    } else {
-      return 100;
-    }
-    ;
-  };
-  var ensure_dock_BANG_ = function() {
-    const or__23426__auto__1 = deref(dock_el);
-    if (truth_(or__23426__auto__1)) {
-      return or__23426__auto__1;
-    } else {
-      const el2 = mk2("div", "dial-timeline");
-      attr_BANG_2(el2, "data-theme", "system");
-      document.body.appendChild(el2);
-      reset_BANG_(dock_el, el2);
-      return el2;
-    }
-    ;
-  };
-  var build_clip_rows_BANG_ = function(tl, track_host) {
-    track_host.innerHTML = "";
-    const pps1 = px_per_sec(tl);
-    const render_node2 = (function(node, depth) {
-      if (truth_(node["clip"])) {
-        const clip3 = node["clip"];
-        const row4 = mk2("div", "dtl-row");
-        const bar5 = mk2("div", "dtl-clip");
-        row4.style.paddingLeft = `${depth * 12}px`;
-        add_BANG_2(row4, txt_BANG_2(mk2("span", "dtl-row-label"), node["name"]));
-        bar5.style.left = `${pps1 * clip3["at"]}px`;
-        bar5.style.width = `${Math.max(8, pps1 * clip3["duration"]) ?? ""}px`;
-        txt_BANG_2(bar5, `${node["name"] ?? ""}${" "}${fmt_clock(clip3["duration"]) ?? ""}`);
-        const st6 = { "mode": null, "sx": 0, "at0": 0, "dur0": 0 };
-        on_BANG_2(bar5, "pointerdown", (function(e) {
-          bar5.setPointerCapture(e.pointerId);
-          const rect7 = bar5.getBoundingClientRect();
-          const near_edge8 = e.clientX > rect7.right - 10;
-          st6["mode"] = near_edge8 ? "resize" : "move";
-          st6["sx"] = e.clientX;
-          st6["at0"] = clip3["at"];
-          return st6["dur0"] = clip3["duration"];
-        }));
-        on_BANG_2(bar5, "pointermove", (function(e) {
-          if (truth_(st6["mode"])) {
-            const dx9 = (e.clientX - st6["sx"]) / pps1;
-            if (st6["mode"] === "resize") {
-              clip3["duration"] = Math.max(0.05, st6["dur0"] + dx9);
-            } else {
-              clip3["at"] = Math.max(0, st6["at0"] + dx9);
-            }
-            ;
-            tl["duration"] = Math.max(get(tl, "baseDuration"), total_duration(get(tl, "nodes")));
-            bar5.style.left = `${pps1 * clip3["at"]}px`;
-            bar5.style.width = `${Math.max(8, pps1 * clip3["duration"]) ?? ""}px`;
-            return notify_BANG_2(tl);
-          }
-          ;
-        }));
-        on_BANG_2(bar5, "pointerup", (function(_) {
-          return st6["mode"] = null;
-        }));
-        add_BANG_2(row4, bar5);
-        return track_host.appendChild(row4);
-      } else {
-        const hdr10 = mk2("div", "dtl-group");
-        hdr10.style.paddingLeft = `${depth * 12}px`;
-        txt_BANG_2(hdr10, node["name"]);
-        track_host.appendChild(hdr10);
-        for (let G__11 of iterable(node["group"])) {
-          const child12 = G__11;
-          render_node2(child12, depth + 1);
-        }
-        return null;
-      }
-      ;
-    });
-    for (let G__13 of iterable(get(tl, "nodes"))) {
-      const node14 = G__13;
-      render_node2(node14, 0);
-    }
-    return null;
-  };
-  var paint_dock_BANG_ = function(tl) {
-    if (truth_(get(tl, "playhead"))) {
-      const pps1 = px_per_sec(tl);
-      get(tl, "playhead").style.left = `${pps1 * get(tl, "time")}px`;
-      return txt_BANG_2(get(tl, "clock"), fmt_clock(get(tl, "time")));
-    }
-    ;
-  };
-  var build_dock_BANG_ = function(tl) {
-    const dock1 = ensure_dock_BANG_();
-    const panel2 = mk2("div", "dtl-panel");
-    const bar3 = mk2("div", "dtl-toolbar");
-    const playb4 = mk2("button", "dtl-btn");
-    const repb5 = mk2("button", "dtl-btn");
-    const clock6 = mk2("span", "dtl-clock");
-    const name7 = txt_BANG_2(mk2("span", "dtl-name"), get(tl, "name"));
-    const scroller8 = mk2("div", "dtl-scroll");
-    const ruler9 = mk2("div", "dtl-ruler");
-    const tracks10 = mk2("div", "dtl-tracks");
-    const playhead11 = mk2("div", "dtl-playhead");
-    attr_BANG_2(playb4, "type", "button");
-    txt_BANG_2(playb4, "\u23F5");
-    attr_BANG_2(repb5, "type", "button");
-    txt_BANG_2(repb5, "\u21BA");
-    tl["ruler"] = ruler9;
-    tl["playhead"] = playhead11;
-    tl["clock"] = clock6;
-    tl["trackHost"] = tracks10;
-    on_BANG_2(playb4, "click", (function(_) {
-      if (truth_(get(tl, "playing"))) {
-        pause_BANG_(tl);
-      } else {
-        play_BANG_(tl);
-      }
-      ;
-      return txt_BANG_2(playb4, truth_(get(tl, "playing")) ? "\u23F8" : "\u23F5");
-    }));
-    on_BANG_2(repb5, "click", (function(_) {
-      replay_BANG_(tl);
-      return txt_BANG_2(playb4, "\u23F8");
-    }));
-    const pps12 = px_per_sec(tl);
-    const n13 = Math.ceil(get(tl, "duration"));
-    const n1814 = n13 + 1;
-    let i15 = 0;
-    for (; i15 < n1814; i15++) {
-      (() => {
-        const tick16 = mk2("div", "dtl-tick");
-        tick16.style.left = `${pps12 * i15}px`;
-        txt_BANG_2(tick16, `${i15}s`);
-        return add_BANG_2(ruler9, tick16);
-      })();
-    }
-    ;
-    const scrub17 = (function(e) {
-      const rect18 = ruler9.getBoundingClientRect();
-      const pps19 = px_per_sec(tl);
-      const s20 = (e.clientX - rect18.left + scroller8.scrollLeft) / pps19;
-      return seek_BANG_(tl, s20);
-    });
-    const st21 = { "on": false, "wasPlaying": false };
-    on_BANG_2(ruler9, "pointerdown", (function(e) {
-      ruler9.setPointerCapture(e.pointerId);
-      st21["on"] = true;
-      st21["wasPlaying"] = get(tl, "playing");
-      pause_BANG_(tl);
-      return scrub17(e);
-    }));
-    on_BANG_2(ruler9, "pointermove", (function(e) {
-      if (truth_(st21["on"])) {
-        return scrub17(e);
-      }
-      ;
-    }));
-    on_BANG_2(ruler9, "pointerup", (function(_) {
-      st21["on"] = false;
-      if (truth_(st21["wasPlaying"])) {
-        return play_BANG_(tl);
-      }
-      ;
-    }));
-    on_BANG_2(ruler9, "wheel", (function(e) {
-      if (truth_(e.altKey)) {
-        e.preventDefault();
-        tl["zoom"] = clamp2(get(tl, "zoom") * (e.deltaY > 0 ? 1.1 : 0.9), 0.2, 8);
-        return build_clip_rows_BANG_(tl, get(tl, "trackHost"));
-      }
-      ;
-    }));
-    add_BANG_2(bar3, playb4, repb5, clock6, name7);
-    add_BANG_2(scroller8, ruler9, tracks10, playhead11);
-    add_BANG_2(panel2, bar3, scroller8);
-    add_BANG_2(dock1, panel2);
-    build_clip_rows_BANG_(tl, tracks10);
-    paint_dock_BANG_(tl);
-    return tl["panelEl"] = panel2;
-  };
-  var controller2 = function(tl) {
-    const c1 = { "getValues": (function() {
-      return snapshot(tl);
-    }), "subscribe": (function(cb, immediate) {
-      get(tl, "subs").push(cb);
-      if (!(immediate === false)) {
-        cb(snapshot(tl));
-      }
-      ;
-      return function() {
-        const i2 = get(tl, "subs").indexOf(cb);
-        if (i2 >= 0) {
-          return get(tl, "subs").splice(i2, 1);
-        }
-        ;
-      };
-    }), "play": (function() {
-      play_BANG_(tl);
-      return void 0;
-    }), "pause": (function() {
-      pause_BANG_(tl);
-      return void 0;
-    }), "replay": (function() {
-      replay_BANG_(tl);
-      return void 0;
-    }), "seek": (function(s) {
-      seek_BANG_(tl, s);
-      return void 0;
-    }), "destroy": (function() {
-      if (truth_(get(tl, "raf"))) {
-        cancelAnimationFrame(get(tl, "raf"));
-      }
-      ;
-      const temp__23062__auto__3 = get(tl, "panelEl");
-      if (truth_(temp__23062__auto__3)) {
-        const p4 = temp__23062__auto__3;
-        p4.remove();
-      }
-      ;
-      return void 0;
-    }) };
-    Object.defineProperty(c1, "values", { "get": (function() {
-      return snapshot(tl);
-    }) });
-    Object.defineProperty(c1, "time", { "get": (function() {
-      return get(tl, "time");
-    }) });
-    Object.defineProperty(c1, "playing", { "get": (function() {
-      return get(tl, "playing");
-    }) });
-    Object.defineProperty(c1, "duration", { "get": (function() {
-      return get(tl, "duration");
-    }) });
-    return c1;
-  };
-  var use_timeline = function(name, config, opts) {
-    const opts1 = (() => {
-      const or__23426__auto__2 = opts;
-      if (truth_(or__23426__auto__2)) {
-        return or__23426__auto__2;
-      } else {
-        return {};
-      }
-      ;
-    })();
-    const nodes3 = parse_config2(config);
-    const base_dur4 = (() => {
-      const or__23426__auto__5 = config["duration"];
-      if (truth_(or__23426__auto__5)) {
-        return or__23426__auto__5;
-      } else {
-        return 0;
-      }
-      ;
-    })();
-    const dur6 = Math.max(base_dur4, total_duration(nodes3));
-    const tl7 = { "zoom": 1, "baseDuration": base_dur4, "name": name, "time": 0, "duration": dur6, "nodes": nodes3, "playing": !(opts1["autoplay"] === false), "raf": null, "subs": [], "onChange": opts1["onChange"], "last": null, "loopOpt": (() => {
-      const l8 = opts1["loop"];
-      if (_EQ_(l8, void 0)) {
-        return false;
-      } else {
-        return l8;
-      }
-      ;
-    })() };
-    deref(timelines).push(tl7);
-    if (!(opts1["enabled"] === false)) {
-      build_dock_BANG_(tl7);
-    }
-    ;
-    tl7["raf"] = requestAnimationFrame((function(n) {
-      tl7["last"] = n;
-      return tick_BANG_(tl7, n);
-    }));
-    return controller2(tl7);
-  };
-  window["__uiDialTimeline"] = use_timeline;
-  window["formatClock"] = fmt_clock;
-
   // .compiled/drop_zone.mjs
   var closest_zone = function(el) {
     if (truth_((() => {
@@ -5049,24 +4016,24 @@
     return null;
   };
   var play = (() => {
-    const f19 = (function(...args20) {
-      const G__211 = args20.length;
-      switch (G__211) {
+    const f14 = (function(...args15) {
+      const G__161 = args15.length;
+      switch (G__161) {
         case 1:
-          return f19.cljs$core$IFn$_invoke$arity$1(args20[0]);
+          return f14.cljs$core$IFn$_invoke$arity$1(args15[0]);
           break;
         case 2:
-          return f19.cljs$core$IFn$_invoke$arity$2(args20[0], args20[1]);
+          return f14.cljs$core$IFn$_invoke$arity$2(args15[0], args15[1]);
           break;
         default:
-          throw new Error(`${"Invalid arity: "}${args20.length ?? ""}`);
+          throw new Error(`${"Invalid arity: "}${args15.length ?? ""}`);
       }
       ;
     });
-    f19.cljs$core$IFn$_invoke$arity$1 = (function(snap) {
+    f14.cljs$core$IFn$_invoke$arity$1 = (function(snap) {
       return play(snap, null);
     });
-    f19.cljs$core$IFn$_invoke$arity$2 = (function(snap, opts) {
+    f14.cljs$core$IFn$_invoke$arity$2 = (function(snap, opts) {
       if (truth_(reduced_motion_QMARK_())) {
       } else {
         const opts3 = (() => {
@@ -5104,34 +4071,34 @@
       ;
       return null;
     });
-    f19.cljs$lang$maxFixedArity = 2;
-    return f19;
+    f14.cljs$lang$maxFixedArity = 2;
+    return f14;
   })();
   var wrap = (() => {
-    const f22 = (function(...args23) {
-      const G__241 = args23.length;
-      switch (G__241) {
+    const f17 = (function(...args18) {
+      const G__191 = args18.length;
+      switch (G__191) {
         case 2:
-          return f22.cljs$core$IFn$_invoke$arity$2(args23[0], args23[1]);
+          return f17.cljs$core$IFn$_invoke$arity$2(args18[0], args18[1]);
           break;
         case 3:
-          return f22.cljs$core$IFn$_invoke$arity$3(args23[0], args23[1], args23[2]);
+          return f17.cljs$core$IFn$_invoke$arity$3(args18[0], args18[1], args18[2]);
           break;
         default:
-          throw new Error(`${"Invalid arity: "}${args23.length ?? ""}`);
+          throw new Error(`${"Invalid arity: "}${args18.length ?? ""}`);
       }
       ;
     });
-    f22.cljs$core$IFn$_invoke$arity$2 = (function(target, mutate) {
+    f17.cljs$core$IFn$_invoke$arity$2 = (function(target, mutate) {
       return wrap(target, mutate, null);
     });
-    f22.cljs$core$IFn$_invoke$arity$3 = (function(target, mutate, opts) {
+    f17.cljs$core$IFn$_invoke$arity$3 = (function(target, mutate, opts) {
       const snap3 = capture(target);
       mutate();
       return play(snap3, opts);
     });
-    f22.cljs$lang$maxFixedArity = 3;
-    return f22;
+    f17.cljs$lang$maxFixedArity = 3;
+    return f17;
   })();
   window.__uiFlip = { "capture": capture, "play": play, "wrap": wrap };
 
@@ -5176,11 +4143,11 @@
     clear_held_BANG_();
     if (e.pointerType === "touch") {
       const temp__23062__auto__1 = (() => {
-        const G__252 = e.target;
-        if (G__252 == null) {
+        const G__202 = e.target;
+        if (G__202 == null) {
           return null;
         } else {
-          return G__252.closest(selector);
+          return G__202.closest(selector);
         }
         ;
       })();
@@ -5368,7 +4335,7 @@
   var key_step_fast = 50;
   var pan_threshold = 3;
   var axes_config = { "horizontal": { "client": "clientWidth", "extent": "width", "cursor": "col-resize", "grow": "ArrowRight", "shrink": "ArrowLeft", "sepOrient": "vertical" }, "vertical": { "client": "clientHeight", "extent": "height", "cursor": "row-resize", "grow": "ArrowDown", "shrink": "ArrowUp", "sepOrient": "horizontal" } };
-  var clamp3 = function(v, lo, hi) {
+  var clamp2 = function(v, lo, hi) {
     return Math.min(Math.max(v, lo), hi);
   };
   var round2 = function(v) {
@@ -5732,7 +4699,7 @@
   };
   var apply_size_BANG_ = function(panel, px) {
     const b1 = bounds(panel);
-    const v2 = clamp3(px, b1.min, b1.max);
+    const v2 = clamp2(px, b1.min, b1.max);
     const total3 = group_extent(panel.group);
     if (truth_((() => {
       const and__23442__auto__4 = panel.collapsed;
@@ -5844,7 +4811,7 @@
         }
         ;
       })();
-      const next7 = truth_(collapse5) ? 0 : Math.round(clamp3(pixels4, s1.min, s1.max));
+      const next7 = truth_(collapse5) ? 0 : Math.round(clamp2(pixels4, s1.min, s1.max));
       if (!_EQ_(truth_(collapse5) ? true : false, truth_(s1.sessionCollapsed) ? true : false)) {
         drag_collapse_BANG_(panel, collapse5);
       }
@@ -5918,7 +4885,7 @@
       const next9 = key1 === "End" ? b3.max : key1 === "Home" ? b3.min : key1 === "PageDown" ? t8 + step7 : key1 === "PageUp" ? t8 - step7 : _EQ_(key1, axes2["grow"]) ? t8 + step7 : _EQ_(key1, axes2["shrink"]) ? t8 - step7 : "else" ? null : null;
       if (!(next9 == null)) {
         e.preventDefault();
-        return apply_size_BANG_(panel, clamp3(next9, b3.min, b3.max));
+        return apply_size_BANG_(panel, clamp2(next9, b3.min, b3.max));
       }
       ;
     }
@@ -6284,7 +5251,7 @@
   // .compiled/popover.mjs
   var gap = 8;
   var edge = 8;
-  var clamp4 = function(v, lo, hi) {
+  var clamp3 = function(v, lo, hi) {
     return Math.max(lo, Math.min(v, hi));
   };
   var align_h = function(tr, cw, align) {
@@ -6346,8 +5313,8 @@
     const vh10 = window.innerHeight;
     const left11 = side1 === "left" ? tr5.left - cw7 - gap : side1 === "right" ? tr5.right + gap : "else" ? align_h(tr5, cw7, align3) : null;
     const top12 = side1 === "top" ? tr5.top - ch8 - gap : side1 === "bottom" ? tr5.bottom + gap : "else" ? align_v(tr5, ch8, align3) : null;
-    content.style.left = `${clamp4(left11, edge, vw9 - cw7 - edge) ?? ""}px`;
-    return content.style.top = `${clamp4(top12, edge, vh10 - ch8 - edge) ?? ""}px`;
+    content.style.left = `${clamp3(left11, edge, vw9 - cw7 - edge) ?? ""}px`;
+    return content.style.top = `${clamp3(top12, edge, vh10 - ch8 - edge) ?? ""}px`;
   };
   var current = { "content": null, "trigger": null };
   var reposition_BANG_ = function() {
@@ -6524,25 +5491,25 @@
     ;
   };
   var open_select = (() => {
-    const f26 = (function(var_args) {
-      const args271 = [];
+    const f21 = (function(var_args) {
+      const args221 = [];
       const len__23321__auto__2 = arguments.length;
-      let i283 = 0;
+      let i233 = 0;
       while (true) {
-        if (i283 < len__23321__auto__2) {
-          args271.push(arguments[i283]);
-          let G__4 = i283 + 1;
-          i283 = G__4;
+        if (i233 < len__23321__auto__2) {
+          args221.push(arguments[i233]);
+          let G__4 = i233 + 1;
+          i233 = G__4;
           continue;
         }
         ;
         break;
       }
       ;
-      const argseq__23513__auto__5 = 1 < args271.length ? args271.slice(1) : null;
-      return f26.cljs$core$IFn$_invoke$arity$variadic(arguments[0], argseq__23513__auto__5);
+      const argseq__23513__auto__5 = 1 < args221.length ? args221.slice(1) : null;
+      return f21.cljs$core$IFn$_invoke$arity$variadic(arguments[0], argseq__23513__auto__5);
     });
-    f26.cljs$core$IFn$_invoke$arity$variadic = (function(trigger, args) {
+    f21.cljs$core$IFn$_invoke$arity$variadic = (function(trigger, args) {
       dismiss_BANG_2();
       const options6 = (() => {
         const passed7 = first(args);
@@ -6637,8 +5604,8 @@
       }
       ;
     });
-    f26.cljs$lang$maxFixedArity = 1;
-    return f26;
+    f21.cljs$lang$maxFixedArity = 1;
+    return f21;
   })();
   window["__uiSelect"] = open_select;
 
@@ -6671,8 +5638,8 @@
     return window.matchMedia("(prefers-color-scheme: dark)").matches;
   };
   var resolve_effective = function(mode) {
-    const G__301 = mode;
-    switch (G__301) {
+    const G__251 = mode;
+    switch (G__251) {
       case "light":
         return "light";
         break;
@@ -6701,8 +5668,8 @@
   var apply_theme_BANG_ = function(mode) {
     const el1 = document.documentElement;
     suppress_transitions_BANG_();
-    const G__312 = mode;
-    switch (G__312) {
+    const G__262 = mode;
+    switch (G__262) {
       case "light":
         return el1.setAttribute("data-theme", "light");
         break;
@@ -6715,7 +5682,7 @@
     ;
   };
   var subscribers = atom([]);
-  var notify_BANG_3 = function(mode, effective) {
+  var notify_BANG_2 = function(mode, effective) {
     const subs1 = deref(subscribers);
     return subs1.forEach((function(f) {
       return f({ "mode": mode, "effective": effective });
@@ -6737,13 +5704,13 @@
     const m1 = truth_(get(/* @__PURE__ */ new Set(["auto", "light", "dark"]), mode)) ? mode : "auto";
     store_BANG_(m1);
     apply_theme_BANG_(m1);
-    return notify_BANG_3(m1, resolve_effective(m1));
+    return notify_BANG_2(m1, resolve_effective(m1));
   };
   var toggle_BANG_ = function() {
     const current1 = get_mode();
     const next_mode2 = (() => {
-      const G__323 = current1;
-      switch (G__323) {
+      const G__273 = current1;
+      switch (G__273) {
         case "auto":
           return "light";
           break;
@@ -6780,7 +5747,7 @@
     return mql2.addEventListener("change", (function(_e) {
       if (get_mode() === "auto") {
         apply_theme_BANG_("auto");
-        return notify_BANG_3("auto", resolve_effective("auto"));
+        return notify_BANG_2("auto", resolve_effective("auto"));
       }
       ;
     }));
@@ -6913,14 +5880,14 @@
       ;
     })().split(","))));
     const override_keys4 = set(map(first, viewport_overrides));
-    const kept5 = remove((function(p__33) {
-      const vec__69 = p__33;
+    const kept5 = remove((function(p__28) {
+      const vec__69 = p__28;
       const k10 = nth(vec__69, 0, null);
       const _11 = nth(vec__69, 1, null);
       return contains_QMARK_(override_keys4, k10);
     }), entries1);
-    return join(", ", map((function(p__34) {
-      const vec__1215 = p__34;
+    return join(", ", map((function(p__29) {
+      const vec__1215 = p__29;
       const k16 = nth(vec__1215, 0, null);
       const v17 = nth(vec__1215, 1, null);
       if (v17 == null) {

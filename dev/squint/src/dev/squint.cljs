@@ -395,16 +395,8 @@
                                "large" "var(--shadow-3)"
                                "var(--shadow-2)"))))))
 
-(defn- dk-apply-dot! [v]
-  (when-let [dot (js/document.getElementById "dial-demo-dot")]
-    (when-let [m (aget v "dot")]
-      (when-let [cur (aget m "current")]
-        (let [st (.-style dot)]
-          (aset st "transform" (str "translateX(" (js/Math.round (aget cur "x")) "px)"))
-          (aset st "opacity" (str (aget cur "opacity"))))))))
-
 (defn init-dial-demo! []
-  (when (and (nil? @!dial-ctrls) js/window.__uiDial js/window.__uiDialTimeline)
+  (when (and (nil? @!dial-ctrls) js/window.__uiDial)
     (let [dial (js/window.__uiDial "Box Playground"
                  #js {:box #js {:size    #js [96 32 200]
                                 :radius  #js [16 0 100]
@@ -422,28 +414,20 @@
                       :onAction (fn [nm _v]
                                   (when (= nm "reset")
                                     (when-let [c @!dial-ctrls]
-                                      ((aget (aget c "dial") "resetValues")))))})
-          tl (js/window.__uiDialTimeline "Motion"
-               #js {:dot #js {:at 0 :duration 2 :loop true
-                              :from #js {:x 0 :opacity 0.35}
-                              :to   #js {:x 240 :opacity 1}
-                              :transition #js {:type "easing" :ease #js [0.4 0 0.2 1] :duration 2}}}
-               #js {:autoplay true :loop true
-                    :onChange dk-apply-dot!})]
-      (reset! !dial-ctrls #js {:dial dial :tl tl})
+                                      ((aget (aget c "dial") "resetValues")))))})]
+      (reset! !dial-ctrls #js {:dial dial})
       (dk-apply-box! (aget dial "values")))))
 
 (defn teardown-dial-demo! []
   (when-let [c @!dial-ctrls]
     ((aget (aget c "dial") "destroy"))
-    ((aget (aget c "tl") "destroy"))
     (reset! !dial-ctrls nil)))
 
 (defn dial-page []
   (js/setTimeout init-dial-demo! 0)
   [:div
    (page-header "DialKit"
-     "Live value-tuning panels + an animation timeline, ported from dialkit.dev. Drag the panel (top-right) by its title to move it; every edit updates the box below in real time and persists to localStorage. The timeline dock (bottom) animates the dot on a loop.")
+     "Live value-tuning panels, ported from dialkit.dev. Drag the panel (top-right) by its title to move it; every edit updates the box below in real time and persists to localStorage.")
    (section "Box Playground"
      [:p {:style {"color" "var(--fg-2)" "font-size" "var(--font-sm)"}}
       "Tune the floating panel in the top-right corner — size, radius, rotation, opacity, colour, border and shadow all bind live to this box. Use “Save version” in the panel head to snapshot presets, ⧉ to copy the config, ↺ to reset."]
@@ -453,17 +437,7 @@
                     "background" "var(--bg-1)"}}
       [:div {:id "dial-demo-box"
              :style {"width" "96px" "height" "96px" "border-radius" "16px"
-                     "background" "#8b5cf6" "transition" "box-shadow 0.15s ease"}}]])
-   (section "Motion Timeline"
-     [:p {:style {"color" "var(--fg-2)" "font-size" "var(--font-sm)"}}
-      "The timeline dock at the bottom of the screen drives this dot. Scrub the playhead, hit play/replay, drag clip bars to retime, or alt+scroll to zoom the ruler."]
-     [:div {:style {"position" "relative" "height" "80px" "padding" "0 1rem"
-                    "display" "flex" "align-items" "center"
-                    "border" "var(--border-0)" "border-radius" "var(--radius-lg)"
-                    "background" "var(--bg-1)"}}
-      [:div {:id "dial-demo-dot"
-             :style {"width" "40px" "height" "40px" "border-radius" "50%"
-                     "background" "var(--accent)" "opacity" "0.35"}}]])])
+                     "background" "#8b5cf6" "transition" "box-shadow 0.15s ease"}}]])])
 
 ;; ── Pages ───────────────────────────────────────────────────────────
 

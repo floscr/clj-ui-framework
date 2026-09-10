@@ -2,7 +2,6 @@
   (:require [command]
             [context-menu]
             [dial]
-            [dial-timeline]
             [drop-zone]
             [flip]
             [gestures]

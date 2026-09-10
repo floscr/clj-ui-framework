@@ -28,8 +28,7 @@
    Panel fields are read with (:kw panel) and written with (aset panel \"kw\" v)
    — never `.-` interop, which munges hyphens to underscores in squint.
 
-   See src/ui/dial.css for styling and dial_timeline.cljs for the timeline
-   dock (window.__uiDialTimeline)."
+   See src/ui/dial.css for styling."
   (:require [clojure.string :as str]))
 
 ;; ── DOM helpers ─────────────────────────────────────────────────────
