@@ -17,7 +17,9 @@
                        |\"spring\"|\"easing\"|\"action\", ...}
                 nested object (no :type)       -> folder
        opts   : {id, persist, onChange, onAction, defaultCollapsed,
-                 enabled, shortcuts}
+                 enabled, shortcuts,
+                 position: \"top-right\"|\"top-left\"|\"bottom-right\"|\"bottom-left\",
+                 icon: char shown when minimized (default \"⚙\")}
        controller: {values, getValues, setValue, setValues, resetValues,
                     setOpen, getOpen, subscribe, destroy, id}
 
@@ -855,12 +857,20 @@
 (def ^:private panels (atom #js {}))
 (def ^:private drag-state #js {:on false :x 0 :y 0 :sx 0 :sy 0})
 
+(defn- apply-root-position! [el pos]
+  (let [s (.-style el)
+        bottom? (or (= pos "bottom-right") (= pos "bottom-left"))
+        left?   (or (= pos "top-left") (= pos "bottom-left"))]
+    (set! (.-top s) "auto") (set! (.-bottom s) "auto")
+    (set! (.-left s) "auto") (set! (.-right s) "auto")
+    (if bottom? (set! (.-bottom s) "12px") (set! (.-top s) "12px"))
+    (if left? (set! (.-left s) "12px") (set! (.-right s) "12px"))))
+
 (defn- ensure-root! []
   (or @root-el
       (let [el (mk "div" "dialkit-root")]
         (attr! el "data-theme" "system")
-        (set! (.. el -style -top) "12px")
-        (set! (.. el -style -right) "12px")
+        (apply-root-position! el "top-right")
         (.appendChild js/document.body el)
         (reset! root-el el)
         (js/window.addEventListener "pointermove"
@@ -868,6 +878,7 @@
                     (let [dx (- (.-clientX e) (aget drag-state "sx"))
                           dy (- (.-clientY e) (aget drag-state "sy"))]
                       (set! (.. el -style -right) "auto")
+                      (set! (.. el -style -bottom) "auto")
                       (set! (.. el -style -left) (str (+ (aget drag-state "x") dx) "px"))
                       (set! (.. el -style -top) (str (+ (aget drag-state "y") dy) "px"))))))
         (js/window.addEventListener "pointerup" (fn [_] (aset drag-state "on" false)))
@@ -947,6 +958,8 @@
                                     :else nil))
                    :presets #js []
                    :activePreset nil
+                   :position (or (aget opts "position") "top-right")
+                   :icon (or (aget opts "icon") "⚙")
                    :open (not (aget opts "defaultCollapsed"))}]
     (init-values! store controls)
     (aset panel "baseValues" (clj->js @store))
@@ -955,7 +968,9 @@
 
 (defn- mount-panel! [panel opts]
   (let [root   (ensure-root!)
-        card   (mk "div" "dial-panel")
+        pos    (:position panel)
+        side   (if (or (= pos "top-left") (= pos "bottom-left")) "pos-left" "pos-right")
+        card   (mk "div" (str "dial-panel " side))
         head   (mk "div" "dial-panel-head")
         title  (mk "div" "dial-panel-title")
         tools  (mk "div" "dial-panel-tools")
@@ -964,13 +979,18 @@
         copyb  (mk "button" "dial-tool")
         resetb (mk "button" "dial-tool")
         collb  (mk "button" "dial-tool")
+        iconb  (mk "button" "dial-panel-icon")
         body   (mk "div" "dial-panel-body")]
+    (apply-root-position! root pos)
     (txt! title (:name panel))
     (aset panel "bodyEl" body)
     (aset panel "versionSel" vsel)
     (aset panel "cardEl" card)
+    (attr! iconb "type" "button")
+    (attr! iconb "title" (str "Expand " (:name panel)))
+    (txt! iconb (:icon panel))
     (doseq [spec [#js [addb "+" "Save version"] #js [copyb "⧉" "Copy values"]
-                  #js [resetb "↺" "Reset"] #js [collb "▾" "Collapse"]]]
+                  #js [resetb "↺" "Reset"] #js [collb "–" "Minimize"]]]
       (let [b (aget spec 0)]
         (attr! b "type" "button") (attr! b "title" (aget spec 2)) (txt! b (aget spec 1))))
     (on! vsel "change" (fn [_] (select-version! panel (let [v (.-value vsel)] (when (seq v) v)))))
@@ -978,19 +998,22 @@
     (on! copyb "click" (fn [_] (copy-config! panel)))
     (on! resetb "click" (fn [_] (select-version! panel nil)))
     (on! collb "click" (fn [_]
-                         (.toggle (.-classList card) "is-collapsed")
-                         (txt! collb (if (.contains (.-classList card) "is-collapsed") "▸" "▾"))))
+                         (.add (.-classList card) "is-iconified")
+                         (aset panel "open" false)))
+    (on! iconb "click" (fn [_]
+                         (.remove (.-classList card) "is-iconified")
+                         (aset panel "open" true)))
     (on! head "pointerdown" (fn [e]
                               (when (or (= (.-target e) head) (= (.-target e) title))
                                 (start-drag! e))))
     (add! tools vsel addb copyb resetb collb)
     (add! head title tools)
-    (add! card head body)
+    (add! card head body iconb)
     (add! root card)
     (build-body! panel)
     (render-versions! panel)
     (when (aget opts "defaultCollapsed")
-      (.add (.-classList card) "is-collapsed") (txt! collb "▸"))
+      (.add (.-classList card) "is-iconified") (aset panel "open" false))
     card))
 
 ;; ── Controller / public API ─────────────────────────────────────────
@@ -1012,7 +1035,7 @@
        :setOpen (fn [o]
                   (aset panel "open" o)
                   (when-let [card (:cardEl panel)]
-                    (if o (.remove (.-classList card) "is-collapsed") (.add (.-classList card) "is-collapsed")))
+                    (if o (.remove (.-classList card) "is-iconified") (.add (.-classList card) "is-iconified")))
                   js/undefined)
        :getOpen (fn [] (:open panel))
        :subscribe (fn [cb immediate]

@@ -410,6 +410,8 @@
                       :reset #js {:type "action" :label "Reset box"}}
                  #js {:id "dial-demo"
                       :persist true
+                      :position "top-right"
+                      :icon "⚙"
                       :onChange dk-apply-box!
                       :onAction (fn [nm _v]
                                   (when (= nm "reset")
@@ -427,7 +429,7 @@
   (js/setTimeout init-dial-demo! 0)
   [:div
    (page-header "DialKit"
-     "Live value-tuning panels, ported from dialkit.dev. Drag the panel (top-right) by its title to move it; every edit updates the box below in real time and persists to localStorage.")
+     "Live value-tuning panels, ported from dialkit.dev. Drag the panel by its title to move it; every edit updates the box below in real time and persists to localStorage. Hit “–” to minimize the panel to a corner icon, click the icon to restore. Set :position to top-right | top-left | bottom-right | bottom-left.")
    (section "Box Playground"
      [:p {:style {"color" "var(--fg-2)" "font-size" "var(--font-sm)"}}
       "Tune the floating panel in the top-right corner — size, radius, rotation, opacity, colour, border and shadow all bind live to this box. Use “Save version” in the panel head to snapshot presets, ⧉ to copy the config, ↺ to reset."]

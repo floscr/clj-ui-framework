@@ -3434,6 +3434,43 @@
   var root_el = atom(null);
   var panels = atom({});
   var drag_state = { "on": false, "x": 0, "y": 0, "sx": 0, "sy": 0 };
+  var apply_root_position_BANG_ = function(el, pos) {
+    const s1 = el.style;
+    const bottom_QMARK_2 = (() => {
+      const or__23426__auto__3 = pos === "bottom-right";
+      if (or__23426__auto__3) {
+        return or__23426__auto__3;
+      } else {
+        return pos === "bottom-left";
+      }
+      ;
+    })();
+    const left_QMARK_4 = (() => {
+      const or__23426__auto__5 = pos === "top-left";
+      if (or__23426__auto__5) {
+        return or__23426__auto__5;
+      } else {
+        return pos === "bottom-left";
+      }
+      ;
+    })();
+    s1.top = "auto";
+    s1.bottom = "auto";
+    s1.left = "auto";
+    s1.right = "auto";
+    if (truth_(bottom_QMARK_2)) {
+      s1.bottom = "12px";
+    } else {
+      s1.top = "12px";
+    }
+    ;
+    if (truth_(left_QMARK_4)) {
+      return s1.left = "12px";
+    } else {
+      return s1.right = "12px";
+    }
+    ;
+  };
   var ensure_root_BANG_ = function() {
     const or__23426__auto__1 = deref(root_el);
     if (truth_(or__23426__auto__1)) {
@@ -3441,8 +3478,7 @@
     } else {
       const el2 = mk("div", "dialkit-root");
       attr_BANG_(el2, "data-theme", "system");
-      el2.style.top = "12px";
-      el2.style.right = "12px";
+      apply_root_position_BANG_(el2, "top-right");
       document.body.appendChild(el2);
       reset_BANG_(root_el, el2);
       window.addEventListener("pointermove", (function(e) {
@@ -3450,6 +3486,7 @@
           const dx3 = e.clientX - drag_state["sx"];
           const dy4 = e.clientY - drag_state["sy"];
           el2.style.right = "auto";
+          el2.style.bottom = "auto";
           el2.style.left = `${drag_state["x"] + dx3}px`;
           return el2.style.top = `${drag_state["y"] + dy4}px`;
         }
@@ -3573,7 +3610,23 @@
         }
       }
       ;
-    })(), "controls": controls3, "onAction": opts["onAction"], "presets": [], "id": id1, "subs": [], "onChange": opts["onChange"], "updaters": {} };
+    })(), "controls": controls3, "icon": (() => {
+      const or__23426__auto__7 = opts["icon"];
+      if (truth_(or__23426__auto__7)) {
+        return or__23426__auto__7;
+      } else {
+        return "\u2699";
+      }
+      ;
+    })(), "onAction": opts["onAction"], "presets": [], "id": id1, "position": (() => {
+      const or__23426__auto__8 = opts["position"];
+      if (truth_(or__23426__auto__8)) {
+        return or__23426__auto__8;
+      } else {
+        return "top-right";
+      }
+      ;
+    })(), "subs": [], "onChange": opts["onChange"], "updaters": {} };
     init_values_BANG_(store4, controls3);
     panel5["baseValues"] = clj__GT_js(deref(store4));
     persist_load_BANG_(panel5);
@@ -3581,57 +3634,76 @@
   };
   var mount_panel_BANG_ = function(panel, opts) {
     const root1 = ensure_root_BANG_();
-    const card2 = mk("div", "dial-panel");
-    const head3 = mk("div", "dial-panel-head");
-    const title4 = mk("div", "dial-panel-title");
-    const tools5 = mk("div", "dial-panel-tools");
-    const vsel6 = mk("select", "dial-version");
-    const addb7 = mk("button", "dial-tool");
-    const copyb8 = mk("button", "dial-tool");
-    const resetb9 = mk("button", "dial-tool");
-    const collb10 = mk("button", "dial-tool");
-    const body11 = mk("div", "dial-panel-body");
-    txt_BANG_(title4, get(panel, "name"));
-    panel["bodyEl"] = body11;
-    panel["versionSel"] = vsel6;
-    panel["cardEl"] = card2;
-    for (let G__12 of iterable([[addb7, "+", "Save version"], [copyb8, "\u29C9", "Copy values"], [resetb9, "\u21BA", "Reset"], [collb10, "\u25BE", "Collapse"]])) {
-      const spec13 = G__12;
-      const b14 = spec13[0];
-      attr_BANG_(b14, "type", "button");
-      attr_BANG_(b14, "title", spec13[2]);
-      txt_BANG_(b14, spec13[1]);
+    const pos2 = get(panel, "position");
+    const side3 = truth_((() => {
+      const or__23426__auto__4 = pos2 === "top-left";
+      if (or__23426__auto__4) {
+        return or__23426__auto__4;
+      } else {
+        return pos2 === "bottom-left";
+      }
+      ;
+    })()) ? "pos-left" : "pos-right";
+    const card5 = mk("div", `${"dial-panel "}${side3 ?? ""}`);
+    const head6 = mk("div", "dial-panel-head");
+    const title7 = mk("div", "dial-panel-title");
+    const tools8 = mk("div", "dial-panel-tools");
+    const vsel9 = mk("select", "dial-version");
+    const addb10 = mk("button", "dial-tool");
+    const copyb11 = mk("button", "dial-tool");
+    const resetb12 = mk("button", "dial-tool");
+    const collb13 = mk("button", "dial-tool");
+    const iconb14 = mk("button", "dial-panel-icon");
+    const body15 = mk("div", "dial-panel-body");
+    apply_root_position_BANG_(root1, pos2);
+    txt_BANG_(title7, get(panel, "name"));
+    panel["bodyEl"] = body15;
+    panel["versionSel"] = vsel9;
+    panel["cardEl"] = card5;
+    attr_BANG_(iconb14, "type", "button");
+    attr_BANG_(iconb14, "title", `${"Expand "}${get(panel, "name") ?? ""}`);
+    txt_BANG_(iconb14, get(panel, "icon"));
+    for (let G__16 of iterable([[addb10, "+", "Save version"], [copyb11, "\u29C9", "Copy values"], [resetb12, "\u21BA", "Reset"], [collb13, "\u2013", "Minimize"]])) {
+      const spec17 = G__16;
+      const b18 = spec17[0];
+      attr_BANG_(b18, "type", "button");
+      attr_BANG_(b18, "title", spec17[2]);
+      txt_BANG_(b18, spec17[1]);
     }
     ;
-    on_BANG_(vsel6, "change", (function(_) {
+    on_BANG_(vsel9, "change", (function(_) {
       return select_version_BANG_(panel, (() => {
-        const v15 = vsel6.value;
-        if (truth_(seq(v15))) {
-          return v15;
+        const v19 = vsel9.value;
+        if (truth_(seq(v19))) {
+          return v19;
         }
         ;
       })());
     }));
-    on_BANG_(addb7, "click", (function(_) {
+    on_BANG_(addb10, "click", (function(_) {
       return save_version_BANG_(panel);
     }));
-    on_BANG_(copyb8, "click", (function(_) {
+    on_BANG_(copyb11, "click", (function(_) {
       return copy_config_BANG_(panel);
     }));
-    on_BANG_(resetb9, "click", (function(_) {
+    on_BANG_(resetb12, "click", (function(_) {
       return select_version_BANG_(panel, null);
     }));
-    on_BANG_(collb10, "click", (function(_) {
-      card2.classList.toggle("is-collapsed");
-      return txt_BANG_(collb10, truth_(card2.classList.contains("is-collapsed")) ? "\u25B8" : "\u25BE");
+    on_BANG_(collb13, "click", (function(_) {
+      card5.classList.add("is-iconified");
+      return panel["open"] = false;
     }));
-    on_BANG_(head3, "pointerdown", (function(e) {
+    on_BANG_(iconb14, "click", (function(_) {
+      card5.classList.remove("is-iconified");
+      return panel["open"] = true;
+    }));
+    on_BANG_(head6, "pointerdown", (function(e) {
       if (truth_((() => {
-        const or__23426__auto__16 = _EQ_(e.target, head3);
-        if (or__23426__auto__16) {
-          return or__23426__auto__16;
+        const or__23426__auto__20 = _EQ_(e.target, head6);
+        if (or__23426__auto__20) {
+          return or__23426__auto__20;
         } else {
-          return _EQ_(e.target, title4);
+          return _EQ_(e.target, title7);
         }
         ;
       })())) {
@@ -3639,18 +3711,18 @@
       }
       ;
     }));
-    add_BANG_(tools5, vsel6, addb7, copyb8, resetb9, collb10);
-    add_BANG_(head3, title4, tools5);
-    add_BANG_(card2, head3, body11);
-    add_BANG_(root1, card2);
+    add_BANG_(tools8, vsel9, addb10, copyb11, resetb12, collb13);
+    add_BANG_(head6, title7, tools8);
+    add_BANG_(card5, head6, body15, iconb14);
+    add_BANG_(root1, card5);
     build_body_BANG_(panel);
     render_versions_BANG_(panel);
     if (truth_(opts["defaultCollapsed"])) {
-      card2.classList.add("is-collapsed");
-      txt_BANG_(collb10, "\u25B8");
+      card5.classList.add("is-iconified");
+      panel["open"] = false;
     }
     ;
-    return card2;
+    return card5;
   };
   var setvals_walk_BANG_ = function(panel, prefix, o) {
     for (let G__1 of iterable(Object.keys(o))) {
@@ -3672,9 +3744,9 @@
       if (truth_(temp__23062__auto__1)) {
         const card2 = temp__23062__auto__1;
         if (truth_(o)) {
-          card2.classList.remove("is-collapsed");
+          card2.classList.remove("is-iconified");
         } else {
-          card2.classList.add("is-collapsed");
+          card2.classList.add("is-iconified");
         }
       }
       ;

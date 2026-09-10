@@ -91,7 +91,40 @@
   overflow-y: auto;
 }
 
-.dial-panel.is-collapsed .dial-panel-body { display: none; }
+/* ── Minimized-to-icon state ───────────────────────────────────────── */
+
+.dial-panel-icon {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--size-11);
+  height: var(--size-11);
+  font-size: var(--font-md);
+  line-height: 1;
+  color: var(--fg-0);
+  background: var(--bg-1);
+  border: var(--border-1);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-3);
+  cursor: pointer;
+}
+
+.dial-panel-icon:hover { background: var(--bg-2); }
+
+.dial-panel.is-iconified {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  overflow: visible;
+  align-items: flex-end;
+}
+
+.dial-panel.pos-left.is-iconified { align-items: flex-start; }
+
+.dial-panel.is-iconified .dial-panel-head,
+.dial-panel.is-iconified .dial-panel-body { display: none; }
+
+.dial-panel.is-iconified .dial-panel-icon { display: inline-flex; }
 
 /* ── Row + label ───────────────────────────────────────────────────── */
 
