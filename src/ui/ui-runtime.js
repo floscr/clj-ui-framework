@@ -2573,20 +2573,30 @@
     const path3 = get(map__12, "path");
     const label4 = get(map__12, "label");
     const r5 = row(label4);
-    const btn6 = mk("button", "dial-toggle");
-    const paint7 = (function(v) {
-      attr_BANG_(btn6, "aria-pressed", `${boolean$(v) ?? ""}`);
-      return txt_BANG_(btn6, truth_(v) ? "On" : "Off");
+    const wrap6 = mk("label", "switch dial-switch");
+    const input7 = mk("input", "switch-input");
+    const track8 = mk("span", "switch-track");
+    const thumb9 = mk("span", "switch-thumb");
+    const paint10 = (function(v) {
+      input7.checked = boolean$(v);
+      if (truth_(v)) {
+        return track8.classList.add("switch-track--checked");
+      } else {
+        return track8.classList.remove("switch-track--checked");
+      }
+      ;
     });
-    attr_BANG_(btn6, "type", "button");
-    on_BANG_(btn6, "click", (function(_) {
-      const v8 = not(get_in(deref(get(panel, "store")), path3));
-      commit_BANG_(panel, path3, v8);
-      return paint7(v8);
+    attr_BANG_(input7, "type", "checkbox");
+    add_BANG_(track8, thumb9);
+    add_BANG_(wrap6, input7, track8);
+    on_BANG_(input7, "change", (function(_) {
+      const v11 = input7.checked;
+      commit_BANG_(panel, path3, v11);
+      return paint10(v11);
     }));
-    add_BANG_(r5, btn6);
-    paint7(get_in(deref(get(panel, "store")), path3));
-    reg_updater_BANG_(panel, path3, paint7);
+    add_BANG_(r5, wrap6);
+    paint10(get_in(deref(get(panel, "store")), path3));
+    reg_updater_BANG_(panel, path3, paint10);
     return r5;
   };
   var render_text = function(panel, c) {
@@ -2635,42 +2645,71 @@
     const label4 = get(map__12, "label");
     const options5 = get(map__12, "options");
     const r6 = row(label4);
-    const sel7 = mk("select", "dial-select");
-    for (let G__8 of iterable(options5)) {
-      const o9 = G__8;
-      const op10 = mk("option", null);
-      op10.value = o9["value"];
-      txt_BANG_(op10, o9["label"]);
-      add_BANG_(sel7, op10);
-    }
-    ;
-    if (truth_(empty_QMARK_(options5))) {
-      sel7.disabled = true;
-    }
-    ;
-    on_BANG_(sel7, "change", (function(_) {
-      return commit_BANG_(panel, path3, sel7.value);
-    }));
-    add_BANG_(r6, sel7);
-    sel7.value = (() => {
-      const or__23426__auto__11 = get_in(deref(get(panel, "store")), path3);
-      if (truth_(or__23426__auto__11)) {
-        return or__23426__auto__11;
-      } else {
-        return "";
-      }
-      ;
-    })();
-    reg_updater_BANG_(panel, path3, (function(v) {
-      return sel7.value = (() => {
-        const or__23426__auto__12 = v;
-        if (truth_(or__23426__auto__12)) {
-          return or__23426__auto__12;
+    const wrap7 = mk("div", "select dial-select");
+    const trigger8 = mk("button", "select-trigger");
+    const valspan9 = mk("span", "select-value");
+    const opt_for10 = (function(v) {
+      return options5.find((function(o) {
+        return _EQ_(o["value"], v);
+      }));
+    });
+    const set_lbl11 = (function(v) {
+      const o12 = opt_for10(v);
+      return txt_BANG_(valspan9, truth_(o12) ? o12["label"] : (() => {
+        const or__23426__auto__13 = v;
+        if (truth_(or__23426__auto__13)) {
+          return or__23426__auto__13;
         } else {
           return "";
         }
         ;
-      })();
+      })());
+    });
+    attr_BANG_(trigger8, "type", "button");
+    attr_BANG_(trigger8, "role", "combobox");
+    attr_BANG_(trigger8, "aria-haspopup", "listbox");
+    attr_BANG_(trigger8, "aria-expanded", "false");
+    if (truth_(empty_QMARK_(options5))) {
+      trigger8.disabled = true;
+    }
+    ;
+    add_BANG_(trigger8, valspan9);
+    add_BANG_(wrap7, trigger8);
+    add_BANG_(r6, wrap7);
+    const cur14 = get_in(deref(get(panel, "store")), path3);
+    attr_BANG_(trigger8, "data-select-value", (() => {
+      const or__23426__auto__15 = cur14;
+      if (truth_(or__23426__auto__15)) {
+        return or__23426__auto__15;
+      } else {
+        return "";
+      }
+      ;
+    })());
+    set_lbl11(cur14);
+    on_BANG_(trigger8, "click", (function(_) {
+      const temp__23062__auto__16 = window.__uiSelect;
+      if (truth_(temp__23062__auto__16)) {
+        const f17 = temp__23062__auto__16;
+        return f17(trigger8, options5, (function(v) {
+          attr_BANG_(trigger8, "data-select-value", v);
+          set_lbl11(v);
+          return commit_BANG_(panel, path3, v);
+        }));
+      }
+      ;
+    }));
+    reg_updater_BANG_(panel, path3, (function(v) {
+      attr_BANG_(trigger8, "data-select-value", (() => {
+        const or__23426__auto__18 = v;
+        if (truth_(or__23426__auto__18)) {
+          return or__23426__auto__18;
+        } else {
+          return "";
+        }
+        ;
+      })());
+      return set_lbl11(v);
     }));
     return r6;
   };

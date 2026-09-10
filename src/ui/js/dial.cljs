@@ -401,15 +401,21 @@
 (defn- render-toggle [panel c]
   (let [{:keys [path label]} c
         r     (row label)
-        btn   (mk "button" "dial-toggle")
+        wrap  (mk "label" "switch dial-switch")
+        input (mk "input" "switch-input")
+        track (mk "span" "switch-track")
+        thumb (mk "span" "switch-thumb")
         paint (fn [v]
-                (attr! btn "aria-pressed" (str (boolean v)))
-                (txt! btn (if v "On" "Off")))]
-    (attr! btn "type" "button")
-    (on! btn "click"
-         (fn [_] (let [v (not (get-in @(:store panel) path))]
+                (set! (.-checked input) (boolean v))
+                (if v (.add (.-classList track) "switch-track--checked")
+                    (.remove (.-classList track) "switch-track--checked")))]
+    (attr! input "type" "checkbox")
+    (add! track thumb)
+    (add! wrap input track)
+    (on! input "change"
+         (fn [_] (let [v (.-checked input)]
                    (commit! panel path v) (paint v))))
-    (add! r btn)
+    (add! r wrap)
     (paint (get-in @(:store panel) path))
     (reg-updater! panel path paint)
     r))
@@ -436,18 +442,33 @@
 
 (defn- render-select [panel c]
   (let [{:keys [path label options]} c
-        r   (row label)
-        sel (mk "select" "dial-select")]
-    (doseq [o options]
-      (let [op (mk "option" nil)]
-        (set! (.-value op) (aget o "value"))
-        (txt! op (aget o "label"))
-        (add! sel op)))
-    (when (empty? options) (set! (.-disabled sel) true))
-    (on! sel "change" (fn [_] (commit! panel path (.-value sel))))
-    (add! r sel)
-    (set! (.-value sel) (or (get-in @(:store panel) path) ""))
-    (reg-updater! panel path (fn [v] (set! (.-value sel) (or v ""))))
+        r       (row label)
+        wrap    (mk "div" "select dial-select")
+        trigger (mk "button" "select-trigger")
+        valspan (mk "span" "select-value")
+        opt-for (fn [v] (.find options (fn [o] (= (aget o "value") v))))
+        set-lbl (fn [v] (let [o (opt-for v)]
+                          (txt! valspan (if o (aget o "label") (or v "")))))]
+    (attr! trigger "type" "button")
+    (attr! trigger "role" "combobox")
+    (attr! trigger "aria-haspopup" "listbox")
+    (attr! trigger "aria-expanded" "false")
+    (when (empty? options) (set! (.-disabled trigger) true))
+    (add! trigger valspan)
+    (add! wrap trigger)
+    (add! r wrap)
+    (let [cur (get-in @(:store panel) path)]
+      (attr! trigger "data-select-value" (or cur "")) (set-lbl cur))
+    (on! trigger "click"
+         (fn [_]
+           (when-let [f js/window.__uiSelect]
+             (f trigger options
+                (fn [v]
+                  (attr! trigger "data-select-value" v)
+                  (set-lbl v)
+                  (commit! panel path v))))))
+    (reg-updater! panel path
+                  (fn [v] (attr! trigger "data-select-value" (or v "")) (set-lbl v)))
     r))
 
 ;; Color -------------------------------------------------------------
