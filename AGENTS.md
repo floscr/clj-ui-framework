@@ -656,6 +656,31 @@ mobile bug in consumer apps (e.g. a photo tile whose checkbox appears on
 Style-only hovers (background, color, filter, underline) do **not** trigger
 this and need no guard.
 
+### The build gates `:hover` for you — automatically
+
+You do **not** need to hand-wrap `:hover` in `@media (hover: hover)` anymore.
+`ui.css.gen/wrap-hover-media` runs at build time and rewrites **every** rule
+whose selector contains `:hover` into a `@media (hover: hover)` block — for the
+generated framework theme (`generate-css`) *and* for every consumer's
+`style.css` (server-lib's `frontend.clj` routes inlined/emitted CSS through it
+before esbuild minify). It's idempotent (skips rules already inside a
+`@media (hover: …)`) and splits grouped selectors so non-hover parts
+(`:focus-visible`, state classes) stay ungated. **Author plain `:hover`;** the
+build makes it touch-safe.
+
+What the build still can't do for you:
+
+- **Design the touch/default state.** The build moves your `:hover` rule into
+  the media query verbatim — it does not invent an always-visible fallback.
+  For a *reveal*, the ungated default must already be the visible state (hide
+  only inside `:hover`, which the build then gates away on touch).
+- **Keyboard access.** Pair `:hover` with `:focus-within` / `:focus-visible`
+  yourself — the build gates `:hover` behind `hover: hover`, and keyboard
+  users on touch devices would otherwise lose the reveal.
+
+The manual pattern below still documents the *end result* the build produces,
+and is what you'd write if authoring CSS outside the build pipeline.
+
 ### Rule: gate every hover-reveal behind `@media (hover: hover)`
 
 ```css
@@ -719,9 +744,9 @@ in their HTML — the runtime upgrades it on touch devices. Don't hand-write
 
 ### Checklist for new components
 
-1. **No bare hover-reveals** — grep your CSS for `:hover` rules that change
-   `opacity`/`visibility`/`display`/`transform`-into-view on *other* elements
-   or pseudo-elements; wrap them in `@media (hover: hover)`.
+1. **No bare hover-reveals** — the build auto-gates `:hover` behind
+   `@media (hover: hover)`, so don't hand-wrap. Do make sure the *default*
+   (ungated) state is always-visible for reveals, since that's what touch gets.
 2. **Decide the touch state** — always-visible (default outside the media
    query) or an explicit `.clj-ui-touch` override (see next section).
 3. **Tap targets** — use `.hit-area` / `--hit-area-*` so controls hit ≥44px.
