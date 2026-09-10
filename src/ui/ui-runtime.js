@@ -738,6 +738,9 @@
     return typeof s === "string";
   }
   var _metaSym = Symbol("meta");
+  function mod(x, y) {
+    return (x % y + y) % y;
+  }
   var SortedSet = class _SortedSet {
     constructor(xs) {
       const isSorted = xs instanceof _SortedSet;
@@ -1978,6 +1981,103 @@
   var color_str_QMARK_ = function(s) {
     return tof(s) === "string" && color_re.test(s);
   };
+  var hsv__GT_rgb = function(h, s, v) {
+    const c1 = v * s;
+    const h_SINGLEQUOTE_2 = mod(h, 360) / 60;
+    const x3 = c1 * (1 - Math.abs(mod(h_SINGLEQUOTE_2, 2) - 1));
+    const m4 = v - c1;
+    const rgb5 = h_SINGLEQUOTE_2 < 1 ? [c1, x3, 0] : h_SINGLEQUOTE_2 < 2 ? [x3, c1, 0] : h_SINGLEQUOTE_2 < 3 ? [0, c1, x3] : h_SINGLEQUOTE_2 < 4 ? [0, x3, c1] : h_SINGLEQUOTE_2 < 5 ? [x3, 0, c1] : "else" ? [c1, 0, x3] : null;
+    return [Math.round(255 * (rgb5[0] + m4)), Math.round(255 * (rgb5[1] + m4)), Math.round(255 * (rgb5[2] + m4))];
+  };
+  var rgb__GT_hsv = function(r, g, b) {
+    const r1 = r / 255;
+    const g2 = g / 255;
+    const b3 = b / 255;
+    const mx4 = Math.max(r1, g2, b3);
+    const mn5 = Math.min(r1, g2, b3);
+    const d6 = mx4 - mn5;
+    const h7 = d6 === 0 ? 0 : _EQ_(mx4, r1) ? 60 * mod((g2 - b3) / d6, 6) : _EQ_(mx4, g2) ? 60 * ((b3 - r1) / d6 + 2) : "else" ? 60 * ((r1 - g2) / d6 + 4) : null;
+    const h8 = h7 < 0 ? h7 + 360 : h7;
+    const s9 = mx4 === 0 ? 0 : d6 / mx4;
+    return [h8, s9, mx4];
+  };
+  var rgb__GT_hsl = function(r, g, b) {
+    const r1 = r / 255;
+    const g2 = g / 255;
+    const b3 = b / 255;
+    const mx4 = Math.max(r1, g2, b3);
+    const mn5 = Math.min(r1, g2, b3);
+    const d6 = mx4 - mn5;
+    const l7 = (mx4 + mn5) / 2;
+    const h8 = d6 === 0 ? 0 : _EQ_(mx4, r1) ? 60 * mod((g2 - b3) / d6, 6) : _EQ_(mx4, g2) ? 60 * ((b3 - r1) / d6 + 2) : "else" ? 60 * ((r1 - g2) / d6 + 4) : null;
+    const h9 = h8 < 0 ? h8 + 360 : h8;
+    const s10 = d6 === 0 ? 0 : d6 / (1 - Math.abs(2 * l7 - 1));
+    return [h9, s10, l7];
+  };
+  var color_probe = null;
+  var parse_rgba = function(s) {
+    const el1 = (() => {
+      const or__23426__auto__2 = color_probe;
+      if (truth_(or__23426__auto__2)) {
+        return or__23426__auto__2;
+      } else {
+        const e3 = mk("div", null);
+        e3.style.display = "none";
+        document.body.appendChild(e3);
+        color_probe = e3;
+        return e3;
+      }
+      ;
+    })();
+    el1.style.color = "";
+    el1.style.color = `${s ?? ""}`;
+    if (!_EQ_("", el1.style.color)) {
+      const cs4 = getComputedStyle(el1).color;
+      const m5 = cs4.match(new RegExp("rgba?\\(([^)]+)\\)"));
+      if (truth_(m5)) {
+        const parts6 = m5[1].split(new RegExp("[ ,/]+"));
+        const a7 = parts6.length > 3 ? parseFloat(parts6[3]) : 1;
+        return [parseFloat(parts6[0]), parseFloat(parts6[1]), parseFloat(parts6[2]), truth_(isFinite(a7)) ? a7 : 1];
+      }
+      ;
+    }
+    ;
+  };
+  var to_hex2 = function(n) {
+    return clamp(Math.round(n), 0, 255).toString(16).padStart(2, "0");
+  };
+  var compose_color = function(h, s, v, a, fmt) {
+    const rgb1 = hsv__GT_rgb(h, s, v);
+    const r2 = rgb1[0];
+    const g3 = rgb1[1];
+    const b4 = rgb1[2];
+    const G__125 = fmt;
+    switch (G__125) {
+      case "rgb":
+        if (a < 0.999) {
+          return `${"rgba("}${r2 ?? ""}${", "}${g3 ?? ""}${", "}${b4 ?? ""}${", "}${fmt_num(a) ?? ""}${")"}`;
+        } else {
+          return `${"rgb("}${r2 ?? ""}${", "}${g3 ?? ""}${", "}${b4 ?? ""}${")"}`;
+        }
+        ;
+        break;
+      case "hsl":
+        const hsl7 = rgb__GT_hsl(r2, g3, b4);
+        const hh8 = Math.round(hsl7[0]);
+        const ss9 = Math.round(hsl7[1] * 100);
+        const ll10 = Math.round(hsl7[2] * 100);
+        if (a < 0.999) {
+          return `${"hsla("}${hh8 ?? ""}${", "}${ss9 ?? ""}${"%, "}${ll10 ?? ""}${"%, "}${fmt_num(a) ?? ""}${")"}`;
+        } else {
+          return `${"hsl("}${hh8 ?? ""}${", "}${ss9 ?? ""}${"%, "}${ll10 ?? ""}${"%)"}`;
+        }
+        ;
+        break;
+      default:
+        return `${"#"}${to_hex2(r2) ?? ""}${to_hex2(g3) ?? ""}${to_hex2(b4) ?? ""}${(a < 0.999 ? to_hex2(a * 255) : "") ?? ""}`;
+    }
+    ;
+  };
   var humanize = function(k) {
     const s1 = `${k ?? ""}`.replace(new RegExp("([a-z0-9])([A-Z])", "g"), "$1 $2").replace(new RegExp("[_\\-]", "g"), " ").trim();
     if (s1.length === 0) {
@@ -2608,85 +2708,193 @@
     const map__12 = c;
     const path3 = get(map__12, "path");
     const label4 = get(map__12, "label");
-    const r5 = row(label4);
+    const r5 = mk("div", "dial-row dial-row--color");
     const wrap6 = mk("div", "dial-color");
-    const sw7 = mk("input", "dial-color-swatch");
-    const op8 = mk("input", "dial-color-opacity");
-    const txtf9 = mk("input", "dial-color-text");
-    const cur10 = (function() {
+    const formats7 = mk("div", "dial-color-formats");
+    const plane8 = mk("div", "dial-color-plane");
+    const marker9 = mk("span", "dial-color-marker");
+    const tracks10 = mk("div", "dial-color-tracks");
+    const huerow11 = mk("label", "dial-color-track-row");
+    const hue12 = mk("input", "dial-color-track dial-color-hue");
+    const oprow13 = mk("label", "dial-color-track-row");
+    const op14 = mk("input", "dial-color-track dial-color-opacity");
+    const txtf15 = mk("input", "dial-color-input");
+    const st16 = { "h": 265, "s": 0.6, "v": 0.9, "a": 1, "fmt": "hex" };
+    const fmt_btns17 = {};
+    const cur18 = (function() {
       return get_in(deref(get(panel, "store")), path3);
     });
-    const hex611 = (function(s) {
-      const m12 = `${s ?? ""}`.match(new RegExp("^#([0-9a-fA-F]{6})"));
-      if (truth_(m12)) {
-        return `${"#"}${m12[1] ?? ""}`;
+    const emit19 = (function() {
+      return compose_color(st16["h"], st16["s"], st16["v"], st16["a"], st16["fmt"]);
+    });
+    const detect_fmt20 = (function(s) {
+      const s21 = `${s ?? ""}`.trim().toLowerCase();
+      if (truth_(s21.startsWith("hsl"))) {
+        return "hsl";
       } else {
-        return "#000000";
+        if (truth_(s21.startsWith("rgb"))) {
+          return "rgb";
+        } else {
+          if (truth_(s21.startsWith("#"))) {
+            return "hex";
+          } else {
+            if ("else") {
+              return st16["fmt"];
+            } else {
+              return null;
+            }
+          }
+        }
       }
       ;
     });
-    const opacity_of13 = (function(s) {
-      const m14 = `${s ?? ""}`.match(new RegExp("^#[0-9a-fA-F]{6}([0-9a-fA-F]{2})$"));
-      if (truth_(m14)) {
-        return parseInt(m14[1], 16) / 255;
-      } else {
-        return 1;
+    const adopt22 = (function(s) {
+      const rgba23 = parse_rgba(s);
+      if (truth_(rgba23)) {
+        const hsv24 = rgb__GT_hsv(rgba23[0], rgba23[1], rgba23[2]);
+        if (hsv24[1] > 1e-4) {
+          st16["h"] = hsv24[0];
+        }
+        ;
+        st16["s"] = hsv24[1];
+        st16["v"] = hsv24[2];
+        return st16["a"] = rgba23[3];
       }
       ;
     });
-    const compose15 = (function() {
-      const base16 = hex611(sw7.value);
-      const a17 = parseFloat(op8.value);
-      if (a17 >= 0.999) {
-        return base16;
-      } else {
-        return `${base16 ?? ""}${Math.round(a17 * 255).toString(16).padStart(2, "0") ?? ""}`;
+    const paint_ui25 = (function() {
+      const h26 = st16["h"];
+      const s27 = st16["s"];
+      const v28 = st16["v"];
+      const a29 = st16["a"];
+      const rgb30 = hsv__GT_rgb(h26, s27, v28);
+      const hue_col31 = `${"hsl("}${Math.round(h26) ?? ""}${", 100%, 50%)"}`;
+      const solid32 = `${"rgb("}${rgb30[0] ?? ""}${", "}${rgb30[1] ?? ""}${", "}${rgb30[2] ?? ""}${")"}`;
+      plane8.style.background = `${"linear-gradient(to top, #000, rgba(0,0,0,0)),"}${"linear-gradient(to right, #fff, "}${hue_col31}${")"}`;
+      marker9.style.left = `${100 * s27}${"%"}`;
+      marker9.style.top = `${100 * (1 - v28)}${"%"}`;
+      marker9.style.background = solid32;
+      hue12.value = `${h26 ?? ""}`;
+      op14.value = `${a29 ?? ""}`;
+      op14.style.setProperty("--dial-color-solid", solid32);
+      for (let G__33 of iterable(["hex", "rgb", "hsl"])) {
+        const f34 = G__33;
+        const b35 = fmt_btns17[f34];
+        if (truth_(b35)) {
+          attr_BANG_(b35, "data-active", _EQ_(f34, st16["fmt"]) ? "true" : "false");
+        }
       }
-      ;
+      return null;
     });
-    const paint18 = (function(v) {
-      const v19 = (() => {
-        const or__23426__auto__20 = v;
-        if (truth_(or__23426__auto__20)) {
-          return or__23426__auto__20;
+    const set_fmt36 = (function(f) {
+      st16["fmt"] = f;
+      const v37 = emit19();
+      commit_BANG_(panel, path3, v37);
+      txtf15.value = v37;
+      return paint_ui25();
+    });
+    const push38 = (function() {
+      const v39 = emit19();
+      commit_BANG_(panel, path3, v39);
+      txtf15.value = v39;
+      return paint_ui25();
+    });
+    const plane_at40 = (function(e) {
+      const rect41 = plane8.getBoundingClientRect();
+      const sx42 = clamp((e.clientX - rect41.left) / rect41.width, 0, 1);
+      const sy43 = clamp((e.clientY - rect41.top) / rect41.height, 0, 1);
+      st16["s"] = sx42;
+      st16["v"] = 1 - sy43;
+      return push38();
+    });
+    const paint44 = (function(v) {
+      const v45 = (() => {
+        const or__23426__auto__46 = v;
+        if (truth_(or__23426__auto__46)) {
+          return or__23426__auto__46;
         } else {
           return "#000000";
         }
         ;
       })();
-      txtf9.value = v19;
-      if (truth_(color_str_QMARK_(v19))) {
-        sw7.value = hex611(v19);
-        op8.value = `${opacity_of13(v19) ?? ""}`;
-        return sw7.style.backgroundColor = v19;
+      adopt22(v45);
+      st16["fmt"] = detect_fmt20(v45);
+      txtf15.value = v45;
+      return paint_ui25();
+    });
+    for (let G__47 of iterable([["hex", "Hex"], ["rgb", "RGB"], ["hsl", "HSL"]])) {
+      const pair48 = G__47;
+      const f49 = pair48[0];
+      const b50 = mk("button", "dial-color-format");
+      b50.type = "button";
+      txt_BANG_(b50, pair48[1]);
+      fmt_btns17[f49] = b50;
+      on_BANG_(b50, "click", (function(_) {
+        return set_fmt36(f49);
+      }));
+      add_BANG_(formats7, b50);
+    }
+    ;
+    attr_BANG_(plane8, "tabindex", "0");
+    add_BANG_(plane8, marker9);
+    const dragging51 = { "on": false };
+    on_BANG_(plane8, "pointerdown", (function(e) {
+      e.preventDefault();
+      plane8.setPointerCapture(e.pointerId);
+      dragging51["on"] = true;
+      return plane_at40(e);
+    }));
+    on_BANG_(plane8, "pointermove", (function(e) {
+      if (truth_(dragging51["on"])) {
+        return plane_at40(e);
       }
       ;
-    });
-    sw7.type = "color";
-    op8.type = "range";
-    op8.min = "0";
-    op8.max = "1";
-    op8.step = "0.01";
-    txtf9.type = "text";
-    on_BANG_(sw7, "input", (function(_) {
-      const v21 = compose15();
-      commit_BANG_(panel, path3, v21);
-      return paint18(v21);
     }));
-    on_BANG_(op8, "input", (function(_) {
-      const v22 = compose15();
-      commit_BANG_(panel, path3, v22);
-      return paint18(v22);
+    on_BANG_(plane8, "pointerup", (function(_) {
+      return dragging51["on"] = false;
     }));
-    on_BANG_(txtf9, "change", (function(_) {
-      const v23 = txtf9.value;
-      commit_BANG_(panel, path3, v23);
-      return paint18(v23);
+    on_BANG_(plane8, "pointercancel", (function(_) {
+      return dragging51["on"] = false;
     }));
-    add_BANG_(wrap6, sw7, op8, txtf9);
+    hue12.type = "range";
+    hue12.min = "0";
+    hue12.max = "360";
+    hue12.step = "1";
+    op14.type = "range";
+    op14.min = "0";
+    op14.max = "1";
+    op14.step = "0.01";
+    add_BANG_(huerow11, txt_BANG_(mk("span", null), "Hue"), hue12);
+    add_BANG_(oprow13, txt_BANG_(mk("span", null), "Opacity"), op14);
+    on_BANG_(hue12, "input", (function(_) {
+      st16["h"] = parseFloat(hue12.value);
+      return push38();
+    }));
+    on_BANG_(op14, "input", (function(_) {
+      st16["a"] = parseFloat(op14.value);
+      return push38();
+    }));
+    txtf15.type = "text";
+    attr_BANG_(txtf15, "spellcheck", "false");
+    on_BANG_(txtf15, "change", (function(_) {
+      const v52 = txtf15.value;
+      if (truth_(color_str_QMARK_(v52))) {
+        adopt22(v52);
+        st16["fmt"] = detect_fmt20(v52);
+      }
+      ;
+      commit_BANG_(panel, path3, v52);
+      return paint_ui25();
+    }));
+    add_BANG_(tracks10, huerow11, oprow13);
+    add_BANG_(wrap6, formats7, plane8, tracks10, txtf15);
+    if (truth_(label4)) {
+      add_BANG_(r5, txt_BANG_(mk("label", "dial-label"), label4));
+    }
+    ;
     add_BANG_(r5, wrap6);
-    paint18(cur10());
-    reg_updater_BANG_(panel, path3, paint18);
+    paint44(cur18());
+    reg_updater_BANG_(panel, path3, paint44);
     return r5;
   };
   var render_image = function(panel, c) {
@@ -2887,9 +3095,9 @@
       ctx13.beginPath();
       const v17 = cur9();
       const mode18 = get_mode10();
-      const n1219 = 61;
+      const n1319 = 61;
       let i20 = 0;
-      for (; i20 < n1219; i20++) {
+      for (; i20 < n1319; i20++) {
         (() => {
           const t21 = i20 / 60;
           const y22 = mode18 === "easing" ? (() => {
@@ -3641,25 +3849,25 @@
     return e1;
   };
   var add_BANG_2 = (() => {
-    const f13 = (function(var_args) {
-      const args141 = [];
+    const f14 = (function(var_args) {
+      const args151 = [];
       const len__23321__auto__2 = arguments.length;
-      let i153 = 0;
+      let i163 = 0;
       while (true) {
-        if (i153 < len__23321__auto__2) {
-          args141.push(arguments[i153]);
-          let G__4 = i153 + 1;
-          i153 = G__4;
+        if (i163 < len__23321__auto__2) {
+          args151.push(arguments[i163]);
+          let G__4 = i163 + 1;
+          i163 = G__4;
           continue;
         }
         ;
         break;
       }
       ;
-      const argseq__23513__auto__5 = 1 < args141.length ? args141.slice(1) : null;
-      return f13.cljs$core$IFn$_invoke$arity$variadic(arguments[0], argseq__23513__auto__5);
+      const argseq__23513__auto__5 = 1 < args151.length ? args151.slice(1) : null;
+      return f14.cljs$core$IFn$_invoke$arity$variadic(arguments[0], argseq__23513__auto__5);
     });
-    f13.cljs$core$IFn$_invoke$arity$variadic = (function(parent, children) {
+    f14.cljs$core$IFn$_invoke$arity$variadic = (function(parent, children) {
       for (let G__6 of iterable(children)) {
         const c7 = G__6;
         if (truth_(c7)) {
@@ -3669,8 +3877,8 @@
       ;
       return parent;
     });
-    f13.cljs$lang$maxFixedArity = 1;
-    return f13;
+    f14.cljs$lang$maxFixedArity = 1;
+    return f14;
   })();
   var txt_BANG_2 = function(e, s) {
     e.textContent = `${s ?? ""}`;
@@ -4471,9 +4679,9 @@
     }));
     const pps12 = px_per_sec(tl);
     const n13 = Math.ceil(get(tl, "duration"));
-    const n1714 = n13 + 1;
+    const n1814 = n13 + 1;
     let i15 = 0;
-    for (; i15 < n1714; i15++) {
+    for (; i15 < n1814; i15++) {
       (() => {
         const tick16 = mk2("div", "dtl-tick");
         tick16.style.left = `${pps12 * i15}px`;
@@ -4834,24 +5042,24 @@
     return null;
   };
   var play = (() => {
-    const f18 = (function(...args19) {
-      const G__201 = args19.length;
-      switch (G__201) {
+    const f19 = (function(...args20) {
+      const G__211 = args20.length;
+      switch (G__211) {
         case 1:
-          return f18.cljs$core$IFn$_invoke$arity$1(args19[0]);
+          return f19.cljs$core$IFn$_invoke$arity$1(args20[0]);
           break;
         case 2:
-          return f18.cljs$core$IFn$_invoke$arity$2(args19[0], args19[1]);
+          return f19.cljs$core$IFn$_invoke$arity$2(args20[0], args20[1]);
           break;
         default:
-          throw new Error(`${"Invalid arity: "}${args19.length ?? ""}`);
+          throw new Error(`${"Invalid arity: "}${args20.length ?? ""}`);
       }
       ;
     });
-    f18.cljs$core$IFn$_invoke$arity$1 = (function(snap) {
+    f19.cljs$core$IFn$_invoke$arity$1 = (function(snap) {
       return play(snap, null);
     });
-    f18.cljs$core$IFn$_invoke$arity$2 = (function(snap, opts) {
+    f19.cljs$core$IFn$_invoke$arity$2 = (function(snap, opts) {
       if (truth_(reduced_motion_QMARK_())) {
       } else {
         const opts3 = (() => {
@@ -4889,34 +5097,34 @@
       ;
       return null;
     });
-    f18.cljs$lang$maxFixedArity = 2;
-    return f18;
+    f19.cljs$lang$maxFixedArity = 2;
+    return f19;
   })();
   var wrap = (() => {
-    const f21 = (function(...args22) {
-      const G__231 = args22.length;
-      switch (G__231) {
+    const f22 = (function(...args23) {
+      const G__241 = args23.length;
+      switch (G__241) {
         case 2:
-          return f21.cljs$core$IFn$_invoke$arity$2(args22[0], args22[1]);
+          return f22.cljs$core$IFn$_invoke$arity$2(args23[0], args23[1]);
           break;
         case 3:
-          return f21.cljs$core$IFn$_invoke$arity$3(args22[0], args22[1], args22[2]);
+          return f22.cljs$core$IFn$_invoke$arity$3(args23[0], args23[1], args23[2]);
           break;
         default:
-          throw new Error(`${"Invalid arity: "}${args22.length ?? ""}`);
+          throw new Error(`${"Invalid arity: "}${args23.length ?? ""}`);
       }
       ;
     });
-    f21.cljs$core$IFn$_invoke$arity$2 = (function(target, mutate) {
+    f22.cljs$core$IFn$_invoke$arity$2 = (function(target, mutate) {
       return wrap(target, mutate, null);
     });
-    f21.cljs$core$IFn$_invoke$arity$3 = (function(target, mutate, opts) {
+    f22.cljs$core$IFn$_invoke$arity$3 = (function(target, mutate, opts) {
       const snap3 = capture(target);
       mutate();
       return play(snap3, opts);
     });
-    f21.cljs$lang$maxFixedArity = 3;
-    return f21;
+    f22.cljs$lang$maxFixedArity = 3;
+    return f22;
   })();
   window.__uiFlip = { "capture": capture, "play": play, "wrap": wrap };
 
@@ -4961,11 +5169,11 @@
     clear_held_BANG_();
     if (e.pointerType === "touch") {
       const temp__23062__auto__1 = (() => {
-        const G__242 = e.target;
-        if (G__242 == null) {
+        const G__252 = e.target;
+        if (G__252 == null) {
           return null;
         } else {
-          return G__242.closest(selector);
+          return G__252.closest(selector);
         }
         ;
       })();
@@ -6309,25 +6517,25 @@
     ;
   };
   var open_select = (() => {
-    const f25 = (function(var_args) {
-      const args261 = [];
+    const f26 = (function(var_args) {
+      const args271 = [];
       const len__23321__auto__2 = arguments.length;
-      let i273 = 0;
+      let i283 = 0;
       while (true) {
-        if (i273 < len__23321__auto__2) {
-          args261.push(arguments[i273]);
-          let G__4 = i273 + 1;
-          i273 = G__4;
+        if (i283 < len__23321__auto__2) {
+          args271.push(arguments[i283]);
+          let G__4 = i283 + 1;
+          i283 = G__4;
           continue;
         }
         ;
         break;
       }
       ;
-      const argseq__23513__auto__5 = 1 < args261.length ? args261.slice(1) : null;
-      return f25.cljs$core$IFn$_invoke$arity$variadic(arguments[0], argseq__23513__auto__5);
+      const argseq__23513__auto__5 = 1 < args271.length ? args271.slice(1) : null;
+      return f26.cljs$core$IFn$_invoke$arity$variadic(arguments[0], argseq__23513__auto__5);
     });
-    f25.cljs$core$IFn$_invoke$arity$variadic = (function(trigger, args) {
+    f26.cljs$core$IFn$_invoke$arity$variadic = (function(trigger, args) {
       dismiss_BANG_2();
       const options6 = (() => {
         const passed7 = first(args);
@@ -6422,8 +6630,8 @@
       }
       ;
     });
-    f25.cljs$lang$maxFixedArity = 1;
-    return f25;
+    f26.cljs$lang$maxFixedArity = 1;
+    return f26;
   })();
   window["__uiSelect"] = open_select;
 
@@ -6456,8 +6664,8 @@
     return window.matchMedia("(prefers-color-scheme: dark)").matches;
   };
   var resolve_effective = function(mode) {
-    const G__291 = mode;
-    switch (G__291) {
+    const G__301 = mode;
+    switch (G__301) {
       case "light":
         return "light";
         break;
@@ -6486,8 +6694,8 @@
   var apply_theme_BANG_ = function(mode) {
     const el1 = document.documentElement;
     suppress_transitions_BANG_();
-    const G__302 = mode;
-    switch (G__302) {
+    const G__312 = mode;
+    switch (G__312) {
       case "light":
         return el1.setAttribute("data-theme", "light");
         break;
@@ -6527,8 +6735,8 @@
   var toggle_BANG_ = function() {
     const current1 = get_mode();
     const next_mode2 = (() => {
-      const G__313 = current1;
-      switch (G__313) {
+      const G__323 = current1;
+      switch (G__323) {
         case "auto":
           return "light";
           break;
@@ -6698,14 +6906,14 @@
       ;
     })().split(","))));
     const override_keys4 = set(map(first, viewport_overrides));
-    const kept5 = remove((function(p__32) {
-      const vec__69 = p__32;
+    const kept5 = remove((function(p__33) {
+      const vec__69 = p__33;
       const k10 = nth(vec__69, 0, null);
       const _11 = nth(vec__69, 1, null);
       return contains_QMARK_(override_keys4, k10);
     }), entries1);
-    return join(", ", map((function(p__33) {
-      const vec__1215 = p__33;
+    return join(", ", map((function(p__34) {
+      const vec__1215 = p__34;
       const k16 = nth(vec__1215, 0, null);
       const v17 = nth(vec__1215, 1, null);
       if (v17 == null) {

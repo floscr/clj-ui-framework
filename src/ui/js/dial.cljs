@@ -86,6 +86,94 @@
 (defn- color-str? [s]
   (and (= (tof s) "string") (.test color-re s)))
 
+;; ── Colour maths (HSV ⇄ RGB ⇄ HSL, CSS parsing) ─────────────────────
+
+(defn- hsv->rgb [h s v]
+  (let [c  (* v s)
+        h' (/ (mod h 360) 60)
+        x  (* c (- 1 (js/Math.abs (- (mod h' 2) 1))))
+        m  (- v c)
+        rgb (cond
+              (< h' 1) #js [c x 0]
+              (< h' 2) #js [x c 0]
+              (< h' 3) #js [0 c x]
+              (< h' 4) #js [0 x c]
+              (< h' 5) #js [x 0 c]
+              :else    #js [c 0 x])]
+    #js [(js/Math.round (* 255 (+ (aget rgb 0) m)))
+         (js/Math.round (* 255 (+ (aget rgb 1) m)))
+         (js/Math.round (* 255 (+ (aget rgb 2) m)))]))
+
+(defn- rgb->hsv [r g b]
+  (let [r  (/ r 255) g (/ g 255) b (/ b 255)
+        mx (js/Math.max r g b) mn (js/Math.min r g b)
+        d  (- mx mn)
+        h  (cond
+             (zero? d) 0
+             (= mx r)  (* 60 (mod (/ (- g b) d) 6))
+             (= mx g)  (* 60 (+ (/ (- b r) d) 2))
+             :else     (* 60 (+ (/ (- r g) d) 4)))
+        h  (if (< h 0) (+ h 360) h)
+        s  (if (zero? mx) 0 (/ d mx))]
+    #js [h s mx]))
+
+(defn- rgb->hsl [r g b]
+  (let [r  (/ r 255) g (/ g 255) b (/ b 255)
+        mx (js/Math.max r g b) mn (js/Math.min r g b)
+        d  (- mx mn)
+        l  (/ (+ mx mn) 2)
+        h  (cond
+             (zero? d) 0
+             (= mx r)  (* 60 (mod (/ (- g b) d) 6))
+             (= mx g)  (* 60 (+ (/ (- b r) d) 2))
+             :else     (* 60 (+ (/ (- r g) d) 4)))
+        h  (if (< h 0) (+ h 360) h)
+        s  (if (zero? d) 0 (/ d (- 1 (js/Math.abs (- (* 2 l) 1)))))]
+    #js [h s l]))
+
+(def ^:private color-probe nil)
+
+(defn- parse-rgba [s]
+  ;; Resolve ANY CSS colour string to #js [r g b a] via a hidden probe element.
+  (let [el (or color-probe
+               (let [e (mk "div" nil)]
+                 (set! (.. e -style -display) "none")
+                 (.appendChild js/document.body e)
+                 (set! color-probe e)
+                 e))]
+    (set! (.. el -style -color) "")
+    (set! (.. el -style -color) (str s))
+    (when (not= "" (.. el -style -color))
+      (let [cs (.-color (js/getComputedStyle el))
+            m  (.match cs (js/RegExp. "rgba?\\(([^)]+)\\)"))]
+        (when m
+          (let [parts (.split (aget m 1) (js/RegExp. "[ ,/]+"))
+                a (if (> (.-length parts) 3) (js/parseFloat (aget parts 3)) 1)]
+            #js [(js/parseFloat (aget parts 0))
+                 (js/parseFloat (aget parts 1))
+                 (js/parseFloat (aget parts 2))
+                 (if (js/isFinite a) a 1)]))))))
+
+(defn- to-hex2 [n]
+  (.padStart (.toString (clamp (js/Math.round n) 0 255) 16) 2 "0"))
+
+(defn- compose-color [h s v a fmt]
+  (let [rgb (hsv->rgb h s v)
+        r (aget rgb 0) g (aget rgb 1) b (aget rgb 2)]
+    (case fmt
+      "rgb" (if (< a 0.999)
+              (str "rgba(" r ", " g ", " b ", " (fmt-num a) ")")
+              (str "rgb(" r ", " g ", " b ")"))
+      "hsl" (let [hsl (rgb->hsl r g b)
+                  hh (js/Math.round (aget hsl 0))
+                  ss (js/Math.round (* (aget hsl 1) 100))
+                  ll (js/Math.round (* (aget hsl 2) 100))]
+              (if (< a 0.999)
+                (str "hsla(" hh ", " ss "%, " ll "%, " (fmt-num a) ")")
+                (str "hsl(" hh ", " ss "%, " ll "%)")))
+      (str "#" (to-hex2 r) (to-hex2 g) (to-hex2 b)
+           (if (< a 0.999) (to-hex2 (* a 255)) "")))))
+
 (defn- humanize [k]
   (let [s (-> (str k)
               (.replace (js/RegExp. "([a-z0-9])([A-Z])" "g") "$1 $2")
@@ -357,37 +445,121 @@
 
 (defn- render-color [panel c]
   (let [{:keys [path label]} c
-        r     (row label)
-        wrap  (mk "div" "dial-color")
-        sw    (mk "input" "dial-color-swatch")
-        op    (mk "input" "dial-color-opacity")
-        txtf  (mk "input" "dial-color-text")
-        cur   (fn [] (get-in @(:store panel) path))
-        hex6  (fn [s] (let [m (.match (str s) (js/RegExp. "^#([0-9a-fA-F]{6})"))]
-                        (if m (str "#" (aget m 1)) "#000000")))
-        opacity-of (fn [s]
-                     (let [m (.match (str s) (js/RegExp. "^#[0-9a-fA-F]{6}([0-9a-fA-F]{2})$"))]
-                       (if m (/ (js/parseInt (aget m 1) 16) 255) 1)))
-        compose (fn []
-                  (let [base (hex6 (.-value sw))
-                        a (js/parseFloat (.-value op))]
-                    (if (>= a 0.999)
-                      base
-                      (str base (.padStart (.toString (js/Math.round (* a 255)) 16) 2 "0")))))
-        paint (fn [v]
-                (let [v (or v "#000000")]
-                  (set! (.-value txtf) v)
-                  (when (color-str? v)
-                    (set! (.-value sw) (hex6 v))
-                    (set! (.-value op) (str (opacity-of v)))
-                    (set! (.. sw -style -backgroundColor) v))))]
-    (set! (.-type sw) "color")
+        r        (mk "div" "dial-row dial-row--color")
+        wrap     (mk "div" "dial-color")
+        formats  (mk "div" "dial-color-formats")
+        plane    (mk "div" "dial-color-plane")
+        marker   (mk "span" "dial-color-marker")
+        tracks   (mk "div" "dial-color-tracks")
+        huerow   (mk "label" "dial-color-track-row")
+        hue      (mk "input" "dial-color-track dial-color-hue")
+        oprow    (mk "label" "dial-color-track-row")
+        op       (mk "input" "dial-color-track dial-color-opacity")
+        txtf     (mk "input" "dial-color-input")
+        st       #js {:h 265 :s 0.6 :v 0.9 :a 1 :fmt "hex"}
+        fmt-btns #js {}
+        cur      (fn [] (get-in @(:store panel) path))
+        emit     (fn [] (compose-color (:h st) (:s st) (:v st) (:a st) (:fmt st)))
+        detect-fmt (fn [s]
+                     (let [s (.toLowerCase (.trim (str s)))]
+                       (cond
+                         (.startsWith s "hsl") "hsl"
+                         (.startsWith s "rgb") "rgb"
+                         (.startsWith s "#")   "hex"
+                         :else (:fmt st))))
+        adopt    (fn [s]
+                   (let [rgba (parse-rgba s)]
+                     (when rgba
+                       (let [hsv (rgb->hsv (aget rgba 0) (aget rgba 1) (aget rgba 2))]
+                         ;; keep prior hue for greys so the plane doesn't jump
+                         (when (> (aget hsv 1) 0.0001) (aset st "h" (aget hsv 0)))
+                         (aset st "s" (aget hsv 1))
+                         (aset st "v" (aget hsv 2))
+                         (aset st "a" (aget rgba 3))))))
+        paint-ui (fn []
+                   (let [h (:h st) s (:s st) v (:v st) a (:a st)
+                         rgb (hsv->rgb h s v)
+                         hue-col (str "hsl(" (js/Math.round h) ", 100%, 50%)")
+                         solid (str "rgb(" (aget rgb 0) ", " (aget rgb 1) ", " (aget rgb 2) ")")]
+                     (set! (.. plane -style -background)
+                           (str "linear-gradient(to top, #000, rgba(0,0,0,0)),"
+                                "linear-gradient(to right, #fff, " hue-col ")"))
+                     (set! (.. marker -style -left) (str (* 100 s) "%"))
+                     (set! (.. marker -style -top) (str (* 100 (- 1 v)) "%"))
+                     (set! (.. marker -style -background) solid)
+                     (set! (.-value hue) (str h))
+                     (set! (.-value op) (str a))
+                     (.setProperty (.-style op) "--dial-color-solid" solid)
+                     (doseq [f #js ["hex" "rgb" "hsl"]]
+                       (let [b (aget fmt-btns f)]
+                         (when b (attr! b "data-active" (if (= f (:fmt st)) "true" "false")))))))
+        set-fmt  (fn [f]
+                   (aset st "fmt" f)
+                   (let [v (emit)]
+                     (commit! panel path v)
+                     (set! (.-value txtf) v)
+                     (paint-ui)))
+        push     (fn []
+                   (let [v (emit)]
+                     (commit! panel path v)
+                     (set! (.-value txtf) v)
+                     (paint-ui)))
+        plane-at (fn [e]
+                   (let [rect (.getBoundingClientRect plane)
+                         sx (clamp (/ (- (.-clientX e) (.-left rect)) (.-width rect)) 0 1)
+                         sy (clamp (/ (- (.-clientY e) (.-top rect)) (.-height rect)) 0 1)]
+                     (aset st "s" sx)
+                     (aset st "v" (- 1 sy))
+                     (push)))
+        paint    (fn [v]
+                   (let [v (or v "#000000")]
+                     (adopt v)
+                     (aset st "fmt" (detect-fmt v))
+                     (set! (.-value txtf) v)
+                     (paint-ui)))]
+    ;; format segmented control
+    (doseq [pair #js [#js ["hex" "Hex"] #js ["rgb" "RGB"] #js ["hsl" "HSL"]]]
+      (let [f (aget pair 0)
+            b (mk "button" "dial-color-format")]
+        (set! (.-type b) "button")
+        (txt! b (aget pair 1))
+        (aset fmt-btns f b)
+        (on! b "click" (fn [_] (set-fmt f)))
+        (add! formats b)))
+    ;; plane
+    (attr! plane "tabindex" "0")
+    (add! plane marker)
+    (let [dragging #js {:on false}]
+      (on! plane "pointerdown"
+           (fn [e]
+             (.preventDefault e)
+             (.setPointerCapture plane (.-pointerId e))
+             (aset dragging "on" true) (plane-at e)))
+      (on! plane "pointermove" (fn [e] (when (aget dragging "on") (plane-at e))))
+      (on! plane "pointerup" (fn [_] (aset dragging "on" false)))
+      (on! plane "pointercancel" (fn [_] (aset dragging "on" false))))
+    ;; hue + opacity tracks
+    (set! (.-type hue) "range") (set! (.-min hue) "0") (set! (.-max hue) "360") (set! (.-step hue) "1")
     (set! (.-type op) "range") (set! (.-min op) "0") (set! (.-max op) "1") (set! (.-step op) "0.01")
+    (add! huerow (txt! (mk "span" nil) "Hue") hue)
+    (add! oprow (txt! (mk "span" nil) "Opacity") op)
+    (on! hue "input" (fn [_] (aset st "h" (js/parseFloat (.-value hue))) (push)))
+    (on! op "input" (fn [_] (aset st "a" (js/parseFloat (.-value op))) (push)))
+    ;; css text input
     (set! (.-type txtf) "text")
-    (on! sw "input" (fn [_] (let [v (compose)] (commit! panel path v) (paint v))))
-    (on! op "input" (fn [_] (let [v (compose)] (commit! panel path v) (paint v))))
-    (on! txtf "change" (fn [_] (let [v (.-value txtf)] (commit! panel path v) (paint v))))
-    (add! wrap sw op txtf)
+    (attr! txtf "spellcheck" "false")
+    (on! txtf "change"
+         (fn [_]
+           (let [v (.-value txtf)]
+             (when (color-str? v)
+               (adopt v)
+               (aset st "fmt" (detect-fmt v)))
+             (commit! panel path v)
+             (paint-ui))))
+    ;; assemble
+    (add! tracks huerow oprow)
+    (add! wrap formats plane tracks txtf)
+    (when label (add! r (txt! (mk "label" "dial-label") label)))
     (add! r wrap)
     (paint (cur))
     (reg-updater! panel path paint)
