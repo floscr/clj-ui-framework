@@ -374,6 +374,97 @@
                                       (swap! !lightbox-state assoc :src nil)
                                       (render!))}))))
 
+;; ── DialKit Demo ────────────────────────────────────────────────────
+
+(def !dial-ctrls (atom nil))
+
+(defn- dk-apply-box! [v]
+  (when-let [box (js/document.getElementById "dial-demo-box")]
+    (when-let [b (aget v "box")]
+      (let [st (.-style box)]
+        (aset st "width" (str (aget b "size") "px"))
+        (aset st "height" (str (aget b "size") "px"))
+        (aset st "borderRadius" (str (aget b "radius") "px"))
+        (aset st "background" (aget b "color"))
+        (aset st "transform" (str "rotate(" (aget b "rotate") "deg)"))
+        (aset st "opacity" (str (aget b "opacity")))
+        (aset st "border" (if (aget b "border") "3px solid var(--fg-0)" "3px solid transparent"))
+        (aset st "boxShadow" (case (aget b "shadow")
+                               "none" "none"
+                               "small" "var(--shadow-1)"
+                               "large" "var(--shadow-3)"
+                               "var(--shadow-2)"))))))
+
+(defn- dk-apply-dot! [v]
+  (when-let [dot (js/document.getElementById "dial-demo-dot")]
+    (when-let [m (aget v "dot")]
+      (when-let [cur (aget m "current")]
+        (let [st (.-style dot)]
+          (aset st "transform" (str "translateX(" (js/Math.round (aget cur "x")) "px)"))
+          (aset st "opacity" (str (aget cur "opacity"))))))))
+
+(defn init-dial-demo! []
+  (when (and (nil? @!dial-ctrls) js/window.__uiDial js/window.__uiDialTimeline)
+    (let [dial (js/window.__uiDial "Box Playground"
+                 #js {:box #js {:size    #js [96 32 200]
+                                :radius  #js [16 0 100]
+                                :rotate  #js [0 -180 180]
+                                :opacity #js [1 0 1 0.01]
+                                :color   "#8b5cf6"
+                                :border  true
+                                :shadow  #js {:type "select"
+                                              :options #js ["none" "small" "medium" "large"]
+                                              :default "medium"}}
+                      :reset #js {:type "action" :label "Reset box"}}
+                 #js {:id "dial-demo"
+                      :persist true
+                      :onChange dk-apply-box!
+                      :onAction (fn [nm _v]
+                                  (when (= nm "reset")
+                                    (when-let [c @!dial-ctrls]
+                                      ((aget (aget c "dial") "resetValues")))))})
+          tl (js/window.__uiDialTimeline "Motion"
+               #js {:dot #js {:at 0 :duration 2 :loop true
+                              :from #js {:x 0 :opacity 0.35}
+                              :to   #js {:x 240 :opacity 1}
+                              :transition #js {:type "easing" :ease #js [0.4 0 0.2 1] :duration 2}}}
+               #js {:autoplay true :loop true
+                    :onChange dk-apply-dot!})]
+      (reset! !dial-ctrls #js {:dial dial :tl tl})
+      (dk-apply-box! (aget dial "values")))))
+
+(defn teardown-dial-demo! []
+  (when-let [c @!dial-ctrls]
+    ((aget (aget c "dial") "destroy"))
+    ((aget (aget c "tl") "destroy"))
+    (reset! !dial-ctrls nil)))
+
+(defn dial-page []
+  (js/setTimeout init-dial-demo! 0)
+  [:div
+   (page-header "DialKit"
+     "Live value-tuning panels + an animation timeline, ported from dialkit.dev. Drag the panel (top-right) by its title to move it; every edit updates the box below in real time and persists to localStorage. The timeline dock (bottom) animates the dot on a loop.")
+   (section "Box Playground"
+     [:p {:style {"color" "var(--fg-2)" "font-size" "var(--font-sm)"}}
+      "Tune the floating panel in the top-right corner — size, radius, rotation, opacity, colour, border and shadow all bind live to this box. Use “Save version” in the panel head to snapshot presets, ⧉ to copy the config, ↺ to reset."]
+     [:div {:style {"display" "flex" "align-items" "center" "justify-content" "center"
+                    "min-height" "260px" "padding" "2rem"
+                    "border" "var(--border-0)" "border-radius" "var(--radius-lg)"
+                    "background" "var(--bg-1)"}}
+      [:div {:id "dial-demo-box"
+             :style {"width" "96px" "height" "96px" "border-radius" "16px"
+                     "background" "#8b5cf6" "transition" "box-shadow 0.15s ease"}}]])
+   (section "Motion Timeline"
+     [:p {:style {"color" "var(--fg-2)" "font-size" "var(--font-sm)"}}
+      "The timeline dock at the bottom of the screen drives this dot. Scrub the playhead, hit play/replay, drag clip bars to retime, or alt+scroll to zoom the ruler."]
+     [:div {:style {"position" "relative" "height" "80px" "padding" "0 1rem"
+                    "display" "flex" "align-items" "center"
+                    "border" "var(--border-0)" "border-radius" "var(--radius-lg)"
+                    "background" "var(--bg-1)"}}
+      [:div {:id "dial-demo-dot"
+             :style {"width" "40px" "height" "40px" "border-radius" "50%"
+                     "background" "var(--accent)" "opacity" "0.35"}}]])])
+
 ;; ── Pages ───────────────────────────────────────────────────────────
 
 (defn components-page []
@@ -815,16 +906,20 @@
    {:id "calendar"   :label "Calendar"    :icon-name "calendar"}
    {:id "icons"      :label "Icons"       :icon-name "image"}
    {:id "sidebar"    :label "Sidebar"     :icon-name "layout-dashboard"}
-   {:id "files"      :label "File Browser" :icon-name "folder"}])
+   {:id "files"      :label "File Browser" :icon-name "folder"}
+   {:id "dial"       :label "DialKit"     :icon-name "settings"}])
 
 (defn navigate! [page-id]
   (fn [_e]
+    (when (and (= @!page "dial") (not= page-id "dial"))
+      (teardown-dial-demo!))
     (reset! !page page-id)
     (render!)))
 
 (defn navigate-to-section! [anchor]
   (fn [_e]
     (when (not= @!page "components")
+      (when (= @!page "dial") (teardown-dial-demo!))
       (reset! !page "components")
       (render!))
     (js/setTimeout
@@ -906,6 +1001,7 @@
            "icons"      (icons-page)
            "sidebar"    (sidebar-page)
            "files"      (file-browser-page)
+           "dial"       (dial-page)
            (components-page))]))))
 
 ;; ── Init ────────────────────────────────────────────────────────────

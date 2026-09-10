@@ -83,12 +83,96 @@
   function _EQ_(...xs) {
     return walkArray(xs, (x, y) => dequal(x, y));
   }
+  function mapAssocMut(m, k, v) {
+    m.set(k, v);
+    return m;
+  }
+  function objAssocMut(m, k, v) {
+    m[k] = v;
+    return m;
+  }
+  function getAssocMut(m) {
+    switch (typeConst(m)) {
+      case MAP_TYPE:
+        return mapAssocMut;
+      case ARRAY_TYPE:
+      case OBJECT_TYPE:
+        return objAssocMut;
+    }
+  }
+  function assoc_BANG_(m, k, v, ...kvs) {
+    if (kvs.length % 2 !== 0) {
+      throw new Error("Illegal argument: assoc expects an odd number of arguments.");
+    }
+    switch (typeConst(m)) {
+      case MAP_TYPE:
+        m.set(k, v);
+        for (let i = 0; i < kvs.length; i += 2) {
+          m.set(kvs[i], kvs[i + 1]);
+        }
+        break;
+      case ARRAY_TYPE:
+      case OBJECT_TYPE:
+        m[k] = v;
+        for (let i = 0; i < kvs.length; i += 2) {
+          m[kvs[i]] = kvs[i + 1];
+        }
+        break;
+      default:
+        throw new Error(
+          `Illegal argument: assoc! expects a Map, Array, or Object as the first argument, but got ${typeof m}.`
+        );
+    }
+    return m;
+  }
+  function copy(o) {
+    switch (typeConst(o)) {
+      case MAP_TYPE:
+        return new Map(o);
+      case SET_TYPE:
+        return new o.constructor(o);
+      case ARRAY_TYPE:
+        return [...o];
+      case OBJECT_TYPE:
+        return { ...o };
+      default:
+        throw new Error(`Don't know how to copy object of type ${typeof o}.`);
+    }
+  }
+  function assoc(o, k, v, ...kvs) {
+    if (!o) {
+      o = {};
+    }
+    const ret = copy(o);
+    assoc_BANG_(ret, k, v, ...kvs);
+    return ret;
+  }
   var MAP_TYPE = 1;
   var ARRAY_TYPE = 2;
   var OBJECT_TYPE = 3;
   var LIST_TYPE = 4;
   var SET_TYPE = 5;
   var LAZY_ITERABLE_TYPE = 6;
+  function emptyOfType(type) {
+    switch (type) {
+      case MAP_TYPE:
+        return /* @__PURE__ */ new Map();
+      case ARRAY_TYPE:
+        return [];
+      case OBJECT_TYPE:
+        return {};
+      // Object.create?
+      case LIST_TYPE:
+        return new List();
+      case SET_TYPE:
+        return /* @__PURE__ */ new Set();
+      case LAZY_ITERABLE_TYPE:
+        return lazy(function* () {
+          return;
+        });
+    }
+    return void 0;
+  }
   function isObj(coll) {
     return coll.constructor === Object;
   }
@@ -107,6 +191,91 @@
     if (obj instanceof SortedSet) return SET_TYPE;
     if (obj instanceof Object) return OBJECT_TYPE;
     return void 0;
+  }
+  function assoc_in_with(f, fname, o, keys, value) {
+    keys = vec(keys);
+    o = o || {};
+    const baseType = typeConst(o);
+    if (baseType !== MAP_TYPE && baseType !== ARRAY_TYPE && baseType !== OBJECT_TYPE)
+      throw new Error(
+        `Illegal argument: ${fname} expects the first argument to be a Map, Array, or Object.`
+      );
+    const chain = [o];
+    let lastInChain = o;
+    for (let i = 0; i < keys.length - 1; i += 1) {
+      const k = keys[i];
+      let chainValue;
+      if (lastInChain instanceof Map) chainValue = lastInChain.get(k);
+      else chainValue = lastInChain[k];
+      if (!chainValue) {
+        chainValue = emptyOfType(baseType);
+      }
+      chain.push(chainValue);
+      lastInChain = chainValue;
+    }
+    chain.push(value);
+    for (let i = chain.length - 2; i >= 0; i -= 1) {
+      chain[i] = f(chain[i], keys[i], chain[i + 1]);
+    }
+    return chain[0];
+  }
+  function assoc_in(o, keys, value) {
+    return assoc_in_with(assoc, "assoc-in", o, keys, value);
+  }
+  function conj_BANG_set(o, rest) {
+    for (const x of rest) {
+      o.add(x);
+    }
+    return o;
+  }
+  function conj(...xs) {
+    if (xs.length === 0) {
+      return vector();
+    }
+    const [_o, ...rest] = xs;
+    let o = _o;
+    if (o === null || o === void 0) {
+      o = list();
+    }
+    let m, o2;
+    switch (typeConst(o)) {
+      case SET_TYPE:
+        if (o instanceof SortedSet) {
+          return conj_BANG_set(new o.constructor(o), rest);
+        } else {
+          return new o.constructor([...o, ...rest]);
+        }
+      case LIST_TYPE:
+        return new List(...rest.reverse(), ...o);
+      case ARRAY_TYPE:
+        return [...o, ...rest];
+      case MAP_TYPE:
+        m = new Map(o);
+        for (const x of rest) {
+          if (!Array.isArray(x))
+            iterable(x).forEach((kv) => {
+              m.set(kv[0], kv[1]);
+            });
+          else m.set(x[0], x[1]);
+        }
+        return m;
+      case LAZY_ITERABLE_TYPE:
+        return lazy(function* () {
+          yield* rest;
+          yield* o;
+        });
+      case OBJECT_TYPE:
+        o2 = { ...o };
+        for (const x of rest) {
+          if (!Array.isArray(x)) Object.assign(o2, x);
+          else o2[x[0]] = x[1];
+        }
+        return o2;
+      default:
+        throw new Error(
+          "Illegal argument: conj expects a Set, Array, List, Map, or Object as the first argument."
+        );
+    }
   }
   function contains_QMARK_(coll, v) {
     switch (typeConst(coll)) {
@@ -198,6 +367,16 @@
     return coll[Symbol.iterator]();
   }
   var es6_iterator = _iterator;
+  function seq(x) {
+    if (x == null) return x;
+    const iter = iterable(x);
+    if (iter.length === 0 || iter.size === 0) {
+      return null;
+    }
+    const _i = iter[Symbol.iterator]();
+    if (_i.next().done) return null;
+    return iter;
+  }
   function first(coll) {
     const [first2] = iterable(coll);
     return first2;
@@ -205,6 +384,43 @@
   function second(coll) {
     const [_, v] = iterable(coll);
     return v;
+  }
+  var Reduced = class {
+    value;
+    constructor(x) {
+      this.value = x;
+    }
+    _deref() {
+      return this.value;
+    }
+  };
+  function reduce(f, arg1, arg2) {
+    f = toFn(f);
+    let coll, val;
+    if (arguments.length === 2) {
+      const iter = iterable(arg1)[Symbol.iterator]();
+      const vd = iter.next();
+      if (vd.done) {
+        val = f();
+      } else {
+        val = vd.value;
+      }
+      coll = iter;
+    } else {
+      val = arg1;
+      coll = iterable(arg2);
+    }
+    if (val instanceof Reduced) {
+      return val.value;
+    }
+    for (const x of coll) {
+      val = f(val, x);
+      if (val instanceof Reduced) {
+        val = val.value;
+        break;
+      }
+    }
+    return val;
   }
   var tolr = false;
   var LazyIterable = class {
@@ -380,6 +596,12 @@
     }
     return [...map(...args)];
   }
+  function vec(x) {
+    if (array_QMARK_(x)) {
+      return x;
+    }
+    return [...iterable(x)];
+  }
   function set(coll) {
     return new Set(iterable(coll));
   }
@@ -394,6 +616,12 @@
       this.push(...args);
     }
   };
+  function list(...args) {
+    return new List(...args);
+  }
+  function array_QMARK_(x) {
+    return Array.isArray(x);
+  }
   function concat1(colls) {
     return lazy(function* () {
       for (const coll of colls) {
@@ -407,6 +635,22 @@
   concat[IApply__apply] = (colls) => {
     return concat1(colls);
   };
+  function empty(coll) {
+    const type = typeConst(coll);
+    if (type != null) {
+      return emptyOfType(type);
+    } else {
+      throw new Error(`Can't create empty of ${typeof coll}`);
+    }
+  }
+  function get_in(coll, path, orElse) {
+    let entry = coll;
+    for (const item of path) {
+      entry = get(entry, item);
+    }
+    if (entry === void 0) return orElse;
+    return entry;
+  }
   function sort(f, coll) {
     if (arguments.length === 1) {
       coll = f;
@@ -417,11 +661,33 @@
     const clone = [...coll];
     return clone.sort(f || compare);
   }
+  function empty_QMARK_(coll) {
+    return seq(coll) ? false : true;
+  }
+  function boolean$(x) {
+    return !!x;
+  }
+  function reduce_kv(f, init, m) {
+    if (!m) {
+      return init;
+    }
+    var ret = init;
+    for (const o of iterable(m)) {
+      ret = f(ret, o[0], o[1]);
+    }
+    return ret;
+  }
   function max(x, y, ...more) {
     if (y == void 0) {
       return x;
     }
     return Math.max(x, y, ...more);
+  }
+  function map_QMARK_(coll) {
+    if (coll == null) return false;
+    if (isObj(coll)) return true;
+    if (coll instanceof Map) return true;
+    return false;
   }
   function compare(x, y) {
     if (x === y) {
@@ -534,6 +800,33 @@
       return this.keys();
     }
   };
+  function update_vals(m, f) {
+    const m2 = empty(m);
+    const assocFn = getAssocMut(m) || assoc_BANG_;
+    reduce_kv(
+      (acc, k, v) => {
+        return assocFn(acc, k, f(v));
+      },
+      m2,
+      m
+    );
+    return m2;
+  }
+  function clj__GT_js_(x, seen) {
+    if (seen.has(x)) return x;
+    seen.add(x);
+    if (map_QMARK_(x)) {
+      return update_vals(x, (x2) => clj__GT_js_(x2, seen));
+    }
+    const tc = typeConst(x);
+    if (tc && tc != OBJECT_TYPE) {
+      return mapv((x2) => clj__GT_js_(x2, seen), x);
+    }
+    return x;
+  }
+  function clj__GT_js(x) {
+    return clj__GT_js_(x, /* @__PURE__ */ new Set());
+  }
 
   // .compiled/command.mjs
   var items = function(dialog) {
@@ -1532,6 +1825,2779 @@
   })();
   window["__uiContextMenu"] = open_context_menu;
 
+  // ../../../dev/squint/node_modules/squint-cljs/src/squint/string.js
+  function join(sep, coll) {
+    if (coll === void 0) {
+      coll = sep;
+      sep = "";
+    }
+    if (coll instanceof Array) {
+      return coll.join(sep);
+    }
+    let ret = "";
+    let addSep = false;
+    for (const o of iterable(coll)) {
+      if (addSep) ret += sep;
+      ret += o;
+      addSep = true;
+    }
+    return ret;
+  }
+
+  // .compiled/dial.mjs
+  var tof = function(v) {
+    return typeof v;
+  };
+  var mk = function(tag, class$) {
+    const e1 = document.createElement(tag);
+    if (truth_(class$)) {
+      e1.className = class$;
+    }
+    ;
+    return e1;
+  };
+  var add_BANG_ = (() => {
+    const f8 = (function(var_args) {
+      const args91 = [];
+      const len__23321__auto__2 = arguments.length;
+      let i103 = 0;
+      while (true) {
+        if (i103 < len__23321__auto__2) {
+          args91.push(arguments[i103]);
+          let G__4 = i103 + 1;
+          i103 = G__4;
+          continue;
+        }
+        ;
+        break;
+      }
+      ;
+      const argseq__23513__auto__5 = 1 < args91.length ? args91.slice(1) : null;
+      return f8.cljs$core$IFn$_invoke$arity$variadic(arguments[0], argseq__23513__auto__5);
+    });
+    f8.cljs$core$IFn$_invoke$arity$variadic = (function(parent, children) {
+      for (let G__6 of iterable(children)) {
+        const c7 = G__6;
+        if (truth_(c7)) {
+          parent.appendChild(c7);
+        }
+      }
+      ;
+      return parent;
+    });
+    f8.cljs$lang$maxFixedArity = 1;
+    return f8;
+  })();
+  var txt_BANG_ = function(e, s) {
+    e.textContent = `${s ?? ""}`;
+    return e;
+  };
+  var on_BANG_ = function(e, ev, f) {
+    e.addEventListener(ev, f);
+    return e;
+  };
+  var attr_BANG_ = function(e, k, v) {
+    e.setAttribute(k, v);
+    return e;
+  };
+  var clamp = function(v, lo, hi) {
+    return Math.max(lo, Math.min(v, hi));
+  };
+  var path_str = function(path) {
+    return path.join(".");
+  };
+  var fmt_num = function(n) {
+    if (not(isFinite(n))) {
+      return "0";
+    } else {
+      return `${Math.round(n * 1e3) / 1e3}`;
+    }
+    ;
+  };
+  var round_step = function(v, step) {
+    if (truth_((() => {
+      const and__23442__auto__1 = step;
+      if (truth_(and__23442__auto__1)) {
+        return step > 0;
+      } else {
+        return and__23442__auto__1;
+      }
+      ;
+    })())) {
+      return Math.round(v / step) * step;
+    } else {
+      return v;
+    }
+    ;
+  };
+  var infer_range = function(v) {
+    if (v < 0) {
+      return { "min": v * 3, "max": -v * 3, "step": 1 };
+    } else {
+      if (v <= 1) {
+        return { "min": 0, "max": 1, "step": 0.01 };
+      } else {
+        if (v <= 10) {
+          return { "min": 0, "max": v * 3, "step": 0.1 };
+        } else {
+          if (v <= 100) {
+            return { "min": 0, "max": v * 3, "step": 1 };
+          } else {
+            if ("else") {
+              return { "min": 0, "max": v * 3, "step": 10 };
+            } else {
+              return null;
+            }
+          }
+        }
+      }
+    }
+    ;
+  };
+  var infer_step = function(mx) {
+    if (mx <= 1) {
+      return 0.01;
+    } else {
+      if (mx <= 10) {
+        return 0.1;
+      } else {
+        if (mx <= 100) {
+          return 1;
+        } else {
+          if ("else") {
+            return 10;
+          } else {
+            return null;
+          }
+        }
+      }
+    }
+    ;
+  };
+  var color_re = new RegExp("^\\s*(#([0-9a-fA-F]{3,8})|(rgb|rgba|hsl|hsla|oklch|oklab|color)\\()");
+  var color_str_QMARK_ = function(s) {
+    return tof(s) === "string" && color_re.test(s);
+  };
+  var humanize = function(k) {
+    const s1 = `${k ?? ""}`.replace(new RegExp("([a-z0-9])([A-Z])", "g"), "$1 $2").replace(new RegExp("[_\\-]", "g"), " ").trim();
+    if (s1.length === 0) {
+      return s1;
+    } else {
+      return `${s1.charAt(0).toUpperCase() ?? ""}${s1.slice(1) ?? ""}`;
+    }
+    ;
+  };
+  var normalize_options = function(opts) {
+    return mapv((function(o) {
+      if (tof(o) === "object") {
+        return { "value": o["value"], "label": (() => {
+          const or__23426__auto__1 = o["label"];
+          if (truth_(or__23426__auto__1)) {
+            return or__23426__auto__1;
+          } else {
+            return o["value"];
+          }
+          ;
+        })() };
+      } else {
+        return { "value": o, "label": o };
+      }
+      ;
+    }), opts);
+  };
+  var parse_node = function(k, v, path) {
+    if (truth_(Array.isArray(v))) {
+      const step1 = v.length > 3 ? v[3] : infer_step(v[2]);
+      return { "ctype": "slider", "key": k, "path": path, "label": humanize(k), "default": v[0], "min": v[1], "max": v[2], "step": step1 };
+    } else {
+      if (tof(v) === "number") {
+        const r2 = infer_range(v);
+        return { "ctype": "slider", "key": k, "path": path, "label": humanize(k), "default": v, "min": r2["min"], "max": r2["max"], "step": r2["step"] };
+      } else {
+        if (tof(v) === "boolean") {
+          return { "ctype": "toggle", "key": k, "path": path, "label": humanize(k), "default": v };
+        } else {
+          if (tof(v) === "string") {
+            if (truth_(color_str_QMARK_(v))) {
+              return { "ctype": "color", "key": k, "path": path, "label": humanize(k), "default": v };
+            } else {
+              return { "ctype": "text", "key": k, "path": path, "label": humanize(k), "default": v, "placeholder": "" };
+            }
+          } else {
+            if (tof(v) === "object") {
+              const t3 = v["type"];
+              if (t3 === "text") {
+                return { "ctype": "text", "key": k, "path": path, "label": (() => {
+                  const or__23426__auto__4 = v["label"];
+                  if (truth_(or__23426__auto__4)) {
+                    return or__23426__auto__4;
+                  } else {
+                    return humanize(k);
+                  }
+                  ;
+                })(), "default": (() => {
+                  const or__23426__auto__5 = v["default"];
+                  if (truth_(or__23426__auto__5)) {
+                    return or__23426__auto__5;
+                  } else {
+                    return "";
+                  }
+                  ;
+                })(), "placeholder": (() => {
+                  const or__23426__auto__6 = v["placeholder"];
+                  if (truth_(or__23426__auto__6)) {
+                    return or__23426__auto__6;
+                  } else {
+                    return "";
+                  }
+                  ;
+                })() };
+              } else {
+                if (t3 === "select") {
+                  const os7 = normalize_options((() => {
+                    const or__23426__auto__8 = v["options"];
+                    if (truth_(or__23426__auto__8)) {
+                      return or__23426__auto__8;
+                    } else {
+                      return [];
+                    }
+                    ;
+                  })());
+                  return { "ctype": "select", "key": k, "path": path, "label": (() => {
+                    const or__23426__auto__9 = v["label"];
+                    if (truth_(or__23426__auto__9)) {
+                      return or__23426__auto__9;
+                    } else {
+                      return humanize(k);
+                    }
+                    ;
+                  })(), "options": os7, "default": (() => {
+                    const or__23426__auto__10 = v["default"];
+                    if (truth_(or__23426__auto__10)) {
+                      return or__23426__auto__10;
+                    } else {
+                      const or__23426__auto__11 = truth_(seq(os7)) ? first(os7)["value"] : null;
+                      if (truth_(or__23426__auto__11)) {
+                        return or__23426__auto__11;
+                      } else {
+                        return "";
+                      }
+                      ;
+                    }
+                    ;
+                  })() };
+                } else {
+                  if (t3 === "color") {
+                    return { "ctype": "color", "key": k, "path": path, "label": (() => {
+                      const or__23426__auto__12 = v["label"];
+                      if (truth_(or__23426__auto__12)) {
+                        return or__23426__auto__12;
+                      } else {
+                        return humanize(k);
+                      }
+                      ;
+                    })(), "default": (() => {
+                      const or__23426__auto__13 = v["default"];
+                      if (truth_(or__23426__auto__13)) {
+                        return or__23426__auto__13;
+                      } else {
+                        return "#000000";
+                      }
+                      ;
+                    })() };
+                  } else {
+                    if (t3 === "image") {
+                      const os14 = truth_(v["options"]) ? normalize_options(v["options"]) : null;
+                      return { "ctype": "image", "key": k, "path": path, "label": (() => {
+                        const or__23426__auto__15 = v["label"];
+                        if (truth_(or__23426__auto__15)) {
+                          return or__23426__auto__15;
+                        } else {
+                          return humanize(k);
+                        }
+                        ;
+                      })(), "options": os14, "default": (() => {
+                        const or__23426__auto__16 = v["default"];
+                        if (truth_(or__23426__auto__16)) {
+                          return or__23426__auto__16;
+                        } else {
+                          const or__23426__auto__17 = truth_(seq(os14)) ? first(os14)["value"] : null;
+                          if (truth_(or__23426__auto__17)) {
+                            return or__23426__auto__17;
+                          } else {
+                            return "";
+                          }
+                          ;
+                        }
+                        ;
+                      })() };
+                    } else {
+                      if (t3 === "pad") {
+                        const ax18 = (function(a, def_) {
+                          const tup19 = (() => {
+                            const or__23426__auto__20 = v[a];
+                            if (truth_(or__23426__auto__20)) {
+                              return or__23426__auto__20;
+                            } else {
+                              return def_;
+                            }
+                            ;
+                          })();
+                          return { "default": tup19[0], "min": tup19[1], "max": tup19[2], "step": (() => {
+                            const or__23426__auto__21 = tup19[3];
+                            if (truth_(or__23426__auto__21)) {
+                              return or__23426__auto__21;
+                            } else {
+                              return (tup19[2] - tup19[1]) / 200;
+                            }
+                            ;
+                          })() };
+                        });
+                        const default_axis22 = [0, -1, 1, 0.01];
+                        const xa23 = ax18("x", default_axis22);
+                        const ya24 = ax18("y", default_axis22);
+                        const labels25 = (() => {
+                          const or__23426__auto__26 = v["labels"];
+                          if (truth_(or__23426__auto__26)) {
+                            return or__23426__auto__26;
+                          } else {
+                            return {};
+                          }
+                          ;
+                        })();
+                        return { "y": ya24, "path": path, "key": k, "default": { "x": xa23["default"], "y": ya24["default"] }, "y-label": (() => {
+                          const or__23426__auto__27 = labels25["y"];
+                          if (truth_(or__23426__auto__27)) {
+                            return or__23426__auto__27;
+                          } else {
+                            return "Y";
+                          }
+                          ;
+                        })(), "x-label": (() => {
+                          const or__23426__auto__28 = labels25["x"];
+                          if (truth_(or__23426__auto__28)) {
+                            return or__23426__auto__28;
+                          } else {
+                            return "X";
+                          }
+                          ;
+                        })(), "label": (() => {
+                          const or__23426__auto__29 = v["label"];
+                          if (truth_(or__23426__auto__29)) {
+                            return or__23426__auto__29;
+                          } else {
+                            return humanize(k);
+                          }
+                          ;
+                        })(), "ctype": "pad", "x": xa23 };
+                      } else {
+                        if (truth_((() => {
+                          const or__23426__auto__30 = t3 === "spring";
+                          if (or__23426__auto__30) {
+                            return or__23426__auto__30;
+                          } else {
+                            return t3 === "easing";
+                          }
+                          ;
+                        })())) {
+                          return { "ctype": "transition", "key": k, "path": path, "label": (() => {
+                            const or__23426__auto__31 = v["label"];
+                            if (truth_(or__23426__auto__31)) {
+                              return or__23426__auto__31;
+                            } else {
+                              return humanize(k);
+                            }
+                            ;
+                          })(), "default": JSON.parse(JSON.stringify(v)) };
+                        } else {
+                          if (t3 === "action") {
+                            return { "ctype": "action", "key": k, "path": path, "label": (() => {
+                              const or__23426__auto__32 = v["label"];
+                              if (truth_(or__23426__auto__32)) {
+                                return or__23426__auto__32;
+                              } else {
+                                return humanize(k);
+                              }
+                              ;
+                            })() };
+                          } else {
+                            if ("else") {
+                              return { "ctype": "folder", "key": k, "path": path, "label": humanize(k), "collapsed": boolean$(v["_collapsed"]), "children": parse_config(v, path) };
+                            } else {
+                              return null;
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+              ;
+            } else {
+              if ("else") {
+                return null;
+              } else {
+                return null;
+              }
+            }
+          }
+        }
+      }
+    }
+    ;
+  };
+  var parse_config = function(config, path) {
+    const out1 = [];
+    for (let G__2 of iterable(Object.keys(config))) {
+      const k3 = G__2;
+      if (k3 === "_collapsed") {
+      } else {
+        const node4 = parse_node(k3, config[k3], conj(path, k3));
+        if (truth_(node4)) {
+          out1.push(node4);
+        }
+      }
+    }
+    ;
+    return out1;
+  };
+  var init_values_BANG_ = function(store, controls) {
+    for (let G__1 of iterable(controls)) {
+      const c2 = G__1;
+      if (get(c2, "ctype") === "folder") {
+        init_values_BANG_(store, get(c2, "children"));
+      } else {
+        if (get(c2, "ctype") === "action") {
+        } else {
+          if ("else") {
+            swap_BANG_(store, assoc_in, get(c2, "path"), get(c2, "default"));
+          } else {
+          }
+        }
+      }
+    }
+    return null;
+  };
+  var notify_BANG_ = function(panel) {
+    const vs1 = deref(get(panel, "store"));
+    const temp__23062__auto__2 = get(panel, "onChange");
+    if (truth_(temp__23062__auto__2)) {
+      const cb3 = temp__23062__auto__2;
+      cb3(clj__GT_js(vs1));
+    }
+    ;
+    for (let G__4 of iterable(Array.from(get(panel, "subs")))) {
+      const s5 = G__4;
+      s5(clj__GT_js(vs1));
+    }
+    return null;
+  };
+  var commit_BANG_ = function(panel, path, v) {
+    swap_BANG_(get(panel, "store"), assoc_in, path, v);
+    notify_BANG_(panel);
+    return persist_save_BANG_(panel);
+  };
+  var refresh_updaters_BANG_ = function(panel) {
+    const vs1 = deref(get(panel, "store"));
+    const us2 = get(panel, "updaters");
+    for (let G__3 of iterable(Object.keys(us2))) {
+      const k4 = G__3;
+      us2[k4](get_in(vs1, k4.split(".")));
+    }
+    return null;
+  };
+  var set_value_BANG_ = function(panel, path, v) {
+    swap_BANG_(get(panel, "store"), assoc_in, path, v);
+    const temp__23062__auto__1 = get(panel, "updaters")[path_str(path)];
+    if (truth_(temp__23062__auto__1)) {
+      const u2 = temp__23062__auto__1;
+      u2(v);
+    }
+    ;
+    notify_BANG_(panel);
+    return persist_save_BANG_(panel);
+  };
+  var reg_updater_BANG_ = function(panel, path, f) {
+    return get(panel, "updaters")[path_str(path)] = f;
+  };
+  var row = function(label) {
+    const r1 = mk("div", "dial-row");
+    if (truth_(label)) {
+      add_BANG_(r1, txt_BANG_(mk("label", "dial-label"), label));
+    }
+    ;
+    return r1;
+  };
+  var render_slider = function(panel, c) {
+    const map__12 = c;
+    const path3 = get(map__12, "path");
+    const label4 = get(map__12, "label");
+    const min5 = get(map__12, "min");
+    const max6 = get(map__12, "max");
+    const step7 = get(map__12, "step");
+    const r8 = row(label4);
+    const wrap9 = mk("div", "dial-slider");
+    const track10 = mk("div", "dial-slider-track");
+    const fill11 = mk("div", "dial-slider-fill");
+    const thumb12 = mk("div", "dial-slider-thumb");
+    const num13 = mk("input", "dial-num");
+    const cur14 = (function() {
+      return get_in(deref(get(panel, "store")), path3);
+    });
+    const paint15 = (function(v) {
+      const pct16 = 100 * clamp((v - min5) / (max6 - min5), 0, 1);
+      fill11.style.width = `${pct16 ?? ""}${"%"}`;
+      thumb12.style.left = `${pct16 ?? ""}${"%"}`;
+      return num13.value = fmt_num(v);
+    });
+    const set_at17 = (function(clientx) {
+      const rect18 = track10.getBoundingClientRect();
+      const t19 = clamp((clientx - rect18.left) / rect18.width, 0, 1);
+      const raw20 = min5 + t19 * (max6 - min5);
+      const v21 = clamp(round_step(raw20, step7), min5, max6);
+      commit_BANG_(panel, path3, v21);
+      return paint15(v21);
+    });
+    num13.type = "text";
+    add_BANG_(track10, fill11, thumb12);
+    add_BANG_(wrap9, track10, num13);
+    add_BANG_(r8, wrap9);
+    attr_BANG_(wrap9, "tabindex", "0");
+    const dragging22 = { "on": false };
+    on_BANG_(track10, "pointerdown", (function(e) {
+      track10.setPointerCapture(e.pointerId);
+      dragging22["on"] = true;
+      return set_at17(e.clientX);
+    }));
+    on_BANG_(track10, "pointermove", (function(e) {
+      if (truth_(dragging22["on"])) {
+        return set_at17(e.clientX);
+      }
+      ;
+    }));
+    on_BANG_(track10, "pointerup", (function(_) {
+      return dragging22["on"] = false;
+    }));
+    on_BANG_(track10, "pointercancel", (function(_) {
+      return dragging22["on"] = false;
+    }));
+    on_BANG_(num13, "change", (function(_) {
+      const v23 = parseFloat(num13.value);
+      if (truth_(isFinite(v23))) {
+        const v224 = clamp(round_step(v23, step7), min5, max6);
+        commit_BANG_(panel, path3, v224);
+        return paint15(v224);
+      } else {
+        return paint15(cur14());
+      }
+      ;
+    }));
+    on_BANG_(wrap9, "keydown", (function(e) {
+      const k25 = e.key;
+      const big26 = (() => {
+        const or__23426__auto__27 = e.shiftKey;
+        if (truth_(or__23426__auto__27)) {
+          return or__23426__auto__27;
+        } else {
+          const or__23426__auto__28 = k25 === "PageUp";
+          if (or__23426__auto__28) {
+            return or__23426__auto__28;
+          } else {
+            return k25 === "PageDown";
+          }
+          ;
+        }
+        ;
+      })();
+      const d29 = step7 * (truth_(big26) ? 10 : 1);
+      if (truth_((() => {
+        const or__23426__auto__30 = k25 === "ArrowUp";
+        if (or__23426__auto__30) {
+          return or__23426__auto__30;
+        } else {
+          const or__23426__auto__31 = k25 === "ArrowRight";
+          if (or__23426__auto__31) {
+            return or__23426__auto__31;
+          } else {
+            return k25 === "PageUp";
+          }
+          ;
+        }
+        ;
+      })())) {
+        e.preventDefault();
+        const v32 = clamp(cur14() + d29, min5, max6);
+        commit_BANG_(panel, path3, v32);
+        return paint15(v32);
+      } else {
+        if (truth_((() => {
+          const or__23426__auto__33 = k25 === "ArrowDown";
+          if (or__23426__auto__33) {
+            return or__23426__auto__33;
+          } else {
+            const or__23426__auto__34 = k25 === "ArrowLeft";
+            if (or__23426__auto__34) {
+              return or__23426__auto__34;
+            } else {
+              return k25 === "PageDown";
+            }
+            ;
+          }
+          ;
+        })())) {
+          e.preventDefault();
+          const v35 = clamp(cur14() - d29, min5, max6);
+          commit_BANG_(panel, path3, v35);
+          return paint15(v35);
+        } else {
+          if (k25 === "Home") {
+            e.preventDefault();
+            commit_BANG_(panel, path3, min5);
+            return paint15(min5);
+          } else {
+            if (k25 === "End") {
+              e.preventDefault();
+              commit_BANG_(panel, path3, max6);
+              return paint15(max6);
+            } else {
+              return null;
+            }
+          }
+        }
+      }
+      ;
+    }));
+    paint15(cur14());
+    reg_updater_BANG_(panel, path3, paint15);
+    return r8;
+  };
+  var render_toggle = function(panel, c) {
+    const map__12 = c;
+    const path3 = get(map__12, "path");
+    const label4 = get(map__12, "label");
+    const r5 = row(label4);
+    const btn6 = mk("button", "dial-toggle");
+    const paint7 = (function(v) {
+      attr_BANG_(btn6, "aria-pressed", `${boolean$(v) ?? ""}`);
+      return txt_BANG_(btn6, truth_(v) ? "On" : "Off");
+    });
+    attr_BANG_(btn6, "type", "button");
+    on_BANG_(btn6, "click", (function(_) {
+      const v8 = not(get_in(deref(get(panel, "store")), path3));
+      commit_BANG_(panel, path3, v8);
+      return paint7(v8);
+    }));
+    add_BANG_(r5, btn6);
+    paint7(get_in(deref(get(panel, "store")), path3));
+    reg_updater_BANG_(panel, path3, paint7);
+    return r5;
+  };
+  var render_text = function(panel, c) {
+    const map__12 = c;
+    const path3 = get(map__12, "path");
+    const label4 = get(map__12, "label");
+    const placeholder5 = get(map__12, "placeholder");
+    const r6 = row(label4);
+    const ta7 = mk("textarea", "dial-text");
+    attr_BANG_(ta7, "rows", "1");
+    if (truth_(seq(placeholder5))) {
+      attr_BANG_(ta7, "placeholder", placeholder5);
+    }
+    ;
+    on_BANG_(ta7, "input", (function(_) {
+      ta7.style.height = "auto";
+      ta7.style.height = `${Math.min(120, ta7.scrollHeight) ?? ""}px`;
+      return commit_BANG_(panel, path3, ta7.value);
+    }));
+    add_BANG_(r6, ta7);
+    ta7.value = (() => {
+      const or__23426__auto__8 = get_in(deref(get(panel, "store")), path3);
+      if (truth_(or__23426__auto__8)) {
+        return or__23426__auto__8;
+      } else {
+        return "";
+      }
+      ;
+    })();
+    reg_updater_BANG_(panel, path3, (function(v) {
+      return ta7.value = (() => {
+        const or__23426__auto__9 = v;
+        if (truth_(or__23426__auto__9)) {
+          return or__23426__auto__9;
+        } else {
+          return "";
+        }
+        ;
+      })();
+    }));
+    return r6;
+  };
+  var render_select = function(panel, c) {
+    const map__12 = c;
+    const path3 = get(map__12, "path");
+    const label4 = get(map__12, "label");
+    const options5 = get(map__12, "options");
+    const r6 = row(label4);
+    const sel7 = mk("select", "dial-select");
+    for (let G__8 of iterable(options5)) {
+      const o9 = G__8;
+      const op10 = mk("option", null);
+      op10.value = o9["value"];
+      txt_BANG_(op10, o9["label"]);
+      add_BANG_(sel7, op10);
+    }
+    ;
+    if (truth_(empty_QMARK_(options5))) {
+      sel7.disabled = true;
+    }
+    ;
+    on_BANG_(sel7, "change", (function(_) {
+      return commit_BANG_(panel, path3, sel7.value);
+    }));
+    add_BANG_(r6, sel7);
+    sel7.value = (() => {
+      const or__23426__auto__11 = get_in(deref(get(panel, "store")), path3);
+      if (truth_(or__23426__auto__11)) {
+        return or__23426__auto__11;
+      } else {
+        return "";
+      }
+      ;
+    })();
+    reg_updater_BANG_(panel, path3, (function(v) {
+      return sel7.value = (() => {
+        const or__23426__auto__12 = v;
+        if (truth_(or__23426__auto__12)) {
+          return or__23426__auto__12;
+        } else {
+          return "";
+        }
+        ;
+      })();
+    }));
+    return r6;
+  };
+  var render_color = function(panel, c) {
+    const map__12 = c;
+    const path3 = get(map__12, "path");
+    const label4 = get(map__12, "label");
+    const r5 = row(label4);
+    const wrap6 = mk("div", "dial-color");
+    const sw7 = mk("input", "dial-color-swatch");
+    const op8 = mk("input", "dial-color-opacity");
+    const txtf9 = mk("input", "dial-color-text");
+    const cur10 = (function() {
+      return get_in(deref(get(panel, "store")), path3);
+    });
+    const hex611 = (function(s) {
+      const m12 = `${s ?? ""}`.match(new RegExp("^#([0-9a-fA-F]{6})"));
+      if (truth_(m12)) {
+        return `${"#"}${m12[1] ?? ""}`;
+      } else {
+        return "#000000";
+      }
+      ;
+    });
+    const opacity_of13 = (function(s) {
+      const m14 = `${s ?? ""}`.match(new RegExp("^#[0-9a-fA-F]{6}([0-9a-fA-F]{2})$"));
+      if (truth_(m14)) {
+        return parseInt(m14[1], 16) / 255;
+      } else {
+        return 1;
+      }
+      ;
+    });
+    const compose15 = (function() {
+      const base16 = hex611(sw7.value);
+      const a17 = parseFloat(op8.value);
+      if (a17 >= 0.999) {
+        return base16;
+      } else {
+        return `${base16 ?? ""}${Math.round(a17 * 255).toString(16).padStart(2, "0") ?? ""}`;
+      }
+      ;
+    });
+    const paint18 = (function(v) {
+      const v19 = (() => {
+        const or__23426__auto__20 = v;
+        if (truth_(or__23426__auto__20)) {
+          return or__23426__auto__20;
+        } else {
+          return "#000000";
+        }
+        ;
+      })();
+      txtf9.value = v19;
+      if (truth_(color_str_QMARK_(v19))) {
+        sw7.value = hex611(v19);
+        op8.value = `${opacity_of13(v19) ?? ""}`;
+        return sw7.style.backgroundColor = v19;
+      }
+      ;
+    });
+    sw7.type = "color";
+    op8.type = "range";
+    op8.min = "0";
+    op8.max = "1";
+    op8.step = "0.01";
+    txtf9.type = "text";
+    on_BANG_(sw7, "input", (function(_) {
+      const v21 = compose15();
+      commit_BANG_(panel, path3, v21);
+      return paint18(v21);
+    }));
+    on_BANG_(op8, "input", (function(_) {
+      const v22 = compose15();
+      commit_BANG_(panel, path3, v22);
+      return paint18(v22);
+    }));
+    on_BANG_(txtf9, "change", (function(_) {
+      const v23 = txtf9.value;
+      commit_BANG_(panel, path3, v23);
+      return paint18(v23);
+    }));
+    add_BANG_(wrap6, sw7, op8, txtf9);
+    add_BANG_(r5, wrap6);
+    paint18(cur10());
+    reg_updater_BANG_(panel, path3, paint18);
+    return r5;
+  };
+  var render_image = function(panel, c) {
+    const map__12 = c;
+    const path3 = get(map__12, "path");
+    const label4 = get(map__12, "label");
+    const options5 = get(map__12, "options");
+    const r6 = row(label4);
+    const wrap7 = mk("div", "dial-image");
+    const grid8 = mk("div", "dial-image-grid");
+    const drop9 = mk("label", "dial-image-drop");
+    const file10 = mk("input", null);
+    const cur11 = (function() {
+      return get_in(deref(get(panel, "store")), path3);
+    });
+    const mark12 = (function(v) {
+      for (let G__13 of iterable(Array.from(grid8.children))) {
+        const ch14 = G__13;
+        if (_EQ_(ch14.getAttribute("data-value"), v)) {
+          ch14.classList.add("is-active");
+        } else {
+          ch14.classList.remove("is-active");
+        }
+      }
+      return null;
+    });
+    const read_BANG_15 = (function(f) {
+      if (truth_(f)) {
+        const rd16 = new FileReader();
+        rd16.onload = (function(_) {
+          const v17 = rd16.result;
+          commit_BANG_(panel, path3, v17);
+          return mark12(v17);
+        });
+        return rd16.readAsDataURL(f);
+      }
+      ;
+    });
+    file10.type = "file";
+    attr_BANG_(file10, "accept", "image/*");
+    file10.style.display = "none";
+    if (truth_(seq(options5))) {
+      for (let G__18 of iterable(options5)) {
+        const o19 = G__18;
+        const b20 = mk("button", "dial-image-opt");
+        attr_BANG_(b20, "type", "button");
+        attr_BANG_(b20, "data-value", o19["value"]);
+        attr_BANG_(b20, "title", o19["label"]);
+        b20.style.backgroundImage = `${"url("}${JSON.stringify(o19["value"]) ?? ""}${")"}`;
+        on_BANG_(b20, "click", (function(_) {
+          const v21 = o19["value"];
+          commit_BANG_(panel, path3, v21);
+          return mark12(v21);
+        }));
+        add_BANG_(grid8, b20);
+      }
+    }
+    ;
+    txt_BANG_(drop9, "Drop / upload");
+    add_BANG_(drop9, file10);
+    on_BANG_(file10, "change", (function(_) {
+      return read_BANG_15(file10.files[0]);
+    }));
+    on_BANG_(drop9, "dragover", (function(e) {
+      e.preventDefault();
+      return drop9.classList.add("is-over");
+    }));
+    on_BANG_(drop9, "dragleave", (function(_) {
+      return drop9.classList.remove("is-over");
+    }));
+    on_BANG_(drop9, "drop", (function(e) {
+      e.preventDefault();
+      drop9.classList.remove("is-over");
+      return read_BANG_15(e.dataTransfer.files[0]);
+    }));
+    add_BANG_(wrap7, grid8, drop9);
+    add_BANG_(r6, wrap7);
+    mark12(cur11());
+    reg_updater_BANG_(panel, path3, (function(v) {
+      return mark12(v);
+    }));
+    return r6;
+  };
+  var render_pad = function(panel, c) {
+    const map__12 = c;
+    const path3 = get(map__12, "path");
+    const x4 = get(map__12, "x");
+    const y5 = get(map__12, "y");
+    const x_label6 = get(map__12, "x-label");
+    const y_label7 = get(map__12, "y-label");
+    const r8 = row(get(c, "label"));
+    const area9 = mk("div", "dial-pad");
+    const dot10 = mk("div", "dial-pad-dot");
+    const meta11 = mk("div", "dial-pad-meta");
+    const cur12 = (function() {
+      return get_in(deref(get(panel, "store")), path3);
+    });
+    const to_pct13 = (function(v, ax) {
+      return clamp((v - ax["min"]) / (ax["max"] - ax["min"]), 0, 1);
+    });
+    const paint14 = (function(val) {
+      const px15 = 100 * to_pct13(val["x"], x4);
+      const py16 = 100 * (1 - to_pct13(val["y"], y5));
+      dot10.style.left = `${px15 ?? ""}${"%"}`;
+      dot10.style.top = `${py16 ?? ""}${"%"}`;
+      return txt_BANG_(meta11, `${x_label6 ?? ""}${" "}${fmt_num(val["x"]) ?? ""}${"   "}${y_label7 ?? ""}${" "}${fmt_num(val["y"]) ?? ""}`);
+    });
+    const set_at17 = (function(cx, cy) {
+      const rect18 = area9.getBoundingClientRect();
+      const tx19 = clamp((cx - rect18.left) / rect18.width, 0, 1);
+      const ty20 = clamp((cy - rect18.top) / rect18.height, 0, 1);
+      const vx21 = clamp(round_step(x4["min"] + tx19 * (x4["max"] - x4["min"]), x4["step"]), x4["min"], x4["max"]);
+      const vy22 = clamp(round_step(y5["min"] + (1 - ty20) * (y5["max"] - y5["min"]), y5["step"]), y5["min"], y5["max"]);
+      const v23 = { "x": vx21, "y": vy22 };
+      commit_BANG_(panel, path3, v23);
+      return paint14(v23);
+    });
+    add_BANG_(area9, dot10);
+    add_BANG_(r8, area9, meta11);
+    attr_BANG_(area9, "tabindex", "0");
+    const dragging24 = { "on": false };
+    on_BANG_(area9, "pointerdown", (function(e) {
+      area9.setPointerCapture(e.pointerId);
+      dragging24["on"] = true;
+      return set_at17(e.clientX, e.clientY);
+    }));
+    on_BANG_(area9, "pointermove", (function(e) {
+      if (truth_(dragging24["on"])) {
+        return set_at17(e.clientX, e.clientY);
+      }
+      ;
+    }));
+    on_BANG_(area9, "pointerup", (function(_) {
+      return dragging24["on"] = false;
+    }));
+    on_BANG_(area9, "dblclick", (function(_) {
+      commit_BANG_(panel, path3, get(c, "default"));
+      return paint14(get(c, "default"));
+    }));
+    paint14(cur12());
+    reg_updater_BANG_(panel, path3, paint14);
+    return r8;
+  };
+  var cubic_bezier = function(p1x, p1y, p2x, p2y, t) {
+    const mt1 = 1 - t;
+    const y2 = 3 * mt1 * mt1 * t * p1y + 3 * mt1 * t * t * p2y + t * t * t;
+    return { "x": t, "y": y2 };
+  };
+  var sample_spring = function(visual_dur, bounce, t) {
+    const zeta1 = clamp(1 - bounce, 0.05, 1);
+    const omega2 = 2 * Math.PI / Math.max(0.05, visual_dur);
+    if (zeta1 < 1) {
+      const wd3 = omega2 * Math.sqrt(1 - zeta1 * zeta1);
+      return 1 - Math.exp(-zeta1 * omega2 * t) * (Math.cos(wd3 * t) + zeta1 * omega2 / wd3 * Math.sin(wd3 * t));
+    } else {
+      return 1 - Math.exp(-omega2 * t) * (1 + omega2 * t);
+    }
+    ;
+  };
+  var render_transition = function(panel, c) {
+    const map__12 = c;
+    const path3 = get(map__12, "path");
+    const r4 = row(get(c, "label"));
+    const wrap5 = mk("div", "dial-transition");
+    const modes6 = mk("div", "dial-seg");
+    const canvas7 = mk("canvas", "dial-curve");
+    const fields8 = mk("div", "dial-fields");
+    const cur9 = (function() {
+      return get_in(deref(get(panel, "store")), path3);
+    });
+    const get_mode10 = (function() {
+      const v11 = cur9();
+      if (v11["type"] === "easing") {
+        return "easing";
+      } else {
+        if (truth_(v11["stiffness"])) {
+          return "physics";
+        } else {
+          if ("else") {
+            return "time";
+          } else {
+            return null;
+          }
+        }
+      }
+      ;
+    });
+    const draw12 = (function() {
+      const ctx13 = canvas7.getContext("2d");
+      const w14 = 220;
+      const h15 = 90;
+      const accent16 = getComputedStyle(document.documentElement).getPropertyValue("--accent").trim();
+      canvas7.width = w14;
+      canvas7.height = h15;
+      ctx13.clearRect(0, 0, w14, h15);
+      ctx13.lineWidth = 2;
+      ctx13.strokeStyle = truth_(seq(accent16)) ? accent16 : "#7c5cfc";
+      ctx13.beginPath();
+      const v17 = cur9();
+      const mode18 = get_mode10();
+      const n1219 = 61;
+      let i20 = 0;
+      for (; i20 < n1219; i20++) {
+        (() => {
+          const t21 = i20 / 60;
+          const y22 = mode18 === "easing" ? (() => {
+            const e23 = (() => {
+              const or__23426__auto__24 = v17["ease"];
+              if (truth_(or__23426__auto__24)) {
+                return or__23426__auto__24;
+              } else {
+                return [0.25, 0.1, 0.25, 1];
+              }
+              ;
+            })();
+            return cubic_bezier(e23[0], e23[1], e23[2], e23[3], t21)["y"];
+          })() : mode18 === "physics" ? sample_spring(0.5, 0.2, t21 * 1) : "else" ? (() => {
+            const vd25 = (() => {
+              const or__23426__auto__26 = v17["visualDuration"];
+              if (truth_(or__23426__auto__26)) {
+                return or__23426__auto__26;
+              } else {
+                return 0.4;
+              }
+              ;
+            })();
+            return sample_spring(vd25, (() => {
+              const or__23426__auto__27 = v17["bounce"];
+              if (truth_(or__23426__auto__27)) {
+                return or__23426__auto__27;
+              } else {
+                return 0.2;
+              }
+              ;
+            })(), t21 * (vd25 * 2));
+          })() : null;
+          const px28 = t21 * w14;
+          const py29 = h15 - clamp(y22, -0.2, 1.4) * (h15 * 0.7) - h15 * 0.1;
+          if (i20 === 0) {
+            return ctx13.moveTo(px28, py29);
+          } else {
+            return ctx13.lineTo(px28, py29);
+          }
+          ;
+        })();
+      }
+      ;
+      return ctx13.stroke();
+    });
+    const num_field30 = (function(key_, lbl, mn, mx, st) {
+      const fw31 = mk("label", "dial-field");
+      const inp32 = mk("input", null);
+      inp32.type = "number";
+      inp32.min = `${mn ?? ""}`;
+      inp32.max = `${mx ?? ""}`;
+      inp32.step = `${st ?? ""}`;
+      inp32.value = `${(() => {
+        const or__23426__auto__33 = cur9()[key_];
+        if (truth_(or__23426__auto__33)) {
+          return or__23426__auto__33;
+        } else {
+          return "";
+        }
+        ;
+      })() ?? ""}`;
+      add_BANG_(fw31, txt_BANG_(mk("span", null), lbl), inp32);
+      on_BANG_(inp32, "input", (function(_) {
+        const v34 = JSON.parse(JSON.stringify(cur9()));
+        v34[key_] = parseFloat(inp32.value);
+        commit_BANG_(panel, path3, v34);
+        return draw12();
+      }));
+      return { "el": fw31, "inp": inp32 };
+    });
+    const rebuild35 = (function() {
+      fields8.innerHTML = "";
+      const mode36 = get_mode10();
+      const v37 = cur9();
+      if (mode36 === "easing") {
+        add_BANG_(fields8, num_field30("duration", "Duration", 0, 5, 0.05)["el"]);
+      } else {
+        if (mode36 === "physics") {
+          for (let G__38 of iterable([num_field30("stiffness", "Stiffness", 1, 500, 1), num_field30("damping", "Damping", 1, 60, 1), num_field30("mass", "Mass", 0.1, 5, 0.1)])) {
+            const f39 = G__38;
+            add_BANG_(fields8, f39["el"]);
+          }
+        } else {
+          if ("else") {
+            for (let G__40 of iterable([num_field30("visualDuration", "Duration", 0.05, 2, 0.01), num_field30("bounce", "Bounce", 0, 1, 0.01)])) {
+              const f41 = G__40;
+              add_BANG_(fields8, f41["el"]);
+            }
+          } else {
+          }
+        }
+      }
+      ;
+      return draw12();
+    });
+    const set_mode42 = (function(m) {
+      const v43 = JSON.parse(JSON.stringify(cur9()));
+      if (m === "easing") {
+        v43["type"] = "easing";
+        if (truth_(v43["ease"])) {
+        } else {
+          v43["ease"] = [0.25, 0.1, 0.25, 1];
+        }
+        ;
+        if (truth_(v43["duration"])) {
+        } else {
+          v43["duration"] = 0.3;
+        }
+      } else {
+        if (m === "physics") {
+          v43["type"] = "spring";
+          v43["stiffness"] = (() => {
+            const or__23426__auto__44 = v43["stiffness"];
+            if (truth_(or__23426__auto__44)) {
+              return or__23426__auto__44;
+            } else {
+              return 200;
+            }
+            ;
+          })();
+          v43["damping"] = (() => {
+            const or__23426__auto__45 = v43["damping"];
+            if (truth_(or__23426__auto__45)) {
+              return or__23426__auto__45;
+            } else {
+              return 25;
+            }
+            ;
+          })();
+          v43["mass"] = (() => {
+            const or__23426__auto__46 = v43["mass"];
+            if (truth_(or__23426__auto__46)) {
+              return or__23426__auto__46;
+            } else {
+              return 1;
+            }
+            ;
+          })();
+        } else {
+          if ("else") {
+            v43["type"] = "spring";
+            delete v43["stiffness"];
+            delete v43["damping"];
+            delete v43["mass"];
+            v43["visualDuration"] = (() => {
+              const or__23426__auto__47 = v43["visualDuration"];
+              if (truth_(or__23426__auto__47)) {
+                return or__23426__auto__47;
+              } else {
+                return 0.4;
+              }
+              ;
+            })();
+            v43["bounce"] = (() => {
+              const or__23426__auto__48 = v43["bounce"];
+              if (truth_(or__23426__auto__48)) {
+                return or__23426__auto__48;
+              } else {
+                return 0.2;
+              }
+              ;
+            })();
+          } else {
+          }
+        }
+      }
+      ;
+      commit_BANG_(panel, path3, v43);
+      return rebuild35();
+    });
+    for (let G__49 of iterable([["easing", "Easing"], ["time", "Time"], ["physics", "Physics"]])) {
+      const pair50 = G__49;
+      const b51 = mk("button", "dial-seg-btn");
+      attr_BANG_(b51, "type", "button");
+      txt_BANG_(b51, pair50[1]);
+      on_BANG_(b51, "click", (function(_) {
+        return set_mode42(pair50[0]);
+      }));
+      add_BANG_(modes6, b51);
+    }
+    ;
+    add_BANG_(wrap5, modes6, canvas7, fields8);
+    add_BANG_(r4, wrap5);
+    rebuild35();
+    reg_updater_BANG_(panel, path3, (function(_) {
+      return rebuild35();
+    }));
+    return r4;
+  };
+  var render_action = function(panel, c) {
+    const map__12 = c;
+    const path3 = get(map__12, "path");
+    const label4 = get(map__12, "label");
+    const r5 = mk("div", "dial-row dial-row--action");
+    const btn6 = mk("button", "dial-action");
+    attr_BANG_(btn6, "type", "button");
+    txt_BANG_(btn6, label4);
+    on_BANG_(btn6, "click", (function(_) {
+      const temp__23062__auto__7 = get(panel, "onAction");
+      if (truth_(temp__23062__auto__7)) {
+        const f8 = temp__23062__auto__7;
+        return f8(path_str(path3));
+      }
+      ;
+    }));
+    add_BANG_(r5, btn6);
+    return r5;
+  };
+  var render_folder = function(panel, c) {
+    const wrap1 = mk("div", "dial-folder");
+    const head2 = mk("button", "dial-folder-head");
+    const body3 = mk("div", "dial-folder-body");
+    const chev4 = mk("span", "dial-chevron");
+    const open5 = atom(not(get(c, "collapsed")));
+    const sync6 = (function() {
+      if (truth_(deref(open5))) {
+        return wrap1.classList.remove("is-collapsed");
+      } else {
+        return wrap1.classList.add("is-collapsed");
+      }
+      ;
+    });
+    attr_BANG_(head2, "type", "button");
+    add_BANG_(head2, chev4, txt_BANG_(mk("span", null), get(c, "label")));
+    on_BANG_(head2, "click", (function(_) {
+      swap_BANG_(open5, not);
+      return sync6();
+    }));
+    for (let G__7 of iterable(get(c, "children"))) {
+      const child8 = G__7;
+      add_BANG_(body3, render_control(panel, child8));
+    }
+    ;
+    add_BANG_(wrap1, head2, body3);
+    sync6();
+    return wrap1;
+  };
+  var render_control = function(panel, c) {
+    const t1 = get(c, "ctype");
+    if (t1 === "slider") {
+      return render_slider(panel, c);
+    } else {
+      if (t1 === "toggle") {
+        return render_toggle(panel, c);
+      } else {
+        if (t1 === "text") {
+          return render_text(panel, c);
+        } else {
+          if (t1 === "select") {
+            return render_select(panel, c);
+          } else {
+            if (t1 === "color") {
+              return render_color(panel, c);
+            } else {
+              if (t1 === "image") {
+                return render_image(panel, c);
+              } else {
+                if (t1 === "pad") {
+                  return render_pad(panel, c);
+                } else {
+                  if (t1 === "transition") {
+                    return render_transition(panel, c);
+                  } else {
+                    if (t1 === "action") {
+                      return render_action(panel, c);
+                    } else {
+                      if (t1 === "folder") {
+                        return render_folder(panel, c);
+                      } else {
+                        if ("else") {
+                          return mk("div", null);
+                        } else {
+                          return null;
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    ;
+  };
+  var storage_for = function(panel) {
+    const p1 = get(panel, "persist");
+    if (truth_((() => {
+      const and__23442__auto__2 = p1;
+      if (truth_(and__23442__auto__2)) {
+        return p1["storage"] === "sessionStorage";
+      } else {
+        return and__23442__auto__2;
+      }
+      ;
+    })())) {
+      return sessionStorage;
+    } else {
+      return localStorage;
+    }
+    ;
+  };
+  var storage_key = function(panel) {
+    const p1 = get(panel, "persist");
+    const or__23426__auto__2 = (() => {
+      const and__23442__auto__3 = p1;
+      if (truth_(and__23442__auto__3)) {
+        return p1["key"];
+      } else {
+        return and__23442__auto__3;
+      }
+      ;
+    })();
+    if (truth_(or__23426__auto__2)) {
+      return or__23426__auto__2;
+    } else {
+      return `${"dialkit:"}${get(panel, "id") ?? ""}`;
+    }
+    ;
+  };
+  var persist_save_BANG_ = function(panel) {
+    if (truth_(get(panel, "persist"))) {
+      return (() => {
+        try {
+          const payload1 = { "values": clj__GT_js(deref(get(panel, "store"))), "presets": get(panel, "presets"), "active": get(panel, "activePreset") };
+          return storage_for(panel).setItem(storage_key(panel), JSON.stringify(payload1));
+        } catch (_2) {
+          return null;
+        }
+      })();
+    }
+    ;
+  };
+  var persist_load_BANG_ = function(panel) {
+    if (truth_(get(panel, "persist"))) {
+      return (() => {
+        try {
+          const raw1 = storage_for(panel).getItem(storage_key(panel));
+          if (truth_(raw1)) {
+            const data2 = JSON.parse(raw1);
+            if (truth_(data2["values"])) {
+              reset_BANG_(get(panel, "store"), js__GT_clj(data2["values"]));
+            }
+            ;
+            if (truth_(data2["presets"])) {
+              panel["presets"] = data2["presets"];
+            }
+            ;
+            if (truth_(data2["active"])) {
+              return panel["activePreset"] = data2["active"];
+            }
+            ;
+          }
+          ;
+        } catch (_3) {
+          return null;
+        }
+      })();
+    }
+    ;
+  };
+  var root_el = atom(null);
+  var panels = atom({});
+  var drag_state = { "on": false, "x": 0, "y": 0, "sx": 0, "sy": 0 };
+  var ensure_root_BANG_ = function() {
+    const or__23426__auto__1 = deref(root_el);
+    if (truth_(or__23426__auto__1)) {
+      return or__23426__auto__1;
+    } else {
+      const el2 = mk("div", "dialkit-root");
+      attr_BANG_(el2, "data-theme", "system");
+      el2.style.top = "12px";
+      el2.style.right = "12px";
+      document.body.appendChild(el2);
+      reset_BANG_(root_el, el2);
+      window.addEventListener("pointermove", (function(e) {
+        if (truth_(drag_state["on"])) {
+          const dx3 = e.clientX - drag_state["sx"];
+          const dy4 = e.clientY - drag_state["sy"];
+          el2.style.right = "auto";
+          el2.style.left = `${drag_state["x"] + dx3}px`;
+          return el2.style.top = `${drag_state["y"] + dy4}px`;
+        }
+        ;
+      }));
+      window.addEventListener("pointerup", (function(_) {
+        return drag_state["on"] = false;
+      }));
+      return el2;
+    }
+    ;
+  };
+  var start_drag_BANG_ = function(e) {
+    const el1 = deref(root_el);
+    const rect2 = el1.getBoundingClientRect();
+    drag_state["on"] = true;
+    drag_state["sx"] = e.clientX;
+    drag_state["sy"] = e.clientY;
+    drag_state["x"] = rect2.left;
+    return drag_state["y"] = rect2.top;
+  };
+  var build_body_BANG_ = function(panel) {
+    const body1 = get(panel, "bodyEl");
+    body1.innerHTML = "";
+    panel["updaters"] = {};
+    for (let G__2 of iterable(get(panel, "controls"))) {
+      const c3 = G__2;
+      add_BANG_(body1, render_control(panel, c3));
+    }
+    return null;
+  };
+  var select_version_BANG_ = function(panel, id) {
+    panel["activePreset"] = id;
+    if (truth_(id)) {
+      const p1 = get(panel, "presets").find((function(x) {
+        return _EQ_(x["id"], id);
+      }));
+      if (truth_(p1)) {
+        reset_BANG_(get(panel, "store"), js__GT_clj(p1["values"]));
+      }
+    } else {
+      reset_BANG_(get(panel, "store"), js__GT_clj(get(panel, "baseValues")));
+    }
+    ;
+    refresh_updaters_BANG_(panel);
+    notify_BANG_(panel);
+    persist_save_BANG_(panel);
+    return render_versions_BANG_(panel);
+  };
+  var save_version_BANG_ = function(panel) {
+    const id1 = `v${Date.now() ?? ""}`;
+    const n2 = `${"Version "}${2 + get(panel, "presets").length}`;
+    const preset3 = { "id": id1, "name": n2, "values": clj__GT_js(deref(get(panel, "store"))) };
+    get(panel, "presets").push(preset3);
+    return select_version_BANG_(panel, id1);
+  };
+  var render_versions_BANG_ = function(panel) {
+    const sel1 = get(panel, "versionSel");
+    sel1.innerHTML = "";
+    const o02 = mk("option", null);
+    o02.value = "";
+    txt_BANG_(o02, "Version 1");
+    add_BANG_(sel1, o02);
+    for (let G__3 of iterable(get(panel, "presets"))) {
+      const p4 = G__3;
+      const o5 = mk("option", null);
+      o5.value = p4["id"];
+      txt_BANG_(o5, p4["name"]);
+      add_BANG_(sel1, o5);
+    }
+    ;
+    return sel1.value = (() => {
+      const or__23426__auto__6 = get(panel, "activePreset");
+      if (truth_(or__23426__auto__6)) {
+        return or__23426__auto__6;
+      } else {
+        return "";
+      }
+      ;
+    })();
+  };
+  var copy_config_BANG_ = function(panel) {
+    const vals1 = JSON.stringify(clj__GT_js(deref(get(panel, "store"))), null, 2);
+    const text2 = `${'// DialKit values for "'}${get(panel, "name") ?? ""}${'"\n'}${"// Replace your config defaults with these tuned values:\n"}${vals1 ?? ""}`;
+    if (truth_(navigator.clipboard)) {
+      navigator.clipboard.writeText(text2);
+    }
+    ;
+    const temp__23062__auto__3 = window.__uiToast;
+    if (truth_(temp__23062__auto__3)) {
+      const t4 = temp__23062__auto__3;
+      return t4("Copied values to clipboard", { "variant": "success" });
+    }
+    ;
+  };
+  var make_panel = function(name, config, opts) {
+    const id1 = (() => {
+      const or__23426__auto__2 = opts["id"];
+      if (truth_(or__23426__auto__2)) {
+        return or__23426__auto__2;
+      } else {
+        return `dial-${Math.random().toString(36).slice(2, 8) ?? ""}`;
+      }
+      ;
+    })();
+    const controls3 = parse_config(config, []);
+    const store4 = atom({});
+    const panel5 = { "open": not(opts["defaultCollapsed"]), "store": store4, "activePreset": null, "name": name, "persist": (() => {
+      const p6 = opts["persist"];
+      if (p6 === true) {
+        return {};
+      } else {
+        if (tof(p6) === "object") {
+          return p6;
+        } else {
+          if ("else") {
+            return null;
+          } else {
+            return null;
+          }
+        }
+      }
+      ;
+    })(), "controls": controls3, "onAction": opts["onAction"], "presets": [], "id": id1, "subs": [], "onChange": opts["onChange"], "updaters": {} };
+    init_values_BANG_(store4, controls3);
+    panel5["baseValues"] = clj__GT_js(deref(store4));
+    persist_load_BANG_(panel5);
+    return panel5;
+  };
+  var mount_panel_BANG_ = function(panel, opts) {
+    const root1 = ensure_root_BANG_();
+    const card2 = mk("div", "dial-panel");
+    const head3 = mk("div", "dial-panel-head");
+    const title4 = mk("div", "dial-panel-title");
+    const tools5 = mk("div", "dial-panel-tools");
+    const vsel6 = mk("select", "dial-version");
+    const addb7 = mk("button", "dial-tool");
+    const copyb8 = mk("button", "dial-tool");
+    const resetb9 = mk("button", "dial-tool");
+    const collb10 = mk("button", "dial-tool");
+    const body11 = mk("div", "dial-panel-body");
+    txt_BANG_(title4, get(panel, "name"));
+    panel["bodyEl"] = body11;
+    panel["versionSel"] = vsel6;
+    panel["cardEl"] = card2;
+    for (let G__12 of iterable([[addb7, "+", "Save version"], [copyb8, "\u29C9", "Copy values"], [resetb9, "\u21BA", "Reset"], [collb10, "\u25BE", "Collapse"]])) {
+      const spec13 = G__12;
+      const b14 = spec13[0];
+      attr_BANG_(b14, "type", "button");
+      attr_BANG_(b14, "title", spec13[2]);
+      txt_BANG_(b14, spec13[1]);
+    }
+    ;
+    on_BANG_(vsel6, "change", (function(_) {
+      return select_version_BANG_(panel, (() => {
+        const v15 = vsel6.value;
+        if (truth_(seq(v15))) {
+          return v15;
+        }
+        ;
+      })());
+    }));
+    on_BANG_(addb7, "click", (function(_) {
+      return save_version_BANG_(panel);
+    }));
+    on_BANG_(copyb8, "click", (function(_) {
+      return copy_config_BANG_(panel);
+    }));
+    on_BANG_(resetb9, "click", (function(_) {
+      return select_version_BANG_(panel, null);
+    }));
+    on_BANG_(collb10, "click", (function(_) {
+      card2.classList.toggle("is-collapsed");
+      return txt_BANG_(collb10, truth_(card2.classList.contains("is-collapsed")) ? "\u25B8" : "\u25BE");
+    }));
+    on_BANG_(head3, "pointerdown", (function(e) {
+      if (truth_((() => {
+        const or__23426__auto__16 = _EQ_(e.target, head3);
+        if (or__23426__auto__16) {
+          return or__23426__auto__16;
+        } else {
+          return _EQ_(e.target, title4);
+        }
+        ;
+      })())) {
+        return start_drag_BANG_(e);
+      }
+      ;
+    }));
+    add_BANG_(tools5, vsel6, addb7, copyb8, resetb9, collb10);
+    add_BANG_(head3, title4, tools5);
+    add_BANG_(card2, head3, body11);
+    add_BANG_(root1, card2);
+    build_body_BANG_(panel);
+    render_versions_BANG_(panel);
+    if (truth_(opts["defaultCollapsed"])) {
+      card2.classList.add("is-collapsed");
+      txt_BANG_(collb10, "\u25B8");
+    }
+    ;
+    return card2;
+  };
+  var setvals_walk_BANG_ = function(panel, prefix, o) {
+    for (let G__1 of iterable(Object.keys(o))) {
+      const k2 = G__1;
+      const v3 = o[k2];
+      const path4 = conj(prefix, k2);
+      if (truth_(tof(v3) === "object" && (not(Array.isArray(v3)) && not(get(panel, "updaters")[path_str(path4)])))) {
+        setvals_walk_BANG_(panel, path4, v3);
+      } else {
+        set_value_BANG_(panel, path4, v3);
+      }
+    }
+    return null;
+  };
+  var controller = function(panel) {
+    return { "setOpen": (function(o) {
+      panel["open"] = o;
+      const temp__23062__auto__1 = get(panel, "cardEl");
+      if (truth_(temp__23062__auto__1)) {
+        const card2 = temp__23062__auto__1;
+        if (truth_(o)) {
+          card2.classList.remove("is-collapsed");
+        } else {
+          card2.classList.add("is-collapsed");
+        }
+      }
+      ;
+      return void 0;
+    }), "destroy": (function() {
+      const temp__23062__auto__3 = get(panel, "cardEl");
+      if (truth_(temp__23062__auto__3)) {
+        const card4 = temp__23062__auto__3;
+        card4.remove();
+      }
+      ;
+      delete deref(panels)[get(panel, "id")];
+      return void 0;
+    }), "setValue": (function(p, v) {
+      set_value_BANG_(panel, p.split("."), v);
+      return void 0;
+    }), "getOpen": (function() {
+      return get(panel, "open");
+    }), "id": get(panel, "id"), "setValues": (function(obj) {
+      setvals_walk_BANG_(panel, [], obj);
+      return void 0;
+    }), "resetValues": (function() {
+      select_version_BANG_(panel, null);
+      return void 0;
+    }), "getValues": (function() {
+      return clj__GT_js(deref(get(panel, "store")));
+    }), "subscribe": (function(cb, immediate) {
+      get(panel, "subs").push(cb);
+      if (!(immediate === false)) {
+        cb(clj__GT_js(deref(get(panel, "store"))));
+      }
+      ;
+      return function() {
+        const i5 = get(panel, "subs").indexOf(cb);
+        if (i5 >= 0) {
+          return get(panel, "subs").splice(i5, 1);
+        }
+        ;
+      };
+    }) };
+  };
+  var use_dial = function(name, config, opts) {
+    const opts1 = (() => {
+      const or__23426__auto__2 = opts;
+      if (truth_(or__23426__auto__2)) {
+        return or__23426__auto__2;
+      } else {
+        return {};
+      }
+      ;
+    })();
+    const panel3 = make_panel(name, config, opts1);
+    const ctrl4 = controller(panel3);
+    deref(panels)[get(panel3, "id")] = panel3;
+    panel3["ctrl"] = ctrl4;
+    Object.defineProperty(ctrl4, "values", { "get": (function() {
+      return clj__GT_js(deref(get(panel3, "store")));
+    }) });
+    if (!(opts1["enabled"] === false)) {
+      mount_panel_BANG_(panel3, opts1);
+    }
+    ;
+    return ctrl4;
+  };
+  var panel_by_id = function(id) {
+    return deref(panels)[id];
+  };
+  var dial_store = { "setPanelOpen": (function(id, o) {
+    const temp__23062__auto__1 = panel_by_id(id);
+    if (truth_(temp__23062__auto__1)) {
+      const p2 = temp__23062__auto__1;
+      return get(p2, "ctrl")["setOpen"](o);
+    }
+    ;
+  }), "togglePanelOpen": (function(id) {
+    const temp__23062__auto__3 = panel_by_id(id);
+    if (truth_(temp__23062__auto__3)) {
+      const p4 = temp__23062__auto__3;
+      return get(p4, "ctrl")["setOpen"](not(get(p4, "open")));
+    }
+    ;
+  }), "getPanelOpen": (function(id) {
+    const temp__23062__auto__5 = panel_by_id(id);
+    if (truth_(temp__23062__auto__5)) {
+      const p6 = temp__23062__auto__5;
+      return get(p6, "open");
+    }
+    ;
+  }), "getPresets": (function(id) {
+    const temp__23062__auto__7 = panel_by_id(id);
+    if (truth_(temp__23062__auto__7)) {
+      const p8 = temp__23062__auto__7;
+      return get(p8, "presets");
+    }
+    ;
+  }), "getActivePresetId": (function(id) {
+    const temp__23062__auto__9 = panel_by_id(id);
+    if (truth_(temp__23062__auto__9)) {
+      const p10 = temp__23062__auto__9;
+      return get(p10, "activePreset");
+    }
+    ;
+  }), "clearActivePreset": (function(id) {
+    const temp__23062__auto__11 = panel_by_id(id);
+    if (truth_(temp__23062__auto__11)) {
+      const p12 = temp__23062__auto__11;
+      return select_version_BANG_(p12, null);
+    }
+    ;
+  }), "savePreset": (function(id) {
+    const temp__23062__auto__13 = panel_by_id(id);
+    if (truth_(temp__23062__auto__13)) {
+      const p14 = temp__23062__auto__13;
+      return save_version_BANG_(p14);
+    }
+    ;
+  }), "deletePreset": (function(id, pid) {
+    const temp__23062__auto__15 = panel_by_id(id);
+    if (truth_(temp__23062__auto__15)) {
+      const p16 = temp__23062__auto__15;
+      p16["presets"] = get(p16, "presets").filter((function(x) {
+        return !_EQ_(x["id"], pid);
+      }));
+      render_versions_BANG_(p16);
+      return persist_save_BANG_(p16);
+    }
+    ;
+  }) };
+  window["__uiDial"] = use_dial;
+  window["DialStore"] = dial_store;
+
+  // .compiled/dial_timeline.mjs
+  var tof2 = function(v) {
+    return typeof v;
+  };
+  var mk2 = function(tag, class$) {
+    const e1 = document.createElement(tag);
+    if (truth_(class$)) {
+      e1.className = class$;
+    }
+    ;
+    return e1;
+  };
+  var add_BANG_2 = (() => {
+    const f13 = (function(var_args) {
+      const args141 = [];
+      const len__23321__auto__2 = arguments.length;
+      let i153 = 0;
+      while (true) {
+        if (i153 < len__23321__auto__2) {
+          args141.push(arguments[i153]);
+          let G__4 = i153 + 1;
+          i153 = G__4;
+          continue;
+        }
+        ;
+        break;
+      }
+      ;
+      const argseq__23513__auto__5 = 1 < args141.length ? args141.slice(1) : null;
+      return f13.cljs$core$IFn$_invoke$arity$variadic(arguments[0], argseq__23513__auto__5);
+    });
+    f13.cljs$core$IFn$_invoke$arity$variadic = (function(parent, children) {
+      for (let G__6 of iterable(children)) {
+        const c7 = G__6;
+        if (truth_(c7)) {
+          parent.appendChild(c7);
+        }
+      }
+      ;
+      return parent;
+    });
+    f13.cljs$lang$maxFixedArity = 1;
+    return f13;
+  })();
+  var txt_BANG_2 = function(e, s) {
+    e.textContent = `${s ?? ""}`;
+    return e;
+  };
+  var on_BANG_2 = function(e, ev, f) {
+    e.addEventListener(ev, f);
+    return e;
+  };
+  var attr_BANG_2 = function(e, k, v) {
+    e.setAttribute(k, v);
+    return e;
+  };
+  var clamp2 = function(v, lo, hi) {
+    return Math.max(lo, Math.min(v, hi));
+  };
+  var fmt_clock = function(sec) {
+    const s1 = Math.max(0, sec);
+    const whole2 = Math.floor(s1);
+    const tenths3 = Math.floor(10 * (s1 - whole2));
+    return `${whole2 ?? ""}${"."}${tenths3 ?? ""}s`;
+  };
+  var cubic_bezier_y = function(e, p) {
+    const t1 = p;
+    const mt2 = 1 - t1;
+    return 3 * mt2 * mt2 * t1 * e[1] + 3 * mt2 * t1 * t1 * e[3] + t1 * t1 * t1;
+  };
+  var sample_spring2 = function(visual_dur, bounce, t) {
+    const zeta1 = clamp2(1 - bounce, 0.05, 1);
+    const omega2 = 2 * Math.PI / Math.max(0.05, visual_dur);
+    if (zeta1 < 1) {
+      const wd3 = omega2 * Math.sqrt(1 - zeta1 * zeta1);
+      return 1 - Math.exp(-zeta1 * omega2 * t) * (Math.cos(wd3 * t) + zeta1 * omega2 / wd3 * Math.sin(wd3 * t));
+    } else {
+      return 1 - Math.exp(-omega2 * t) * (1 + omega2 * t);
+    }
+    ;
+  };
+  var transition_duration = function(tr, fallback) {
+    if (tr == null) {
+      return fallback;
+    } else {
+      if (tr["type"] === "easing") {
+        const or__23426__auto__1 = tr["duration"];
+        if (truth_(or__23426__auto__1)) {
+          return or__23426__auto__1;
+        } else {
+          return 0.3;
+        }
+        ;
+      } else {
+        if (truth_(tr["stiffness"])) {
+          const k2 = tr["stiffness"];
+          const m3 = (() => {
+            const or__23426__auto__4 = tr["mass"];
+            if (truth_(or__23426__auto__4)) {
+              return or__23426__auto__4;
+            } else {
+              return 1;
+            }
+            ;
+          })();
+          return clamp2(4 * Math.sqrt(m3 / k2), 0.2, 3);
+        } else {
+          if ("else") {
+            const or__23426__auto__5 = tr["visualDuration"];
+            if (truth_(or__23426__auto__5)) {
+              return or__23426__auto__5;
+            } else {
+              return 0.5;
+            }
+            ;
+          } else {
+            return null;
+          }
+        }
+      }
+    }
+    ;
+  };
+  var ease_factor = function(tr, p) {
+    if (tr == null) {
+      return p;
+    } else {
+      if (tr["type"] === "easing") {
+        return cubic_bezier_y((() => {
+          const or__23426__auto__1 = tr["ease"];
+          if (truth_(or__23426__auto__1)) {
+            return or__23426__auto__1;
+          } else {
+            return [0.25, 0.1, 0.25, 1];
+          }
+          ;
+        })(), p);
+      } else {
+        if (truth_(tr["stiffness"])) {
+          return sample_spring2(0.5, 0.25, p * 1);
+        } else {
+          if ("else") {
+            return sample_spring2((() => {
+              const or__23426__auto__2 = tr["visualDuration"];
+              if (truth_(or__23426__auto__2)) {
+                return or__23426__auto__2;
+              } else {
+                return 0.5;
+              }
+              ;
+            })(), (() => {
+              const or__23426__auto__3 = tr["bounce"];
+              if (truth_(or__23426__auto__3)) {
+                return or__23426__auto__3;
+              } else {
+                return 0.2;
+              }
+              ;
+            })(), p * 1);
+          } else {
+            return null;
+          }
+        }
+      }
+    }
+    ;
+  };
+  var lerp_map = function(from, to, factor) {
+    const out1 = {};
+    const keys2 = Array.from(new Set(Object.keys((() => {
+      const or__23426__auto__3 = from;
+      if (truth_(or__23426__auto__3)) {
+        return or__23426__auto__3;
+      } else {
+        return {};
+      }
+      ;
+    })()).concat(Object.keys((() => {
+      const or__23426__auto__4 = to;
+      if (truth_(or__23426__auto__4)) {
+        return or__23426__auto__4;
+      } else {
+        return {};
+      }
+      ;
+    })()))));
+    for (let G__5 of iterable(keys2)) {
+      const k6 = G__5;
+      const a7 = truth_((() => {
+        const and__23442__auto__8 = from;
+        if (truth_(and__23442__auto__8)) {
+          return !_EQ_(from[k6], void 0);
+        } else {
+          return and__23442__auto__8;
+        }
+        ;
+      })()) ? from[k6] : to[k6];
+      const b9 = truth_((() => {
+        const and__23442__auto__10 = to;
+        if (truth_(and__23442__auto__10)) {
+          return !_EQ_(to[k6], void 0);
+        } else {
+          return and__23442__auto__10;
+        }
+        ;
+      })()) ? to[k6] : from[k6];
+      out1[k6] = a7 + (b9 - a7) * factor;
+    }
+    ;
+    return out1;
+  };
+  var clip_QMARK_ = function(v) {
+    return tof2(v) === "object" && (not(Array.isArray(v)) && (() => {
+      const or__23426__auto__1 = !_EQ_(v["at"], void 0);
+      if (or__23426__auto__1) {
+        return or__23426__auto__1;
+      } else {
+        const or__23426__auto__2 = v["from"];
+        if (truth_(or__23426__auto__2)) {
+          return or__23426__auto__2;
+        } else {
+          const or__23426__auto__3 = v["to"];
+          if (truth_(or__23426__auto__3)) {
+            return or__23426__auto__3;
+          } else {
+            const or__23426__auto__4 = v["steps"];
+            if (truth_(or__23426__auto__4)) {
+              return or__23426__auto__4;
+            } else {
+              return v["props"];
+            }
+            ;
+          }
+          ;
+        }
+        ;
+      }
+      ;
+    })());
+  };
+  var parse_clip = function(v) {
+    const at1 = (() => {
+      const or__23426__auto__2 = v["at"];
+      if (truth_(or__23426__auto__2)) {
+        return or__23426__auto__2;
+      } else {
+        return 0;
+      }
+      ;
+    })();
+    const tr3 = v["transition"];
+    const loop_QMARK_4 = boolean$(v["loop"]);
+    if (truth_(v["props"])) {
+      const tracks5 = {};
+      const names6 = Object.keys(v["props"]);
+      for (let G__7 of iterable(names6)) {
+        const nm8 = G__7;
+        const tk9 = v["props"][nm8];
+        const steps10 = (() => {
+          const or__23426__auto__11 = tk9["steps"];
+          if (truth_(or__23426__auto__11)) {
+            return or__23426__auto__11;
+          } else {
+            return [{ "duration": transition_duration((() => {
+              const or__23426__auto__12 = tk9["transition"];
+              if (truth_(or__23426__auto__12)) {
+                return or__23426__auto__12;
+              } else {
+                return tr3;
+              }
+              ;
+            })(), 0.5), "to": tk9["to"], "transition": tk9["transition"] }];
+          }
+          ;
+        })();
+        const dur13 = reduce((function(a, s) {
+          return a + (() => {
+            const or__23426__auto__14 = s["duration"];
+            if (truth_(or__23426__auto__14)) {
+              return or__23426__auto__14;
+            } else {
+              return 0.5;
+            }
+            ;
+          })();
+        }), 0, steps10);
+        tracks5[nm8] = { "from": tk9["from"], "delay": (() => {
+          const or__23426__auto__15 = tk9["delay"];
+          if (truth_(or__23426__auto__15)) {
+            return or__23426__auto__15;
+          } else {
+            return 0;
+          }
+          ;
+        })(), "steps": steps10, "transition": (() => {
+          const or__23426__auto__16 = tk9["transition"];
+          if (truth_(or__23426__auto__16)) {
+            return or__23426__auto__16;
+          } else {
+            return tr3;
+          }
+          ;
+        })(), "dur": dur13 };
+      }
+      ;
+      const dur17 = reduce((function(a, nm) {
+        return Math.max(a, tracks5[nm]["delay"] + tracks5[nm]["dur"]);
+      }), 0, names6);
+      return { "kind": "props", "at": at1, "duration": (() => {
+        const or__23426__auto__18 = v["duration"];
+        if (truth_(or__23426__auto__18)) {
+          return or__23426__auto__18;
+        } else {
+          return dur17;
+        }
+        ;
+      })(), "loop": loop_QMARK_4, "tracks": tracks5, "transition": tr3 };
+    } else {
+      if (truth_(v["steps"])) {
+        const steps19 = v["steps"];
+        const dur20 = reduce((function(a, s) {
+          return a + (() => {
+            const or__23426__auto__21 = s["duration"];
+            if (truth_(or__23426__auto__21)) {
+              return or__23426__auto__21;
+            } else {
+              return 0.5;
+            }
+            ;
+          })();
+        }), 0, steps19);
+        return { "kind": "sequence", "at": at1, "duration": (() => {
+          const or__23426__auto__22 = v["duration"];
+          if (truth_(or__23426__auto__22)) {
+            return or__23426__auto__22;
+          } else {
+            return dur20;
+          }
+          ;
+        })(), "loop": loop_QMARK_4, "from": v["from"], "steps": steps19, "transition": tr3 };
+      } else {
+        if (truth_((() => {
+          const or__23426__auto__23 = v["from"];
+          if (truth_(or__23426__auto__23)) {
+            return or__23426__auto__23;
+          } else {
+            return v["to"];
+          }
+          ;
+        })())) {
+          return { "kind": "single", "at": at1, "duration": (() => {
+            const or__23426__auto__24 = v["duration"];
+            if (truth_(or__23426__auto__24)) {
+              return or__23426__auto__24;
+            } else {
+              return transition_duration(tr3, 0.5);
+            }
+            ;
+          })(), "loop": loop_QMARK_4, "from": v["from"], "to": v["to"], "transition": tr3 };
+        } else {
+          if ("else") {
+            return { "kind": "marker", "at": at1, "duration": (() => {
+              const or__23426__auto__25 = v["duration"];
+              if (truth_(or__23426__auto__25)) {
+                return or__23426__auto__25;
+              } else {
+                return 0;
+              }
+              ;
+            })(), "loop": false };
+          } else {
+            return null;
+          }
+        }
+      }
+    }
+    ;
+  };
+  var parse_node2 = function(nm, v) {
+    if (truth_(clip_QMARK_(v))) {
+      return { "name": nm, "clip": parse_clip(v) };
+    } else {
+      return { "name": nm, "group": mapv((function(k) {
+        return parse_node2(k, v[k]);
+      }), Object.keys(v)) };
+    }
+    ;
+  };
+  var parse_config2 = function(config) {
+    return mapv((function(k) {
+      return parse_node2(k, config[k]);
+    }), Object.keys(config));
+  };
+  var clip_end = function(clip) {
+    return clip["at"] + clip["duration"];
+  };
+  var sample_single = function(clip, local) {
+    const dur1 = Math.max(1e-4, clip["duration"]);
+    const p2 = clamp2(local / dur1, 0, 1);
+    const f3 = ease_factor(clip["transition"], p2);
+    return { "progress": p2, "from": clip["from"], "to": clip["to"], "current": lerp_map(clip["from"], clip["to"], f3), "animate": p2 >= 1 ? clip["to"] : clip["from"] };
+  };
+  var sample_sequence = function(clip, local) {
+    const steps1 = clip["steps"];
+    const state2 = JSON.parse(JSON.stringify((() => {
+      const or__23426__auto__3 = clip["from"];
+      if (truth_(or__23426__auto__3)) {
+        return or__23426__auto__3;
+      } else {
+        return {};
+      }
+      ;
+    })()));
+    let i4 = 0;
+    let acc5 = 0;
+    let cur6 = state2;
+    let stepidx7 = 0;
+    while (true) {
+      if (i4 >= steps1.length) {
+        return { "progress": 1, "from": clip["from"], "to": cur6, "current": cur6, "step": steps1.length - 1, "animate": cur6 };
+      } else {
+        const s8 = steps1[i4];
+        const d9 = (() => {
+          const or__23426__auto__10 = s8["duration"];
+          if (truth_(or__23426__auto__10)) {
+            return or__23426__auto__10;
+          } else {
+            return 0.5;
+          }
+          ;
+        })();
+        const to11 = (() => {
+          const or__23426__auto__12 = s8["to"];
+          if (truth_(or__23426__auto__12)) {
+            return or__23426__auto__12;
+          } else {
+            return cur6;
+          }
+          ;
+        })();
+        if (local <= acc5 + d9) {
+          const lp13 = clamp2((local - acc5) / Math.max(1e-4, d9), 0, 1);
+          const f14 = ease_factor((() => {
+            const or__23426__auto__15 = s8["transition"];
+            if (truth_(or__23426__auto__15)) {
+              return or__23426__auto__15;
+            } else {
+              return clip["transition"];
+            }
+            ;
+          })(), lp13);
+          return { "progress": clamp2(local / Math.max(1e-4, clip["duration"]), 0, 1), "from": clip["from"], "to": to11, "step": i4, "current": lerp_map(cur6, to11, f14), "animate": lp13 >= 1 ? to11 : cur6 };
+        } else {
+          let G__16 = i4 + 1;
+          let G__17 = acc5 + d9;
+          let G__18 = (() => {
+            const m19 = Object.assign({}, cur6);
+            return Object.assign(m19, to11);
+          })();
+          let G__20 = i4;
+          i4 = G__16;
+          acc5 = G__17;
+          cur6 = G__18;
+          stepidx7 = G__20;
+          continue;
+        }
+        ;
+      }
+      ;
+      ;
+      break;
+    }
+    ;
+  };
+  var sample_track = function(track, local) {
+    const delay1 = track["delay"];
+    const lt2 = local - delay1;
+    if (lt2 < 0) {
+      return track["from"];
+    } else {
+      const steps3 = track["steps"];
+      let i4 = 0;
+      let acc5 = 0;
+      let cur6 = track["from"];
+      while (true) {
+        if (i4 >= steps3.length) {
+          return cur6;
+        } else {
+          const s7 = steps3[i4];
+          const d8 = (() => {
+            const or__23426__auto__9 = s7["duration"];
+            if (truth_(or__23426__auto__9)) {
+              return or__23426__auto__9;
+            } else {
+              return 0.5;
+            }
+            ;
+          })();
+          const to10 = s7["to"];
+          if (lt2 <= acc5 + d8) {
+            const lp11 = clamp2((lt2 - acc5) / Math.max(1e-4, d8), 0, 1);
+            const f12 = ease_factor((() => {
+              const or__23426__auto__13 = s7["transition"];
+              if (truth_(or__23426__auto__13)) {
+                return or__23426__auto__13;
+              } else {
+                return track["transition"];
+              }
+              ;
+            })(), lp11);
+            return cur6 + (to10 - cur6) * f12;
+          } else {
+            let G__14 = i4 + 1;
+            let G__15 = acc5 + d8;
+            let G__16 = to10;
+            i4 = G__14;
+            acc5 = G__15;
+            cur6 = G__16;
+            continue;
+          }
+          ;
+        }
+        ;
+        ;
+        break;
+      }
+      ;
+    }
+    ;
+  };
+  var sample_props = function(clip, local) {
+    const tracks1 = clip["tracks"];
+    const cur2 = {};
+    const from3 = {};
+    const to4 = {};
+    for (let G__5 of iterable(Object.keys(tracks1))) {
+      const nm6 = G__5;
+      const tk7 = tracks1[nm6];
+      const steps8 = tk7["steps"];
+      cur2[nm6] = sample_track(tk7, local);
+      from3[nm6] = tk7["from"];
+      to4[nm6] = steps8[steps8.length - 1]["to"];
+    }
+    ;
+    return { "progress": clamp2(local / Math.max(1e-4, clip["duration"]), 0, 1), "current": cur2, "from": from3, "to": to4, "animate": cur2 };
+  };
+  var sample_clip = function(clip, t) {
+    const at1 = clip["at"];
+    const dur2 = clip["duration"];
+    const raw3 = t - at1;
+    const started4 = t >= at1;
+    const cyc5 = Math.max(1e-4, dur2);
+    const local6 = truth_(clip["loop"]) ? raw3 < 0 ? 0 : Math.min(cyc5, raw3 - cyc5 * Math.floor(raw3 / cyc5)) : clamp2(raw3, 0, dur2);
+    const active7 = started4 && (() => {
+      const or__23426__auto__8 = clip["loop"];
+      if (truth_(or__23426__auto__8)) {
+        return or__23426__auto__8;
+      } else {
+        return t <= clip_end(clip);
+      }
+      ;
+    })();
+    const done9 = not(clip["loop"]) && t > clip_end(clip);
+    const base10 = clip["kind"] === "props" ? sample_props(clip, local6) : clip["kind"] === "sequence" ? sample_sequence(clip, local6) : clip["kind"] === "single" ? sample_single(clip, local6) : "else" ? { "progress": clamp2(local6 / cyc5, 0, 1), "current": {} } : null;
+    const css11 = (() => {
+      const tr12 = clip["transition"];
+      if (truth_((() => {
+        const and__23442__auto__13 = tr12;
+        if (truth_(and__23442__auto__13)) {
+          return tr12["type"] === "easing";
+        } else {
+          return and__23442__auto__13;
+        }
+        ;
+      })())) {
+        return { "duration": `${clip["duration"] ?? ""}s`, "timingFunction": `${"cubic-bezier("}${(() => {
+          const or__23426__auto__14 = tr12["ease"];
+          if (truth_(or__23426__auto__14)) {
+            return or__23426__auto__14;
+          } else {
+            return [0.25, 0.1, 0.25, 1];
+          }
+          ;
+        })().join(",") ?? ""}${")"}` };
+      } else {
+        return { "duration": `${clip["duration"] ?? ""}s`, "timingFunction": "ease" };
+      }
+      ;
+    })();
+    Object.assign(base10, { "at": at1, "duration": dur2, "loop": truth_(clip["loop"]) ? "repeat" : "off", "started": started4, "active": active7, "done": done9, "transition": clip["transition"], "css": css11 });
+    return base10;
+  };
+  var node_values = function(node, t) {
+    if (truth_(node["clip"])) {
+      return sample_clip(node["clip"], t);
+    } else {
+      const g1 = {};
+      for (let G__2 of iterable(node["group"])) {
+        const child3 = G__2;
+        g1[child3["name"]] = node_values(child3, t);
+      }
+      ;
+      return g1;
+    }
+    ;
+  };
+  var total_duration = function(nodes) {
+    const walk1 = (function(node) {
+      if (truth_(node["clip"])) {
+        return clip_end(node["clip"]);
+      } else {
+        return reduce((function(a, c) {
+          return Math.max(a, walk1(c));
+        }), 0, node["group"]);
+      }
+      ;
+    });
+    return reduce((function(a, n) {
+      return Math.max(a, walk1(n));
+    }), 1e-4, nodes);
+  };
+  var snapshot = function(tl) {
+    const t1 = get(tl, "time");
+    const out2 = {};
+    for (let G__3 of iterable(get(tl, "nodes"))) {
+      const node4 = G__3;
+      out2[node4["name"]] = node_values(node4, t1);
+    }
+    ;
+    out2["time"] = t1;
+    out2["playing"] = get(tl, "playing");
+    out2["duration"] = get(tl, "duration");
+    return out2;
+  };
+  var notify_BANG_2 = function(tl) {
+    const snap1 = snapshot(tl);
+    const temp__23062__auto__2 = get(tl, "onChange");
+    if (truth_(temp__23062__auto__2)) {
+      const cb3 = temp__23062__auto__2;
+      cb3(snap1);
+    }
+    ;
+    for (let G__4 of iterable(Array.from(get(tl, "subs")))) {
+      const s5 = G__4;
+      s5(snap1);
+    }
+    return null;
+  };
+  var tick_BANG_ = function(tl, now) {
+    const last1 = get(tl, "last");
+    const dt2 = truth_(last1) ? (now - last1) / 1e3 : 0;
+    tl["last"] = now;
+    if (truth_(get(tl, "playing"))) {
+      const t3 = get(tl, "time") + dt2;
+      const dur4 = get(tl, "duration");
+      const lp5 = get(tl, "loopOpt");
+      if (t3 < dur4) {
+        tl["time"] = t3;
+      } else {
+        if (lp5 === true) {
+          tl["time"] = t3 - dur4;
+        } else {
+          if (truth_((() => {
+            const and__23442__auto__6 = lp5;
+            if (truth_(and__23442__auto__6)) {
+              return !(lp5 === true) && !(lp5 === false);
+            } else {
+              return and__23442__auto__6;
+            }
+            ;
+          })())) {
+            const from7 = (() => {
+              const or__23426__auto__8 = lp5["from"];
+              if (truth_(or__23426__auto__8)) {
+                return or__23426__auto__8;
+              } else {
+                return 0;
+              }
+              ;
+            })();
+            tl["time"] = from7 + (t3 - dur4);
+          } else {
+            if ("else") {
+              tl["time"] = dur4;
+              tl["playing"] = false;
+            } else {
+            }
+          }
+        }
+      }
+    }
+    ;
+    notify_BANG_2(tl);
+    paint_dock_BANG_(tl);
+    return tl["raf"] = requestAnimationFrame((function(n) {
+      return tick_BANG_(tl, n);
+    }));
+  };
+  var play_BANG_ = function(tl) {
+    return tl["playing"] = true;
+  };
+  var pause_BANG_ = function(tl) {
+    return tl["playing"] = false;
+  };
+  var seek_BANG_ = function(tl, s) {
+    tl["time"] = clamp2(s, 0, get(tl, "duration"));
+    notify_BANG_2(tl);
+    return paint_dock_BANG_(tl);
+  };
+  var replay_BANG_ = function(tl) {
+    tl["time"] = 0;
+    return tl["playing"] = true;
+  };
+  var dock_el = atom(null);
+  var timelines = atom([]);
+  var px_per_sec = function(tl) {
+    const ruler1 = get(tl, "ruler");
+    if (truth_(ruler1)) {
+      return ruler1.clientWidth / Math.max(1e-4, get(tl, "zoom") * get(tl, "duration"));
+    } else {
+      return 100;
+    }
+    ;
+  };
+  var ensure_dock_BANG_ = function() {
+    const or__23426__auto__1 = deref(dock_el);
+    if (truth_(or__23426__auto__1)) {
+      return or__23426__auto__1;
+    } else {
+      const el2 = mk2("div", "dial-timeline");
+      attr_BANG_2(el2, "data-theme", "system");
+      document.body.appendChild(el2);
+      reset_BANG_(dock_el, el2);
+      return el2;
+    }
+    ;
+  };
+  var build_clip_rows_BANG_ = function(tl, track_host) {
+    track_host.innerHTML = "";
+    const pps1 = px_per_sec(tl);
+    const render_node2 = (function(node, depth) {
+      if (truth_(node["clip"])) {
+        const clip3 = node["clip"];
+        const row4 = mk2("div", "dtl-row");
+        const bar5 = mk2("div", "dtl-clip");
+        row4.style.paddingLeft = `${depth * 12}px`;
+        add_BANG_2(row4, txt_BANG_2(mk2("span", "dtl-row-label"), node["name"]));
+        bar5.style.left = `${pps1 * clip3["at"]}px`;
+        bar5.style.width = `${Math.max(8, pps1 * clip3["duration"]) ?? ""}px`;
+        txt_BANG_2(bar5, `${node["name"] ?? ""}${" "}${fmt_clock(clip3["duration"]) ?? ""}`);
+        const st6 = { "mode": null, "sx": 0, "at0": 0, "dur0": 0 };
+        on_BANG_2(bar5, "pointerdown", (function(e) {
+          bar5.setPointerCapture(e.pointerId);
+          const rect7 = bar5.getBoundingClientRect();
+          const near_edge8 = e.clientX > rect7.right - 10;
+          st6["mode"] = near_edge8 ? "resize" : "move";
+          st6["sx"] = e.clientX;
+          st6["at0"] = clip3["at"];
+          return st6["dur0"] = clip3["duration"];
+        }));
+        on_BANG_2(bar5, "pointermove", (function(e) {
+          if (truth_(st6["mode"])) {
+            const dx9 = (e.clientX - st6["sx"]) / pps1;
+            if (st6["mode"] === "resize") {
+              clip3["duration"] = Math.max(0.05, st6["dur0"] + dx9);
+            } else {
+              clip3["at"] = Math.max(0, st6["at0"] + dx9);
+            }
+            ;
+            tl["duration"] = Math.max(get(tl, "baseDuration"), total_duration(get(tl, "nodes")));
+            bar5.style.left = `${pps1 * clip3["at"]}px`;
+            bar5.style.width = `${Math.max(8, pps1 * clip3["duration"]) ?? ""}px`;
+            return notify_BANG_2(tl);
+          }
+          ;
+        }));
+        on_BANG_2(bar5, "pointerup", (function(_) {
+          return st6["mode"] = null;
+        }));
+        add_BANG_2(row4, bar5);
+        return track_host.appendChild(row4);
+      } else {
+        const hdr10 = mk2("div", "dtl-group");
+        hdr10.style.paddingLeft = `${depth * 12}px`;
+        txt_BANG_2(hdr10, node["name"]);
+        track_host.appendChild(hdr10);
+        for (let G__11 of iterable(node["group"])) {
+          const child12 = G__11;
+          render_node2(child12, depth + 1);
+        }
+        return null;
+      }
+      ;
+    });
+    for (let G__13 of iterable(get(tl, "nodes"))) {
+      const node14 = G__13;
+      render_node2(node14, 0);
+    }
+    return null;
+  };
+  var paint_dock_BANG_ = function(tl) {
+    if (truth_(get(tl, "playhead"))) {
+      const pps1 = px_per_sec(tl);
+      get(tl, "playhead").style.left = `${pps1 * get(tl, "time")}px`;
+      return txt_BANG_2(get(tl, "clock"), fmt_clock(get(tl, "time")));
+    }
+    ;
+  };
+  var build_dock_BANG_ = function(tl) {
+    const dock1 = ensure_dock_BANG_();
+    const panel2 = mk2("div", "dtl-panel");
+    const bar3 = mk2("div", "dtl-toolbar");
+    const playb4 = mk2("button", "dtl-btn");
+    const repb5 = mk2("button", "dtl-btn");
+    const clock6 = mk2("span", "dtl-clock");
+    const name7 = txt_BANG_2(mk2("span", "dtl-name"), get(tl, "name"));
+    const scroller8 = mk2("div", "dtl-scroll");
+    const ruler9 = mk2("div", "dtl-ruler");
+    const tracks10 = mk2("div", "dtl-tracks");
+    const playhead11 = mk2("div", "dtl-playhead");
+    attr_BANG_2(playb4, "type", "button");
+    txt_BANG_2(playb4, "\u23F5");
+    attr_BANG_2(repb5, "type", "button");
+    txt_BANG_2(repb5, "\u21BA");
+    tl["ruler"] = ruler9;
+    tl["playhead"] = playhead11;
+    tl["clock"] = clock6;
+    tl["trackHost"] = tracks10;
+    on_BANG_2(playb4, "click", (function(_) {
+      if (truth_(get(tl, "playing"))) {
+        pause_BANG_(tl);
+      } else {
+        play_BANG_(tl);
+      }
+      ;
+      return txt_BANG_2(playb4, truth_(get(tl, "playing")) ? "\u23F8" : "\u23F5");
+    }));
+    on_BANG_2(repb5, "click", (function(_) {
+      replay_BANG_(tl);
+      return txt_BANG_2(playb4, "\u23F8");
+    }));
+    const pps12 = px_per_sec(tl);
+    const n13 = Math.ceil(get(tl, "duration"));
+    const n1714 = n13 + 1;
+    let i15 = 0;
+    for (; i15 < n1714; i15++) {
+      (() => {
+        const tick16 = mk2("div", "dtl-tick");
+        tick16.style.left = `${pps12 * i15}px`;
+        txt_BANG_2(tick16, `${i15}s`);
+        return add_BANG_2(ruler9, tick16);
+      })();
+    }
+    ;
+    const scrub17 = (function(e) {
+      const rect18 = ruler9.getBoundingClientRect();
+      const pps19 = px_per_sec(tl);
+      const s20 = (e.clientX - rect18.left + scroller8.scrollLeft) / pps19;
+      return seek_BANG_(tl, s20);
+    });
+    const st21 = { "on": false, "wasPlaying": false };
+    on_BANG_2(ruler9, "pointerdown", (function(e) {
+      ruler9.setPointerCapture(e.pointerId);
+      st21["on"] = true;
+      st21["wasPlaying"] = get(tl, "playing");
+      pause_BANG_(tl);
+      return scrub17(e);
+    }));
+    on_BANG_2(ruler9, "pointermove", (function(e) {
+      if (truth_(st21["on"])) {
+        return scrub17(e);
+      }
+      ;
+    }));
+    on_BANG_2(ruler9, "pointerup", (function(_) {
+      st21["on"] = false;
+      if (truth_(st21["wasPlaying"])) {
+        return play_BANG_(tl);
+      }
+      ;
+    }));
+    on_BANG_2(ruler9, "wheel", (function(e) {
+      if (truth_(e.altKey)) {
+        e.preventDefault();
+        tl["zoom"] = clamp2(get(tl, "zoom") * (e.deltaY > 0 ? 1.1 : 0.9), 0.2, 8);
+        return build_clip_rows_BANG_(tl, get(tl, "trackHost"));
+      }
+      ;
+    }));
+    add_BANG_2(bar3, playb4, repb5, clock6, name7);
+    add_BANG_2(scroller8, ruler9, tracks10, playhead11);
+    add_BANG_2(panel2, bar3, scroller8);
+    add_BANG_2(dock1, panel2);
+    build_clip_rows_BANG_(tl, tracks10);
+    paint_dock_BANG_(tl);
+    return tl["panelEl"] = panel2;
+  };
+  var controller2 = function(tl) {
+    const c1 = { "getValues": (function() {
+      return snapshot(tl);
+    }), "subscribe": (function(cb, immediate) {
+      get(tl, "subs").push(cb);
+      if (!(immediate === false)) {
+        cb(snapshot(tl));
+      }
+      ;
+      return function() {
+        const i2 = get(tl, "subs").indexOf(cb);
+        if (i2 >= 0) {
+          return get(tl, "subs").splice(i2, 1);
+        }
+        ;
+      };
+    }), "play": (function() {
+      play_BANG_(tl);
+      return void 0;
+    }), "pause": (function() {
+      pause_BANG_(tl);
+      return void 0;
+    }), "replay": (function() {
+      replay_BANG_(tl);
+      return void 0;
+    }), "seek": (function(s) {
+      seek_BANG_(tl, s);
+      return void 0;
+    }), "destroy": (function() {
+      if (truth_(get(tl, "raf"))) {
+        cancelAnimationFrame(get(tl, "raf"));
+      }
+      ;
+      const temp__23062__auto__3 = get(tl, "panelEl");
+      if (truth_(temp__23062__auto__3)) {
+        const p4 = temp__23062__auto__3;
+        p4.remove();
+      }
+      ;
+      return void 0;
+    }) };
+    Object.defineProperty(c1, "values", { "get": (function() {
+      return snapshot(tl);
+    }) });
+    Object.defineProperty(c1, "time", { "get": (function() {
+      return get(tl, "time");
+    }) });
+    Object.defineProperty(c1, "playing", { "get": (function() {
+      return get(tl, "playing");
+    }) });
+    Object.defineProperty(c1, "duration", { "get": (function() {
+      return get(tl, "duration");
+    }) });
+    return c1;
+  };
+  var use_timeline = function(name, config, opts) {
+    const opts1 = (() => {
+      const or__23426__auto__2 = opts;
+      if (truth_(or__23426__auto__2)) {
+        return or__23426__auto__2;
+      } else {
+        return {};
+      }
+      ;
+    })();
+    const nodes3 = parse_config2(config);
+    const base_dur4 = (() => {
+      const or__23426__auto__5 = config["duration"];
+      if (truth_(or__23426__auto__5)) {
+        return or__23426__auto__5;
+      } else {
+        return 0;
+      }
+      ;
+    })();
+    const dur6 = Math.max(base_dur4, total_duration(nodes3));
+    const tl7 = { "zoom": 1, "baseDuration": base_dur4, "name": name, "time": 0, "duration": dur6, "nodes": nodes3, "playing": !(opts1["autoplay"] === false), "raf": null, "subs": [], "onChange": opts1["onChange"], "last": null, "loopOpt": (() => {
+      const l8 = opts1["loop"];
+      if (_EQ_(l8, void 0)) {
+        return false;
+      } else {
+        return l8;
+      }
+      ;
+    })() };
+    deref(timelines).push(tl7);
+    if (!(opts1["enabled"] === false)) {
+      build_dock_BANG_(tl7);
+    }
+    ;
+    tl7["raf"] = requestAnimationFrame((function(n) {
+      tl7["last"] = n;
+      return tick_BANG_(tl7, n);
+    }));
+    return controller2(tl7);
+  };
+  window["__uiDialTimeline"] = use_timeline;
+  window["formatClock"] = fmt_clock;
+
   // .compiled/drop_zone.mjs
   var closest_zone = function(el) {
     if (truth_((() => {
@@ -1742,24 +4808,24 @@
     return null;
   };
   var play = (() => {
-    const f8 = (function(...args9) {
-      const G__101 = args9.length;
-      switch (G__101) {
+    const f18 = (function(...args19) {
+      const G__201 = args19.length;
+      switch (G__201) {
         case 1:
-          return f8.cljs$core$IFn$_invoke$arity$1(args9[0]);
+          return f18.cljs$core$IFn$_invoke$arity$1(args19[0]);
           break;
         case 2:
-          return f8.cljs$core$IFn$_invoke$arity$2(args9[0], args9[1]);
+          return f18.cljs$core$IFn$_invoke$arity$2(args19[0], args19[1]);
           break;
         default:
-          throw new Error(`${"Invalid arity: "}${args9.length ?? ""}`);
+          throw new Error(`${"Invalid arity: "}${args19.length ?? ""}`);
       }
       ;
     });
-    f8.cljs$core$IFn$_invoke$arity$1 = (function(snap) {
+    f18.cljs$core$IFn$_invoke$arity$1 = (function(snap) {
       return play(snap, null);
     });
-    f8.cljs$core$IFn$_invoke$arity$2 = (function(snap, opts) {
+    f18.cljs$core$IFn$_invoke$arity$2 = (function(snap, opts) {
       if (truth_(reduced_motion_QMARK_())) {
       } else {
         const opts3 = (() => {
@@ -1797,34 +4863,34 @@
       ;
       return null;
     });
-    f8.cljs$lang$maxFixedArity = 2;
-    return f8;
+    f18.cljs$lang$maxFixedArity = 2;
+    return f18;
   })();
   var wrap = (() => {
-    const f11 = (function(...args12) {
-      const G__131 = args12.length;
-      switch (G__131) {
+    const f21 = (function(...args22) {
+      const G__231 = args22.length;
+      switch (G__231) {
         case 2:
-          return f11.cljs$core$IFn$_invoke$arity$2(args12[0], args12[1]);
+          return f21.cljs$core$IFn$_invoke$arity$2(args22[0], args22[1]);
           break;
         case 3:
-          return f11.cljs$core$IFn$_invoke$arity$3(args12[0], args12[1], args12[2]);
+          return f21.cljs$core$IFn$_invoke$arity$3(args22[0], args22[1], args22[2]);
           break;
         default:
-          throw new Error(`${"Invalid arity: "}${args12.length ?? ""}`);
+          throw new Error(`${"Invalid arity: "}${args22.length ?? ""}`);
       }
       ;
     });
-    f11.cljs$core$IFn$_invoke$arity$2 = (function(target, mutate) {
+    f21.cljs$core$IFn$_invoke$arity$2 = (function(target, mutate) {
       return wrap(target, mutate, null);
     });
-    f11.cljs$core$IFn$_invoke$arity$3 = (function(target, mutate, opts) {
+    f21.cljs$core$IFn$_invoke$arity$3 = (function(target, mutate, opts) {
       const snap3 = capture(target);
       mutate();
       return play(snap3, opts);
     });
-    f11.cljs$lang$maxFixedArity = 3;
-    return f11;
+    f21.cljs$lang$maxFixedArity = 3;
+    return f21;
   })();
   window.__uiFlip = { "capture": capture, "play": play, "wrap": wrap };
 
@@ -1869,11 +4935,11 @@
     clear_held_BANG_();
     if (e.pointerType === "touch") {
       const temp__23062__auto__1 = (() => {
-        const G__142 = e.target;
-        if (G__142 == null) {
+        const G__242 = e.target;
+        if (G__242 == null) {
           return null;
         } else {
-          return G__142.closest(selector);
+          return G__242.closest(selector);
         }
         ;
       })();
@@ -2061,7 +5127,7 @@
   var key_step_fast = 50;
   var pan_threshold = 3;
   var axes_config = { "horizontal": { "client": "clientWidth", "extent": "width", "cursor": "col-resize", "grow": "ArrowRight", "shrink": "ArrowLeft", "sepOrient": "vertical" }, "vertical": { "client": "clientHeight", "extent": "height", "cursor": "row-resize", "grow": "ArrowDown", "shrink": "ArrowUp", "sepOrient": "horizontal" } };
-  var clamp = function(v, lo, hi) {
+  var clamp3 = function(v, lo, hi) {
     return Math.min(Math.max(v, lo), hi);
   };
   var round2 = function(v) {
@@ -2425,7 +5491,7 @@
   };
   var apply_size_BANG_ = function(panel, px) {
     const b1 = bounds(panel);
-    const v2 = clamp(px, b1.min, b1.max);
+    const v2 = clamp3(px, b1.min, b1.max);
     const total3 = group_extent(panel.group);
     if (truth_((() => {
       const and__23442__auto__4 = panel.collapsed;
@@ -2537,7 +5603,7 @@
         }
         ;
       })();
-      const next7 = truth_(collapse5) ? 0 : Math.round(clamp(pixels4, s1.min, s1.max));
+      const next7 = truth_(collapse5) ? 0 : Math.round(clamp3(pixels4, s1.min, s1.max));
       if (!_EQ_(truth_(collapse5) ? true : false, truth_(s1.sessionCollapsed) ? true : false)) {
         drag_collapse_BANG_(panel, collapse5);
       }
@@ -2611,7 +5677,7 @@
       const next9 = key1 === "End" ? b3.max : key1 === "Home" ? b3.min : key1 === "PageDown" ? t8 + step7 : key1 === "PageUp" ? t8 - step7 : _EQ_(key1, axes2["grow"]) ? t8 + step7 : _EQ_(key1, axes2["shrink"]) ? t8 - step7 : "else" ? null : null;
       if (!(next9 == null)) {
         e.preventDefault();
-        return apply_size_BANG_(panel, clamp(next9, b3.min, b3.max));
+        return apply_size_BANG_(panel, clamp3(next9, b3.min, b3.max));
       }
       ;
     }
@@ -2977,7 +6043,7 @@
   // .compiled/popover.mjs
   var gap = 8;
   var edge = 8;
-  var clamp2 = function(v, lo, hi) {
+  var clamp4 = function(v, lo, hi) {
     return Math.max(lo, Math.min(v, hi));
   };
   var align_h = function(tr, cw, align) {
@@ -3039,8 +6105,8 @@
     const vh10 = window.innerHeight;
     const left11 = side1 === "left" ? tr5.left - cw7 - gap : side1 === "right" ? tr5.right + gap : "else" ? align_h(tr5, cw7, align3) : null;
     const top12 = side1 === "top" ? tr5.top - ch8 - gap : side1 === "bottom" ? tr5.bottom + gap : "else" ? align_v(tr5, ch8, align3) : null;
-    content.style.left = `${clamp2(left11, edge, vw9 - cw7 - edge) ?? ""}px`;
-    return content.style.top = `${clamp2(top12, edge, vh10 - ch8 - edge) ?? ""}px`;
+    content.style.left = `${clamp4(left11, edge, vw9 - cw7 - edge) ?? ""}px`;
+    return content.style.top = `${clamp4(top12, edge, vh10 - ch8 - edge) ?? ""}px`;
   };
   var current = { "content": null, "trigger": null };
   var reposition_BANG_ = function() {
@@ -3217,25 +6283,25 @@
     ;
   };
   var open_select = (() => {
-    const f15 = (function(var_args) {
-      const args161 = [];
+    const f25 = (function(var_args) {
+      const args261 = [];
       const len__23321__auto__2 = arguments.length;
-      let i173 = 0;
+      let i273 = 0;
       while (true) {
-        if (i173 < len__23321__auto__2) {
-          args161.push(arguments[i173]);
-          let G__4 = i173 + 1;
-          i173 = G__4;
+        if (i273 < len__23321__auto__2) {
+          args261.push(arguments[i273]);
+          let G__4 = i273 + 1;
+          i273 = G__4;
           continue;
         }
         ;
         break;
       }
       ;
-      const argseq__23513__auto__5 = 1 < args161.length ? args161.slice(1) : null;
-      return f15.cljs$core$IFn$_invoke$arity$variadic(arguments[0], argseq__23513__auto__5);
+      const argseq__23513__auto__5 = 1 < args261.length ? args261.slice(1) : null;
+      return f25.cljs$core$IFn$_invoke$arity$variadic(arguments[0], argseq__23513__auto__5);
     });
-    f15.cljs$core$IFn$_invoke$arity$variadic = (function(trigger, args) {
+    f25.cljs$core$IFn$_invoke$arity$variadic = (function(trigger, args) {
       dismiss_BANG_2();
       const options6 = (() => {
         const passed7 = first(args);
@@ -3330,17 +6396,17 @@
       }
       ;
     });
-    f15.cljs$lang$maxFixedArity = 1;
-    return f15;
+    f25.cljs$lang$maxFixedArity = 1;
+    return f25;
   })();
   window["__uiSelect"] = open_select;
 
   // .compiled/theme.mjs
-  var storage_key = "ui-theme";
+  var storage_key2 = "ui-theme";
   var get_stored = function() {
     return (() => {
       try {
-        return localStorage.getItem(storage_key);
+        return localStorage.getItem(storage_key2);
       } catch (_e1) {
         return null;
       }
@@ -3350,9 +6416,9 @@
     return (() => {
       try {
         if (mode === "auto") {
-          return localStorage.removeItem(storage_key);
+          return localStorage.removeItem(storage_key2);
         } else {
-          return localStorage.setItem(storage_key, mode);
+          return localStorage.setItem(storage_key2, mode);
         }
         ;
       } catch (_e1) {
@@ -3364,8 +6430,8 @@
     return window.matchMedia("(prefers-color-scheme: dark)").matches;
   };
   var resolve_effective = function(mode) {
-    const G__191 = mode;
-    switch (G__191) {
+    const G__291 = mode;
+    switch (G__291) {
       case "light":
         return "light";
         break;
@@ -3394,8 +6460,8 @@
   var apply_theme_BANG_ = function(mode) {
     const el1 = document.documentElement;
     suppress_transitions_BANG_();
-    const G__202 = mode;
-    switch (G__202) {
+    const G__302 = mode;
+    switch (G__302) {
       case "light":
         return el1.setAttribute("data-theme", "light");
         break;
@@ -3408,7 +6474,7 @@
     ;
   };
   var subscribers = atom([]);
-  var notify_BANG_ = function(mode, effective) {
+  var notify_BANG_3 = function(mode, effective) {
     const subs1 = deref(subscribers);
     return subs1.forEach((function(f) {
       return f({ "mode": mode, "effective": effective });
@@ -3430,13 +6496,13 @@
     const m1 = truth_(get(/* @__PURE__ */ new Set(["auto", "light", "dark"]), mode)) ? mode : "auto";
     store_BANG_(m1);
     apply_theme_BANG_(m1);
-    return notify_BANG_(m1, resolve_effective(m1));
+    return notify_BANG_3(m1, resolve_effective(m1));
   };
   var toggle_BANG_ = function() {
     const current1 = get_mode();
     const next_mode2 = (() => {
-      const G__213 = current1;
-      switch (G__213) {
+      const G__313 = current1;
+      switch (G__313) {
         case "auto":
           return "light";
           break;
@@ -3473,7 +6539,7 @@
     return mql2.addEventListener("change", (function(_e) {
       if (get_mode() === "auto") {
         apply_theme_BANG_("auto");
-        return notify_BANG_("auto", resolve_effective("auto"));
+        return notify_BANG_3("auto", resolve_effective("auto"));
       }
       ;
     }));
@@ -3580,25 +6646,6 @@
     init_BANG_6();
   }
 
-  // ../../../dev/squint/node_modules/squint-cljs/src/squint/string.js
-  function join(sep, coll) {
-    if (coll === void 0) {
-      coll = sep;
-      sep = "";
-    }
-    if (coll instanceof Array) {
-      return coll.join(sep);
-    }
-    let ret = "";
-    let addSep = false;
-    for (const o of iterable(coll)) {
-      if (addSep) ret += sep;
-      ret += o;
-      addSep = true;
-    }
-    return ret;
-  }
-
   // .compiled/touch.mjs
   var mq = window.matchMedia("(hover: none)");
   var viewport_overrides = [["width", "device-width"], ["initial-scale", "1.0"], ["maximum-scale", "1.0"], ["user-scalable", "no"], ["viewport-fit", "cover"]];
@@ -3625,14 +6672,14 @@
       ;
     })().split(","))));
     const override_keys4 = set(map(first, viewport_overrides));
-    const kept5 = remove((function(p__22) {
-      const vec__69 = p__22;
+    const kept5 = remove((function(p__32) {
+      const vec__69 = p__32;
       const k10 = nth(vec__69, 0, null);
       const _11 = nth(vec__69, 1, null);
       return contains_QMARK_(override_keys4, k10);
     }), entries1);
-    return join(", ", map((function(p__23) {
-      const vec__1215 = p__23;
+    return join(", ", map((function(p__33) {
+      const vec__1215 = p__33;
       const k16 = nth(vec__1215, 0, null);
       const v17 = nth(vec__1215, 1, null);
       if (v17 == null) {
