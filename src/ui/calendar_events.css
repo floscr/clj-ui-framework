@@ -753,3 +753,258 @@
     left: var(--size-11);
   }
 }
+
+/* ── Week timeline ───────────────────────────────────────────────── */
+/* A 7-day grid: sticky day headers, an all-day bar row, and a scrollable
+   hour grid with per-day event columns. Same minimal treatment as the
+   single-day timeline (thin colored left rule, faint tint). */
+
+.cal-week {
+  --cal-week-gutter: var(--size-14);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* Header row — sticky day names + numbers, aligned to the day columns. */
+.cal-week-header {
+  display: flex;
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  background: var(--bg-0);
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.cal-week-corner {
+  width: var(--cal-week-gutter);
+  flex-shrink: 0;
+}
+
+.cal-week-headcols,
+.cal-week-alldaycols,
+.cal-week-daycols {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.cal-week-headcell {
+  display: flex;
+  align-items: baseline;
+  gap: var(--size-2);
+  padding: var(--size-2) var(--size-3);
+  border-left: 1px solid var(--gray-200);
+}
+
+.cal-week-headname {
+  font-size: var(--font-sm);
+  font-weight: 500;
+  color: var(--fg-2);
+}
+
+.cal-week-headnum {
+  font-size: var(--font-sm);
+  font-weight: 600;
+  color: var(--fg-1);
+  font-variant-numeric: tabular-nums;
+}
+
+.cal-week-headcell.is-today .cal-week-headname,
+.cal-week-headcell.is-today .cal-week-headnum {
+  color: var(--accent-600);
+}
+
+/* All-day row — horizontal bars for events without a start time. */
+.cal-week-allday {
+  display: flex;
+  min-height: var(--size-9);
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.cal-week-allday-label {
+  width: var(--cal-week-gutter);
+  flex-shrink: 0;
+  padding: var(--size-2) var(--size-2) 0 0;
+  font-size: var(--font-xs);
+  color: var(--fg-2);
+  text-align: right;
+}
+
+.cal-week-alldaycol {
+  border-left: 1px solid var(--gray-200);
+  padding: var(--size-1);
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-1);
+}
+
+.cal-week-alldaycol.is-today,
+.cal-week-daycol.is-today {
+  background: var(--gray-100);
+}
+
+.cal-week-alldayevent {
+  display: flex;
+  align-items: center;
+  gap: var(--size-1);
+  padding: var(--size-1) var(--size-2);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-xs);
+  font-weight: 500;
+  line-height: 1.3;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.cal-week-alldayevent-dot {
+  width: var(--size-2);
+  height: var(--size-2);
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: currentColor;
+}
+
+.cal-week-alldayevent-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Scrollable hour grid. */
+.cal-week-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.cal-week-grid {
+  display: flex;
+  position: relative;
+}
+
+.cal-week-gutter {
+  width: var(--cal-week-gutter);
+  flex-shrink: 0;
+  position: relative;
+}
+
+.cal-week-hour {
+  position: absolute;
+  right: var(--size-2);
+  transform: translateY(-50%);
+  font-size: var(--font-xs);
+  font-weight: 500;
+  color: var(--fg-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.cal-week-canvas {
+  flex: 1;
+  position: relative;
+}
+
+.cal-week-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 0;
+  border-top: 1px solid var(--gray-200);
+  pointer-events: none;
+}
+
+.cal-week-daycols {
+  position: absolute;
+  inset: 0;
+}
+
+.cal-week-daycol {
+  position: relative;
+  border-left: 1px solid var(--gray-200);
+}
+
+/* Timed event cards — positioned by start time (top) and duration (height). */
+.cal-week-event {
+  position: absolute;
+  left: 2px;
+  right: 2px;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-1);
+  min-height: var(--size-6);
+  padding: var(--size-1) var(--size-2);
+  border-radius: var(--radius-sm);
+  border-left-width: 2px;
+  border-left-style: solid;
+  overflow: hidden;
+  cursor: pointer;
+  transition: filter 0.12s;
+}
+
+.cal-week-event:hover {
+  filter: brightness(0.97);
+}
+
+.cal-week-event-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--size-1);
+}
+
+.cal-week-event-title {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--font-xs);
+  font-weight: 600;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cal-week-event-dur {
+  flex-shrink: 0;
+  font-size: 0.625rem;
+  font-weight: 500;
+  white-space: nowrap;
+  opacity: 0.55;
+}
+
+/* "Now" indicator — thin red rule spanning the week, dot on today's column. */
+.cal-week-now {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 0;
+  z-index: 3;
+  border-top: 1.5px solid var(--danger-500);
+  pointer-events: none;
+}
+
+.cal-week-now-dot {
+  position: absolute;
+  top: 50%;
+  width: var(--size-2);
+  height: var(--size-2);
+  border-radius: 50%;
+  background: var(--danger-500);
+  transform: translate(-50%, -50%);
+}
+
+@media (max-width: 768px) {
+  .cal-week {
+    --cal-week-gutter: var(--size-11);
+  }
+
+  .cal-week-headname {
+    font-size: var(--font-xs);
+  }
+
+  .cal-week-headcell {
+    flex-direction: column;
+    gap: 0;
+    padding: var(--size-1);
+  }
+}

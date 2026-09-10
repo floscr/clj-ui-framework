@@ -123,6 +123,45 @@
                             (range trailing-count))]
     (into all trailing)))
 
+(defn inc-date
+  "Returns [year month day] for the day after the given date."
+  [year month day]
+  (if (< day (days-in-month year month))
+    [year month (inc day)]
+    (let [[ny nm] (next-month year month)]
+      [ny nm 1])))
+
+(defn dec-date
+  "Returns [year month day] for the day before the given date."
+  [year month day]
+  (if (> day 1)
+    [year month (dec day)]
+    (let [[py pm] (prev-month year month)]
+      [py pm (days-in-month py pm)])))
+
+(defn week-start
+  "Returns [year month day] of the Monday of the week containing the date."
+  [year month day]
+  (loop [y year m month d day n (day-of-week year month day)]
+    (if (zero? n)
+      [y m d]
+      (let [[py pm pd] (dec-date y m d)]
+        (recur py pm pd (dec n))))))
+
+(defn week-days
+  "Vector of 7 day maps (Mon–Sun) for the week containing the given date.
+   Each map: {:day :month :year :date :dow} (:dow 0=Mon..6=Sun)."
+  [year month day]
+  (let [[sy sm sd] (week-start year month day)]
+    (loop [y sy m sm d sd acc []]
+      (if (= 7 (count acc))
+        acc
+        (let [[ny nm nd] (inc-date y m d)]
+          (recur ny nm nd
+                 (conj acc {:day d :month m :year y
+                            :date (date-str y m d)
+                            :dow (day-of-week y m d)})))))))
+
 ;; ── Class Generation ────────────────────────────────────────────────
 
 (defn calendar-class-list
