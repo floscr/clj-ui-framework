@@ -1850,10 +1850,930 @@
     init_BANG_3();
   }
 
+  // .compiled/panels.mjs
+  var easing = "cubic-bezier(0.32, 0.72, 0, 1)";
+  var duration = 250;
+  var key_step = 10;
+  var key_step_fast = 50;
+  var pan_threshold = 3;
+  var axes_config = { "horizontal": { "client": "clientWidth", "extent": "width", "cursor": "col-resize", "grow": "ArrowRight", "shrink": "ArrowLeft", "sepOrient": "vertical" }, "vertical": { "client": "clientHeight", "extent": "height", "cursor": "row-resize", "grow": "ArrowDown", "shrink": "ArrowUp", "sepOrient": "horizontal" } };
+  var clamp = function(v, lo, hi) {
+    return Math.min(Math.max(v, lo), hi);
+  };
+  var round2 = function(v) {
+    return Math.round(v * 100) / 100;
+  };
+  var reduced_motion_QMARK_ = function() {
+    return matchMedia("(prefers-reduced-motion: reduce)").matches;
+  };
+  var has_attr_QMARK_ = function(el, attr) {
+    return !(el == null) && (!(el.hasAttribute == null) && el.hasAttribute(attr));
+  };
+  var fill_node_QMARK_ = function(el) {
+    return has_attr_QMARK_(el, "data-ui-panels-fill");
+  };
+  var separator_node_QMARK_ = function(el) {
+    return has_attr_QMARK_(el, "data-ui-panels-separator");
+  };
+  var fill_after_QMARK_ = function(el) {
+    let n1 = el.nextElementSibling;
+    while (true) {
+      if (n1 == null) {
+        return false;
+      } else {
+        if (truth_(fill_node_QMARK_(n1))) {
+          return true;
+        } else {
+          if ("else") {
+            let G__2 = n1.nextElementSibling;
+            n1 = G__2;
+            continue;
+          } else {
+            return null;
+          }
+        }
+      }
+      ;
+      ;
+      break;
+    }
+    ;
+  };
+  var extent_key = function(group) {
+    return group.axes["extent"];
+  };
+  var group_extent = function(group) {
+    return group.el[group.axes["client"]];
+  };
+  var parse_size = function(s) {
+    if (truth_(!(s == null) && !_EQ_(s, ""))) {
+      const pct1 = s.endsWith("%");
+      const v2 = parseFloat(s);
+      if (truth_(isNaN(v2))) {
+        return null;
+      } else {
+        return { "pct": pct1, "value": v2 };
+      }
+      ;
+    }
+    ;
+  };
+  var to_pixels = function(parsed, total) {
+    if (truth_(parsed.pct)) {
+      return parsed.value / 100 * total;
+    } else {
+      return parsed.value;
+    }
+    ;
+  };
+  var measure = function(panel) {
+    const total1 = group_extent(panel.group);
+    if (truth_(panel.pct)) {
+      return Math.round(panel.value / 100 * total1);
+    } else {
+      return panel.value;
+    }
+    ;
+  };
+  var current_extent = function(panel) {
+    return panel.el.getBoundingClientRect()[extent_key(panel.group)];
+  };
+  var size_report = function(panel) {
+    if (truth_(panel.pct)) {
+      return `${panel.value ?? ""}${"%"}`;
+    } else {
+      return panel.value;
+    }
+    ;
+  };
+  var lock_state = { "count": 0, "saved": null };
+  var lock_body_BANG_ = function(cursor, on_escape) {
+    const style1 = document.body.style;
+    const onkey2 = (function(e) {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        return on_escape();
+      }
+      ;
+    });
+    if (lock_state.count === 0) {
+      lock_state["saved"] = { "cursor": style1.cursor, "userSelect": style1.userSelect, "webkitUserSelect": style1.webkitUserSelect };
+    }
+    ;
+    lock_state["count"] = lock_state.count + 1;
+    style1.cursor = cursor;
+    style1.userSelect = "none";
+    style1.webkitUserSelect = "none";
+    addEventListener("keydown", onkey2, true);
+    return function() {
+      lock_state["count"] = lock_state.count - 1;
+      if (lock_state.count === 0) {
+        const saved3 = lock_state.saved;
+        style1.cursor = saved3.cursor;
+        style1.userSelect = saved3.userSelect;
+        style1.webkitUserSelect = saved3.webkitUserSelect;
+      }
+      ;
+      return removeEventListener("keydown", onkey2, true);
+    };
+  };
+  var persist_BANG_ = function(panel) {
+    if (truth_(panel.persist)) {
+      return (() => {
+        try {
+          return localStorage.setItem(`${"ui-panels:"}${panel.persist ?? ""}`, JSON.stringify({ "size": size_report(panel), "collapsed": truth_(panel.collapsed) ? true : false }));
+        } catch (_1) {
+          return null;
+        }
+      })();
+    }
+    ;
+  };
+  var restore_persisted = function(key) {
+    return (() => {
+      try {
+        const temp__23062__auto__1 = localStorage.getItem(`${"ui-panels:"}${key ?? ""}`);
+        if (truth_(temp__23062__auto__1)) {
+          const raw2 = temp__23062__auto__1;
+          return JSON.parse(raw2);
+        }
+        ;
+      } catch (_3) {
+        return null;
+      }
+    })();
+  };
+  var emit_BANG_ = function(panel, type, detail) {
+    return panel.el.dispatchEvent(new CustomEvent(type, { "bubbles": true, "detail": detail }));
+  };
+  var emit_resize_BANG_ = function(panel) {
+    return emit_BANG_(panel, "ui-panels-resize", { "size": size_report(panel), "pixels": measure(panel) });
+  };
+  var reflect_collapsed_BANG_ = function(panel) {
+    if (truth_(panel.collapsed)) {
+      return panel.el.setAttribute("data-collapsed", "true");
+    } else {
+      return panel.el.removeAttribute("data-collapsed");
+    }
+    ;
+  };
+  var jump_size_BANG_ = function(panel, px) {
+    return panel.el.style[extent_key(panel.group)] = `${px ?? ""}px`;
+  };
+  var jump_content_BANG_ = function(panel, px) {
+    const temp__23062__auto__1 = panel.content;
+    if (truth_(temp__23062__auto__1)) {
+      const content2 = temp__23062__auto__1;
+      return content2.style[extent_key(panel.group)] = `${px ?? ""}px`;
+    }
+    ;
+  };
+  var available = function(panel) {
+    const group1 = panel.group;
+    const k2 = extent_key(group1);
+    const fill3 = group1.fill;
+    const base4 = !(fill3 == null) ? parseFloat(getComputedStyle(fill3)[k2]) : 0;
+    let i5 = 0;
+    let room6 = base4;
+    while (true) {
+      if (i5 < group1.panels.length) {
+        const p7 = group1.panels[i5];
+        let G__8 = i5 + 1;
+        let G__9 = room6 + (current_extent(p7) - (p7 === panel ? 0 : p7.target));
+        i5 = G__8;
+        room6 = G__9;
+        continue;
+      } else {
+        return Math.max(0, room6);
+      }
+      ;
+      ;
+      break;
+    }
+    ;
+  };
+  var bounds = function(panel) {
+    const room1 = available(panel);
+    const total2 = group_extent(panel.group);
+    const minv3 = Math.min(!(panel.minSize == null) ? to_pixels(panel.minSize, total2) : 0, room1);
+    const maxv4 = !(panel.maxSize == null) ? to_pixels(panel.maxSize, total2) : room1;
+    return { "min": minv3, "max": Math.max(minv3, Math.min(maxv4, room1)) };
+  };
+  var grow_sign = function(panel) {
+    if (truth_(panel.end)) {
+      return 1;
+    } else {
+      return -1;
+    }
+    ;
+  };
+  var sync_aria_BANG_ = function(panel) {
+    const b1 = bounds(panel);
+    const t2 = Math.round(panel.target);
+    return panel.grips.forEach((function(grip) {
+      grip.setAttribute("aria-valuenow", `${t2 ?? ""}`);
+      grip.setAttribute("aria-valuetext", `${t2 ?? ""}${" pixels"}`);
+      grip.setAttribute("aria-valuemin", `${Math.round(b1.min) ?? ""}`);
+      if (!(panel.maxSize == null)) {
+        return grip.setAttribute("aria-valuemax", `${Math.round(b1.max) ?? ""}`);
+      } else {
+        return grip.removeAttribute("aria-valuemax");
+      }
+      ;
+    }));
+  };
+  var any_folding_QMARK_ = function(group) {
+    return group.panels.some((function(p) {
+      if (truth_(p.folding)) {
+        return true;
+      } else {
+        return false;
+      }
+      ;
+    }));
+  };
+  var freeze_fill_BANG_ = function(panel) {
+    const group1 = panel.group;
+    const fill2 = group1.fill;
+    const inner3 = group1.fillInner;
+    if (!(inner3 == null)) {
+      fill2.style.justifyContent = truth_(panel.end) ? "flex-end" : "flex-start";
+      fill2.style.overflow = "clip";
+      return inner3.style[extent_key(group1)] = `${Math.max(0, available(panel) - panel.target) ?? ""}px`;
+    }
+    ;
+  };
+  var set_folding_BANG_ = function(panel, folding) {
+    if (!_EQ_(truth_(panel.folding) ? true : false, truth_(folding) ? true : false)) {
+      panel["folding"] = folding;
+      if (truth_(folding)) {
+        panel.el.setAttribute("data-folding", "true");
+      } else {
+        panel.el.removeAttribute("data-folding");
+      }
+      ;
+      if (truth_(folding)) {
+        return null;
+      } else {
+        const group1 = panel.group;
+        const fill2 = group1.fill;
+        const inner3 = group1.fillInner;
+        if (truth_(!(inner3 == null) && not(any_folding_QMARK_(group1)))) {
+          inner3.style[extent_key(group1)] = "100%";
+          return fill2.style.overflow = "";
+        }
+        ;
+      }
+      ;
+    }
+    ;
+  };
+  var fold_BANG_ = function(panel, to) {
+    const el1 = panel.el;
+    const k2 = extent_key(panel.group);
+    const from3 = current_extent(panel);
+    set_folding_BANG_(panel, true);
+    freeze_fill_BANG_(panel);
+    const temp__23062__auto__4 = panel.anim;
+    if (truth_(temp__23062__auto__4)) {
+      const anim5 = temp__23062__auto__4;
+      anim5.cancel();
+    }
+    ;
+    jump_size_BANG_(panel, to);
+    const content_from6 = truth_(to > 0 && from3 > 0) ? (() => {
+      const temp__23062__auto__7 = panel.content;
+      if (truth_(temp__23062__auto__7)) {
+        const c8 = temp__23062__auto__7;
+        return c8.getBoundingClientRect()[k2];
+      }
+      ;
+    })() : null;
+    if (to > 0) {
+      jump_content_BANG_(panel, to);
+    }
+    ;
+    if (truth_((() => {
+      const or__23426__auto__9 = reduced_motion_QMARK_();
+      if (truth_(or__23426__auto__9)) {
+        return or__23426__auto__9;
+      } else {
+        return _EQ_(from3, to);
+      }
+      ;
+    })())) {
+      return set_folding_BANG_(panel, false);
+    } else {
+      const kf10 = {};
+      const _11 = kf10[k2] = [`${from3 ?? ""}px`, `${to ?? ""}px`];
+      const anim12 = el1.animate(kf10, { "duration": duration, "easing": easing });
+      panel["anim"] = anim12;
+      if (truth_(!(content_from6 == null) && (!(panel.content == null) && !_EQ_(content_from6, to)))) {
+        const ckf13 = {};
+        ckf13[k2] = [`${content_from6 ?? ""}px`, `${to ?? ""}px`];
+        panel.content.animate(ckf13, { "duration": duration, "easing": easing });
+      }
+      ;
+      anim12.onfinish = (function() {
+        panel["anim"] = null;
+        return set_folding_BANG_(panel, false);
+      });
+      return anim12.oncancel = (function() {
+        return panel["anim"] = null;
+      });
+    }
+    ;
+  };
+  var retarget_BANG_ = function(panel) {
+    const m1 = measure(panel);
+    const value2 = truth_(panel.collapsed) ? 0 : m1;
+    if (truth_(current_extent(panel) === 0 && not(panel.dragging))) {
+      jump_content_BANG_(panel, m1);
+    }
+    ;
+    if (!_EQ_(value2, panel.target)) {
+      panel["target"] = value2;
+      if (truth_(panel.dragging)) {
+      } else {
+        if (_EQ_(current_extent(panel), value2)) {
+          set_folding_BANG_(panel, false);
+          jump_size_BANG_(panel, value2);
+          if (value2 > 0) {
+            jump_content_BANG_(panel, m1);
+          }
+        } else {
+          fold_BANG_(panel, value2);
+        }
+      }
+    }
+    ;
+    return sync_aria_BANG_(panel);
+  };
+  var set_collapsed_BANG_ = function(panel, collapsed) {
+    if (!_EQ_(truth_(collapsed) ? true : false, truth_(panel.collapsed) ? true : false)) {
+      panel["collapsed"] = collapsed;
+      reflect_collapsed_BANG_(panel);
+      retarget_BANG_(panel);
+      emit_BANG_(panel, "ui-panels-collapse", { "collapsed": truth_(collapsed) ? true : false });
+      return persist_BANG_(panel);
+    }
+    ;
+  };
+  var apply_size_BANG_ = function(panel, px) {
+    const b1 = bounds(panel);
+    const v2 = clamp(px, b1.min, b1.max);
+    const total3 = group_extent(panel.group);
+    if (truth_((() => {
+      const and__23442__auto__4 = panel.collapsed;
+      if (truth_(and__23442__auto__4)) {
+        return v2 > 0;
+      } else {
+        return and__23442__auto__4;
+      }
+      ;
+    })())) {
+      panel["collapsed"] = false;
+      reflect_collapsed_BANG_(panel);
+      emit_BANG_(panel, "ui-panels-collapse", { "collapsed": false });
+    }
+    ;
+    if (truth_(panel.pct)) {
+      panel["value"] = total3 > 0 ? round2(100 * (v2 / total3)) : 0;
+    } else {
+      panel["value"] = v2;
+    }
+    ;
+    retarget_BANG_(panel);
+    emit_resize_BANG_(panel);
+    return persist_BANG_(panel);
+  };
+  var release_BANG_ = function(panel) {
+    const temp__23062__auto__1 = panel.unlock;
+    if (truth_(temp__23062__auto__1)) {
+      const unlock2 = temp__23062__auto__1;
+      unlock2();
+      return panel["unlock"] = null;
+    }
+    ;
+  };
+  var set_resizing_attrs_BANG_ = function(panel, on) {
+    const f1 = (function(el) {
+      if (truth_(on)) {
+        return el.setAttribute("data-resizing", "true");
+      } else {
+        return el.removeAttribute("data-resizing");
+      }
+      ;
+    });
+    f1(panel.el);
+    return panel.grips.forEach(f1);
+  };
+  var stop_dragging_BANG_ = function(panel) {
+    release_BANG_(panel);
+    panel["dragging"] = false;
+    return set_resizing_attrs_BANG_(panel, false);
+  };
+  var drag_collapse_BANG_ = function(panel, collapsed) {
+    panel["collapsed"] = collapsed;
+    reflect_collapsed_BANG_(panel);
+    panel["target"] = truth_(collapsed) ? 0 : measure(panel);
+    return emit_BANG_(panel, "ui-panels-collapse", { "collapsed": truth_(collapsed) ? true : false });
+  };
+  var drag_cancel_BANG_ = function(panel) {
+    if (truth_(panel.dragging)) {
+      const s1 = panel.session;
+      jump_size_BANG_(panel, s1.start);
+      jump_content_BANG_(panel, s1.start > 0 ? s1.start : measure(panel));
+      if (!_EQ_(truth_(s1.sessionCollapsed) ? true : false, truth_(s1.wasCollapsed) ? true : false)) {
+        drag_collapse_BANG_(panel, s1.wasCollapsed);
+      }
+      ;
+      return stop_dragging_BANG_(panel);
+    }
+    ;
+  };
+  var drag_start_BANG_ = function(panel, cursor) {
+    const b1 = bounds(panel);
+    const s2 = panel.session;
+    const group3 = panel.group;
+    const cur4 = current_extent(panel);
+    const temp__23062__auto__5 = panel.anim;
+    if (truth_(temp__23062__auto__5)) {
+      const anim6 = temp__23062__auto__5;
+      anim6.cancel();
+      jump_size_BANG_(panel, cur4);
+    }
+    ;
+    s2["min"] = b1.min;
+    s2["max"] = b1.max;
+    s2["sign"] = grow_sign(panel);
+    s2["start"] = cur4;
+    s2["sessionCollapsed"] = truth_(panel.collapsed) ? true : false;
+    s2["wasCollapsed"] = truth_(panel.collapsed) ? true : false;
+    release_BANG_(panel);
+    panel["unlock"] = lock_body_BANG_(!(cursor == null) ? cursor : group3.axes["cursor"], (function() {
+      return drag_cancel_BANG_(panel);
+    }));
+    set_folding_BANG_(panel, false);
+    panel["dragging"] = true;
+    return set_resizing_attrs_BANG_(panel, true);
+  };
+  var drag_move_BANG_ = function(panel, dx, dy) {
+    if (truth_(panel.dragging)) {
+      const s1 = panel.session;
+      const group2 = panel.group;
+      const offset3 = extent_key(group2) === "width" ? dx : dy;
+      const pixels4 = s1.start + offset3 * s1.sign;
+      const collapse5 = (() => {
+        const and__23442__auto__6 = panel.collapsible;
+        if (truth_(and__23442__auto__6)) {
+          return pixels4 < s1.min / 2;
+        } else {
+          return and__23442__auto__6;
+        }
+        ;
+      })();
+      const next7 = truth_(collapse5) ? 0 : Math.round(clamp(pixels4, s1.min, s1.max));
+      if (!_EQ_(truth_(collapse5) ? true : false, truth_(s1.sessionCollapsed) ? true : false)) {
+        drag_collapse_BANG_(panel, collapse5);
+      }
+      ;
+      jump_size_BANG_(panel, next7);
+      if (truth_(collapse5)) {
+      } else {
+        jump_content_BANG_(panel, next7);
+      }
+      ;
+      return s1["sessionCollapsed"] = collapse5;
+    }
+    ;
+  };
+  var drag_end_BANG_ = function(panel) {
+    if (truth_(panel.dragging)) {
+      const s1 = panel.session;
+      stop_dragging_BANG_(panel);
+      if (truth_(s1.sessionCollapsed)) {
+        persist_BANG_(panel);
+      } else {
+        const px2 = current_extent(panel);
+        const total3 = group_extent(panel.group);
+        if (truth_(panel.pct)) {
+          panel["value"] = total3 > 0 ? round2(100 * (px2 / total3)) : 0;
+        } else {
+          panel["value"] = px2;
+        }
+        ;
+        panel["target"] = measure(panel);
+        emit_resize_BANG_(panel);
+        persist_BANG_(panel);
+      }
+      ;
+      const cur4 = current_extent(panel);
+      if (!_EQ_(cur4, panel.target)) {
+        fold_BANG_(panel, panel.target);
+      }
+      ;
+      return sync_aria_BANG_(panel);
+    }
+    ;
+  };
+  var resize_by_key_BANG_ = function(panel, e) {
+    const key1 = e.key;
+    const axes2 = panel.group.axes;
+    if (key1 === "Enter") {
+      if (truth_(panel.collapsible)) {
+        e.preventDefault();
+        return set_collapsed_BANG_(panel, not(panel.collapsed));
+      }
+    } else {
+      const b3 = bounds(panel);
+      const fast4 = (() => {
+        const or__23426__auto__5 = e.shiftKey;
+        if (truth_(or__23426__auto__5)) {
+          return or__23426__auto__5;
+        } else {
+          const or__23426__auto__6 = key1 === "PageUp";
+          if (or__23426__auto__6) {
+            return or__23426__auto__6;
+          } else {
+            return key1 === "PageDown";
+          }
+          ;
+        }
+        ;
+      })();
+      const step7 = (truth_(fast4) ? key_step_fast : key_step) * grow_sign(panel);
+      const t8 = panel.target;
+      const next9 = key1 === "End" ? b3.max : key1 === "Home" ? b3.min : key1 === "PageDown" ? t8 + step7 : key1 === "PageUp" ? t8 - step7 : _EQ_(key1, axes2["grow"]) ? t8 + step7 : _EQ_(key1, axes2["shrink"]) ? t8 - step7 : "else" ? null : null;
+      if (!(next9 == null)) {
+        e.preventDefault();
+        return apply_size_BANG_(panel, clamp(next9, b3.min, b3.max));
+      }
+      ;
+    }
+    ;
+  };
+  var reset_size_BANG_ = function(panel) {
+    if (truth_(panel.collapsed)) {
+      set_collapsed_BANG_(panel, false);
+    }
+    ;
+    const total1 = group_extent(panel.group);
+    const parsed2 = !(panel.defaultSize == null) ? panel.defaultSize : panel.initial;
+    if (!(parsed2 == null)) {
+      return apply_size_BANG_(panel, to_pixels(parsed2, total1));
+    }
+    ;
+  };
+  var attach_grip_BANG_ = function(grip, get_panel) {
+    const state1 = { "pressed": null, "dragging": false, "dragged": false };
+    const settle2 = (function() {
+      state1["pressed"] = null;
+      return state1["dragging"] = false;
+    });
+    grip.addEventListener("pointerdown", (function(e) {
+      if (!(get_panel() == null)) {
+        state1["dragged"] = false;
+        state1["pressed"] = { "x": e.clientX, "y": e.clientY };
+        return grip.setPointerCapture(e.pointerId);
+      }
+      ;
+    }));
+    grip.addEventListener("pointermove", (function(e) {
+      const temp__23062__auto__3 = state1.pressed;
+      if (truth_(temp__23062__auto__3)) {
+        const pr4 = temp__23062__auto__3;
+        const temp__23062__auto__5 = get_panel();
+        if (truth_(temp__23062__auto__5)) {
+          const p6 = temp__23062__auto__5;
+          const dx7 = e.clientX - pr4.x;
+          const dy8 = e.clientY - pr4.y;
+          if (truth_(not(state1.dragging) && Math.hypot(dx7, dy8) >= pan_threshold)) {
+            state1["dragging"] = true;
+            state1["dragged"] = true;
+            drag_start_BANG_(p6, null);
+          }
+          ;
+          if (truth_(state1.dragging)) {
+            return drag_move_BANG_(p6, dx7, dy8);
+          }
+          ;
+        }
+        ;
+      }
+      ;
+    }));
+    grip.addEventListener("pointerup", (function(_) {
+      if (truth_(state1.dragging)) {
+        const temp__23062__auto__9 = get_panel();
+        if (truth_(temp__23062__auto__9)) {
+          const p10 = temp__23062__auto__9;
+          drag_end_BANG_(p10);
+        }
+      }
+      ;
+      return settle2();
+    }));
+    grip.addEventListener("pointercancel", (function(_) {
+      if (truth_(state1.dragging)) {
+        const temp__23062__auto__11 = get_panel();
+        if (truth_(temp__23062__auto__11)) {
+          const p12 = temp__23062__auto__11;
+          drag_cancel_BANG_(p12);
+        }
+      }
+      ;
+      return settle2();
+    }));
+    grip.addEventListener("dblclick", (function(_) {
+      if (truth_(state1.dragged)) {
+        return null;
+      } else {
+        const temp__23062__auto__13 = get_panel();
+        if (truth_(temp__23062__auto__13)) {
+          const p14 = temp__23062__auto__13;
+          return reset_size_BANG_(p14);
+        }
+        ;
+      }
+      ;
+    }));
+    return grip.addEventListener("keydown", (function(e) {
+      const temp__23062__auto__15 = get_panel();
+      if (truth_(temp__23062__auto__15)) {
+        const p16 = temp__23062__auto__15;
+        return resize_by_key_BANG_(p16, e);
+      }
+      ;
+    }));
+  };
+  var separator_panel = function(group, slot) {
+    return group.bySide[truth_(fill_after_QMARK_(slot)) ? "start" : "end"];
+  };
+  var place_all_BANG_ = function(group) {
+    const gel1 = group.el;
+    const children2 = Array.from(gel1.children);
+    const fill3 = children2.find((function(c) {
+      return fill_node_QMARK_(c);
+    }));
+    const by_side4 = {};
+    group["fill"] = !(fill3 == null) ? fill3 : null;
+    group["fillInner"] = truth_(!(fill3 == null) && fill3.hasAttribute("data-pin")) ? fill3.querySelector(":scope > .ui-panels-fill-inner") : null;
+    group.panels.forEach((function(p) {
+      const el5 = p.el;
+      const end6 = fill_after_QMARK_(el5);
+      const neighbour7 = truth_(end6) ? el5.nextElementSibling : el5.previousElementSibling;
+      const bare8 = not(separator_node_QMARK_(neighbour7));
+      p["end"] = end6;
+      el5.setAttribute("data-edge", truth_(end6) ? "end" : "start");
+      if (bare8) {
+        el5.setAttribute("data-bare", "true");
+      } else {
+        el5.removeAttribute("data-bare");
+      }
+      ;
+      by_side4[truth_(end6) ? "start" : "end"] = p;
+      return p["grips"] = !(p.edge == null) ? [p.edge] : [];
+    }));
+    group["bySide"] = by_side4;
+    children2.forEach((function(c) {
+      if (truth_(separator_node_QMARK_(c))) {
+        const temp__23062__auto__9 = c["__uiSepGrip"];
+        if (truth_(temp__23062__auto__9)) {
+          const grip10 = temp__23062__auto__9;
+          const temp__23062__auto__11 = separator_panel(group, c);
+          if (truth_(temp__23062__auto__11)) {
+            const p12 = temp__23062__auto__11;
+            return p12.grips.push(grip10);
+          }
+          ;
+        }
+        ;
+      }
+      ;
+    }));
+    return group.panels.forEach((function(p) {
+      return sync_aria_BANG_(p);
+    }));
+  };
+  var observe_panel_attrs_BANG_ = function(panel) {
+    const el1 = panel.el;
+    const mo2 = new MutationObserver((function(muts) {
+      return muts.forEach((function(m) {
+        const attr3 = m.attributeName;
+        if (attr3 === "data-collapsed") {
+          const want4 = el1.hasAttribute("data-collapsed");
+          if (!_EQ_(truth_(want4) ? true : false, truth_(panel.collapsed) ? true : false)) {
+            return set_collapsed_BANG_(panel, want4);
+          }
+          ;
+        } else {
+          if (attr3 === "data-size") {
+            const temp__23062__auto__5 = parse_size(el1.getAttribute("data-size"));
+            if (truth_(temp__23062__auto__5)) {
+              const parsed6 = temp__23062__auto__5;
+              if (truth_((() => {
+                const or__23426__auto__7 = !_EQ_(parsed6.value, panel.value);
+                if (or__23426__auto__7) {
+                  return or__23426__auto__7;
+                } else {
+                  return !_EQ_(truth_(parsed6.pct) ? true : false, truth_(panel.pct) ? true : false);
+                }
+                ;
+              })())) {
+                panel["pct"] = parsed6.pct;
+                panel["value"] = parsed6.value;
+                return retarget_BANG_(panel);
+              }
+              ;
+            }
+            ;
+          } else {
+            return null;
+          }
+        }
+        ;
+      }));
+    }));
+    mo2.observe(el1, { "attributes": true, "attributeFilter": ["data-collapsed", "data-size"] });
+    return panel["attrObserver"] = mo2;
+  };
+  var create_panel_BANG_ = function(group, el) {
+    const content1 = el.querySelector(":scope > .ui-panels-content");
+    const edge2 = el.querySelector(":scope > .ui-panels-edge");
+    const parsed3 = parse_size(el.getAttribute("data-size"));
+    const persist_key4 = el.getAttribute("data-persist-key");
+    const saved5 = !(persist_key4 == null) ? restore_persisted(persist_key4) : null;
+    const saved_size6 = !(saved5 == null) ? parse_size(`${saved5.size ?? ""}`) : null;
+    const active7 = !(saved_size6 == null) ? saved_size6 : parsed3;
+    const collapsed8 = !(saved5 == null) ? truth_(saved5.collapsed) ? true : false : el.hasAttribute("data-collapsed");
+    const panel9 = { "folding": false, "edge": edge2, "el": el, "group": group, "collapsed": collapsed8, "content": content1, "collapsible": el.hasAttribute("data-collapsible"), "value": !(active7 == null) ? active7.value : 0, "grips": [], "persist": persist_key4, "dragging": false, "minSize": parse_size(el.getAttribute("data-min-size")), "pct": !(active7 == null) ? active7.pct : false, "anim": null, "initial": parsed3, "unlock": null, "defaultSize": parse_size(el.getAttribute("data-default-size")), "target": 0, "end": false, "maxSize": parse_size(el.getAttribute("data-max-size")), "session": {} };
+    el["__uiPanel"] = panel9;
+    group.panels.push(panel9);
+    const m10 = measure(panel9);
+    const t11 = truth_(collapsed8) ? 0 : m10;
+    panel9["target"] = t11;
+    reflect_collapsed_BANG_(panel9);
+    jump_size_BANG_(panel9, t11);
+    jump_content_BANG_(panel9, m10);
+    if (!(edge2 == null)) {
+      edge2.setAttribute("aria-orientation", group.axes["sepOrient"]);
+      attach_grip_BANG_(edge2, (function() {
+        return panel9;
+      }));
+    }
+    ;
+    observe_panel_attrs_BANG_(panel9);
+    return panel9;
+  };
+  var attach_separator_BANG_ = function(group, slot) {
+    const grip1 = slot.querySelector(":scope > .ui-panels-grip");
+    const grip2 = !(grip1 == null) ? grip1 : slot;
+    slot["__uiSepGrip"] = grip2;
+    grip2.setAttribute("aria-orientation", group.axes["sepOrient"]);
+    return attach_grip_BANG_(grip2, (function() {
+      return separator_panel(group, slot);
+    }));
+  };
+  var bind_children_BANG_ = function(group) {
+    return Array.from(group.el.children).forEach((function(c) {
+      if (truth_((() => {
+        const and__23442__auto__1 = has_attr_QMARK_(c, "data-ui-panels-panel");
+        if (truth_(and__23442__auto__1)) {
+          return c["__uiPanel"] == null;
+        } else {
+          return and__23442__auto__1;
+        }
+        ;
+      })())) {
+        return create_panel_BANG_(group, c);
+      } else {
+        if (truth_((() => {
+          const and__23442__auto__2 = separator_node_QMARK_(c);
+          if (truth_(and__23442__auto__2)) {
+            return c["__uiSepGrip"] == null;
+          } else {
+            return and__23442__auto__2;
+          }
+          ;
+        })())) {
+          return attach_separator_BANG_(group, c);
+        } else {
+          return null;
+        }
+      }
+      ;
+    }));
+  };
+  var prune_panels_BANG_ = function(group) {
+    const gel1 = group.el;
+    const kept2 = group.panels.filter((function(p) {
+      return p.el.parentElement === gel1;
+    }));
+    group.panels.forEach((function(p) {
+      if (p.el.parentElement === gel1) {
+        return null;
+      } else {
+        release_BANG_(p);
+        const temp__23062__auto__3 = p.attrObserver;
+        if (truth_(temp__23062__auto__3)) {
+          const mo4 = temp__23062__auto__3;
+          return mo4.disconnect();
+        }
+        ;
+      }
+      ;
+    }));
+    return group["panels"] = kept2;
+  };
+  var refit_BANG_ = function(panel) {
+    if (truth_((() => {
+      const and__23442__auto__1 = panel.pct;
+      if (truth_(and__23442__auto__1)) {
+        return not(panel.dragging) && not(panel.folding);
+      } else {
+        return and__23442__auto__1;
+      }
+      ;
+    })())) {
+      const m2 = measure(panel);
+      const v3 = truth_(panel.collapsed) ? 0 : m2;
+      jump_content_BANG_(panel, m2);
+      if (!_EQ_(v3, panel.target)) {
+        panel["target"] = v3;
+        jump_size_BANG_(panel, v3);
+        return sync_aria_BANG_(panel);
+      }
+      ;
+    }
+    ;
+  };
+  var init_group_BANG_ = function(gel) {
+    if (gel["__uiPanelsGroup"] == null) {
+      const orientation1 = (() => {
+        const o2 = gel.getAttribute("data-orientation");
+        if (o2 === "vertical") {
+          return "vertical";
+        } else {
+          return "horizontal";
+        }
+        ;
+      })();
+      const group3 = { "el": gel, "axes": axes_config[orientation1], "panels": [], "bySide": {}, "fill": null, "fillInner": null };
+      gel["__uiPanelsGroup"] = group3;
+      bind_children_BANG_(group3);
+      place_all_BANG_(group3);
+      const mo4 = new MutationObserver((function(_) {
+        prune_panels_BANG_(group3);
+        bind_children_BANG_(group3);
+        return place_all_BANG_(group3);
+      }));
+      mo4.observe(gel, { "childList": true });
+      const ro5 = new ResizeObserver((function(_) {
+        return group3.panels.forEach((function(p) {
+          return refit_BANG_(p);
+        }));
+      }));
+      ro5.observe(gel);
+      return group3;
+    }
+    ;
+  };
+  var scan_BANG_ = function() {
+    return Array.from(document.querySelectorAll("[data-ui-panels-group]")).forEach((function(gel) {
+      return init_group_BANG_(gel);
+    }));
+  };
+  var scan_scheduled = atom(null);
+  var schedule_scan_BANG_ = function() {
+    if (deref(scan_scheduled) == null) {
+      return reset_BANG_(scan_scheduled, requestAnimationFrame((function() {
+        reset_BANG_(scan_scheduled, null);
+        return scan_BANG_();
+      })));
+    }
+    ;
+  };
+  window["__uiPanels"] = scan_BANG_;
+  var start_BANG_ = function() {
+    scan_BANG_();
+    const mo1 = new MutationObserver((function(_) {
+      return schedule_scan_BANG_();
+    }));
+    return mo1.observe(document.body, { "childList": true, "subtree": true });
+  };
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", (function() {
+      return start_BANG_();
+    }));
+  } else {
+    start_BANG_();
+  }
+
   // .compiled/popover.mjs
   var gap = 8;
   var edge = 8;
-  var clamp = function(v, lo, hi) {
+  var clamp2 = function(v, lo, hi) {
     return Math.max(lo, Math.min(v, hi));
   };
   var align_h = function(tr, cw, align) {
@@ -1915,8 +2835,8 @@
     const vh10 = window.innerHeight;
     const left11 = side1 === "left" ? tr5.left - cw7 - gap : side1 === "right" ? tr5.right + gap : "else" ? align_h(tr5, cw7, align3) : null;
     const top12 = side1 === "top" ? tr5.top - ch8 - gap : side1 === "bottom" ? tr5.bottom + gap : "else" ? align_v(tr5, ch8, align3) : null;
-    content.style.left = `${clamp(left11, edge, vw9 - cw7 - edge) ?? ""}px`;
-    return content.style.top = `${clamp(top12, edge, vh10 - ch8 - edge) ?? ""}px`;
+    content.style.left = `${clamp2(left11, edge, vw9 - cw7 - edge) ?? ""}px`;
+    return content.style.top = `${clamp2(top12, edge, vh10 - ch8 - edge) ?? ""}px`;
   };
   var current = { "content": null, "trigger": null };
   var reposition_BANG_ = function() {
@@ -2435,7 +3355,7 @@
       ;
     })(), "duration": truth_(dur2) ? parseInt(dur2, 10) : null });
   };
-  var scan_BANG_ = function() {
+  var scan_BANG_2 = function() {
     for (let G__1 of iterable(Array.from(document.querySelectorAll("[data-ui-toast]")))) {
       const el2 = G__1;
       consume_BANG_(el2);
@@ -2443,9 +3363,9 @@
     return null;
   };
   var init_BANG_6 = function() {
-    scan_BANG_();
+    scan_BANG_2();
     const obs1 = new MutationObserver((function(_, _2) {
-      return scan_BANG_();
+      return scan_BANG_2();
     }));
     return obs1.observe(document.body, { "childList": true, "subtree": true });
   };

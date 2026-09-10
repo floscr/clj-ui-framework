@@ -1,0 +1,259 @@
+/* Panels — resizable panel groups (ui.panels + ui.js.panels runtime) */
+
+.ui-panels-group {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  overflow: clip;
+}
+
+.ui-panels-group[data-orientation="vertical"] {
+  flex-direction: column;
+}
+
+/* Nested groups: only the root clips */
+.ui-panels-group .ui-panels-group {
+  overflow: visible;
+}
+
+/* ── Sized panels ──────────────────────────────────────────────── */
+
+.ui-panels-panel {
+  position: relative;
+  display: flex;
+  flex-shrink: 0;
+}
+
+[data-orientation="horizontal"] > .ui-panels-panel { flex-direction: row; }
+[data-orientation="vertical"] > .ui-panels-panel { flex-direction: column; }
+
+/* Content anchors to the edge away from the resize seam */
+.ui-panels-panel[data-edge="end"] { justify-content: flex-start; }
+.ui-panels-panel[data-edge="start"] { justify-content: flex-end; }
+
+/* Clip while resizing/folding/collapsed so content slides under the seam */
+.ui-panels-panel[data-resizing],
+.ui-panels-panel[data-folding],
+.ui-panels-panel[data-collapsed] {
+  overflow: clip;
+}
+
+.ui-panels-content {
+  flex-shrink: 0;
+  min-width: 0;
+  min-height: 0;
+}
+
+[data-orientation="horizontal"] > .ui-panels-panel > .ui-panels-content { height: 100%; }
+[data-orientation="vertical"] > .ui-panels-panel > .ui-panels-content { width: 100%; }
+
+/* ── Fill panel ────────────────────────────────────────────────── */
+
+.ui-panels-fill {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+}
+
+.ui-panels-fill[data-pin] {
+  display: flex;
+}
+
+[data-orientation="horizontal"] > .ui-panels-fill[data-pin] { flex-direction: row; }
+[data-orientation="vertical"] > .ui-panels-fill[data-pin] { flex-direction: column; }
+
+.ui-panels-fill-inner {
+  flex-shrink: 0;
+}
+
+[data-orientation="horizontal"] > .ui-panels-fill > .ui-panels-fill-inner {
+  height: 100%;
+  width: 100%;
+}
+
+[data-orientation="vertical"] > .ui-panels-fill > .ui-panels-fill-inner {
+  width: 100%;
+  height: 100%;
+}
+
+/* ── Separator slot: zero-size in flow, grip centered on the seam ── */
+
+.ui-panels-separator {
+  flex: none;
+  display: flex;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+}
+
+[data-orientation="horizontal"] > .ui-panels-separator {
+  width: 0;
+  flex-direction: row;
+}
+
+[data-orientation="vertical"] > .ui-panels-separator {
+  height: 0;
+  flex-direction: column;
+}
+
+/* ── Grips (separator + panel edge) ────────────────────────────── */
+
+.ui-panels-grip {
+  position: relative;
+  flex-shrink: 0;
+  touch-action: none;
+  outline: none;
+}
+
+[data-orientation="horizontal"] > .ui-panels-separator > .ui-panels-grip {
+  width: var(--size-2);
+  cursor: col-resize;
+}
+
+[data-orientation="vertical"] > .ui-panels-separator > .ui-panels-grip {
+  height: var(--size-2);
+  cursor: row-resize;
+}
+
+/* Visible seam line, thickens + tints on interaction */
+.ui-panels-separator > .ui-panels-grip::before {
+  content: "";
+  position: absolute;
+  background: var(--gray-200);
+  transition: background 0.15s ease, width 0.15s ease, height 0.15s ease;
+}
+
+[data-orientation="horizontal"] > .ui-panels-separator > .ui-panels-grip::before {
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 1px;
+}
+
+[data-orientation="vertical"] > .ui-panels-separator > .ui-panels-grip::before {
+  left: 0;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 1px;
+}
+
+@media (hover: hover) {
+  .ui-panels-separator > .ui-panels-grip:hover::before {
+    background: var(--gray-400);
+  }
+}
+
+.ui-panels-separator > .ui-panels-grip:focus-visible::before,
+.ui-panels-separator > .ui-panels-grip[data-resizing]::before {
+  background: var(--accent-500);
+}
+
+[data-orientation="horizontal"] > .ui-panels-separator > .ui-panels-grip:focus-visible::before,
+[data-orientation="horizontal"] > .ui-panels-separator > .ui-panels-grip[data-resizing]::before {
+  width: 3px;
+}
+
+[data-orientation="vertical"] > .ui-panels-separator > .ui-panels-grip:focus-visible::before,
+[data-orientation="vertical"] > .ui-panels-separator > .ui-panels-grip[data-resizing]::before {
+  height: 3px;
+}
+
+/* Dark mode: lighter seam line */
+[data-theme="dark"] .ui-panels-separator > .ui-panels-grip::before {
+  background: var(--gray-800);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .ui-panels-separator > .ui-panels-grip::before {
+    background: var(--gray-800);
+  }
+}
+
+@media (hover: hover) {
+  [data-theme="dark"] .ui-panels-separator > .ui-panels-grip:hover::before {
+    background: var(--gray-600);
+  }
+}
+
+/* ── Edge grip (separator-less drag on a bare panel edge) ──────── */
+
+.ui-panels-edge {
+  position: absolute;
+  z-index: 1;
+}
+
+/* Hidden when a real separator handles the seam */
+.ui-panels-panel:not([data-bare]) > .ui-panels-edge {
+  display: none;
+}
+
+[data-orientation="horizontal"] > .ui-panels-panel > .ui-panels-edge {
+  top: 0;
+  bottom: 0;
+  width: var(--size-2);
+  cursor: col-resize;
+}
+
+[data-orientation="vertical"] > .ui-panels-panel > .ui-panels-edge {
+  left: 0;
+  right: 0;
+  height: var(--size-2);
+  cursor: row-resize;
+}
+
+[data-orientation="horizontal"] > .ui-panels-panel[data-edge="end"] > .ui-panels-edge { right: 0; }
+[data-orientation="horizontal"] > .ui-panels-panel[data-edge="start"] > .ui-panels-edge { left: 0; }
+[data-orientation="vertical"] > .ui-panels-panel[data-edge="end"] > .ui-panels-edge { bottom: 0; }
+[data-orientation="vertical"] > .ui-panels-panel[data-edge="start"] > .ui-panels-edge { top: 0; }
+
+/* Edge feedback: accent line at the seam on hover/drag/focus */
+.ui-panels-edge::before {
+  content: "";
+  position: absolute;
+  background: transparent;
+  transition: background 0.15s ease;
+}
+
+[data-orientation="horizontal"] > .ui-panels-panel > .ui-panels-edge::before {
+  top: 0;
+  bottom: 0;
+  width: 3px;
+}
+
+[data-orientation="vertical"] > .ui-panels-panel > .ui-panels-edge::before {
+  left: 0;
+  right: 0;
+  height: 3px;
+}
+
+[data-orientation="horizontal"] > .ui-panels-panel[data-edge="end"] > .ui-panels-edge::before { right: 0; }
+[data-orientation="horizontal"] > .ui-panels-panel[data-edge="start"] > .ui-panels-edge::before { left: 0; }
+[data-orientation="vertical"] > .ui-panels-panel[data-edge="end"] > .ui-panels-edge::before { bottom: 0; }
+[data-orientation="vertical"] > .ui-panels-panel[data-edge="start"] > .ui-panels-edge::before { top: 0; }
+
+@media (hover: hover) {
+  .ui-panels-edge:hover::before {
+    background: var(--accent-300);
+  }
+}
+
+.ui-panels-edge:focus-visible::before,
+.ui-panels-edge[data-resizing]::before {
+  background: var(--accent-500);
+}
+
+/* ── Touch: bigger hit areas ───────────────────────────────────── */
+
+@media (pointer: coarse) {
+  [data-orientation="horizontal"] > .ui-panels-separator > .ui-panels-grip,
+  [data-orientation="horizontal"] > .ui-panels-panel > .ui-panels-edge {
+    width: var(--size-5);
+  }
+
+  [data-orientation="vertical"] > .ui-panels-separator > .ui-panels-grip,
+  [data-orientation="vertical"] > .ui-panels-panel > .ui-panels-edge {
+    height: var(--size-5);
+  }
+}

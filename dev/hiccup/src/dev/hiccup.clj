@@ -40,7 +40,8 @@
                                toast-demo camera-demo grid-demo
                                skeleton-demo progress-demo switch-demo tooltip-demo
                                breadcrumb-demo separator-demo form-demo chat-demo
-                               popover-demo command-demo toolbar-demo button-group-demo header-patterns-demo tabs-demo]]))
+                               popover-demo command-demo toolbar-demo button-group-demo header-patterns-demo tabs-demo
+                               panels-demo]]))
 
 ;; ── Query Params ────────────────────────────────────────────────────
 
@@ -323,6 +324,7 @@
    (breadcrumb-demo)
    (pagination-demo)
    (separator-demo)
+   (panels-demo)
    (form-demo)
    (chat-demo)
    (tag-input-demo)

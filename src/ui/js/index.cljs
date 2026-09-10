@@ -4,6 +4,7 @@
             [drop-zone]
             [gestures]
             [masonry]
+            [panels]
             [popover]
             [select]
             [theme]

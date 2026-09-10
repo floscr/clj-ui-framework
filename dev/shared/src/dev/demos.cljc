@@ -30,6 +30,7 @@
             [ui.breadcrumb :as breadcrumb]
             [ui.separator :as separator]
             [ui.icon :as icon]
+            [ui.panels :as panels]
             [ui.popover :as popover]
             [ui.command :as command]
             [ui.toolbar :as toolbar]
@@ -543,6 +544,38 @@
      [:span {:style (sx {:font-size "var(--font-sm)"})} "Docs"]
      (separator/separator {:orientation :vertical})
      [:span {:style (sx {:font-size "var(--font-sm)"})} "Source"]]))
+
+(defn- panels-pane [& children]
+  (into [:div {:style (sx {:padding "1rem" :font-size "var(--font-sm)"
+                           :color "var(--fg-2)" :height "100%"
+                           :box-sizing "border-box"})}]
+        children))
+
+(defn panels-demo []
+  (section "Panels"
+    [:div {:style (sx {:height "260px" :border "var(--border-0)"
+                       :border-radius "var(--radius-md)" :overflow "hidden"})}
+     (panels/group {:orientation :horizontal}
+       (panels/panel {:size 220 :min-size 140 :max-size 360 :collapsible true}
+         (panels-pane "Sidebar — drag the seam, arrow keys resize, Enter collapses, double-click resets."))
+       (panels/separator {:label "Resize sidebar"})
+       (panels/panel {:pin true}
+         (panels-pane "Main content (pinned fill — stays anchored while the sidebar folds).")))]
+    [:div {:style (sx {:height "200px" :border "var(--border-0)"
+                       :border-radius "var(--radius-md)" :overflow "hidden"})}
+     (panels/group {:orientation :vertical}
+       (panels/panel {}
+         (panels-pane "Fill area."))
+       (panels/separator {:label "Resize bottom panel"})
+       (panels/panel {:size 60 :min-size 40 :max-size 120}
+         (panels-pane "Bottom panel.")))]
+    [:div {:style (sx {:height "180px" :border "var(--border-0)"
+                       :border-radius "var(--radius-md)" :overflow "hidden"})}
+     (panels/group {:orientation :horizontal}
+       (panels/panel {}
+         (panels-pane "Fill area."))
+       (panels/panel {:size "30%" :min-size 120}
+         (panels-pane "Bare edge panel (30%) — drag its left edge, no separator needed.")))]))
 
 (defn form-demo []
   (section "Form"
