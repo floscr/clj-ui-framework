@@ -843,13 +843,14 @@
                         [:div {:class "cal-week-now" :style {"top" (str now-px "px")}}
                          [:span {:class "cal-week-now-dot" :style {"left" (str now-left "%")}}]])]
          [:div (merge {:class wrap-cls} attrs)
-          [:div {:class "cal-week-header"}
-           [:div {:class "cal-week-corner"}]
-           head]
-          [:div {:class "cal-week-allday"}
-           [:div {:class "cal-week-allday-label"} "All day"]
-           allday]
           [:div {:class "cal-week-body"}
+           [:div {:class "cal-week-topbar"}
+            [:div {:class "cal-week-header"}
+             [:div {:class "cal-week-corner"}]
+             head]
+            [:div {:class "cal-week-allday"}
+             [:div {:class "cal-week-allday-label"} "All day"]
+             allday]]
            [:div {:class "cal-week-grid" :style {"height" (str total-px "px")}}
             (into [:div {:class "cal-week-gutter"}] hour-labels)
             (into [:div {:class "cal-week-canvas"}]
@@ -914,13 +915,14 @@
                         [:div {:class ["cal-week-now"] :style {:top (str now-px "px")}}
                          [:span {:class ["cal-week-now-dot"] :style {:left (str now-left "%")}}]])]
          [:div (merge {:class wrap-cls} attrs)
-          [:div {:class ["cal-week-header"]}
-           [:div {:class ["cal-week-corner"]}]
-           head]
-          [:div {:class ["cal-week-allday"]}
-           [:div {:class ["cal-week-allday-label"]} "All day"]
-           allday]
           [:div {:class ["cal-week-body"]}
+           [:div {:class ["cal-week-topbar"]}
+            [:div {:class ["cal-week-header"]}
+             [:div {:class ["cal-week-corner"]}]
+             head]
+            [:div {:class ["cal-week-allday"]}
+             [:div {:class ["cal-week-allday-label"]} "All day"]
+             allday]]
            [:div {:class ["cal-week-grid"] :style {:height (str total-px "px")}}
             (into [:div {:class ["cal-week-gutter"]}] hour-labels)
             (into [:div {:class ["cal-week-canvas"]}]
@@ -973,13 +975,14 @@
                         [:div {:class "cal-week-now" :style (str "top: " now-px "px")}
                          [:span {:class "cal-week-now-dot" :style (str "left: " now-left "%")}]])]
          [:div (merge {:class wrap-cls} attrs)
-          [:div {:class "cal-week-header"}
-           [:div {:class "cal-week-corner"}]
-           head]
-          [:div {:class "cal-week-allday"}
-           [:div {:class "cal-week-allday-label"} "All day"]
-           allday]
           [:div {:class "cal-week-body"}
+           [:div {:class "cal-week-topbar"}
+            [:div {:class "cal-week-header"}
+             [:div {:class "cal-week-corner"}]
+             head]
+            [:div {:class "cal-week-allday"}
+             [:div {:class "cal-week-allday-label"} "All day"]
+             allday]]
            [:div {:class "cal-week-grid" :style (str "height: " total-px "px")}
             (into [:div {:class "cal-week-gutter"}] hour-labels)
             (into [:div {:class "cal-week-canvas"}]

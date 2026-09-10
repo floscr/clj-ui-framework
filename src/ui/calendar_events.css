@@ -766,14 +766,19 @@
   min-height: 0;
 }
 
-/* Header row — sticky day names + numbers, aligned to the day columns. */
-.cal-week-header {
-  display: flex;
+/* Sticky top bar — holds the header + all-day rows inside the scroll
+   container so they share its scrollbar-reduced width (columns stay aligned). */
+.cal-week-topbar {
   position: sticky;
   top: 0;
   z-index: 4;
   background: var(--bg-0);
-  border-bottom: 1px solid var(--gray-200);
+}
+
+/* Header row — day names + numbers, aligned to the day columns. */
+.cal-week-header {
+  display: flex;
+  border-bottom: var(--border-0);
 }
 
 .cal-week-corner {
@@ -794,7 +799,7 @@
   align-items: baseline;
   gap: var(--size-2);
   padding: var(--size-2) var(--size-3);
-  border-left: 1px solid var(--gray-200);
+  border-left: var(--border-0);
 }
 
 .cal-week-headname {
@@ -819,7 +824,7 @@
 .cal-week-allday {
   display: flex;
   min-height: var(--size-9);
-  border-bottom: 1px solid var(--gray-200);
+  border-bottom: var(--border-0);
 }
 
 .cal-week-allday-label {
@@ -832,7 +837,7 @@
 }
 
 .cal-week-alldaycol {
-  border-left: 1px solid var(--gray-200);
+  border-left: var(--border-0);
   padding: var(--size-1);
   display: flex;
   flex-direction: column;
@@ -921,7 +926,7 @@
   left: 0;
   right: 0;
   height: 0;
-  border-top: 1px solid var(--gray-200);
+  border-top: var(--border-0);
   pointer-events: none;
 }
 
@@ -932,7 +937,7 @@
 
 .cal-week-daycol {
   position: relative;
-  border-left: 1px solid var(--gray-200);
+  border-left: var(--border-0);
 }
 
 /* Timed event cards — positioned by start time (top) and duration (height). */
