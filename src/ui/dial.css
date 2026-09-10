@@ -105,6 +105,7 @@
 }
 
 .dial-row--action { grid-template-columns: 1fr; }
+.dial-row--slider { grid-template-columns: 1fr; }
 
 .dial-label {
   font-size: var(--font-xs);
@@ -117,54 +118,71 @@
 /* ── Slider ────────────────────────────────────────────────────────── */
 
 .dial-slider {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: var(--size-2);
+  height: 26px;
+  padding-right: var(--size-2);
+  background: var(--bg-1);
+  border: var(--border-0);
+  border-radius: var(--radius-sm);
+  cursor: ew-resize;
   outline: none;
-}
-
-.dial-slider:focus-visible { box-shadow: 0 0 0 2px var(--accent); border-radius: var(--radius-sm); }
-
-.dial-slider-track {
-  position: relative;
-  flex: 1;
-  height: 6px;
-  background: var(--bg-2);
-  border-radius: 999px;
-  cursor: pointer;
+  overflow: hidden;
   touch-action: none;
+  user-select: none;
 }
+
+.dial-slider:focus-visible { box-shadow: inset 0 0 0 1px var(--accent); }
 
 .dial-slider-fill {
   position: absolute;
-  inset: 0 auto 0 0;
-  background: var(--accent);
-  border-radius: 999px;
-}
-
-.dial-slider-thumb {
-  position: absolute;
-  top: 50%;
-  width: 12px;
-  height: 12px;
-  margin-left: -6px;
-  transform: translateY(-50%);
-  background: var(--bg-0);
-  border: 2px solid var(--accent);
-  border-radius: 50%;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  background: var(--bg-2);
   pointer-events: none;
 }
 
+.dial-slider-label {
+  position: relative;
+  z-index: 1;
+  flex: 0 1 auto;
+  max-width: 55%;
+  margin: var(--size-1);
+  padding: 0 var(--size-2);
+  height: calc(100% - var(--size-2));
+  display: flex;
+  align-items: center;
+  font-size: var(--font-xs);
+  color: var(--fg-1);
+  background: var(--bg-2);
+  border: var(--border-0);
+  border-radius: var(--radius-xs);
+  box-shadow: var(--shadow-0);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+
+.dial-slider:hover .dial-slider-label { color: var(--fg-0); }
+
 .dial-num {
-  width: 46px;
+  position: relative;
+  z-index: 1;
+  margin-left: auto;
+  width: auto;
+  min-width: 40px;
   font-size: var(--font-xs);
   font-variant-numeric: tabular-nums;
   text-align: right;
   color: var(--fg-0);
-  background: var(--bg-1);
-  border: var(--border-0);
-  border-radius: var(--radius-sm);
-  padding: 2px 4px;
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 0 var(--size-1);
+  cursor: text;
 }
 
 /* ── Toggle ────────────────────────────────────────────────────────── */

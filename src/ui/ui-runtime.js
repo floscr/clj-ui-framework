@@ -2336,140 +2336,166 @@
     const min5 = get(map__12, "min");
     const max6 = get(map__12, "max");
     const step7 = get(map__12, "step");
-    const r8 = row(label4);
-    const wrap9 = mk("div", "dial-slider");
-    const track10 = mk("div", "dial-slider-track");
-    const fill11 = mk("div", "dial-slider-fill");
-    const thumb12 = mk("div", "dial-slider-thumb");
-    const num13 = mk("input", "dial-num");
-    const cur14 = (function() {
+    const r8 = mk("div", "dial-row dial-row--slider");
+    const field9 = mk("div", "dial-slider");
+    const fill10 = mk("div", "dial-slider-fill");
+    const lab11 = mk("span", "dial-slider-label");
+    const num12 = mk("input", "dial-num");
+    const cur13 = (function() {
       return get_in(deref(get(panel, "store")), path3);
     });
-    const paint15 = (function(v) {
-      const pct16 = 100 * clamp((v - min5) / (max6 - min5), 0, 1);
-      fill11.style.width = `${pct16 ?? ""}${"%"}`;
-      thumb12.style.left = `${pct16 ?? ""}${"%"}`;
-      return num13.value = fmt_num(v);
+    const paint14 = (function(v) {
+      const pct15 = 100 * clamp((v - min5) / (max6 - min5), 0, 1);
+      fill10.style.width = `${pct15 ?? ""}${"%"}`;
+      return num12.value = fmt_num(v);
     });
-    const set_at17 = (function(clientx) {
-      const rect18 = track10.getBoundingClientRect();
-      const t19 = clamp((clientx - rect18.left) / rect18.width, 0, 1);
-      const raw20 = min5 + t19 * (max6 - min5);
-      const v21 = clamp(round_step(raw20, step7), min5, max6);
-      commit_BANG_(panel, path3, v21);
-      return paint15(v21);
+    const set_at16 = (function(clientx) {
+      const rect17 = field9.getBoundingClientRect();
+      const t18 = clamp((clientx - rect17.left) / rect17.width, 0, 1);
+      const raw19 = min5 + t18 * (max6 - min5);
+      const v20 = clamp(round_step(raw19, step7), min5, max6);
+      commit_BANG_(panel, path3, v20);
+      return paint14(v20);
     });
-    num13.type = "text";
-    add_BANG_(track10, fill11, thumb12);
-    add_BANG_(wrap9, track10, num13);
-    add_BANG_(r8, wrap9);
-    attr_BANG_(wrap9, "tabindex", "0");
-    const dragging22 = { "on": false };
-    on_BANG_(track10, "pointerdown", (function(e) {
-      track10.setPointerCapture(e.pointerId);
-      dragging22["on"] = true;
-      return set_at17(e.clientX);
-    }));
-    on_BANG_(track10, "pointermove", (function(e) {
-      if (truth_(dragging22["on"])) {
-        return set_at17(e.clientX);
-      }
-      ;
-    }));
-    on_BANG_(track10, "pointerup", (function(_) {
-      return dragging22["on"] = false;
-    }));
-    on_BANG_(track10, "pointercancel", (function(_) {
-      return dragging22["on"] = false;
-    }));
-    on_BANG_(num13, "change", (function(_) {
-      const v23 = parseFloat(num13.value);
-      if (truth_(isFinite(v23))) {
-        const v224 = clamp(round_step(v23, step7), min5, max6);
-        commit_BANG_(panel, path3, v224);
-        return paint15(v224);
-      } else {
-        return paint15(cur14());
-      }
-      ;
-    }));
-    on_BANG_(wrap9, "keydown", (function(e) {
-      const k25 = e.key;
-      const big26 = (() => {
-        const or__23426__auto__27 = e.shiftKey;
-        if (truth_(or__23426__auto__27)) {
-          return or__23426__auto__27;
-        } else {
-          const or__23426__auto__28 = k25 === "PageUp";
-          if (or__23426__auto__28) {
-            return or__23426__auto__28;
-          } else {
-            return k25 === "PageDown";
-          }
-          ;
-        }
-        ;
-      })();
-      const d29 = step7 * (truth_(big26) ? 10 : 1);
-      if (truth_((() => {
-        const or__23426__auto__30 = k25 === "ArrowUp";
-        if (or__23426__auto__30) {
-          return or__23426__auto__30;
-        } else {
-          const or__23426__auto__31 = k25 === "ArrowRight";
-          if (or__23426__auto__31) {
-            return or__23426__auto__31;
-          } else {
-            return k25 === "PageUp";
-          }
-          ;
-        }
-        ;
-      })())) {
+    txt_BANG_(lab11, label4);
+    attr_BANG_(lab11, "title", label4);
+    num12.type = "text";
+    attr_BANG_(num12, "inputmode", "decimal");
+    attr_BANG_(num12, "spellcheck", "false");
+    add_BANG_(field9, fill10, lab11, num12);
+    add_BANG_(r8, field9);
+    attr_BANG_(field9, "tabindex", "0");
+    const dragging21 = { "on": false };
+    on_BANG_(field9, "pointerdown", (function(e) {
+      if (!_EQ_(e.target, num12)) {
         e.preventDefault();
-        const v32 = clamp(cur14() + d29, min5, max6);
-        commit_BANG_(panel, path3, v32);
-        return paint15(v32);
+        field9.focus();
+        field9.setPointerCapture(e.pointerId);
+        dragging21["on"] = true;
+        return set_at16(e.clientX);
+      }
+      ;
+    }));
+    on_BANG_(field9, "pointermove", (function(e) {
+      if (truth_(dragging21["on"])) {
+        return set_at16(e.clientX);
+      }
+      ;
+    }));
+    on_BANG_(field9, "pointerup", (function(_) {
+      return dragging21["on"] = false;
+    }));
+    on_BANG_(field9, "pointercancel", (function(_) {
+      return dragging21["on"] = false;
+    }));
+    on_BANG_(num12, "focus", (function(_) {
+      return num12.select();
+    }));
+    on_BANG_(num12, "change", (function(_) {
+      const v22 = parseFloat(num12.value);
+      if (truth_(isFinite(v22))) {
+        const v223 = clamp(round_step(v22, step7), min5, max6);
+        commit_BANG_(panel, path3, v223);
+        return paint14(v223);
       } else {
-        if (truth_((() => {
-          const or__23426__auto__33 = k25 === "ArrowDown";
-          if (or__23426__auto__33) {
-            return or__23426__auto__33;
+        return paint14(cur13());
+      }
+      ;
+    }));
+    on_BANG_(field9, "keydown", (function(e) {
+      if (!_EQ_(e.target, num12)) {
+        const k24 = e.key;
+        const big25 = (() => {
+          const or__23426__auto__26 = e.shiftKey;
+          if (truth_(or__23426__auto__26)) {
+            return or__23426__auto__26;
           } else {
-            const or__23426__auto__34 = k25 === "ArrowLeft";
-            if (or__23426__auto__34) {
-              return or__23426__auto__34;
+            const or__23426__auto__27 = k24 === "PageUp";
+            if (or__23426__auto__27) {
+              return or__23426__auto__27;
             } else {
-              return k25 === "PageDown";
+              return k24 === "PageDown";
             }
             ;
           }
           ;
+        })();
+        const d28 = step7 * (truth_(big25) ? 10 : 1);
+        if (truth_((() => {
+          const or__23426__auto__29 = k24 === "Enter";
+          if (or__23426__auto__29) {
+            return or__23426__auto__29;
+          } else {
+            return k24 === " ";
+          }
+          ;
         })())) {
           e.preventDefault();
-          const v35 = clamp(cur14() - d29, min5, max6);
-          commit_BANG_(panel, path3, v35);
-          return paint15(v35);
+          num12.focus();
+          return num12.select();
         } else {
-          if (k25 === "Home") {
-            e.preventDefault();
-            commit_BANG_(panel, path3, min5);
-            return paint15(min5);
-          } else {
-            if (k25 === "End") {
-              e.preventDefault();
-              commit_BANG_(panel, path3, max6);
-              return paint15(max6);
+          if (truth_((() => {
+            const or__23426__auto__30 = k24 === "ArrowUp";
+            if (or__23426__auto__30) {
+              return or__23426__auto__30;
             } else {
-              return null;
+              const or__23426__auto__31 = k24 === "ArrowRight";
+              if (or__23426__auto__31) {
+                return or__23426__auto__31;
+              } else {
+                return k24 === "PageUp";
+              }
+              ;
+            }
+            ;
+          })())) {
+            e.preventDefault();
+            const v32 = clamp(cur13() + d28, min5, max6);
+            commit_BANG_(panel, path3, v32);
+            return paint14(v32);
+          } else {
+            if (truth_((() => {
+              const or__23426__auto__33 = k24 === "ArrowDown";
+              if (or__23426__auto__33) {
+                return or__23426__auto__33;
+              } else {
+                const or__23426__auto__34 = k24 === "ArrowLeft";
+                if (or__23426__auto__34) {
+                  return or__23426__auto__34;
+                } else {
+                  return k24 === "PageDown";
+                }
+                ;
+              }
+              ;
+            })())) {
+              e.preventDefault();
+              const v35 = clamp(cur13() - d28, min5, max6);
+              commit_BANG_(panel, path3, v35);
+              return paint14(v35);
+            } else {
+              if (k24 === "Home") {
+                e.preventDefault();
+                commit_BANG_(panel, path3, min5);
+                return paint14(min5);
+              } else {
+                if (k24 === "End") {
+                  e.preventDefault();
+                  commit_BANG_(panel, path3, max6);
+                  return paint14(max6);
+                } else {
+                  return null;
+                }
+              }
             }
           }
         }
+        ;
       }
       ;
     }));
-    paint15(cur14());
-    reg_updater_BANG_(panel, path3, paint15);
+    paint14(cur13());
+    reg_updater_BANG_(panel, path3, paint14);
     return r8;
   };
   var render_toggle = function(panel, c) {

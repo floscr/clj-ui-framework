@@ -237,56 +237,64 @@
 
 (defn- render-slider [panel c]
   (let [{:keys [path label min max step]} c
-        r      (row label)
-        wrap   (mk "div" "dial-slider")
-        track  (mk "div" "dial-slider-track")
+        r      (mk "div" "dial-row dial-row--slider")
+        field  (mk "div" "dial-slider")
         fill   (mk "div" "dial-slider-fill")
-        thumb  (mk "div" "dial-slider-thumb")
+        lab    (mk "span" "dial-slider-label")
         num    (mk "input" "dial-num")
         cur    (fn [] (get-in @(:store panel) path))
         paint  (fn [v]
                  (let [pct (* 100 (clamp (/ (- v min) (- max min)) 0 1))]
                    (set! (.. fill -style -width) (str pct "%"))
-                   (set! (.. thumb -style -left) (str pct "%"))
                    (set! (.-value num) (fmt-num v))))
         set-at (fn [clientx]
-                 (let [rect (.getBoundingClientRect track)
+                 (let [rect (.getBoundingClientRect field)
                        t    (clamp (/ (- clientx (.-left rect)) (.-width rect)) 0 1)
                        raw  (+ min (* t (- max min)))
                        v    (clamp (round-step raw step) min max)]
                    (commit! panel path v)
                    (paint v)))]
+    (txt! lab label)
+    (attr! lab "title" label)
     (set! (.-type num) "text")
-    (add! track fill thumb)
-    (add! wrap track num)
-    (add! r wrap)
-    (attr! wrap "tabindex" "0")
+    (attr! num "inputmode" "decimal")
+    (attr! num "spellcheck" "false")
+    (add! field fill lab num)
+    (add! r field)
+    (attr! field "tabindex" "0")
     (let [dragging #js {:on false}]
-      (on! track "pointerdown"
-           (fn [e] (.setPointerCapture track (.-pointerId e))
-             (aset dragging "on" true) (set-at (.-clientX e))))
-      (on! track "pointermove"
+      (on! field "pointerdown"
+           (fn [e]
+             (when (not= (.-target e) num)
+               (.preventDefault e)
+               (.focus field)
+               (.setPointerCapture field (.-pointerId e))
+               (aset dragging "on" true) (set-at (.-clientX e)))))
+      (on! field "pointermove"
            (fn [e] (when (aget dragging "on") (set-at (.-clientX e)))))
-      (on! track "pointerup" (fn [_] (aset dragging "on" false)))
-      (on! track "pointercancel" (fn [_] (aset dragging "on" false))))
+      (on! field "pointerup" (fn [_] (aset dragging "on" false)))
+      (on! field "pointercancel" (fn [_] (aset dragging "on" false))))
+    (on! num "focus" (fn [_] (.select num)))
     (on! num "change"
          (fn [_] (let [v (js/parseFloat (.-value num))]
                    (if (js/isFinite v)
                      (let [v2 (clamp (round-step v step) min max)]
                        (commit! panel path v2) (paint v2))
                      (paint (cur))))))
-    (on! wrap "keydown"
+    (on! field "keydown"
          (fn [e]
-           (let [k (.-key e)
-                 big (or (.-shiftKey e) (= k "PageUp") (= k "PageDown"))
-                 d (* step (if big 10 1))]
-             (cond
-               (or (= k "ArrowUp") (= k "ArrowRight") (= k "PageUp"))
-               (do (.preventDefault e) (let [v (clamp (+ (cur) d) min max)] (commit! panel path v) (paint v)))
-               (or (= k "ArrowDown") (= k "ArrowLeft") (= k "PageDown"))
-               (do (.preventDefault e) (let [v (clamp (- (cur) d) min max)] (commit! panel path v) (paint v)))
-               (= k "Home") (do (.preventDefault e) (commit! panel path min) (paint min))
-               (= k "End")  (do (.preventDefault e) (commit! panel path max) (paint max))))))
+           (when (not= (.-target e) num)
+             (let [k (.-key e)
+                   big (or (.-shiftKey e) (= k "PageUp") (= k "PageDown"))
+                   d (* step (if big 10 1))]
+               (cond
+                 (or (= k "Enter") (= k " ")) (do (.preventDefault e) (.focus num) (.select num))
+                 (or (= k "ArrowUp") (= k "ArrowRight") (= k "PageUp"))
+                 (do (.preventDefault e) (let [v (clamp (+ (cur) d) min max)] (commit! panel path v) (paint v)))
+                 (or (= k "ArrowDown") (= k "ArrowLeft") (= k "PageDown"))
+                 (do (.preventDefault e) (let [v (clamp (- (cur) d) min max)] (commit! panel path v) (paint v)))
+                 (= k "Home") (do (.preventDefault e) (commit! panel path min) (paint min))
+                 (= k "End")  (do (.preventDefault e) (commit! panel path max) (paint max)))))))
     (paint (cur))
     (reg-updater! panel path paint)
     r))
