@@ -146,8 +146,10 @@
 
    Props:
      :event    - event map
-     :on-click - click handler (receives event map)"
-  [{:keys [event on-click]}]
+     :on-click - click handler (receives event map)
+     :on-context-menu - context-menu handler (receives [event dom-event]); wired
+                        to right-click and (via ui.js.gestures) long-press"
+  [{:keys [event on-click on-context-menu]}]
   (let [title (:title event)
         time-str (event-time-display event)
         color (:color event)
@@ -157,17 +159,27 @@
               :on-click (when on-click
                           (fn [e]
                             (.stopPropagation e)
-                            (on-click event)))}
+                            (on-click event)))
+              :on-contextmenu (when on-context-menu
+                                (fn [e]
+                                  (.preventDefault e)
+                                  (.stopPropagation e)
+                                  (on-context-menu event e)))}
         (when time-str
           [:span {:class "cal-event-time"} time-str])
         [:span {:class "cal-event-title"} title]]
 
        :cljs
        [:div {:class (event-pill-class-list {:color color :done? done?})
-              :on (when on-click
-                    {:click (fn [e]
-                              (.stopPropagation e)
-                              (on-click event))})}
+              :on (cond-> {}
+                    on-click (assoc :click (fn [e]
+                                             (.stopPropagation e)
+                                             (on-click event)))
+                    on-context-menu (assoc :contextmenu
+                                           (fn [e]
+                                             (.preventDefault e)
+                                             (.stopPropagation e)
+                                             (on-context-menu event e))))}
         (when time-str
           [:span {:class ["cal-event-time"]} time-str])
         [:span {:class ["cal-event-title"]} title]]
@@ -193,7 +205,7 @@
      :max-visible   - max events to show before '+N more' (pills mode, default 3)
      :max-dots      - max dots to show (dots mode, default 4)"
   [{:keys [day events today-str selected-date on-select on-event-click
-           indicator max-visible max-dots]}]
+           on-event-context-menu indicator max-visible max-dots]}]
   (let [{:keys [current-month? date-str]} day
         d           (:day day)
         today?      (= date-str today-str)
@@ -221,7 +233,8 @@
                      dot-evts))
           (into [:div {:class "cal-day-events"}]
                 (concat
-                 (map (fn [evt] (event-pill {:event evt :on-click on-event-click}))
+                 (map (fn [evt] (event-pill {:event evt :on-click on-event-click
+                                             :on-context-menu on-event-context-menu}))
                       visible-evts)
                  (when (pos? overflow)
                    [[:div {:class "cal-event-more"} (str "+" overflow " more")]]))))]
@@ -240,7 +253,8 @@
                      dot-evts))
           (into [:div {:class ["cal-day-events"]}]
                 (concat
-                 (map (fn [evt] (event-pill {:event evt :on-click on-event-click}))
+                 (map (fn [evt] (event-pill {:event evt :on-click on-event-click
+                                             :on-context-menu on-event-context-menu}))
                       visible-evts)
                  (when (pos? overflow)
                    [[:div {:class ["cal-event-more"]} (str "+" overflow " more")]]))))]
@@ -279,8 +293,8 @@
      :class          - additional CSS classes
      :attrs          - additional HTML attributes"
   [{:keys [year month today-str selected-date events on-select
-           on-prev-month on-next-month on-event-click max-visible
-           class attrs]}]
+           on-prev-month on-next-month on-event-click on-event-context-menu
+           max-visible class attrs]}]
   (let [days (cal/calendar-days year month)]
     #?(:squint
        (let [classes (cond-> "cal cal-has-events" class (str " " class))
@@ -298,6 +312,7 @@
                                         :selected-date selected-date
                                         :on-select on-select
                                         :on-event-click on-event-click
+                                        :on-event-context-menu on-event-context-menu
                                         :max-visible max-visible}))
                      days))])
 
@@ -318,6 +333,7 @@
                                         :selected-date selected-date
                                         :on-select on-select
                                         :on-event-click on-event-click
+                                        :on-event-context-menu on-event-context-menu
                                         :max-visible max-visible}))
                      days))])
 
@@ -458,14 +474,18 @@
    Props:
      :event    - event map
      :on-click - click handler"
-  [{:keys [event on-click]}]
+  [{:keys [event on-click on-context-menu]}]
   (let [title    (:title event)
         time-str (event-time-display event)
         color    (:color event)
         done?    (:done? event)]
     #?(:squint
        [:div {:class (agenda-event-classes {:done? done?})
-              :on-click (when on-click (fn [_e] (on-click event)))}
+              :on-click (when on-click (fn [_e] (on-click event)))
+              :on-contextmenu (when on-context-menu
+                                (fn [e]
+                                  (.preventDefault e)
+                                  (on-context-menu event e)))}
         [:div {:class (str "cal-agenda-dot " (event-color-class color))}]
         [:div {:class "cal-agenda-event-body"}
          (when time-str
@@ -474,7 +494,12 @@
 
        :cljs
        [:div {:class (agenda-event-class-list {:done? done?})
-              :on (when on-click {:click (fn [_e] (on-click event))})}
+              :on (cond-> {}
+                    on-click (assoc :click (fn [_e] (on-click event)))
+                    on-context-menu (assoc :contextmenu
+                                           (fn [e]
+                                             (.preventDefault e)
+                                             (on-context-menu event e))))}
         [:div {:class ["cal-agenda-dot" (event-color-class color)]}]
         [:div {:class ["cal-agenda-event-body"]}
          (when time-str
@@ -497,7 +522,7 @@
      :label      - display label (e.g. 'Today', 'Tomorrow', 'Mon')
      :events     - all events (filtered internally)
      :on-event-click - callback for event click"
-  [{:keys [date label events on-event-click]}]
+  [{:keys [date label events on-event-click on-event-context-menu]}]
   (let [day-evts (events-for-date events date)]
     (when (seq day-evts)
       #?(:squint
@@ -507,7 +532,8 @@
            [:span {:class "cal-agenda-day-date"} (str/replace date "-" "/")]]
           (into [:div {:class "cal-agenda-day-events"}]
                 (map (fn [evt]
-                       (agenda-event-row {:event evt :on-click on-event-click}))
+                       (agenda-event-row {:event evt :on-click on-event-click
+                                          :on-context-menu on-event-context-menu}))
                      day-evts))]
 
          :cljs
@@ -517,7 +543,8 @@
            [:span {:class ["cal-agenda-day-date"]} (str/replace date "-" "/")]]
           (into [:div {:class ["cal-agenda-day-events"]}]
                 (map (fn [evt]
-                       (agenda-event-row {:event evt :on-click on-event-click}))
+                       (agenda-event-row {:event evt :on-click on-event-click
+                                          :on-context-menu on-event-context-menu}))
                      day-evts))]
 
          :clj
@@ -539,12 +566,13 @@
      :on-event-click - callback for event click
      :class          - additional CSS classes
      :attrs          - additional HTML attributes"
-  [{:keys [days events on-event-click class attrs]}]
+  [{:keys [days events on-event-click on-event-context-menu class attrs]}]
   (let [groups (keep (fn [d]
                        (agenda-day-group {:date (:date d)
                                           :label (:label d)
                                           :events events
-                                          :on-event-click on-event-click}))
+                                          :on-event-click on-event-click
+                                          :on-event-context-menu on-event-context-menu}))
                      days)
         empty? (not (seq groups))]
     #?(:squint
@@ -590,7 +618,7 @@
      :hour-height    - pixels per hour (default 72)
      :class          - extra classes
      :attrs          - extra attributes"
-  [{:keys [events date today-str now-minutes on-event-click hour-height class attrs]}]
+  [{:keys [events date today-str now-minutes on-event-click on-event-context-menu hour-height class attrs]}]
   (let [day-evts   (events-for-date events date)
         timed      (filterv :time-start day-evts)
         hour-h     (or hour-height 72)
@@ -626,7 +654,12 @@
                                    :style {"top" (str (px (- s start-off)) "px")
                                            "height" (str (px dur) "px")}
                                    :on-click (when on-event-click
-                                               (fn [_e] (on-event-click evt)))}
+                                               (fn [_e] (on-event-click evt)))
+                                   :on-contextmenu (when on-event-context-menu
+                                                     (fn [e]
+                                                       (.preventDefault e)
+                                                       (.stopPropagation e)
+                                                       (on-event-context-menu evt e)))}
                              [:div {:class "cal-timeline-event-head"}
                               [:span {:class "cal-timeline-event-title"} (:title evt)]
                               (when-let [d (format-duration dur)]
@@ -655,8 +688,13 @@
                             [:div {:class ["cal-timeline-event" (event-color-class (:color evt))]
                                    :style {:top (str (px (- s start-off)) "px")
                                            :height (str (px dur) "px")}
-                                   :on (when on-event-click
-                                         {:click (fn [_e] (on-event-click evt))})}
+                                   :on (cond-> {}
+                                         on-event-click (assoc :click (fn [_e] (on-event-click evt)))
+                                         on-event-context-menu (assoc :contextmenu
+                                                                      (fn [e]
+                                                                        (.preventDefault e)
+                                                                        (.stopPropagation e)
+                                                                        (on-event-context-menu evt e))))}
                              [:div {:class ["cal-timeline-event-head"]}
                               [:span {:class ["cal-timeline-event-title"]} (:title evt)]
                               (when-let [d (format-duration dur)]
@@ -697,3 +735,230 @@
           (into [:div {:class "cal-timeline-track"
                        :style (str "height: " total-px "px")}]
                 (concat rows cards (when now-node [now-node])))]))))
+
+(defn week-timeline
+  "Render a 7-day week grid: a sticky day-header row, an all-day event row,
+   and a scrollable hour grid with timed event cards positioned by start time
+   and duration within per-day columns, plus a red 'now' line spanning the
+   week and a subtle tint on the current day's column.
+
+   The visible hour range is derived from the week's timed events, falling
+   back to 8 AM \u2013 6 PM when the week has none. Events without a :time-start
+   render as bars in the all-day row.
+
+   Props:
+     :days           - vector of 7 {:date :day-num :dow} maps (Mon\u2013Sun);
+                       :dow is 0=Mon..6=Sun, used for the weekday label
+     :events         - all events (filtered to the week internally)
+     :today-str      - today's date string (enables today tint + now line)
+     :now-minutes    - current time as minutes-from-midnight
+     :on-event-click - callback receiving the clicked event map
+     :hour-height    - pixels per hour (default 56)
+     :class          - extra classes
+     :attrs          - extra attributes"
+  [{:keys [days events today-str now-minutes on-event-click hour-height class attrs]}]
+  (let [dates      (mapv :date days)
+        date-set   (set dates)
+        in-week    (filterv (fn [e] (contains? date-set (:date e))) events)
+        timed      (filterv :time-start in-week)
+        all-day    (filterv (fn [e] (not (:time-start e))) in-week)
+        hour-h     (or hour-height 56)
+        px-min     (/ hour-h 60)
+        px         (fn [mins] (round* (* px-min mins)))
+        starts     (mapv #(hhmm->minutes (:time-start %)) timed)
+        ends       (mapv (fn [e] (+ (hhmm->minutes (:time-start e))
+                                    (event-duration-minutes e)))
+                         timed)
+        min-start  (if (seq starts) (apply min starts) (* 8 60))
+        max-end    (if (seq ends) (apply max ends) (* 18 60))
+        start-hour (quot min-start 60)
+        end-hour   (quot (+ max-end 59) 60)
+        start-off  (* start-hour 60)
+        hours      (vec (range start-hour (inc end-hour)))
+        total-px   (px (* (- end-hour start-hour) 60))
+        today-idx  (some (fn [[i d]] (when (= (:date d) today-str) i))
+                         (map-indexed vector days))
+        show-now?  (boolean (and now-minutes today-idx
+                                 (>= now-minutes start-off)
+                                 (<= now-minutes (* end-hour 60))))
+        now-px     (when show-now? (px (- now-minutes start-off)))
+        now-left   (when show-now? (* today-idx (/ 100.0 7)))]
+    #?(:squint
+       (let [wrap-cls (cond-> "cal-week" class (str " " class))
+             head (into [:div {:class "cal-week-headcols"}]
+                        (map (fn [d]
+                               [:div {:class (str "cal-week-headcell"
+                                                  (when (= (:date d) today-str) " is-today"))}
+                                [:span {:class "cal-week-headname"} (nth weekday-short-names (:dow d))]
+                                [:span {:class "cal-week-headnum"} (str (:day d))]])
+                             days))
+             allday (into [:div {:class "cal-week-alldaycols"}]
+                          (map (fn [d]
+                                 (into [:div {:class (str "cal-week-alldaycol"
+                                                         (when (= (:date d) today-str) " is-today"))}]
+                                       (map (fn [evt]
+                                              [:div {:class (str "cal-week-alldayevent " (event-color-class (:color evt)))
+                                                     :on-click (when on-event-click (fn [_e] (on-event-click evt)))}
+                                               [:span {:class "cal-week-alldayevent-dot"}]
+                                               [:span {:class "cal-week-alldayevent-title"} (:title evt)]])
+                                            (events-for-date all-day (:date d)))))
+                               days))
+             hour-labels (map (fn [h]
+                                [:div {:class "cal-week-hour"
+                                       :style {"top" (str (px (- (* h 60) start-off)) "px")}}
+                                 (format-hour-label h)])
+                              hours)
+             hour-lines (map (fn [h]
+                               [:div {:class "cal-week-line"
+                                      :style {"top" (str (px (- (* h 60) start-off)) "px")}}])
+                             hours)
+             day-cols (into [:div {:class "cal-week-daycols"}]
+                            (map (fn [d]
+                                   (into [:div {:class (str "cal-week-daycol"
+                                                           (when (= (:date d) today-str) " is-today"))}]
+                                         (map (fn [evt]
+                                                (let [s   (hhmm->minutes (:time-start evt))
+                                                      dur (event-duration-minutes evt)]
+                                                  [:div {:class (str "cal-week-event " (event-color-class (:color evt)))
+                                                         :style {"top" (str (px (- s start-off)) "px")
+                                                                 "height" (str (px dur) "px")}
+                                                         :on-click (when on-event-click (fn [_e] (on-event-click evt)))}
+                                                   [:div {:class "cal-week-event-head"}
+                                                    [:span {:class "cal-week-event-title"} (:title evt)]
+                                                    (when-let [dd (format-duration dur)]
+                                                      [:span {:class "cal-week-event-dur"} dd])]]))
+                                              (events-for-date timed (:date d)))))
+                                 days))
+             now-node (when show-now?
+                        [:div {:class "cal-week-now" :style {"top" (str now-px "px")}}
+                         [:span {:class "cal-week-now-dot" :style {"left" (str now-left "%")}}]])]
+         [:div (merge {:class wrap-cls} attrs)
+          [:div {:class "cal-week-header"}
+           [:div {:class "cal-week-corner"}]
+           head]
+          [:div {:class "cal-week-allday"}
+           [:div {:class "cal-week-allday-label"} "All day"]
+           allday]
+          [:div {:class "cal-week-body"}
+           [:div {:class "cal-week-grid" :style {"height" (str total-px "px")}}
+            (into [:div {:class "cal-week-gutter"}] hour-labels)
+            (into [:div {:class "cal-week-canvas"}]
+                  (concat hour-lines [day-cols] (when now-node [now-node])))]]])
+
+       :cljs
+       (let [wrap-cls (cond-> ["cal-week"] class (conj class))
+             head (into [:div {:class ["cal-week-headcols"]}]
+                        (map (fn [d]
+                               [:div {:class ["cal-week-headcell" (when (= (:date d) today-str) "is-today")]}
+                                [:span {:class ["cal-week-headname"]} (nth weekday-short-names (:dow d))]
+                                [:span {:class ["cal-week-headnum"]} (str (:day d))]])
+                             days))
+             allday (into [:div {:class ["cal-week-alldaycols"]}]
+                          (map (fn [d]
+                                 (into [:div {:class ["cal-week-alldaycol" (when (= (:date d) today-str) "is-today")]}]
+                                       (map (fn [evt]
+                                              [:div {:class ["cal-week-alldayevent" (event-color-class (:color evt))]
+                                                     :on (when on-event-click {:click (fn [_e] (on-event-click evt))})}
+                                               [:span {:class ["cal-week-alldayevent-dot"]}]
+                                               [:span {:class ["cal-week-alldayevent-title"]} (:title evt)]])
+                                            (events-for-date all-day (:date d)))))
+                               days))
+             hour-labels (map (fn [h]
+                                [:div {:class ["cal-week-hour"]
+                                       :style {:top (str (px (- (* h 60) start-off)) "px")}}
+                                 (format-hour-label h)])
+                              hours)
+             hour-lines (map (fn [h]
+                               [:div {:class ["cal-week-line"]
+                                      :style {:top (str (px (- (* h 60) start-off)) "px")}}])
+                             hours)
+             day-cols (into [:div {:class ["cal-week-daycols"]}]
+                            (map (fn [d]
+                                   (into [:div {:class ["cal-week-daycol" (when (= (:date d) today-str) "is-today")]}]
+                                         (map (fn [evt]
+                                                (let [s   (hhmm->minutes (:time-start evt))
+                                                      dur (event-duration-minutes evt)]
+                                                  [:div {:class ["cal-week-event" (event-color-class (:color evt))]
+                                                         :style {:top (str (px (- s start-off)) "px")
+                                                                 :height (str (px dur) "px")}
+                                                         :on (when on-event-click {:click (fn [_e] (on-event-click evt))})}
+                                                   [:div {:class ["cal-week-event-head"]}
+                                                    [:span {:class ["cal-week-event-title"]} (:title evt)]
+                                                    (when-let [dd (format-duration dur)]
+                                                      [:span {:class ["cal-week-event-dur"]} dd])]]))
+                                              (events-for-date timed (:date d)))))
+                                 days))
+             now-node (when show-now?
+                        [:div {:class ["cal-week-now"] :style {:top (str now-px "px")}}
+                         [:span {:class ["cal-week-now-dot"] :style {:left (str now-left "%")}}]])]
+         [:div (merge {:class wrap-cls} attrs)
+          [:div {:class ["cal-week-header"]}
+           [:div {:class ["cal-week-corner"]}]
+           head]
+          [:div {:class ["cal-week-allday"]}
+           [:div {:class ["cal-week-allday-label"]} "All day"]
+           allday]
+          [:div {:class ["cal-week-body"]}
+           [:div {:class ["cal-week-grid"] :style {:height (str total-px "px")}}
+            (into [:div {:class ["cal-week-gutter"]}] hour-labels)
+            (into [:div {:class ["cal-week-canvas"]}]
+                  (concat hour-lines [day-cols] (when now-node [now-node])))]]])
+
+       :clj
+       (let [wrap-cls (cond-> "cal-week" class (str " " class))
+             head (into [:div {:class "cal-week-headcols"}]
+                        (map (fn [d]
+                               [:div {:class (str "cal-week-headcell"
+                                                  (when (= (:date d) today-str) " is-today"))}
+                                [:span {:class "cal-week-headname"} (nth weekday-short-names (:dow d))]
+                                [:span {:class "cal-week-headnum"} (str (:day d))]])
+                             days))
+             allday (into [:div {:class "cal-week-alldaycols"}]
+                          (map (fn [d]
+                                 (into [:div {:class (str "cal-week-alldaycol"
+                                                         (when (= (:date d) today-str) " is-today"))}]
+                                       (map (fn [evt]
+                                              [:div {:class (str "cal-week-alldayevent " (event-color-class (:color evt)))}
+                                               [:span {:class "cal-week-alldayevent-dot"}]
+                                               [:span {:class "cal-week-alldayevent-title"} (:title evt)]])
+                                            (events-for-date all-day (:date d)))))
+                               days))
+             hour-labels (map (fn [h]
+                                [:div {:class "cal-week-hour"
+                                       :style (str "top: " (px (- (* h 60) start-off)) "px")}
+                                 (format-hour-label h)])
+                              hours)
+             hour-lines (map (fn [h]
+                               [:div {:class "cal-week-line"
+                                      :style (str "top: " (px (- (* h 60) start-off)) "px")}])
+                             hours)
+             day-cols (into [:div {:class "cal-week-daycols"}]
+                            (map (fn [d]
+                                   (into [:div {:class (str "cal-week-daycol"
+                                                           (when (= (:date d) today-str) " is-today"))}]
+                                         (map (fn [evt]
+                                                (let [s   (hhmm->minutes (:time-start evt))
+                                                      dur (event-duration-minutes evt)]
+                                                  [:div {:class (str "cal-week-event " (event-color-class (:color evt)))
+                                                         :style (str "top: " (px (- s start-off)) "px; height: " (px dur) "px")}
+                                                   [:div {:class "cal-week-event-head"}
+                                                    [:span {:class "cal-week-event-title"} (:title evt)]
+                                                    (when-let [dd (format-duration dur)]
+                                                      [:span {:class "cal-week-event-dur"} dd])]]))
+                                              (events-for-date timed (:date d)))))
+                                 days))
+             now-node (when show-now?
+                        [:div {:class "cal-week-now" :style (str "top: " now-px "px")}
+                         [:span {:class "cal-week-now-dot" :style (str "left: " now-left "%")}]])]
+         [:div (merge {:class wrap-cls} attrs)
+          [:div {:class "cal-week-header"}
+           [:div {:class "cal-week-corner"}]
+           head]
+          [:div {:class "cal-week-allday"}
+           [:div {:class "cal-week-allday-label"} "All day"]
+           allday]
+          [:div {:class "cal-week-body"}
+           [:div {:class "cal-week-grid" :style (str "height: " total-px "px")}
+            (into [:div {:class "cal-week-gutter"}] hour-labels)
+            (into [:div {:class "cal-week-canvas"}]
+                  (concat hour-lines [day-cols] (when now-node [now-node])))]]]))))
