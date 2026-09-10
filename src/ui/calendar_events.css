@@ -844,6 +844,18 @@
   background: var(--gray-100);
 }
 
+[data-theme="dark"] .cal-week-alldaycol.is-today,
+[data-theme="dark"] .cal-week-daycol.is-today {
+  background: var(--gray-800);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .cal-week-alldaycol.is-today,
+  :root:not([data-theme="light"]) .cal-week-daycol.is-today {
+    background: var(--gray-800);
+  }
+}
+
 .cal-week-alldayevent {
   display: flex;
   align-items: center;
