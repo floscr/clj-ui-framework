@@ -183,6 +183,8 @@
   outline: none;
   padding: 0 var(--size-1);
   cursor: text;
+  -webkit-user-select: text;
+  user-select: text;
 }
 
 /* ── Toggle ────────────────────────────────────────────────────────── */
