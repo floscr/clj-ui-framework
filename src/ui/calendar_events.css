@@ -244,6 +244,14 @@
   position: relative;
 }
 
+.cal-task-check-clickable {
+  cursor: pointer;
+}
+
+.cal-task-check-clickable:hover {
+  border-color: var(--accent);
+}
+
 .cal-task-check-done {
   background: var(--accent);
   border-color: var(--accent);

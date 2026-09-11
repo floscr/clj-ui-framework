@@ -145,12 +145,25 @@
 
 (defn task-check
   "A checkbox glyph for to-do (repeating) calendar items. Checked when done?.
-   Pure markup + CSS, so it renders identically across clj/cljs/squint."
-  [done?]
-  (let [classes (cond-> ["cal-task-check"] done? (conj "cal-task-check-done"))]
-    #?(:squint [:span {:class (str/join " " classes)}]
-       :cljs [:span {:class classes}]
-       :clj [:span {:class (str/join " " classes)}])))
+   Pure markup + CSS, so it renders identically across clj/cljs/squint.
+
+   With an optional on-toggle handler the glyph becomes clickable: the click is
+   stopped from propagating (so it won't also open the event) and on-toggle is
+   called with the DOM event."
+  ([done?] (task-check done? nil))
+  ([done? on-toggle]
+   (let [classes (cond-> ["cal-task-check"]
+                   done? (conj "cal-task-check-done")
+                   on-toggle (conj "cal-task-check-clickable"))
+         click (when on-toggle
+                 (fn [e]
+                   (.stopPropagation e)
+                   (on-toggle e)))]
+     #?(:squint [:span (cond-> {:class (str/join " " classes)}
+                         click (assoc :on-click click))]
+        :cljs [:span (cond-> {:class classes}
+                       click (assoc :on-click click))]
+        :clj [:span {:class (str/join " " classes)}]))))
 
 (defn event-pill
   "Render a small event chip for use inside calendar day cells.
@@ -496,12 +509,13 @@
    Props:
      :event    - event map
      :on-click - click handler"
-  [{:keys [event on-click on-context-menu]}]
+  [{:keys [event on-click on-context-menu on-toggle-done]}]
   (let [title    (:title event)
         time-str (event-time-display event)
         color    (:color event)
         done?    (:done? event)
-        task?    (:task? event)]
+        task?    (:task? event)
+        toggle   (when on-toggle-done (fn [_e] (on-toggle-done event)))]
     #?(:squint
        [:div {:class (agenda-event-classes {:done? done?})
               :on-click (when on-click (fn [_e] (on-click event)))
@@ -510,7 +524,7 @@
                                   (.preventDefault e)
                                   (on-context-menu event e)))}
         (if task?
-          (task-check done?)
+          (task-check done? toggle)
           [:div {:class (str "cal-agenda-dot " (event-color-class color))}])
         [:div {:class "cal-agenda-event-body"}
          (when time-str
@@ -526,7 +540,7 @@
                                              (.preventDefault e)
                                              (on-context-menu event e))))}
         (if task?
-          (task-check done?)
+          (task-check done? toggle)
           [:div {:class ["cal-agenda-dot" (event-color-class color)]}])
         [:div {:class ["cal-agenda-event-body"]}
          (when time-str
@@ -536,7 +550,7 @@
        :clj
        [:div {:class (agenda-event-classes {:done? done?})}
         (if task?
-          (task-check done?)
+          (task-check done? toggle)
           [:div {:class (str "cal-agenda-dot " (event-color-class color))}])
         [:div {:class "cal-agenda-event-body"}
          (when time-str
@@ -551,7 +565,7 @@
      :label      - display label (e.g. 'Today', 'Tomorrow', 'Mon')
      :events     - all events (filtered internally)
      :on-event-click - callback for event click"
-  [{:keys [date label events on-event-click on-event-context-menu]}]
+  [{:keys [date label events on-event-click on-event-context-menu on-toggle-done]}]
   (let [day-evts (events-for-date events date)]
     (when (seq day-evts)
       #?(:squint
@@ -562,7 +576,8 @@
           (into [:div {:class "cal-agenda-day-events"}]
                 (map (fn [evt]
                        (agenda-event-row {:event evt :on-click on-event-click
-                                          :on-context-menu on-event-context-menu}))
+                                          :on-context-menu on-event-context-menu
+                                          :on-toggle-done on-toggle-done}))
                      day-evts))]
 
          :cljs
@@ -573,7 +588,8 @@
           (into [:div {:class ["cal-agenda-day-events"]}]
                 (map (fn [evt]
                        (agenda-event-row {:event evt :on-click on-event-click
-                                          :on-context-menu on-event-context-menu}))
+                                          :on-context-menu on-event-context-menu
+                                          :on-toggle-done on-toggle-done}))
                      day-evts))]
 
          :clj
@@ -595,13 +611,14 @@
      :on-event-click - callback for event click
      :class          - additional CSS classes
      :attrs          - additional HTML attributes"
-  [{:keys [days events on-event-click on-event-context-menu class attrs]}]
+  [{:keys [days events on-event-click on-event-context-menu on-toggle-done class attrs]}]
   (let [groups (keep (fn [d]
                        (agenda-day-group {:date (:date d)
                                           :label (:label d)
                                           :events events
                                           :on-event-click on-event-click
-                                          :on-event-context-menu on-event-context-menu}))
+                                          :on-event-context-menu on-event-context-menu
+                                          :on-toggle-done on-toggle-done}))
                      days)
         empty? (not (seq groups))]
     #?(:squint
