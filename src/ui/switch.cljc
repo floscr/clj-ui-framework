@@ -29,10 +29,10 @@
            track-cls (cond-> "switch-track"
                        checked (str " switch-track--checked"))]
        [:label (merge {:class classes} attrs)
-        [:input {:class "switch-input" :type "checkbox"
-                 :checked (boolean checked)
-                 :disabled (boolean disabled)
-                 :on-change on-change}]
+        [:input (cond-> {:class "switch-input" :type "checkbox"
+                         :checked (boolean checked)
+                         :on-change on-change}
+                  disabled (assoc :disabled true))]
         [:span {:class track-cls}
          [:span {:class "switch-thumb"}]]
         (when label [:span label])])
@@ -57,9 +57,9 @@
            track-cls (cond-> "switch-track"
                        checked (str " switch-track--checked"))]
        [:label (merge {:class classes} attrs)
-        [:input {:class "switch-input" :type "checkbox"
-                 :checked (boolean checked)
-                 :disabled (boolean disabled)}]
+        [:input (cond-> {:class "switch-input" :type "checkbox"
+                         :checked (boolean checked)}
+                  disabled (assoc :disabled true))]
         [:span {:class track-cls}
          [:span {:class "switch-thumb"}]]
         (when label [:span label])])))
