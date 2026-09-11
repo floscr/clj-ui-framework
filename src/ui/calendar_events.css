@@ -224,6 +224,43 @@
   text-overflow: ellipsis;
 }
 
+/* Task (to-do / repeating) items render as a flat checkbox row instead of a
+   solid color pill. */
+.cal-event-pill.cal-event-task,
+.cal-week-alldayevent.cal-week-alldayevent-task {
+  background: transparent;
+  color: var(--fg-1);
+  border-left-color: transparent;
+  font-weight: 500;
+}
+
+.cal-task-check {
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  border: 1.5px solid var(--fg-2);
+  border-radius: var(--radius-sm);
+  position: relative;
+}
+
+.cal-task-check-done {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.cal-task-check-done::after {
+  content: "";
+  position: absolute;
+  left: 3px;
+  top: 0;
+  width: 4px;
+  height: 7px;
+  border: solid #fff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
 /* ── Event Color Variants ────────────────────────────────────────── */
 
 .cal-event-accent {
