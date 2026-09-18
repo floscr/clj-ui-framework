@@ -832,6 +832,9 @@
       }
       ;
     }));
+    containers4.sort((function(a, b) {
+      return item_order(a) - item_order(b);
+    }));
     return containers4.flatMap((function(c) {
       return vis1.filter((function(el) {
         return c === container2(el);
@@ -1022,23 +1025,24 @@
       ;
     })().trim().toLowerCase();
     const list3 = dialog.querySelector(".command-list");
+    const searching_QMARK_4 = !_EQ_(q1, "");
     items(dialog).forEach((function(el) {
-      const match4 = (() => {
-        const or__23426__auto__5 = _EQ_(q1, "");
-        if (or__23426__auto__5) {
-          return or__23426__auto__5;
+      const match5 = (() => {
+        const or__23426__auto__6 = !searching_QMARK_4;
+        if (or__23426__auto__6) {
+          return or__23426__auto__6;
         } else {
           return item_text(el).includes(q1);
         }
         ;
       })();
-      el.hidden = not(match4);
+      el.hidden = not(match5);
       if (truth_((() => {
-        const or__23426__auto__6 = _EQ_(q1, "");
-        if (or__23426__auto__6) {
-          return or__23426__auto__6;
+        const or__23426__auto__7 = !searching_QMARK_4;
+        if (or__23426__auto__7) {
+          return or__23426__auto__7;
         } else {
-          return not(match4);
+          return not(match5);
         }
         ;
       })())) {
@@ -1048,20 +1052,34 @@
       }
       ;
     }));
+    if (searching_QMARK_4) {
+      list3.classList.add("command-list--searching");
+    } else {
+      list3.classList.remove("command-list--searching");
+    }
+    ;
     Array.from(dialog.querySelectorAll(".command-group")).forEach((function(grp) {
-      const any7 = Array.from(grp.querySelectorAll(".command-item")).some((function(el) {
+      const visible8 = Array.from(grp.querySelectorAll(".command-item")).filter((function(el) {
         return not(el.hidden);
       }));
-      return grp.hidden = not(any7);
+      grp.hidden = visible8.length === 0;
+      if (truth_(searching_QMARK_4 && visible8.length > 0)) {
+        return grp.style.order = visible8.reduce((function(best, el) {
+          return Math.min(best, item_order(el));
+        }), Infinity);
+      } else {
+        return grp.style.removeProperty("order");
+      }
+      ;
     }));
-    const vis8 = visible_items(dialog);
-    if (vis8.length === 0) {
+    const vis9 = visible_items(dialog);
+    if (vis9.length === 0) {
       list3.classList.add("command-list--empty");
     } else {
       list3.classList.remove("command-list--empty");
     }
     ;
-    return set_active_BANG_(dialog, vis8.length > 0 ? vis8[0] : null);
+    return set_active_BANG_(dialog, vis9.length > 0 ? vis9[0] : null);
   };
   var find_dialog = function(id) {
     if (truth_(id)) {

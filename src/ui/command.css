@@ -95,7 +95,11 @@
      (basis 0) contributes nothing to the dialog's auto-height, so the dialog
      collapses to just the search row and the list never gets room. `flex-basis:
      auto` makes the list content count toward the dialog height; `min-height: 0`
-     still lets it shrink and scroll once max-height is hit. */
+     still lets it shrink and scroll once max-height is hit. Column flex so the
+     JS runtime can reorder whole .command-group blocks via `order` while
+     searching (command--searching), floating the best-matching group up. */
+  display: flex;
+  flex-direction: column;
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
@@ -128,6 +132,17 @@
 /* Hide groups whose items are all filtered out (set by the JS runtime). */
 .command-group[hidden] {
   display: none;
+}
+
+/* While searching, the runtime collapses the groups into one flat ranked list:
+   headings hide and the group blocks are reordered by best match score, so the
+   result reads as a single ranked list rather than fixed-order sections. */
+.command-list--searching .command-group-heading {
+  display: none;
+}
+
+.command-list--searching .command-group {
+  padding-bottom: 0;
 }
 
 /* ── Item ────────────────────────────────────────────────────────── */

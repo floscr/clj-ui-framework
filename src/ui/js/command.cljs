@@ -18,8 +18,10 @@
 
 (defn- visible-items
   "Visible, enabled items in *visual* order. filter! ranks matches within
-   each flex-column group via `style.order`, so DOM order alone is wrong
-   while a query is active — re-sort per group (stable, so equal ranks keep
+   each flex-column group via `style.order` AND, while searching, orders the
+   groups themselves via `style.order` on the .command-group, so DOM order
+   alone is wrong while a query is active — walk groups in their flex order,
+   then items within each group in theirs (stable sorts, so equal ranks keep
    DOM order) to keep keyboard nav aligned with what the user sees."
   [dialog]
   (let [vis (.filter (items dialog)
@@ -32,6 +34,7 @@
                     (let [c (container el)]
                       (when-not (.includes containers c)
                         (.push containers c)))))
+    (.sort containers (fn [a b] (- (item-order a) (item-order b))))
     (.flatMap containers
               (fn [c]
                 (.sort (.filter vis (fn [el] (identical? c (container el))))
@@ -116,24 +119,39 @@
 
 (defn- filter! [dialog query]
   (let [q     (.toLowerCase (.trim (or query "")))
-        list  (.querySelector dialog ".command-list")]
+        list  (.querySelector dialog ".command-list")
+        searching? (not= q "")]
     ;; Show / hide individual items.
     (.forEach (items dialog)
               (fn [el]
-                (let [match (or (= q "") (.includes (item-text el) q))]
+                (let [match (or (not searching?) (.includes (item-text el) q))]
                   (set! (.-hidden el) (not match))
                   ;; Rank matches by quality via flex `order` (the group item
                   ;; container is a flex column) so better matches float to
                   ;; the top of their group without touching DOM order.
-                  (if (or (= q "") (not match))
+                  (if (or (not searching?) (not match))
                     (.removeProperty (.-style el) "order")
                     (set! (.. el -style -order) (match-score el q))))))
-    ;; Hide groups whose items are all filtered out.
+    ;; While searching, collapse the group structure into one flat ranked list
+    ;; (see command.css): headings hide and each group is ordered by its best
+    ;; child score, so the strongest match floats to the top regardless of
+    ;; which group emitted it (a value-only session match no longer buries a
+    ;; label-prefix project/command match in a later group).
+    (if searching?
+      (.add (.-classList list) "command-list--searching")
+      (.remove (.-classList list) "command-list--searching"))
+    ;; Hide groups whose items are all filtered out; rank the survivors.
     (.forEach (js/Array.from (.querySelectorAll dialog ".command-group"))
               (fn [grp]
-                (let [any (.some (js/Array.from (.querySelectorAll grp ".command-item"))
-                                 (fn [el] (not (.-hidden el))))]
-                  (set! (.-hidden grp) (not any)))))
+                (let [visible (.filter (js/Array.from (.querySelectorAll grp ".command-item"))
+                                       (fn [el] (not (.-hidden el))))]
+                  (set! (.-hidden grp) (= (.-length visible) 0))
+                  (if (and searching? (> (.-length visible) 0))
+                    (set! (.. grp -style -order)
+                          (.reduce visible
+                                   (fn [best el] (js/Math.min best (item-order el)))
+                                   js/Infinity))
+                    (.removeProperty (.-style grp) "order")))))
     ;; Empty state + reset active to the first visible item.
     (let [vis (visible-items dialog)]
       (if (= (.-length vis) 0)
