@@ -867,7 +867,7 @@
         (when raw
           (let [data (js/JSON.parse raw)]
             (when (aget data "values")
-              (reset! (:store panel) (js->clj (aget data "values"))))
+              (reset! (:store panel) (aget data "values")))
             (when (aget data "presets") (aset panel "presets" (aget data "presets")))
             (when (aget data "active") (aset panel "activePreset" (aget data "active"))))))
       (catch :default _ nil))))
@@ -927,10 +927,14 @@
 
 (defn- select-version! [panel id]
   (aset panel "activePreset" id)
+  ;; The store natively holds a plain JS object (squint), and snapshots are
+  ;; taken with clj->js, so reset directly — squint's core has no js->clj
+  ;; (it compiles to an undefined ref and throws, silently killing the
+  ;; reset / version handlers).
   (if id
     (let [p (.find (:presets panel) (fn [x] (= (aget x "id") id)))]
-      (when p (reset! (:store panel) (js->clj (aget p "values")))))
-    (reset! (:store panel) (js->clj (:baseValues panel))))
+      (when p (reset! (:store panel) (aget p "values"))))
+    (reset! (:store panel) (:baseValues panel)))
   (refresh-updaters! panel)
   (notify! panel)
   (persist-save! panel)
