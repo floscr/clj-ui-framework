@@ -6,6 +6,14 @@
 (def default-size "md")
 (def default-variant "default")
 
+(defn normalize-variant
+  "Canonical variant name. Accepts keywords or strings and aliases the legacy
+   :stacked to :spinner. Variants: \"default\" (steppers flank the input),
+   \"right\" (both steppers after the input), \"spinner\" (detached up/down box)."
+  [variant]
+  (let [v (or (some-> variant util/kw-name) default-variant)]
+    (if (= v "stacked") "spinner" v)))
+
 ;; ── Pure helpers (shared, unit-tested) ───────────────────────────────
 
 (defn- round6
@@ -37,10 +45,10 @@
 (defn number-field-class-list
   "Vector of CSS class strings for the number-field wrapper.
    Variants: \"default\" (steppers flank the input), \"right\" (both steppers
-   after the input), \"stacked\" (up/down spinner column)."
+   after the input), \"spinner\" (detached up/down spinner box)."
   [{:keys [size variant disabled]}]
   (let [s (or (some-> size util/kw-name) default-size)
-        v (or (some-> variant util/kw-name) default-variant)]
+        v (normalize-variant variant)]
     (cond-> ["number-field" (str "number-field--" v)]
       (not= s "md") (conj (str "number-field--" s))
       disabled      (conj "number-field--disabled"))))
@@ -80,7 +88,7 @@
   [variant {:keys [dec inc spin input]}]
   (case variant
     "right"   [input dec inc]
-    "stacked" [input spin]
+    "spinner" [input spin]
     [dec input inc]))
 
 (defn number-field
@@ -100,7 +108,8 @@
      :step        - increment (default 1)
      :size        - :sm | :md (default) | :lg
      :variant     - :default (steppers flank the input) | :right (both on the
-                    right) | :stacked (up/down spinner on the right)
+                    right) | :spinner (detached up/down spinner box on the
+                    right; :stacked is a legacy alias)
      :disabled    - boolean
      :placeholder - input placeholder
      :name :id    - forwarded to the <input>
@@ -109,10 +118,10 @@
      :attrs       - extra wrapper attributes
      :input-attrs - extra attributes merged onto the <input>"
   [{:keys [variant size disabled on-change class attrs input-attrs] :as props}]
-  (let [variant* (or (some-> variant util/kw-name) default-variant)
-        stacked? (= variant* "stacked")
-        dec-icon (if stacked? :chevron-down :minus)
-        inc-icon (if stacked? :chevron-up :plus)
+  (let [variant* (normalize-variant variant)
+        spinner? (= variant* "spinner")
+        dec-icon (if spinner? :chevron-down :minus)
+        inc-icon (if spinner? :chevron-up :plus)
         base-tokens (number-field-class-list {:size size :variant variant :disabled disabled})]
     #?(:squint
        (let [wrap-cls  (cond-> (str/join " " base-tokens) class (str " " class))

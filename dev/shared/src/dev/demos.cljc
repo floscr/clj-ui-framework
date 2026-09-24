@@ -642,13 +642,19 @@
     [:div {:style (sx {:display "flex" :flex-wrap "wrap" :gap "1.5rem" :align-items "flex-end"})}
      (nf-cell "Default" (number-field/number-field {:value 5 :min 0 :max 100}))
      (nf-cell "Buttons right" (number-field/number-field {:value 5 :min 0 :max 100 :variant :right}))
-     (nf-cell "Spinner" (number-field/number-field {:value 5 :min 0 :max 100 :variant :stacked}))]
+     (nf-cell "Spinner" (number-field/number-field {:value 5 :min 0 :max 100 :variant :spinner}))]
     [:div {:style (sx {:display "flex" :flex-wrap "wrap" :gap "1.5rem" :align-items "flex-end"})}
      (nf-cell "Small" (number-field/number-field {:value 2 :min 0 :max 10 :size :sm}))
      (nf-cell "Medium" (number-field/number-field {:value 2 :min 0 :max 10 :size :md}))
      (nf-cell "Large" (number-field/number-field {:value 2 :min 0 :max 10 :size :lg}))]
     [:div {:style (sx {:display "flex" :flex-wrap "wrap" :gap "1.5rem" :align-items "flex-end"})}
+     (nf-cell "Spinner small" (number-field/number-field {:value 2 :min 0 :max 10 :size :sm :variant :spinner}))
+     (nf-cell "Spinner large" (number-field/number-field {:value 2 :min 0 :max 10 :size :lg :variant :spinner}))
+     (nf-cell "Right large" (number-field/number-field {:value 2 :min 0 :max 10 :size :lg :variant :right}))]
+    [:div {:style (sx {:display "flex" :flex-wrap "wrap" :gap "1.5rem" :align-items "flex-end"})}
      (nf-cell "Step 0.5" (number-field/number-field {:value 1 :min 0 :max 10 :step 0.5}))
+     (nf-cell "In form" (form/form-field {:label "Amount" :hint "Between 10 and 100."}
+                          (number-field/number-field {:value 5 :min 0 :max 100 :name "amount"})))
      (nf-cell "Disabled" (number-field/number-field {:value 5 :disabled true}))]))
 
 (defn chat-demo []

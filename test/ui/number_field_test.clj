@@ -7,10 +7,16 @@
     (is (= ["number-field" "number-field--default"]
            (nf/number-field-class-list {}))))
   (testing "variant"
-    (is (= ["number-field" "number-field--stacked"]
-           (nf/number-field-class-list {:variant :stacked})))
+    (is (= ["number-field" "number-field--spinner"]
+           (nf/number-field-class-list {:variant :spinner})))
     (is (= ["number-field" "number-field--right"]
            (nf/number-field-class-list {:variant :right}))))
+  (testing ":stacked is a legacy alias for :spinner"
+    (is (= ["number-field" "number-field--spinner"]
+           (nf/number-field-class-list {:variant :stacked})))
+    (is (= "spinner" (nf/normalize-variant :stacked)))
+    (is (= "right" (nf/normalize-variant "right")))
+    (is (= "default" (nf/normalize-variant nil))))
   (testing "size other than md adds a modifier"
     (is (= ["number-field" "number-field--default" "number-field--sm"]
            (nf/number-field-class-list {:size :sm})))

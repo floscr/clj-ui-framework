@@ -32,7 +32,7 @@
 | icon | `ui.icon` |  | `icon-class-list`, `icon-classes`, `icon` |
 | lightbox | `ui.lightbox` | Lightbox component for fullscreen image viewing. | `lightbox`, `image-thumbnail` |
 | markdown | `ui.markdown` | Minimal markdown-to-hiccup renderer for dev documentation pages. | `markdown->hiccup` |
-| number_field | `ui.number-field` |  | `clamp-value`, `step-value`, `number-field-class-list`, `number-field-classes`, `number-field` |
+| number_field | `ui.number-field` |  | `normalize-variant`, `clamp-value`, `step-value`, `number-field-class-list`, `number-field-classes`, `number-field` |
 | pagination | `ui.pagination` |  | `pagination-item-class-list`, `pagination-item-classes`, `pagination` |
 | panels | `ui.panels` | Resizable panel groups — a port of motion-panels | `size-str`, `group-attrs`, `panel-attrs`, `group`, `separator`, `panel` |
 | player_bar | `ui.player-bar` |  | `player-bar-class-list`, `player-bar-classes`, `player-bar` |
