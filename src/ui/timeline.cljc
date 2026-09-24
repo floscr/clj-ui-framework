@@ -1,7 +1,8 @@
 (ns ui.timeline
   "Motion-Studio-style editing timeline — ruler with ticks, labeled tracks
    with draggable/resizable segment bars, a playhead, click/drag scrubbing
-   and an optional floating transport (skip / play / time readout / loop)."
+   and an optional floating transport (skip / play / time readout / loop).
+   Interactive on :squint only — other targets render a static timeline."
   (:require [clojure.string :as str]
             [ui.icon :as icon]))
 
@@ -84,51 +85,11 @@
   [opts]
   (str/join " " (timeline-class-list opts)))
 
-;; ── Per-target shims ────────────────────────────────────────────────
-
-(defn- cls
-  "Target-appropriate :class value from a vector of base classes plus an
-   optional extra class string."
-  [bases class]
-  #?(:squint (str/join " " (cond-> (vec bases) class (conj class)))
-     :cljs   (cond-> (vec bases)
-               class (into (remove str/blank? (str/split (str class) #"\s+"))))
-     :clj    (str/join " " (cond-> (vec bases) class (conj class)))))
-
-(defn- sty
-  "Target-appropriate :style value from a small (array-)map."
-  [m]
-  #?(:squint m
-     :cljs   m
-     :clj    (str/join "; " (map (fn [[k v]] (str (name k) ": " v)) m))))
-
-(defn- evt-attrs
-  "Target-appropriate event attributes. Accepts a (possibly nil) map with
-   :pointerdown :pointermove :pointerup :pointercancel :keydown :click.
-   Renders no handlers on :clj (static hiccup)."
-  [{:keys [pointerdown pointermove pointerup pointercancel keydown click]}]
-  #?(:squint
-     (cond-> {}
-       pointerdown   (assoc :on-pointerdown pointerdown)
-       pointermove   (assoc :on-pointermove pointermove)
-       pointerup     (assoc :on-pointerup pointerup)
-       pointercancel (assoc :on-pointercancel pointercancel)
-       keydown       (assoc :on-keydown keydown)
-       click         (assoc :on-click click))
-     :cljs
-     (let [m (cond-> {}
-               pointerdown   (assoc :pointerdown pointerdown)
-               pointermove   (assoc :pointermove pointermove)
-               pointerup     (assoc :pointerup pointerup)
-               pointercancel (assoc :pointercancel pointercancel)
-               keydown       (assoc :keydown keydown)
-               click         (assoc :click click))]
-       (if (seq m) {:on m} {}))
-     :clj {}))
-
-;; ── Drag state & browser handlers (:cljs / :squint only) ────────────
-;; These use only host interop and are never invoked in :clj (the hiccup
-;; target attaches no handlers), so they compile unconditionally.
+;; ── Drag interaction (squint-only) ──────────────────────────────────
+;; Drags attach window-level pointer listeners for their lifetime (the
+;; original screen-studio approach): no pointer capture to lose when the
+;; DOM re-renders mid-drag, and moves are rAF-throttled so a re-render
+;; happens at most once per frame.
 
 (defonce ^:private !drag (atom nil))
 
@@ -138,62 +99,90 @@
   (when-let [d @!drag]
     (= (:track-id d) track-id)))
 
-(defn- event->time
-  "Map a pointer event on the ruler to a time in seconds, clamped to the
-   duration (the last 5% of the ruler snaps to the end)."
-  [e duration]
-  (let [rect (.getBoundingClientRect (.-currentTarget e))
-        frac (/ (- (.-clientX e) (.-left rect)) (max (.-width rect) 1))]
-    (clamp (* frac (total-time duration)) 0 duration)))
+(defn- drag-listen!
+  "Attach window pointermove/pointerup listeners for the lifetime of one
+   drag. `on-move` is called at most once per animation frame with the
+   latest event; `on-end` once with the release event."
+  [on-move on-end]
+  #?(:squint
+     (let [!raf  (atom nil)
+           !last (atom nil)
+           move  (fn [e]
+                   (.preventDefault e)
+                   (reset! !last e)
+                   (when-not @!raf
+                     (reset! !raf (js/requestAnimationFrame
+                                   (fn []
+                                     (reset! !raf nil)
+                                     (on-move @!last))))))
+           up    (fn up* [e]
+                   (js/window.removeEventListener "pointermove" move)
+                   (js/window.removeEventListener "pointerup" up*)
+                   (js/window.removeEventListener "pointercancel" up*)
+                   (when-let [r @!raf]
+                     (js/cancelAnimationFrame r)
+                     (reset! !raf nil))
+                   (on-end e))]
+       (js/window.addEventListener "pointermove" move)
+       (js/window.addEventListener "pointerup" up)
+       (js/window.addEventListener "pointercancel" up))))
 
 (defn- start-drag!
-  "Begin dragging a bar (:move) or one of its edges (:start / :end)."
-  [ev mode track-id segment duration]
-  (let [el   (.-currentTarget ev)
-        lane (.closest el ".ui-timeline-lane")
-        rect (.getBoundingClientRect lane)]
-    (.setPointerCapture el (.-pointerId ev))
-    (.stopPropagation ev)
-    (reset! !drag {:mode        mode
-                   :track-id    track-id
-                   :segment-id  (:id segment)
-                   :x0          (.-clientX ev)
-                   :start0      (:start segment)
-                   :end0        (:end segment)
-                   :sec-per-px  (/ (total-time duration)
-                                   (max (.-width rect) 1))})))
+  "Begin dragging a bar (:move) or one of its edges (:start / :end). Fires
+   :on-segment-change with :phase :drag on every throttled move and
+   :phase :commit on release."
+  [ev mode track segment {:keys [duration min-gap on-segment-change]}]
+  (.preventDefault ev)
+  (.stopPropagation ev)
+  (let [el     (.-currentTarget ev)
+        lane   (.closest el ".ui-timeline-lane")
+        rect   (.getBoundingClientRect lane)
+        x0     (.-clientX ev)
+        start0 (:start segment)
+        end0   (:end segment)
+        len    (- end0 start0)
+        gap    (or min-gap 0)
+        spp    (/ (total-time duration) (max (.-width rect) 1))
+        bounds (fn [e]
+                 (let [dt (* (- (.-clientX e) x0) spp)]
+                   (cond
+                     (= mode :move)  (let [s (clamp (+ start0 dt) 0 (- duration len))]
+                                       [s (+ s len) nil])
+                     (= mode :start) [(clamp (+ start0 dt) 0 (- end0 gap)) end0 :start]
+                     :else           [start0
+                                      (clamp (+ end0 dt) (+ start0 gap) duration)
+                                      :end])))
+        fire   (fn [e phase]
+                 (when on-segment-change
+                   (let [[s e* edge] (bounds e)]
+                     (on-segment-change {:track-id   (:id track)
+                                         :segment-id (:id segment)
+                                         :start      s
+                                         :end        e*
+                                         :edge       edge
+                                         :phase      phase}))))]
+    (when (= mode :move)
+      (.focus el))
+    (reset! !drag {:track-id (:id track)})
+    (drag-listen! (fn [e] (fire e :drag))
+                  (fn [e]
+                    (fire e :commit)
+                    (reset! !drag nil)))))
 
-(defn- drag-update!
-  "Compute the dragged segment's new bounds from the pointer event and fire
-   :on-segment-change with the given phase (:drag while moving, :commit on
-   release). Resets the drag state after a commit."
-  [ev phase {:keys [duration min-gap on-segment-change]}]
-  (when-let [d @!drag]
-    (let [mode   (:mode d)
-          gap    (or min-gap 0)
-          dt     (* (- (.-clientX ev) (:x0 d)) (:sec-per-px d))
-          start0 (:start0 d)
-          end0   (:end0 d)
-          len    (- end0 start0)
-          move?  (= mode :move)
-          start? (= mode :start)
-          s      (cond
-                   move?  (clamp (+ start0 dt) 0 (- duration len))
-                   start? (clamp (+ start0 dt) 0 (- end0 gap))
-                   :else  start0)
-          e      (cond
-                   move?  (+ s len)
-                   start? end0
-                   :else  (clamp (+ end0 dt) (+ start0 gap) duration))]
-      (when on-segment-change
-        (on-segment-change {:track-id   (:track-id d)
-                            :segment-id (:segment-id d)
-                            :start      s
-                            :end        e
-                            :edge       (cond start? :start move? nil :else :end)
-                            :phase      phase}))
-      (when (= phase :commit)
-        (reset! !drag nil)))))
+(defn- ruler-scrub!
+  "Seek from a pointerdown on the ruler, then keep seeking while the
+   pointer moves (window listeners) until release."
+  [ev {:keys [duration on-seek]}]
+  (.preventDefault ev)
+  (let [el   (.-currentTarget ev)
+        rect (.getBoundingClientRect el)
+        seek (fn [e]
+               (let [frac (/ (- (.-clientX e) (.-left rect))
+                             (max (.-width rect) 1))]
+                 (on-seek (clamp (* frac (total-time duration)) 0 duration))))]
+    (.focus el)
+    (seek ev)
+    (drag-listen! seek (fn [_] nil))))
 
 (defn- bar-keydown
   "Arrow keys nudge the whole segment by :step (shift: :big-step)."
@@ -236,92 +225,67 @@
   "Bar button + two resize handles for one segment. Returns a seq of three
    elements to splice into the lane."
   [track segment {:keys [duration] :as p}]
-  (let [tid    (:id track)
-        label  (or (:label segment) (:label track) "Segment")
-        drag-h (fn [mode extra]
-                 (evt-attrs
-                  (merge
-                   {:pointerdown   (fn [ev] (start-drag! ev mode tid segment duration))
-                    :pointermove   (fn [ev] (when (pos? (.-buttons ev))
-                                              (drag-update! ev :drag p)))
-                    :pointerup     (fn [ev] (drag-update! ev :commit p))
-                    :pointercancel (fn [ev] (drag-update! ev :commit p))}
-                   extra)))
-        handle (fn [mode]
-                 [:div (merge {:class (cls ["ui-timeline-handle"
-                                            (if (= mode :start)
-                                              "ui-timeline-handle-start"
-                                              "ui-timeline-handle-end")]
-                                           nil)
-                               :style (sty {:left (time->pct
-                                                   (if (= mode :start)
-                                                     (:start segment)
-                                                     (:end segment))
-                                                   duration)})}
-                              (drag-h mode nil))])]
-    [[:button (merge {:class      (cls ["ui-timeline-bar"] nil)
-                      :style      (sty {:left  (time->pct (:start segment) duration)
-                                        :width (span->pct (:start segment) (:end segment) duration)})
-                      :title      label
-                      :aria-label (str "Move " label)}
-                     (drag-h :move {:keydown (bar-keydown track segment p)}))
+  (let [label (or (:label segment) (:label track) "Segment")]
+    [[:button {:class          "ui-timeline-bar"
+               :style          {:left  (time->pct (:start segment) duration)
+                                :width (span->pct (:start segment) (:end segment) duration)}
+               :title          label
+               :aria-label     (str "Move " label)
+               :on-pointerdown (fn [ev] (start-drag! ev :move track segment p))
+               :on-keydown     (bar-keydown track segment p)}
       (when (:label segment)
-        [:span {:class (cls ["ui-timeline-bar-label"] nil)} (:label segment)])]
-     (handle :start)
-     (handle :end)]))
+        [:span {:class "ui-timeline-bar-label"} (:label segment)])]
+     [:div {:class          "ui-timeline-handle ui-timeline-handle-start"
+            :style          {:left (time->pct (:start segment) duration)}
+            :on-pointerdown (fn [ev] (start-drag! ev :start track segment p))}]
+     [:div {:class          "ui-timeline-handle ui-timeline-handle-end"
+            :style          {:left (time->pct (:end segment) duration)}
+            :on-pointerdown (fn [ev] (start-drag! ev :end track segment p))}]]))
 
 (defn- track-el [track p]
-  [:div (cond-> {:class (cls ["ui-timeline-track"] nil)}
+  [:div (cond-> {:class "ui-timeline-track"}
           (dragging? (:id track)) (assoc :data-editing "true"))
-   [:div {:class (cls ["ui-timeline-track-label"] nil)} (:label track)]
-   (into [:div {:class (cls ["ui-timeline-lane"] nil)}]
+   [:div {:class "ui-timeline-track-label"} (:label track)]
+   (into [:div {:class "ui-timeline-lane"}]
          (mapcat (fn [segment] (segment-els track segment p))
                  (:segments track)))])
 
 (defn- ruler-el [{:keys [duration current on-seek] :as p}]
-  (into [:div (merge {:class         (cls ["ui-timeline-ruler"] nil)
-                      :role          "slider"
-                      :tabindex      "0"
-                      :aria-label    "Playhead"
-                      :aria-valuemin "0"
-                      :aria-valuemax (str duration)
-                      :aria-valuenow (str (or current 0))}
-                     (evt-attrs
-                      (when on-seek
-                        {:pointerdown (fn [ev]
-                                        (.setPointerCapture (.-currentTarget ev) (.-pointerId ev))
-                                        (on-seek (event->time ev duration)))
-                         :pointermove (fn [ev]
-                                        (when (pos? (.-buttons ev))
-                                          (on-seek (event->time ev duration))))
-                         :keydown     (ruler-keydown p)})))]
+  (into [:div (cond-> {:class         "ui-timeline-ruler"
+                       :role          "slider"
+                       :tabindex      "0"
+                       :aria-label    "Playhead"
+                       :aria-valuemin "0"
+                       :aria-valuemax (str duration)
+                       :aria-valuenow (str (or current 0))}
+                on-seek (assoc :on-pointerdown (fn [ev] (ruler-scrub! ev p))
+                               :on-keydown (ruler-keydown p)))]
         (mapv (fn [t]
-                [:div {:class (cls ["ui-timeline-tick"] nil)
-                       :style (sty {:left (time->pct t duration)})}
-                 [:span {:class (cls ["ui-timeline-tick-label"] nil)}
+                [:div {:class "ui-timeline-tick"
+                       :style {:left (time->pct t duration)}}
+                 [:span {:class "ui-timeline-tick-label"}
                   (format-time t duration)]])
               (ticks duration))))
 
 (defn- transport-el
   [{:keys [current duration playing looping on-play-pause on-skip-start on-loop]}]
-  [:div {:class (cls ["ui-timeline-transport"] nil)}
-   [:button (merge {:class (cls ["ui-timeline-transport-btn"] nil)
-                    :title "Skip to start"}
-                   (evt-attrs (when on-skip-start {:click on-skip-start})))
+  [:div {:class "ui-timeline-transport"}
+   [:button (cond-> {:class "ui-timeline-transport-btn"
+                     :title "Skip to start"}
+              on-skip-start (assoc :on-click on-skip-start))
     (icon/icon {:icon-name :skip-back :size :sm})]
-   [:button (merge {:class (cls ["ui-timeline-transport-btn" "ui-timeline-play"] nil)
-                    :title (if playing "Pause" "Play")}
-                   (evt-attrs (when on-play-pause {:click on-play-pause})))
+   [:button (cond-> {:class "ui-timeline-transport-btn ui-timeline-play"
+                     :title (if playing "Pause" "Play")}
+              on-play-pause (assoc :on-click on-play-pause))
     (icon/icon {:icon-name (if playing :pause :play) :size :sm :filled true})]
-   [:output {:class (cls ["ui-timeline-time"] nil)}
+   [:output {:class "ui-timeline-time"}
     (format-readout current duration)]
    (when on-loop
-     [:button (merge {:class (cls (cond-> ["ui-timeline-transport-btn"]
-                                    looping (conj "ui-timeline-loop-active"))
-                                  nil)
-                      :title "Loop"
-                      :aria-pressed (if looping "true" "false")}
-                     (evt-attrs {:click on-loop}))
+     [:button {:class        (str "ui-timeline-transport-btn"
+                                  (when looping " ui-timeline-loop-active"))
+               :title        "Loop"
+               :aria-pressed (if looping "true" "false")
+               :on-click     on-loop}
       (icon/icon {:icon-name :repeat :size :sm})])])
 
 ;; ── Component ───────────────────────────────────────────────────────
@@ -354,8 +318,7 @@
      :attrs             - additional HTML attributes
 
    The component is controlled: it renders purely from props and reports
-   edits through the callbacks (handlers are :cljs/:squint only; the :clj
-   target renders a static timeline)."
+   edits through the callbacks (interactive on :squint only)."
   [{:keys [duration current tracks playing transport min-gap step big-step
            on-seek on-segment-change on-play-pause on-skip-start on-loop
            class attrs]
@@ -369,14 +332,16 @@
                   :big-step          big-step
                   :on-seek           on-seek
                   :on-segment-change on-segment-change}]
-    [:div (merge {:class (cls (timeline-class-list {}) class)} attrs)
-     [:div {:class (cls ["ui-timeline-tracks"] nil)}
+    [:div (merge {:class (str/join " " (cond-> (timeline-class-list {})
+                                         class (conj class)))}
+                 attrs)
+     [:div {:class "ui-timeline-tracks"}
       (ruler-el p)
-      (into [:div {:class (cls ["ui-timeline-track-list"] nil)}]
+      (into [:div {:class "ui-timeline-track-list"}]
             (mapv (fn [track] (track-el track p)) (or tracks [])))
-      [:div {:class (cls ["ui-timeline-overlay"] nil)}
-       [:div {:class (cls ["ui-timeline-playhead"] nil)
-              :style (sty {:left (time->pct current duration)})}]]]
+      [:div {:class "ui-timeline-overlay"}
+       [:div {:class "ui-timeline-playhead"
+              :style {:left (time->pct current duration)}}]]]
      (when-not (false? transport)
        (transport-el {:current       current
                       :duration      duration

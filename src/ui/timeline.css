@@ -8,6 +8,8 @@
   border: var(--border-0);
   border-radius: var(--radius-md);
   overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .ui-timeline-tracks {

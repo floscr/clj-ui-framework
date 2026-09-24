@@ -92,27 +92,29 @@
       (is (= "Clip" (nth label 2)))
       (is (= :button (first bar)))
       (is (= "ui-timeline-bar" (get-in bar [1 :class])))
-      (let [[_ left] (re-find #"left: ([0-9.]+)%" (get-in bar [1 :style]))]
-        (is (< (Math/abs (- (Double/parseDouble left) 9.5)) 1e-6)))
+      (is (< (Math/abs (- (pct->num (get-in bar [1 :style :left])) 9.5)) 1e-6))
       ;; two handles follow the bar
       (is (= ["ui-timeline-handle ui-timeline-handle-start"
               "ui-timeline-handle ui-timeline-handle-end"]
              [(get-in (nth lane 3) [1 :class])
               (get-in (nth lane 4) [1 :class])]))))
 
-  (testing "clj target attaches no event handlers"
+  (testing "bar and handles carry pointer/key handlers"
     (let [tracks-div (nth (tl/timeline sample-props) 2)
           track-list (nth tracks-div 3)
-          bar (-> track-list (nth 2) (nth 3) (nth 2))]
-      (is (nil? (get-in bar [1 :on])))
-      (is (nil? (get-in bar [1 :on-pointerdown])))))
+          lane (-> track-list (nth 2) (nth 3))
+          bar (nth lane 2)]
+      (is (fn? (get-in bar [1 :on-pointerdown])))
+      (is (fn? (get-in bar [1 :on-keydown])))
+      (is (fn? (get-in (nth lane 3) [1 :on-pointerdown])))
+      (is (fn? (get-in (nth lane 4) [1 :on-pointerdown])))))
 
   (testing "playhead positioned from :current"
     (let [tracks-div (nth (tl/timeline sample-props) 2)
           overlay (nth tracks-div 4)
           playhead (nth overlay 2)]
       (is (= "ui-timeline-playhead" (get-in playhead [1 :class])))
-      (is (str/starts-with? (get-in playhead [1 :style]) "left: 47.5"))))
+      (is (str/starts-with? (get-in playhead [1 :style :left]) "47.5"))))
 
   (testing "transport shown by default with readout"
     (let [transport (nth (tl/timeline sample-props) 3)]
