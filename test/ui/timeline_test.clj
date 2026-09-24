@@ -134,3 +134,21 @@
           loop-btn (nth transport 5)]
       (is (str/includes? (get-in loop-btn [1 :class]) "ui-timeline-loop-active"))
       (is (= "true" (get-in loop-btn [1 :aria-pressed]))))))
+
+(deftest snap-helpers-test
+  (testing "snap picks the nearest target within tolerance"
+    (let [snap #'tl/snap]
+      (is (= 5.0 (snap 4.9 [5.0 10.0] 0.2)))
+      (is (= 5.0 (snap 5.1 [10.0 5.0] 0.2)))
+      (is (= 4.5 (snap 4.5 [5.0 10.0] 0.2)))
+      (is (= 0 (snap 0.1 [0 5.0] 0.2)))))
+
+  (testing "snap-targets collects playhead + other segments' edges"
+    (let [snap-targets #'tl/snap-targets
+          tracks [{:id :a :segments [{:id :s1 :start 1 :end 2}
+                                     {:id :s2 :start 3 :end 4}]}
+                  {:id :b :segments [{:id :s1 :start 5 :end 6}]}]]
+      (is (= [7.5 3 4 5 6]
+             (snap-targets tracks {:id :a} {:id :s1} 7.5)))
+      (is (= [1 2 3 4]
+             (snap-targets tracks {:id :b} {:id :s1} nil))))))

@@ -99,6 +99,34 @@
   (when-let [d @!drag]
     (= (:track-id d) track-id)))
 
+(defn- abs* [x] (if (neg? x) (- x) x))
+
+(defn- snap-targets
+  "Times worth snapping to while shift-dragging: the playhead plus every
+   other segment's start/end."
+  [tracks track segment current]
+  (concat (when (some? current) [current])
+          (mapcat (fn [tr]
+                    (mapcat (fn [sg]
+                              (when-not (and (= (:id tr) (:id track))
+                                             (= (:id sg) (:id segment)))
+                                [(:start sg) (:end sg)]))
+                            (:segments tr)))
+                  (or tracks []))))
+
+(defn- snap
+  "Return the target within tol closest to t, or t if none is in range."
+  [t targets tol]
+  (let [best (reduce (fn [best tg]
+                       (if (and (<= (abs* (- tg t)) tol)
+                                (or (nil? best)
+                                    (< (abs* (- tg t)) (abs* (- best t)))))
+                         tg
+                         best))
+                     nil
+                     targets)]
+    (if (some? best) best t)))
+
 (defn- drag-listen!
   "Attach window pointermove/pointerup listeners for the lifetime of one
    drag. `on-move` is called at most once per animation frame with the
@@ -130,37 +158,62 @@
 (defn- start-drag!
   "Begin dragging a bar (:move) or one of its edges (:start / :end). Fires
    :on-segment-change with :phase :drag on every throttled move and
-   :phase :commit on release."
-  [ev mode track segment {:keys [duration min-gap on-segment-change]}]
+   :phase :commit on release. Holding shift snaps the dragged edge(s) to
+   other segments' edges and the playhead."
+  [ev mode track segment {:keys [duration min-gap on-segment-change tracks current]}]
   (.preventDefault ev)
   (.stopPropagation ev)
-  (let [el     (.-currentTarget ev)
-        lane   (.closest el ".ui-timeline-lane")
-        rect   (.getBoundingClientRect lane)
-        x0     (.-clientX ev)
-        start0 (:start segment)
-        end0   (:end segment)
-        len    (- end0 start0)
-        gap    (or min-gap 0)
-        spp    (/ (total-time duration) (max (.-width rect) 1))
-        bounds (fn [e]
-                 (let [dt (* (- (.-clientX e) x0) spp)]
-                   (cond
-                     (= mode :move)  (let [s (clamp (+ start0 dt) 0 (- duration len))]
-                                       [s (+ s len) nil])
-                     (= mode :start) [(clamp (+ start0 dt) 0 (- end0 gap)) end0 :start]
-                     :else           [start0
-                                      (clamp (+ end0 dt) (+ start0 gap) duration)
-                                      :end])))
-        fire   (fn [e phase]
-                 (when on-segment-change
-                   (let [[s e* edge] (bounds e)]
-                     (on-segment-change {:track-id   (:id track)
-                                         :segment-id (:id segment)
-                                         :start      s
-                                         :end        e*
-                                         :edge       edge
-                                         :phase      phase}))))]
+  (let [el      (.-currentTarget ev)
+        lane    (.closest el ".ui-timeline-lane")
+        rect    (.getBoundingClientRect lane)
+        x0      (.-clientX ev)
+        start0  (:start segment)
+        end0    (:end segment)
+        len     (- end0 start0)
+        gap     (or min-gap 0)
+        spp     (/ (total-time duration) (max (.-width rect) 1))
+        targets (snap-targets tracks track segment current)
+        tol     (* 8 spp)
+        bounds  (fn [e]
+                  (let [dt    (* (- (.-clientX e) x0) spp)
+                        snap? (and (.-shiftKey e) (seq targets))]
+                    (cond
+                      (= mode :move)
+                      (let [s0 (+ start0 dt)
+                            e0 (+ s0 len)
+                            d  (if snap?
+                                 ;; shift the whole bar by whichever edge is
+                                 ;; closest to a snap target within tolerance
+                                 (let [best (reduce (fn [best d]
+                                                      (if (and (<= (abs* d) tol)
+                                                               (or (nil? best)
+                                                                   (< (abs* d) (abs* best))))
+                                                        d
+                                                        best))
+                                                    nil
+                                                    (concat (mapv #(- % s0) targets)
+                                                            (mapv #(- % e0) targets)))]
+                                   (if (some? best) best 0))
+                                 0)
+                            s  (clamp (+ s0 d) 0 (- duration len))]
+                        [s (+ s len) nil])
+
+                      (= mode :start)
+                      (let [s (cond-> (+ start0 dt) snap? (snap targets tol))]
+                        [(clamp s 0 (- end0 gap)) end0 :start])
+
+                      :else
+                      (let [e* (cond-> (+ end0 dt) snap? (snap targets tol))]
+                        [start0 (clamp e* (+ start0 gap) duration) :end]))))
+        fire    (fn [e phase]
+                  (when on-segment-change
+                    (let [[s e* edge] (bounds e)]
+                      (on-segment-change {:track-id   (:id track)
+                                          :segment-id (:id segment)
+                                          :start      s
+                                          :end        e*
+                                          :edge       edge
+                                          :phase      phase}))))]
     (when (= mode :move)
       (.focus el))
     (reset! !drag {:track-id (:id track)})
@@ -309,7 +362,9 @@
      :on-segment-change - (fn [{:keys [track-id segment-id start end edge phase]}])
                           :edge is :start/:end when trimming, nil when moving;
                           :phase is :drag while the pointer moves and :commit
-                          on release (persist on :commit)
+                          on release (persist on :commit). Holding shift while
+                          dragging snaps to other segments' edges and the
+                          playhead
      :on-play-pause     - transport play/pause click handler
      :on-skip-start     - transport skip-to-start click handler
      :on-loop           - transport loop toggle click handler (button only
@@ -327,6 +382,7 @@
         current  (or current 0)
         p        {:duration          duration
                   :current           current
+                  :tracks            tracks
                   :min-gap           min-gap
                   :step              step
                   :big-step          big-step
