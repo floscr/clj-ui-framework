@@ -39,7 +39,7 @@
                                empty-state-demo drop-zone-demo processing-bar-demo
                                toast-demo camera-demo grid-demo
                                skeleton-demo progress-demo switch-demo tooltip-demo
-                               breadcrumb-demo separator-demo form-demo chat-demo
+                               breadcrumb-demo separator-demo form-demo number-field-demo chat-demo
                                popover-demo command-demo toolbar-demo button-group-demo header-patterns-demo tabs-demo
                                panels-demo]]))
 
@@ -326,6 +326,7 @@
    (separator-demo)
    (panels-demo)
    (form-demo)
+   (number-field-demo)
    (chat-demo)
    (tag-input-demo)
    (lightbox-demo)

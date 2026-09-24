@@ -112,6 +112,7 @@
               [ui.breadcrumb-test]
               [ui.pagination-test]
               [ui.form-test]
+              [ui.number-field-test]
               [ui.select-test]
               [ui.icon-test]
               [ui.sidebar-test]
@@ -155,6 +156,7 @@
                                       'ui.breadcrumb-test
                                       'ui.pagination-test
                                       'ui.form-test
+                                      'ui.number-field-test
                                       'ui.select-test
                                       'ui.icon-test
                                       'ui.sidebar-test

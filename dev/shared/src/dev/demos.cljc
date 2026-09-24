@@ -37,6 +37,7 @@
             [ui.button-group :as button-group]
             [ui.tabs :as tabs]
             [ui.form :as form]
+            [ui.number-field :as number-field]
             [ui.chat :as chat]))
 
 ;; ── Cross-target helpers ────────────────────────────────────────────
@@ -629,6 +630,26 @@
      [:h4 {:style (sx {:margin-bottom "0.75rem"})} "Validation error"]
      (form/form-field {:label "Email" :error "Please enter a valid email address."}
        (form/form-input {:type :email :error true :value "invalid-email"}))]))
+
+(defn- nf-cell [label field]
+  [:div {:style (sx {:width "11rem"})}
+   (form/form-field {:label label} field)])
+
+(defn number-field-demo []
+  (section "Number Field"
+    [:p {:style (sx {:margin "0" :color "var(--fg-2)" :font-size "var(--font-sm)"})}
+     "Scroll over a field or click a stepper to change the value."]
+    [:div {:style (sx {:display "flex" :flex-wrap "wrap" :gap "1.5rem" :align-items "flex-end"})}
+     (nf-cell "Default" (number-field/number-field {:value 5 :min 0 :max 100}))
+     (nf-cell "Buttons right" (number-field/number-field {:value 5 :min 0 :max 100 :variant :right}))
+     (nf-cell "Spinner" (number-field/number-field {:value 5 :min 0 :max 100 :variant :stacked}))]
+    [:div {:style (sx {:display "flex" :flex-wrap "wrap" :gap "1.5rem" :align-items "flex-end"})}
+     (nf-cell "Small" (number-field/number-field {:value 2 :min 0 :max 10 :size :sm}))
+     (nf-cell "Medium" (number-field/number-field {:value 2 :min 0 :max 10 :size :md}))
+     (nf-cell "Large" (number-field/number-field {:value 2 :min 0 :max 10 :size :lg}))]
+    [:div {:style (sx {:display "flex" :flex-wrap "wrap" :gap "1.5rem" :align-items "flex-end"})}
+     (nf-cell "Step 0.5" (number-field/number-field {:value 1 :min 0 :max 10 :step 0.5}))
+     (nf-cell "Disabled" (number-field/number-field {:value 5 :disabled true}))]))
 
 (defn chat-demo []
   (section "Chat"

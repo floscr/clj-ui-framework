@@ -1,0 +1,157 @@
+/* Number field — numeric input with stepper buttons + scroll-wheel.
+   Wrapper is styled like a single input; the inner <input> is borderless. */
+
+.number-field {
+  display: inline-flex;
+  align-items: stretch;
+  width: 100%;
+  background: var(--bg-0);
+  color: var(--fg-0);
+  border: var(--border-1);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.number-field:focus-within {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 6px color-mix(in srgb, var(--accent) 35%, transparent);
+}
+
+.number-field-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
+  padding: var(--size-2) var(--size-3);
+  font-size: var(--font-sm);
+  font-family: inherit;
+  line-height: 1.5;
+  text-align: center;
+  background: transparent;
+  color: inherit;
+  border: none;
+  outline: none;
+  -moz-appearance: textfield;
+}
+
+.number-field-input::placeholder {
+  color: var(--fg-2);
+}
+
+/* Hide native spinner — the component provides its own steppers. */
+.number-field-input::-webkit-outer-spin-button,
+.number-field-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Stepper buttons */
+.number-field-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: var(--size-8);
+  padding: 0;
+  color: var(--fg-1);
+  background: var(--bg-1);
+  border: none;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.number-field-btn:hover:not(:disabled) {
+  background: var(--bg-2);
+  color: var(--fg-0);
+}
+
+.number-field-btn:active:not(:disabled) {
+  background: color-mix(in srgb, var(--accent) 18%, var(--bg-2));
+  color: var(--fg-0);
+}
+
+.number-field-btn:disabled {
+  color: var(--fg-2);
+  cursor: not-allowed;
+}
+
+/* Divider between a stepper and the input */
+.number-field-btn--dec {
+  border-right: var(--border-1);
+}
+
+.number-field-btn--inc {
+  border-left: var(--border-1);
+}
+
+/* "right" variant — both steppers sit after the input; divide them */
+.number-field--right .number-field-btn--dec {
+  border-right: var(--border-1);
+  border-left: none;
+}
+
+/* Stacked spinner column (up over down) */
+.number-field-spin {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 auto;
+  border-left: var(--border-1);
+}
+
+.number-field-spin .number-field-btn {
+  width: var(--size-7);
+  border: none;
+  flex: 1 1 0;
+}
+
+.number-field-spin .number-field-btn--dec {
+  border-top: var(--border-1);
+}
+
+.number-field--stacked .number-field-input {
+  text-align: left;
+}
+
+/* Sizes */
+.number-field--sm .number-field-input {
+  padding: var(--size-1) var(--size-2);
+  font-size: var(--font-xs);
+}
+
+.number-field--sm .number-field-btn {
+  width: var(--size-7);
+}
+
+.number-field--sm .number-field-spin .number-field-btn {
+  width: var(--size-6);
+}
+
+.number-field--lg .number-field-input {
+  padding: var(--size-3) var(--size-4);
+  font-size: var(--font-md);
+}
+
+.number-field--lg .number-field-btn {
+  width: var(--size-10);
+}
+
+.number-field--lg .number-field-spin .number-field-btn {
+  width: var(--size-8);
+}
+
+/* Disabled */
+.number-field--disabled {
+  background: var(--bg-2);
+  color: var(--fg-2);
+  cursor: not-allowed;
+}
+
+.number-field--disabled .number-field-input {
+  color: var(--fg-2);
+  cursor: not-allowed;
+}
+
+.number-field--disabled:focus-within {
+  border-color: var(--border-1);
+  box-shadow: none;
+}

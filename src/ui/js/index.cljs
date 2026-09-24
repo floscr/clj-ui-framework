@@ -6,6 +6,7 @@
             [flip]
             [gestures]
             [masonry]
+            [number-field]
             [panels]
             [popover]
             [select]

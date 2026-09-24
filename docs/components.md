@@ -4,7 +4,7 @@
 > See `AGENTS.md` for conventions, per-target pitfalls, and how to
 > add new components and icons.
 
-## Components (45)
+## Components (46)
 
 | Component | Namespace | Description | Public API |
 |-----------|-----------|-------------|------------|
@@ -14,8 +14,8 @@
 | breadcrumb | `ui.breadcrumb` |  | `breadcrumb` |
 | button | `ui.button` |  | `button-class-list`, `button-classes`, `button` |
 | button_group | `ui.button-group` | Button group — a cluster of related buttons rendered as a segmented | `button-group-class-list`, `button-group-classes`, `button-group-item-class-list`, `button-group-item-classes`, `button-group`, `button-group-item`, `button-group-separator` |
-| calendar | `ui.calendar` | Month-grid date picker. See src/ui/calendar.md for full documentation. | `leap-year?`, `days-in-month`, `day-of-week`, `first-day-of-week`, `pad2`, `date-str`, `month-name`, `short-month-name`, `prev-month`, `next-month`, `calendar-days`, `calendar-class-list`, `calendar-classes`, `day-cell-class-list`, `day-cell-classes`, `calendar-header`, `calendar-weekdays`, `calendar-day`, `calendar` |
-| calendar_events | `ui.calendar-events` | Event-aware calendar components. See src/ui/calendar.md for full documentation. | `event-color-class`, `events-for-date`, `format-time`, `event-time-display`, `parse-int*`, `round*`, `hhmm->minutes`, `event-duration-minutes`, `format-duration`, `format-hour-label`, `event-pill-class-list`, `event-pill-classes`, `ticker-day-class-list`, `ticker-day-classes`, `agenda-event-class-list`, `agenda-event-classes`, `event-pill`, `event-day-cell`, `calendar-event-grid`, `ticker-dot`, `ticker-day-item`, `ticker-strip`, `agenda-event-row`, `agenda-day-group`, `agenda-list`, `day-timeline` |
+| calendar | `ui.calendar` | Month-grid date picker. See src/ui/calendar.md for full documentation. | `leap-year?`, `days-in-month`, `day-of-week`, `first-day-of-week`, `pad2`, `date-str`, `month-name`, `short-month-name`, `prev-month`, `next-month`, `calendar-days`, `inc-date`, `dec-date`, `week-start`, `week-days`, `calendar-class-list`, `calendar-classes`, `day-cell-class-list`, `day-cell-classes`, `calendar-header`, `calendar-weekdays`, `calendar-day`, `calendar` |
+| calendar_events | `ui.calendar-events` | Event-aware calendar components. See src/ui/calendar.md for full documentation. | `event-color-class`, `events-for-date`, `format-time`, `event-time-display`, `parse-int*`, `round*`, `hhmm->minutes`, `event-duration-minutes`, `format-duration`, `format-hour-label`, `event-pill-class-list`, `event-pill-classes`, `ticker-day-class-list`, `ticker-day-classes`, `agenda-event-class-list`, `agenda-event-classes`, `task-check`, `event-pill`, `event-day-cell`, `calendar-event-grid`, `ticker-dot`, `ticker-day-item`, `ticker-strip`, `agenda-event-row`, `agenda-day-group`, `agenda-list`, `day-timeline`, `week-timeline` |
 | camera | `ui.camera` | Camera capture: capability detection, getUserMedia stream helpers, and | `camera-view` |
 | card | `ui.card` |  | `card-class-list`, `card-classes`, `card`, `card-header`, `card-body`, `card-footer`, `card-list-class-list`, `card-list-classes`, `card-list`, `card-list-item` |
 | chat | `ui.chat` | Chat conversation components: message log, bubbles, thinking indicator, | `chat-bubble-class-list`, `chat-bubble-classes`, `chat-log`, `chat-bubble`, `chat-thinking`, `chat-toolbar`, `chat-input` |
@@ -32,6 +32,7 @@
 | icon | `ui.icon` |  | `icon-class-list`, `icon-classes`, `icon` |
 | lightbox | `ui.lightbox` | Lightbox component for fullscreen image viewing. | `lightbox`, `image-thumbnail` |
 | markdown | `ui.markdown` | Minimal markdown-to-hiccup renderer for dev documentation pages. | `markdown->hiccup` |
+| number_field | `ui.number-field` |  | `clamp-value`, `step-value`, `number-field-class-list`, `number-field-classes`, `number-field` |
 | pagination | `ui.pagination` |  | `pagination-item-class-list`, `pagination-item-classes`, `pagination` |
 | panels | `ui.panels` | Resizable panel groups — a port of motion-panels | `size-str`, `group-attrs`, `panel-attrs`, `group`, `separator`, `panel` |
 | player_bar | `ui.player-bar` |  | `player-bar-class-list`, `player-bar-classes`, `player-bar` |
