@@ -1,0 +1,275 @@
+/* ── Timeline ───────────────────────────────────────────────── */
+
+.ui-timeline {
+  --ui-timeline-gutter: 120px;
+  position: relative;
+  width: 100%;
+  background: var(--bg-1);
+  border: var(--border-0);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.ui-timeline-tracks {
+  position: relative;
+  padding-bottom: 56px; /* room for the floating transport */
+}
+
+/* ── Ruler / scrubber ───────────────────────────────────────── */
+
+.ui-timeline-ruler {
+  position: relative;
+  height: 30px;
+  margin-left: var(--ui-timeline-gutter);
+  cursor: ew-resize;
+  outline: none;
+  /* Claim horizontal drag gestures so touch devices scrub instead of
+     scrolling the page (see player-bar for the same trick). */
+  touch-action: none;
+}
+
+.ui-timeline-ruler:focus-visible {
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--accent) 40%, transparent);
+}
+
+.ui-timeline-tick {
+  position: absolute;
+  bottom: 0;
+  width: 1px;
+  height: 7px;
+  background: color-mix(in srgb, var(--fg-0) 16%, transparent);
+  pointer-events: none;
+}
+
+.ui-timeline-tick-label {
+  position: absolute;
+  bottom: 10px;
+  left: 4px;
+  font-size: var(--font-xs);
+  font-family: var(--font-mono, ui-monospace, monospace);
+  color: var(--fg-2);
+  white-space: nowrap;
+}
+
+/* Last tick sits at the ruler's right edge — right-align its label. */
+.ui-timeline-tick:last-child .ui-timeline-tick-label {
+  left: auto;
+  right: 4px;
+}
+
+/* ── Tracks ─────────────────────────────────────────────────── */
+
+.ui-timeline-track-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-1);
+}
+
+.ui-timeline-track {
+  display: grid;
+  grid-template-columns: var(--ui-timeline-gutter) 1fr;
+  height: 28px;
+}
+
+.ui-timeline-track-label {
+  display: flex;
+  align-items: center;
+  padding: 0 var(--size-3);
+  font-size: var(--font-xs);
+  color: var(--fg-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ui-timeline-lane {
+  position: relative;
+}
+
+/* ── Segment bars ───────────────────────────────────────────── */
+
+.ui-timeline-bar {
+  position: absolute;
+  top: 5px;
+  height: 18px;
+  min-width: 2px;
+  display: flex;
+  align-items: center;
+  padding: 0 var(--size-2);
+  border: none;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--fg-0) 14%, transparent);
+  color: var(--fg-0);
+  font-size: var(--font-xs);
+  white-space: nowrap;
+  overflow: hidden;
+  cursor: ew-resize;
+  touch-action: none;
+}
+
+@media (hover: hover) {
+  .ui-timeline-bar:hover {
+    background: color-mix(in srgb, var(--fg-0) 20%, transparent);
+  }
+}
+
+.ui-timeline-bar:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.ui-timeline-track[data-editing] .ui-timeline-bar {
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 28%, transparent);
+}
+
+.ui-timeline-bar-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Resize handles ─────────────────────────────────────────── */
+/* Invisible 24px-wide hit areas straddling each segment edge, with a
+   2px accent line revealed on hover / while editing. */
+
+.ui-timeline-handle {
+  position: absolute;
+  top: 0;
+  width: 24px;
+  height: 28px;
+  background: transparent;
+  cursor: ew-resize;
+  touch-action: none;
+  z-index: 1;
+}
+
+.ui-timeline-handle-start { translate: -18px 0; }
+.ui-timeline-handle-end   { translate: -6px 0; }
+
+.ui-timeline-handle::after {
+  content: "";
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  width: 2px;
+  border-radius: 1px;
+  background: var(--accent);
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+/* Align the line with the segment edge the handle controls. */
+.ui-timeline-handle-start::after { left: 17px; }
+.ui-timeline-handle-end::after   { left: 5px; }
+
+@media (hover: hover) {
+  .ui-timeline-track:hover .ui-timeline-handle::after,
+  .ui-timeline-handle:hover::after,
+  .ui-timeline-track[data-editing] .ui-timeline-handle::after {
+    opacity: 1;
+  }
+}
+
+/* Touch: keep the trim lines faintly visible so edges are discoverable. */
+.clj-ui-touch .ui-timeline-handle::after {
+  opacity: 0.65;
+}
+
+/* ── Playhead ───────────────────────────────────────────────── */
+
+.ui-timeline-overlay {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: var(--ui-timeline-gutter);
+  pointer-events: none;
+}
+
+.ui-timeline-playhead {
+  position: absolute;
+  top: 30px;
+  bottom: 0;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--fg-0);
+}
+
+/* Accent pentagon cap at the ruler line. */
+.ui-timeline-playhead::before {
+  content: "";
+  position: absolute;
+  top: -10px;
+  left: -3px;
+  width: 8px;
+  height: 10px;
+  background: var(--accent);
+  clip-path: polygon(0 0, 100% 0, 100% 60%, 50% 100%, 0 60%);
+}
+
+/* ── Transport ──────────────────────────────────────────────── */
+
+.ui-timeline-transport {
+  position: absolute;
+  right: 7px;
+  bottom: 7px;
+  display: flex;
+  align-items: center;
+  gap: var(--size-1);
+  height: 40px;
+  padding: 0 var(--size-2);
+  background: var(--bg-2);
+  border: var(--border-0);
+  border-radius: var(--radius-md);
+}
+
+.ui-timeline-transport-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 9999px;
+  padding: 0;
+  background: transparent;
+  color: var(--fg-2);
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .ui-timeline-transport-btn:hover {
+    color: var(--fg-0);
+    background: color-mix(in srgb, var(--fg-0) 10%, transparent);
+  }
+}
+
+.ui-timeline-transport-btn.ui-timeline-loop-active {
+  color: var(--accent);
+}
+
+.ui-timeline-play {
+  background: var(--fg-0);
+  color: var(--bg-0);
+  transition: scale 0.15s;
+}
+
+@media (hover: hover) {
+  .ui-timeline-play:hover {
+    scale: 1.1;
+    background: var(--fg-0);
+    color: var(--bg-0);
+  }
+}
+
+.ui-timeline-play:active {
+  scale: 0.95;
+}
+
+.ui-timeline-time {
+  padding: 0 var(--size-1);
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: var(--font-xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--fg-2);
+}

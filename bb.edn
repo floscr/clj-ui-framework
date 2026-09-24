@@ -124,6 +124,7 @@
               [ui.calendar-test]
               [ui.calendar-events-test]
               [ui.player-bar-test]
+              [ui.timeline-test]
               [ui.file-browser-test]
               [ui.file-progress-test]
               [ui.processing-bar-test]
@@ -168,6 +169,7 @@
                                       'ui.calendar-test
                                       'ui.calendar-events-test
                                       'ui.player-bar-test
+                                      'ui.timeline-test
                                       'ui.file-browser-test
                                       'ui.file-progress-test
                                       'ui.processing-bar-test

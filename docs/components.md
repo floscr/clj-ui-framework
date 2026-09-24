@@ -4,7 +4,7 @@
 > See `AGENTS.md` for conventions, per-target pitfalls, and how to
 > add new components and icons.
 
-## Components (46)
+## Components (47)
 
 | Component | Namespace | Description | Public API |
 |-----------|-----------|-------------|------------|
@@ -50,6 +50,7 @@
 | tag_input | `ui.tag-input` |  | `tag-input-class-list`, `tag-input-classes`, `tag-pill-class-list`, `tag-pill-classes`, `tag-pill`, `tag-dropdown-item`, `tag-dropdown`, `tag-input` |
 | theme | `ui.theme` |  | `css-var` |
 | theme_toggle | `ui.theme-toggle` |  | `theme-toggle-class-list`, `theme-toggle-classes`, `theme-toggle` |
+| timeline | `ui.timeline` | Motion-Studio-style editing timeline — ruler with ticks, labeled tracks | `total-time`, `tick-step`, `ticks`, `time->pct`, `span->pct`, `format-time`, `format-readout`, `timeline-class-list`, `timeline-classes`, `dragging?`, `timeline` |
 | toast | `ui.toast` | Toast — floating, auto-dismissing notification. | `toast-class-list`, `toast-classes`, `toast`, `toast-flash` |
 | toolbar | `ui.toolbar` | Toolbar — a rounded container that groups buttons (typically icon buttons) | `toolbar-class-list`, `toolbar-classes`, `toolbar`, `toolbar-separator` |
 | tooltip | `ui.tooltip` |  | `tooltip` |

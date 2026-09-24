@@ -34,6 +34,7 @@
             [ui.file-browser :as fb]
             [ui.file-progress :as fp]
             [ui.theme-toggle :as theme-toggle]
+            [ui.timeline :as timeline]
             [dev.demos :refer [section page-header button-demo alert-demo badge-demo
                                card-demo accordion-demo table-demo spinner-demo
                                empty-state-demo drop-zone-demo processing-bar-demo
@@ -291,11 +292,29 @@
         :repeat true
         :favorited false})]))
 
+(defn timeline-demo []
+  (section "Timeline"
+    (timeline/timeline
+      {:duration 12.5
+       :current 4.2
+       :playing false
+       :tracks [{:id :clip :label "Clip" :segments [{:id :trim :start 0.8 :end 10.9 :label "video.mp4"}]}
+                {:id :zoom :label "Zoom" :segments [{:id :z1 :start 2.0 :end 5.5}
+                                                    {:id :z2 :start 7.0 :end 9.0}]}]})
+    [:div {:style "margin-top: 1rem;"}
+     (timeline/timeline
+       {:duration 95
+        :current 33
+        :playing true
+        :loop true
+        :tracks [{:id :clip :label "Clip" :segments [{:id :trim :start 5 :end 88}]}]})]))
+
 (defn components-page []
   [:div
    (page-header "Components" "All UI components at a glance.")
    (button-demo)
    (player-bar-demo)
+   (timeline-demo)
    (alert-demo)
    (badge-demo)
    (card-demo)
@@ -606,7 +625,8 @@
     :items [{:label "Button" :anchor "button"}
             {:label "Badge" :anchor "badge"}
             {:label "Card" :anchor "card"}
-            {:label "Player Bar" :anchor "player-bar"}]}
+            {:label "Player Bar" :anchor "player-bar"}
+            {:label "Timeline" :anchor "timeline"}]}
    {:title "Forms"
     :items [{:label "Form" :anchor "form"}
             {:label "Chat" :anchor "chat"}

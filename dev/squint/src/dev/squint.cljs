@@ -24,6 +24,7 @@
             [ui.tag-input :as tag-input]
             [ui.markdown :as markdown]
             [ui.player-bar :as player-bar]
+            [ui.timeline :as timeline]
             [ui.lightbox :as lightbox]
             [ui.context-menu :as context-menu]
             [ui.drop-zone :as drop-zone]
@@ -263,6 +264,55 @@
         :favorited false
         :on-play-pause (fn [_] (js/console.log "play/pause"))})]))
 
+(def !timeline-state
+  (atom {:duration 12.5
+         :current 4.2
+         :playing false
+         :loop false
+         :tracks [{:id :clip :label "Clip" :segments [{:id :trim :start 0.8 :end 10.9 :label "video.mp4"}]}
+                  {:id :zoom :label "Zoom" :segments [{:id :z1 :start 2.0 :end 5.5}
+                                                      {:id :z2 :start 7.0 :end 9.0}]}]}))
+
+(defn- update-timeline-segment [state track-id segment-id start end]
+  (update state :tracks
+          (fn [tracks]
+            (mapv (fn [track]
+                    (if (= (:id track) track-id)
+                      (update track :segments
+                              (fn [segs]
+                                (mapv (fn [seg]
+                                        (if (= (:id seg) segment-id)
+                                          (assoc seg :start start :end end)
+                                          seg))
+                                      segs)))
+                      track))
+                  tracks))))
+
+(defn timeline-demo []
+  (let [st @!timeline-state]
+    (section "Timeline"
+      (timeline/timeline
+        {:duration (:duration st)
+         :current (:current st)
+         :playing (:playing st)
+         :loop (:loop st)
+         :tracks (:tracks st)
+         :on-seek (fn [t]
+                    (swap! !timeline-state assoc :current t)
+                    (render!))
+         :on-segment-change (fn [{:keys [track-id segment-id start end]}]
+                              (swap! !timeline-state update-timeline-segment track-id segment-id start end)
+                              (render!))
+         :on-play-pause (fn [_]
+                          (swap! !timeline-state update :playing not)
+                          (render!))
+         :on-skip-start (fn [_]
+                          (swap! !timeline-state assoc :current 0)
+                          (render!))
+         :on-loop (fn [_]
+                    (swap! !timeline-state update :loop not)
+                    (render!))}))))
+
 (def !cal-state (atom {:year 2026 :month 3 :selected-date nil}))
 
 (def !lightbox-state (atom {:src nil}))
@@ -448,6 +498,7 @@
    (page-header "Components" "All UI components at a glance.")
    (button-demo)
    (player-bar-demo)
+   (timeline-demo)
    (alert-demo)
    (badge-demo)
    (card-demo)
@@ -659,7 +710,8 @@
     :items [{:label "Button" :anchor "button"}
             {:label "Badge" :anchor "badge"}
             {:label "Card" :anchor "card"}
-            {:label "Player Bar" :anchor "player-bar"}]}
+            {:label "Player Bar" :anchor "player-bar"}
+            {:label "Timeline" :anchor "timeline"}]}
    {:title "Forms"
     :items [{:label "Form" :anchor "form"}
             {:label "Chat" :anchor "chat"}
