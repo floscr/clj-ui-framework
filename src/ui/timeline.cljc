@@ -224,15 +224,22 @@
 
 (defn- ruler-scrub!
   "Seek from a pointerdown on the ruler, then keep seeking while the
-   pointer moves (window listeners) until release."
-  [ev {:keys [duration on-seek]}]
+   pointer moves (window listeners) until release. Holding shift snaps
+   the playhead to segment edges."
+  [ev {:keys [duration on-seek tracks]}]
   (.preventDefault ev)
-  (let [el   (.-currentTarget ev)
-        rect (.getBoundingClientRect el)
-        seek (fn [e]
-               (let [frac (/ (- (.-clientX e) (.-left rect))
-                             (max (.-width rect) 1))]
-                 (on-seek (clamp (* frac (total-time duration)) 0 duration))))]
+  (let [el      (.-currentTarget ev)
+        rect    (.getBoundingClientRect el)
+        targets (snap-targets tracks nil nil nil)
+        tol     (* 8 (/ (total-time duration) (max (.-width rect) 1)))
+        seek    (fn [e]
+                  (let [frac (/ (- (.-clientX e) (.-left rect))
+                                (max (.-width rect) 1))
+                        t    (* frac (total-time duration))
+                        t    (if (and (.-shiftKey e) (seq targets))
+                               (snap t targets tol)
+                               t)]
+                    (on-seek (clamp t 0 duration))))]
     (.focus el)
     (seek ev)
     (drag-listen! seek (fn [_] nil))))
@@ -358,7 +365,8 @@
      :transport         - set false to hide the floating transport
      :min-gap           - minimum segment length in seconds when trimming (default 0)
      :step / :big-step  - keyboard nudge amounts in seconds (default 0.1 / 1)
-     :on-seek           - (fn [t]) — ruler click/drag scrub and keyboard seek
+     :on-seek           - (fn [t]) — ruler click/drag scrub and keyboard seek;
+                          shift while scrubbing snaps to segment edges
      :on-segment-change - (fn [{:keys [track-id segment-id start end edge phase]}])
                           :edge is :start/:end when trimming, nil when moving;
                           :phase is :drag while the pointer moves and :commit
