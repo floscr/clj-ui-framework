@@ -1,4 +1,4 @@
-(ns number-field
+(ns ui.js.number-field
   "Interactivity runtime for [data-ui-number-field] elements.
 
    The server-rendered field (hiccup) has no event handlers, and the
