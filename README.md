@@ -200,3 +200,7 @@ Beyond color scales, the theme includes:
 - **Radii** — `--radius-sm` (6px), `--radius-md` (10px), `--radius-lg` (16px)
 
 Light/dark mode switches automatically via `prefers-color-scheme`, or manually with `data-theme="dark"` on the root element.
+
+## License
+
+MIT, see [LICENSE](LICENSE).
