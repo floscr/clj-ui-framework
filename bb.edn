@@ -1,5 +1,5 @@
-{:deps {tmux-dev/tmux-dev {:git/url "https://git.example.com/floscr/tmux-dev"
-                           :git/sha "3d9e53bc38b818bfcee312065ded0aef83bdecf4"}}
+{:deps {tmux-dev/tmux-dev {:git/url "https://github.com/floscr/tmux-dev"
+                           :git/sha "80f4da9ec9f304d8ec8626cc2a33d20779194c26"}}
  :paths ["src" "test" "dev/hiccup/src" "dev/shared/src" "scripts"]
 
  :tasks
