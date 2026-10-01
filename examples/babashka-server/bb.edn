@@ -1,6 +1,6 @@
 {:deps {clj-ui-framework/clj-ui-framework
         {:git/url "https://github.com/floscr/clj-ui-framework"
-         :git/sha "3e1df14b217f58cb579f7eed102d1547947bc30c"}}
+         :git/sha "df1477c34c94f513b3b7752a30d23392a5057df7"}}
  :paths ["src"]
 
  :tasks
