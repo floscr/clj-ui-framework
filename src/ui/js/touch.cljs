@@ -10,11 +10,10 @@
       a mouse to a tablet).
 
    2. On touch devices, hardens the page against zoom gestures:
-      - merges maximum-scale=1 / user-scalable=no / viewport-fit=cover
-        into the viewport meta (creating it if missing), preserving
-        any app-specific properties already there (e.g.
-        interactive-widget=resizes-content). Also prevents the iOS
-        zoom-on-input-focus.
+      - merges maximum-scale=1 / user-scalable=no into the viewport
+        meta (creating it if missing), preserving any app-specific
+        properties already there (e.g. interactive-widget=resizes-content).
+        Also prevents the iOS zoom-on-input-focus.
       - blocks the iOS Safari pinch gesture (gesturestart), which
         ignores user-scalable=no
 
@@ -34,8 +33,7 @@
   [["width" "device-width"]
    ["initial-scale" "1.0"]
    ["maximum-scale" "1.0"]
-   ["user-scalable" "no"]
-   ["viewport-fit" "cover"]])
+   ["user-scalable" "no"]])
 
 (defn- merge-viewport
   "Merge the zoom-hardening properties into an existing viewport content

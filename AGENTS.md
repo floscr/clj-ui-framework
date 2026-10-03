@@ -755,8 +755,13 @@ duplicate these per-app:
 **JS runtime (`ui.js.touch`, touch devices only):**
 
 - Rewrites (or creates) the viewport meta to
-  `width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover`
+  `width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no`
   — disables the zoom gesture on Android and iOS zoom-on-input-focus
+- Deliberately does **not** add `viewport-fit=cover`: in an iOS standalone
+  PWA it draws the page under the status bar, where iOS 26+ lays a
+  progressive blur/fade over the top edge (washes out tabs/headers). Keep
+  it out of app HTML too, and don't set
+  `apple-mobile-web-app-status-bar-style: black-translucent` (same blur).
 - Blocks the iOS Safari pinch gesture (`gesturestart` preventDefault),
   which ignores `user-scalable=no`
 - Desktop is untouched (trackpad pinch zoom keeps working)
