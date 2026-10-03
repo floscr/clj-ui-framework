@@ -240,6 +240,15 @@ git push origin master
 git push hetzner master
 ```
 
+There is also a `github` remote (`github.com/floscr/clj-ui-framework`).
+Some consumers (currently **xi**) pin the GitHub URL, not gitea, so a sha
+that only exists on `origin` fails to resolve for them. When rolling out,
+check each consumer's `:git/url` and push `github` too if any points there:
+
+```sh
+git push github master
+```
+
 The production server (ui.example.com) serves all three
 targets: hiccup renders live, while the Replicant and Squint SPAs are
 served as **committed static builds** at `/replicant/` and `/squint/`
@@ -263,15 +272,18 @@ out/deploy.
 1. **Verify in the framework**: `bb build-theme`, `bb build-js-runtime`
    (if `src/ui/js/` changed), `bb test`, `bb check-dev`, and `bb gen-docs`
    (if components/icons changed). Commit.
-2. **Push both remotes**: `git push origin master && git push hetzner master`,
-   then grab the new full sha: `git rev-parse master`.
+2. **Push the remotes**: `git push origin master && git push hetzner master`,
+   plus `git push github master` if any consumer pins the GitHub URL (xi
+   does — verify with `grep git/url ~/Code/Projects/xi/deps.edn`; server-lib
+   uses gitea). Then grab the new full sha: `git rev-parse master`.
 3. **Find consumers**: `bb scan-consumers` — lists every consumer project
    and marks stale pins.
 4. **Bump the active consumers** (sed-replace the old full sha with the new
    one — shas are pinned in full 40-char form):
    - `~/.config/dotfiles/modules/services/bb-services/server-lib/{bb.edn,deps.edn}`
      — covers all bb-services transitively (photos, music-server,
-     file-server, image-editor, media-server, …)
+     explorer, image-editor, media-server, …). Commit only those two
+     files — the dotfiles repo often has unrelated WIP.
    - `~/Code/Projects/xi/deps.edn` — xi ALSO carries checked-in static
      assets; refresh them from here:
      `cp dist/theme.css  ~/Code/Projects/xi/resources/public/theme.css`
@@ -283,12 +295,12 @@ out/deploy.
 5. **New JS runtime module?** Squint/Replicant SPAs only bundle modules
    they require — add a side-effect require (e.g. `[ui.js.gestures]`) to
    each SPA main: `photos/app/photos/main.cljs`,
-   `music-server/app/music/main.cljs`, `file-server/app/files/main.cljs`.
+   `music-server/app/music/main.cljs`, `explorer/app/explorer/main.cljs`.
    Hiccup/server-rendered apps and xi get it free via `ui-runtime.js`.
 6. **Rebuild consumer SPAs**:
    - bb-services: `bb build` in `photos` (plus `bb collector:build` — the
      collector builds from inside the photos dir), `music-server`,
-     `file-server`, `image-editor`
+     `explorer`, `image-editor` (dist dirs are untracked — nothing to commit)
    - xi: `bb web:build`
 7. **Commit the consumer repos** (dotfiles + xi) with the sha bump +
    rebuilt assets.
