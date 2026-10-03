@@ -4233,6 +4233,7 @@
 
   // .compiled/gestures.mjs
   var press_ms = 500;
+  var press_visual_ms = 250;
   var slop_px = 10;
   var selector = ".context-menu-trigger, [data-long-press]";
   var press_class = "clj-ui-pressing";
@@ -4259,6 +4260,7 @@
     if (truth_(temp__23062__auto__1)) {
       const p2 = temp__23062__auto__1;
       clearTimeout(get(p2, "timer"));
+      clearTimeout(get(p2, "visual-timer"));
       clear_press_visual_BANG_(get(p2, "el"));
       return reset_BANG_(press, null);
     }
@@ -4285,9 +4287,12 @@
         cancel_BANG_();
         const x4 = e.clientX;
         const y5 = e.clientY;
-        el3.classList.add(press_class);
-        return reset_BANG_(press, { "el": el3, "x": x4, "y": y5, "timer": setTimeout((function() {
+        return reset_BANG_(press, { "el": el3, "x": x4, "y": y5, "visual-timer": setTimeout((function() {
+          return el3.classList.add(press_class);
+        }), press_visual_ms), "timer": setTimeout((function() {
+          clearTimeout(get(deref(press), "visual-timer"));
           reset_BANG_(press, null);
+          el3.classList.add(press_class);
           reset_BANG_(held, el3);
           reset_BANG_(suppress_click_QMARK_, true);
           return dispatch_contextmenu_BANG_(el3, x4, y5);
@@ -4325,6 +4330,8 @@
       if (truth_(temp__23062__auto__1)) {
         const p2 = temp__23062__auto__1;
         clearTimeout(get(p2, "timer"));
+        clearTimeout(get(p2, "visual-timer"));
+        get(p2, "el").classList.add(press_class);
         reset_BANG_(press, null);
         return reset_BANG_(held, get(p2, "el"));
       }

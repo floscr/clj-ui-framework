@@ -19,8 +19,8 @@
      long-press itself) cancels the synthetic one — no double-open
    - the click that follows a fired long-press is suppressed, so the
      press doesn't also activate the element underneath
-   - the pressed element gets a `.clj-ui-pressing` class while the
-     press is pending (CSS scales it down slightly for feedback); the
+   - the pressed element gets a `.clj-ui-pressing` class once the press
+     has lasted 250ms (quick taps never shrink) (CSS scales it down slightly for feedback); the
      scale is kept while the context menu is open and animates back
      when the menu dismisses (`clj-ui-menu-dismiss` document event
      from ui/js/context_menu, with a next-pointerdown fallback for
@@ -32,6 +32,8 @@
    synthetic contextmenu on el at viewport coords x/y.")
 
 (def ^:private press-ms 500)
+;; delay before the press-shrink shows, so quick taps stay visually still
+(def ^:private press-visual-ms 250)
 (def ^:private slop-px 10)
 (def ^:private selector ".context-menu-trigger, [data-long-press]")
 (def ^:private press-class "clj-ui-pressing")
@@ -55,6 +57,7 @@
 (defn- cancel! []
   (when-let [p @press]
     (js/clearTimeout (:timer p))
+    (js/clearTimeout (:visual-timer p))
     (clear-press-visual! (:el p))
     (reset! press nil)))
 
@@ -78,13 +81,18 @@
       (cancel!)
       (let [x (.-clientX e)
             y (.-clientY e)]
-        (.add (.-classList el) press-class)
         (reset! press
                 {:el el :x x :y y
+                 ;; defer the shrink so quick taps never show it
+                 :visual-timer (js/setTimeout
+                                #(.add (.-classList el) press-class)
+                                press-visual-ms)
                  :timer (js/setTimeout
                          (fn []
+                           (js/clearTimeout (:visual-timer @press))
                            (reset! press nil)
                            ;; keep .clj-ui-pressing while the menu is open
+                           (.add (.-classList el) press-class)
                            (reset! held el)
                            (reset! suppress-click? true)
                            (dispatch-contextmenu! el x y))
@@ -107,6 +115,8 @@
   (when (.-isTrusted e)
     (when-let [p @press]
       (js/clearTimeout (:timer p))
+      (js/clearTimeout (:visual-timer p))
+      (.add (.-classList (:el p)) press-class)
       (reset! press nil)
       (reset! held (:el p)))))
 
