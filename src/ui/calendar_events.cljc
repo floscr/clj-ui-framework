@@ -10,10 +10,14 @@
 ;;   :date       - "YYYY-MM-DD" string
 ;;   :time-start - "HH:MM" string or nil
 ;;   :time-end   - "HH:MM" string or nil
-;;   :color      - :accent, :danger, :success, :warning, or nil (default)
+;;   :color      - one of event-colors (as keyword or string), or nil (default gray)
 ;;   :done?      - boolean
 
-(def event-colors #{"accent" "danger" "success" "warning"})
+(def event-colors
+  "Named event colors. The first four are the theme's semantic tokens; the
+   rest are the extra categorical palettes (see theme/tokens.edn). Each has a
+   matching .cal-event-<name> class with light/dark variants."
+  #{"accent" "danger" "success" "warning" "blue" "teal" "pink" "orange"})
 
 (defn event-color-class
   "Returns the CSS class for an event color."
@@ -100,7 +104,7 @@
 (defn event-pill-class-list
   "Returns a vector of CSS class strings for an event pill.
    Options:
-     :color - :accent, :danger, :success, :warning, or nil
+     :color - one of event-colors, or nil
      :done? - boolean
      :task? - boolean (render as a checkbox to-do item, not a solid pill)"
   [{:keys [color done? task?]}]

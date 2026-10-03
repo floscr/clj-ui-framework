@@ -171,6 +171,10 @@
 .cal-day-dot.cal-event-danger { background: var(--danger); }
 .cal-day-dot.cal-event-success { background: var(--success); }
 .cal-day-dot.cal-event-warning { background: var(--warning); }
+.cal-day-dot.cal-event-blue { background: var(--blue); }
+.cal-day-dot.cal-event-teal { background: var(--teal); }
+.cal-day-dot.cal-event-pink { background: var(--pink); }
+.cal-day-dot.cal-event-orange { background: var(--orange); }
 .cal-day-dot.cal-event-default { background: var(--fg-2); }
 
 /* ── Day Events Container ────────────────────────────────────────── */
@@ -295,6 +299,30 @@
   border-left-color: var(--warning-500);
 }
 
+.cal-event-blue {
+  background: var(--blue-100);
+  color: var(--blue-800);
+  border-left-color: var(--blue-500);
+}
+
+.cal-event-teal {
+  background: var(--teal-100);
+  color: var(--teal-800);
+  border-left-color: var(--teal-500);
+}
+
+.cal-event-pink {
+  background: var(--pink-100);
+  color: var(--pink-800);
+  border-left-color: var(--pink-500);
+}
+
+.cal-event-orange {
+  background: var(--orange-100);
+  color: var(--orange-800);
+  border-left-color: var(--orange-500);
+}
+
 .cal-event-default {
   background: var(--gray-200);
   color: var(--gray-700);
@@ -327,6 +355,30 @@
   border-left-color: var(--warning-400);
 }
 
+[data-theme="dark"] .cal-event-blue {
+  background: var(--blue-950);
+  color: var(--blue-200);
+  border-left-color: var(--blue-400);
+}
+
+[data-theme="dark"] .cal-event-teal {
+  background: var(--teal-950);
+  color: var(--teal-200);
+  border-left-color: var(--teal-400);
+}
+
+[data-theme="dark"] .cal-event-pink {
+  background: var(--pink-950);
+  color: var(--pink-200);
+  border-left-color: var(--pink-400);
+}
+
+[data-theme="dark"] .cal-event-orange {
+  background: var(--orange-950);
+  color: var(--orange-200);
+  border-left-color: var(--orange-400);
+}
+
 [data-theme="dark"] .cal-event-default {
   background: var(--gray-800);
   color: var(--gray-200);
@@ -354,6 +406,26 @@
     color: var(--warning-200);
     border-left-color: var(--warning-400);
   }
+  :root:not([data-theme="light"]) .cal-event-blue {
+    background: var(--blue-950);
+    color: var(--blue-200);
+    border-left-color: var(--blue-400);
+  }
+  :root:not([data-theme="light"]) .cal-event-teal {
+    background: var(--teal-950);
+    color: var(--teal-200);
+    border-left-color: var(--teal-400);
+  }
+  :root:not([data-theme="light"]) .cal-event-pink {
+    background: var(--pink-950);
+    color: var(--pink-200);
+    border-left-color: var(--pink-400);
+  }
+  :root:not([data-theme="light"]) .cal-event-orange {
+    background: var(--orange-950);
+    color: var(--orange-200);
+    border-left-color: var(--orange-400);
+  }
   :root:not([data-theme="light"]) .cal-event-default {
     background: var(--gray-800);
     color: var(--gray-200);
@@ -378,6 +450,18 @@
 [data-theme="dark"] .cal-day-dot.cal-event-warning,
 [data-theme="dark"] .cal-ticker-dot.cal-event-warning,
 [data-theme="dark"] .cal-agenda-dot.cal-event-warning { background: var(--warning-400); }
+[data-theme="dark"] .cal-day-dot.cal-event-blue,
+[data-theme="dark"] .cal-ticker-dot.cal-event-blue,
+[data-theme="dark"] .cal-agenda-dot.cal-event-blue { background: var(--blue-400); }
+[data-theme="dark"] .cal-day-dot.cal-event-teal,
+[data-theme="dark"] .cal-ticker-dot.cal-event-teal,
+[data-theme="dark"] .cal-agenda-dot.cal-event-teal { background: var(--teal-400); }
+[data-theme="dark"] .cal-day-dot.cal-event-pink,
+[data-theme="dark"] .cal-ticker-dot.cal-event-pink,
+[data-theme="dark"] .cal-agenda-dot.cal-event-pink { background: var(--pink-400); }
+[data-theme="dark"] .cal-day-dot.cal-event-orange,
+[data-theme="dark"] .cal-ticker-dot.cal-event-orange,
+[data-theme="dark"] .cal-agenda-dot.cal-event-orange { background: var(--orange-400); }
 [data-theme="dark"] .cal-day-dot.cal-event-default,
 [data-theme="dark"] .cal-ticker-dot.cal-event-default,
 [data-theme="dark"] .cal-agenda-dot.cal-event-default { background: var(--gray-400); }
@@ -395,6 +479,18 @@
   :root:not([data-theme="light"]) .cal-day-dot.cal-event-warning,
   :root:not([data-theme="light"]) .cal-ticker-dot.cal-event-warning,
   :root:not([data-theme="light"]) .cal-agenda-dot.cal-event-warning { background: var(--warning-400); }
+  :root:not([data-theme="light"]) .cal-day-dot.cal-event-blue,
+  :root:not([data-theme="light"]) .cal-ticker-dot.cal-event-blue,
+  :root:not([data-theme="light"]) .cal-agenda-dot.cal-event-blue { background: var(--blue-400); }
+  :root:not([data-theme="light"]) .cal-day-dot.cal-event-teal,
+  :root:not([data-theme="light"]) .cal-ticker-dot.cal-event-teal,
+  :root:not([data-theme="light"]) .cal-agenda-dot.cal-event-teal { background: var(--teal-400); }
+  :root:not([data-theme="light"]) .cal-day-dot.cal-event-pink,
+  :root:not([data-theme="light"]) .cal-ticker-dot.cal-event-pink,
+  :root:not([data-theme="light"]) .cal-agenda-dot.cal-event-pink { background: var(--pink-400); }
+  :root:not([data-theme="light"]) .cal-day-dot.cal-event-orange,
+  :root:not([data-theme="light"]) .cal-ticker-dot.cal-event-orange,
+  :root:not([data-theme="light"]) .cal-agenda-dot.cal-event-orange { background: var(--orange-400); }
   :root:not([data-theme="light"]) .cal-day-dot.cal-event-default,
   :root:not([data-theme="light"]) .cal-ticker-dot.cal-event-default,
   :root:not([data-theme="light"]) .cal-agenda-dot.cal-event-default { background: var(--gray-400); }
@@ -519,6 +615,10 @@
 .cal-ticker-dot.cal-event-danger { background: var(--danger); }
 .cal-ticker-dot.cal-event-success { background: var(--success); }
 .cal-ticker-dot.cal-event-warning { background: var(--warning); }
+.cal-ticker-dot.cal-event-blue { background: var(--blue); }
+.cal-ticker-dot.cal-event-teal { background: var(--teal); }
+.cal-ticker-dot.cal-event-pink { background: var(--pink); }
+.cal-ticker-dot.cal-event-orange { background: var(--orange); }
 .cal-ticker-dot.cal-event-default { background: var(--fg-2); }
 
 /* ── Agenda List ─────────────────────────────────────────────────── */
@@ -592,6 +692,10 @@
 .cal-agenda-dot.cal-event-danger { background: var(--danger); }
 .cal-agenda-dot.cal-event-success { background: var(--success); }
 .cal-agenda-dot.cal-event-warning { background: var(--warning); }
+.cal-agenda-dot.cal-event-blue { background: var(--blue); }
+.cal-agenda-dot.cal-event-teal { background: var(--teal); }
+.cal-agenda-dot.cal-event-pink { background: var(--pink); }
+.cal-agenda-dot.cal-event-orange { background: var(--orange); }
 .cal-agenda-dot.cal-event-default { background: var(--fg-2); }
 
 .cal-agenda-event-body {

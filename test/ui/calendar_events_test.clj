@@ -15,6 +15,13 @@
     (is (= "cal-event-danger" (cal-events/event-color-class :danger)))
     (is (= "cal-event-success" (cal-events/event-color-class :success)))
     (is (= "cal-event-warning" (cal-events/event-color-class :warning))))
+  (testing "extra categorical palettes"
+    (is (= "cal-event-blue" (cal-events/event-color-class :blue)))
+    (is (= "cal-event-teal" (cal-events/event-color-class :teal)))
+    (is (= "cal-event-pink" (cal-events/event-color-class :pink)))
+    (is (= "cal-event-orange" (cal-events/event-color-class :orange))))
+  (testing "string names work too (squint passes strings)"
+    (is (= "cal-event-blue" (cal-events/event-color-class "blue"))))
   (testing "nil or unknown returns default"
     (is (= "cal-event-default" (cal-events/event-color-class nil)))
     (is (= "cal-event-default" (cal-events/event-color-class :unknown)))))

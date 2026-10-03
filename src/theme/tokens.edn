@@ -87,7 +87,69 @@
                      [700 0.625 0.130]
                      [800 0.540 0.107]
                      [900 0.465 0.088]
-                     [950 0.355 0.065]]}}}
+                     [950 0.355 0.065]]}
+
+   ;; ── Extra palettes ───────────────────────────────────────────────
+   ;; Non-semantic hues for categorical coloring (calendar sources, tags,
+   ;; chart series). Spaced between the semantic hues so all eight stay
+   ;; distinguishable: danger 25 · orange 55 · warning 76 · success 152 ·
+   ;; teal 195 · blue 245 · accent 286 · pink 345.
+
+   ;; Blue
+   :blue {:hue 245 :chroma 0.20
+          :steps [[50  0.965 0.018]
+                  [100 0.925 0.038]
+                  [200 0.860 0.070]
+                  [300 0.770 0.115]
+                  [400 0.690 0.155]
+                  [500 0.595 0.200]
+                  [600 0.505 0.215]
+                  [700 0.450 0.205]
+                  [800 0.395 0.175]
+                  [900 0.350 0.145]
+                  [950 0.260 0.105]]}
+
+   ;; Teal — lower chroma, the sRGB gamut is narrow around this hue
+   :teal {:hue 195 :chroma 0.125
+          :steps [[50  0.980 0.014]
+                  [100 0.960 0.030]
+                  [200 0.930 0.055]
+                  [300 0.885 0.085]
+                  [400 0.815 0.115]
+                  [500 0.705 0.125]
+                  [600 0.595 0.110]
+                  [700 0.510 0.090]
+                  [800 0.425 0.070]
+                  [900 0.370 0.056]
+                  [950 0.270 0.040]]}
+
+   ;; Pink — magenta side of red
+   :pink {:hue 345 :chroma 0.21
+          :steps [[50  0.970 0.014]
+                  [100 0.935 0.032]
+                  [200 0.860 0.070]
+                  [300 0.765 0.120]
+                  [400 0.675 0.175]
+                  [500 0.610 0.215]
+                  [600 0.560 0.210]
+                  [700 0.490 0.178]
+                  [800 0.425 0.148]
+                  [900 0.365 0.120]
+                  [950 0.255 0.084]]}
+
+   ;; Orange — between danger (red) and warning (amber)
+   :orange {:hue 55 :chroma 0.185
+            :steps [[50  0.980 0.014]
+                    [100 0.950 0.034]
+                    [200 0.900 0.068]
+                    [300 0.830 0.115]
+                    [400 0.760 0.160]
+                    [500 0.700 0.185]
+                    [600 0.620 0.175]
+                    [700 0.540 0.150]
+                    [800 0.460 0.125]
+                    [900 0.395 0.100]
+                    [950 0.280 0.070]]}}}
 
  ;; ─── Semantic tokens (light theme) ────────────────────────────────
  ;; Reference color scale variables with var(--scale-step).
@@ -107,6 +169,10 @@
   :fg-on-success "#ffffff"
   :warning   "var(--warning-500)"
   :fg-on-warning "#ffffff"
+  :blue      "var(--blue-500)"
+  :teal      "var(--teal-500)"
+  :pink      "var(--pink-500)"
+  :orange    "var(--orange-500)"
   :border-0  "1px solid var(--gray-200)"
   :border-1  "1px solid var(--gray-300)"
   :border-2  "1px solid var(--gray-500)"
@@ -138,6 +204,10 @@
    :fg-on-success "#ffffff"
    :warning   "var(--warning-400)"
    :fg-on-warning "#ffffff"
+   :blue      "var(--blue-400)"
+   :teal      "var(--teal-400)"
+   :pink      "var(--pink-400)"
+   :orange    "var(--orange-400)"
    :border-0  "1px solid var(--gray-800)"
    :border-1  "1px solid var(--gray-700)"
    :border-2  "1px solid var(--gray-500)"

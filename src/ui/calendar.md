@@ -84,13 +84,18 @@ Events are plain maps:
  :date       "2026-03-29"     ;; YYYY-MM-DD
  :time-start "09:00"          ;; HH:MM or nil
  :time-end   "09:30"          ;; HH:MM or nil
- :color      :accent          ;; :accent :danger :success :warning or nil
+ :color      :accent          ;; see Event Colors below, or nil
  :done?      false}
 ```
 
 ## Event Colors
 
-Colors map to the theme's semantic tokens and support dark mode automatically: `:accent`, `:danger`, `:success`, `:warning`. Pass `nil` for the default gray.
+Eight named colors, all with automatic dark-mode variants. Pass `nil` for the default gray.
+
+- Semantic tokens: `:accent`, `:danger`, `:success`, `:warning`
+- Categorical palettes (for coloring sources/series that need to stay distinguishable): `:blue`, `:teal`, `:pink`, `:orange`
+
+The full set is `ui.calendar-events/event-colors`. Hues are spaced so all eight read as distinct: danger 25 · orange 55 · warning 76 · success 152 · teal 195 · blue 245 · accent 286 · pink 345.
 
 ## Date Utilities
 
@@ -112,4 +117,4 @@ The calendar uses `cal-` prefixed classes. Key states on day cells:
 - `.cal-day-outside` — days from adjacent months
 - `.cal-day-disabled` — unselectable days
 
-Event pills use color classes: `.cal-event-accent`, `.cal-event-danger`, `.cal-event-success`, `.cal-event-warning`, `.cal-event-default`.
+Event pills use color classes: `.cal-event-accent`, `.cal-event-danger`, `.cal-event-success`, `.cal-event-warning`, `.cal-event-blue`, `.cal-event-teal`, `.cal-event-pink`, `.cal-event-orange`, `.cal-event-default`.
