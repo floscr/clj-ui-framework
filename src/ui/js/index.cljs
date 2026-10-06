@@ -5,6 +5,7 @@
             [drop-zone]
             [flip]
             [gestures]
+            [lightbox]
             [masonry]
             [number-field]
             [panels]

@@ -324,7 +324,7 @@
   (let [{:keys [src]} @!lightbox-state]
     (section "Lightbox"
       [:p {:style {:color "var(--fg-2)" :font-size "var(--font-sm)"}}
-       "Click a thumbnail to open the fullscreen lightbox overlay."]
+       "Click a thumbnail to open the fullscreen lightbox overlay. Pinch, double-tap or scroll to zoom; drag to pan."]
       [:div {:style {:display "flex" :gap "0.75rem" :flex-wrap "wrap"}}
        (for [{img-src :src img-alt :alt} sample-images]
          (lightbox/image-thumbnail

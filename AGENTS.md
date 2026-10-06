@@ -888,6 +888,28 @@ side-effect require, like the other runtime modules:
 (:require [ui.js.gestures])
 ```
 
+## Lightbox Zoom (`ui.js.lightbox`) — automatic
+
+Every `ui.lightbox` image is zoomable without per-app wiring: the
+`ui.js.lightbox` runtime module (bundled in ui-runtime.js) installs
+document-level Pointer Event handlers on `.lightbox-overlay`.
+
+- two-finger pinch zooms around the pinch midpoint; one finger / mouse
+  drag pans a zoomed image
+- double-tap / double-click on the image toggles 1x ↔ 2.5x at that point
+- mouse wheel / trackpad pinch (ctrl+wheel) zooms around the cursor
+- release snaps into bounds (1x–5x, no panning past the image edges)
+- the click ending a drag/pinch is suppressed, so it never closes the
+  lightbox; a plain tap on the backdrop still does
+- zoom lives in the image's inline `transform` + a `data-zoomed`
+  attribute (grab cursor) — no component state; it resets when the image
+  (re)loads
+
+`ui/lightbox.css` sets `touch-action: none` on the overlay so the browser
+hands the gestures to the runtime (the page-level pinch block from
+`ui.js.touch` stays in place). **Don't hand-roll zoom in apps.**
+Squint/Replicant SPAs without ui-runtime.js add `(:require [ui.js.lightbox])`.
+
 ## Icons (`ui.icon`)
 
 Inline SVG icons using Lucide-compatible 24×24 paths. All icons are defined in `src/ui/icon.cljc`.

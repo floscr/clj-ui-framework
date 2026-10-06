@@ -5,7 +5,11 @@
      (lightbox {:src (:lightbox-image @state)
                 :on-close #(swap! state assoc :lightbox-image nil)})
 
-   Only renders when :src is non-nil."
+   Only renders when :src is non-nil.
+
+   Pinch-zoom, pan, double-tap and wheel zoom come from the
+   ui/js/lightbox runtime (bundled in ui-runtime.js; squint/replicant
+   SPAs without it add a side-effect require of [ui.js.lightbox])."
   (:require [ui.icon :as icon]))
 
 (defn lightbox
