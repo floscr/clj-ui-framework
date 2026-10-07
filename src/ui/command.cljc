@@ -145,6 +145,13 @@
      :id          - dialog id, matched by command-trigger :target (required)
      :placeholder - search input placeholder (default \"Type a command or search…\")
      :hotkey      - global open shortcut, e.g. \"mod+k\" (mod = ⌘ on mac, Ctrl elsewhere)
+     :quick-nav   - Alt quick-select: while Alt is held the first visible rows
+                    get a key badge and Alt+<key> selects that row (like avy /
+                    swiper). :letters (asdfghl…, skips the j/k/n/p list-nav
+                    keys), :numbers (1234567890) or a custom key string in row
+                    order, e.g. \"sfgh\" when the app binds some Alt+letters
+                    itself. Keys match the physical key (KeyA → a), so they work
+                    where Alt+letter types a special character. Off by default.
      :empty       - empty-state text when no items match (default \"No results found.\")
      :leading     - hiccup rendered in place of the default search icon (optional);
                     e.g. a clickable back button (use class \"command-search-back\")
