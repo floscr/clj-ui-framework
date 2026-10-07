@@ -26,6 +26,13 @@
       (is (= "true" (:aria-modal attrs)))
       (is (= "command-search" (:class (second search))))
       (is (= "command-list" (:class (second list*))))))
+  (testing "quick-nav renders its data attribute (keyword or custom key string)"
+    (let [[_ attrs] (command/command-dialog {:id "c" :quick-nav :letters})]
+      (is (= "letters" (:data-command-quick-nav attrs))))
+    (let [[_ attrs] (command/command-dialog {:id "c" :quick-nav "asdf"})]
+      (is (= "asdf" (:data-command-quick-nav attrs))))
+    (let [[_ attrs] (command/command-dialog {:id "c"})]
+      (is (not (contains? attrs :data-command-quick-nav)))))
   (testing "placeholder default and override"
     (let [[_ _ search] (command/command-dialog {:id "c"} )
           input (nth search 3)]

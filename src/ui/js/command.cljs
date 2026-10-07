@@ -115,6 +115,59 @@
           (set-active! dialog
                        (.find vis (fn [el] (identical? (group-of el) target)))))))))
 
+;; ── Quick navigation (Alt+key) ──────────────────────────────────────
+;; Dialogs rendered with :quick-nav carry data-command-quick-nav. While Alt is
+;; held, the first N visible items (in visual order) get a data-command-hint
+;; badge (drawn by command.css) and Alt+<that key> selects the item directly,
+;; like vim's swiper/avy. Keys are matched on the physical key (`e.code`), so
+;; they work where Alt+letter types a special character (macOS). The built-in
+;; sets skip j/k/n/p, which Alt-navigate the list.
+
+(def ^:private quick-key-sets
+  #js {:letters "asdfghlqweryiotzxcvbum"
+       :numbers "1234567890"})
+
+(defn- quick-keys
+  "The hint key string for a dialog (e.g. \"asdf…\"), or nil when quick-nav is off."
+  [dialog]
+  (let [v (.. dialog -dataset -commandQuickNav)]
+    (when (and v (not= v ""))
+      (or (aget quick-key-sets v) v))))
+
+(defn- event-key
+  "Lowercase char of the physical key of a keyboard event (KeyA → \"a\",
+   Digit1 → \"1\"), or nil."
+  [e]
+  (let [code (or (.-code e) "")]
+    (cond
+      (.startsWith code "Key")   (.toLowerCase (.slice code 3))
+      (.startsWith code "Digit") (.slice code 5))))
+
+(defn- hide-hints! [dialog]
+  (when (.hasAttribute dialog "data-command-hints")
+    (.removeAttribute dialog "data-command-hints")
+    (.forEach (.querySelectorAll dialog "[data-command-hint]")
+              (fn [el] (.removeAttribute el "data-command-hint")))))
+
+(defn- show-hints! [dialog]
+  (when-let [ks (quick-keys dialog)]
+    (hide-hints! dialog)
+    (.forEach (visible-items dialog)
+              (fn [el i]
+                (when (< i (.-length ks))
+                  (.setAttribute el "data-command-hint"
+                                 (.toUpperCase (aget ks i))))))
+    (.setAttribute dialog "data-command-hints" "")))
+
+(defn- quick-item
+  "The visible item bound to the pressed Alt+key, or nil."
+  [dialog e]
+  (when-let [ks (quick-keys dialog)]
+    (let [k (event-key e)
+          i (if k (.indexOf ks k) -1)]
+      (when (>= i 0)
+        (aget (visible-items dialog) i)))))
+
 ;; ── Filtering ───────────────────────────────────────────────────────
 
 (defn- filter! [dialog query]
@@ -157,7 +210,10 @@
       (if (= (.-length vis) 0)
         (.add (.-classList list) "command-list--empty")
         (.remove (.-classList list) "command-list--empty"))
-      (set-active! dialog (when (> (.-length vis) 0) (aget vis 0))))))
+      (set-active! dialog (when (> (.-length vis) 0) (aget vis 0))))
+    ;; Alt held while the list changes: re-label the new visual order.
+    (when (.hasAttribute dialog "data-command-hints")
+      (show-hints! dialog))))
 
 ;; ── Open / close ────────────────────────────────────────────────────
 
@@ -290,6 +346,13 @@
     (when dialog
       (let [key (.-key e)]
         (cond
+          ;; Quick-nav: holding Alt reveals the hints; Alt+<hint key> selects.
+          (and (= key "Alt") (quick-keys dialog)) (show-hints! dialog)
+          (and (.-altKey e) (not (.-ctrlKey e)) (not (.-metaKey e)) (not (.-shiftKey e))
+               (quick-item dialog e))
+          (do (.preventDefault e)
+              (.stopPropagation e)
+              (select! dialog (quick-item dialog e)))
           (= key "ArrowDown") (do (.preventDefault e) (move-active! dialog "down"))
           (= key "ArrowUp")   (do (.preventDefault e) (move-active! dialog "up"))
           ;; Emacs-style Ctrl+n / Ctrl+p to move next / previous. Ctrl+N is a
@@ -315,6 +378,11 @@
           (and (= key "Home") (.-metaKey e)) (do (.preventDefault e) (move-active! dialog "home"))
           (and (= key "End")  (.-metaKey e)) (do (.preventDefault e) (move-active! dialog "end"))
           (= key "Enter")     (do (.preventDefault e) (select! dialog (active-item dialog))))))))
+
+(defn- on-keyup [e]
+  (when (= (.-key e) "Alt")
+    (when-let [dialog (open-dialog)]
+      (hide-hints! dialog))))
 
 (defn- on-click [e]
   (let [t      (.-target e)
@@ -349,11 +417,19 @@
 (defn- on-dialog-close [e]
   (let [t (.-target e)]
     (when (and t (.-classList t) (.contains (.-classList t) "command-dialog"))
+      (hide-hints! t)
       (clear-viewport! t))))
+
+;; Alt+Tab etc. swallow the Alt keyup — drop the hints when the window loses focus.
+(defn- on-blur []
+  (when-let [dialog (open-dialog)]
+    (hide-hints! dialog)))
 
 (defn init! []
   (.addEventListener js/document "input" on-input true)
   (.addEventListener js/document "keydown" on-keydown true)
+  (.addEventListener js/document "keyup" on-keyup true)
+  (.addEventListener js/window "blur" on-blur)
   (.addEventListener js/document "keydown" on-global-key)
   (.addEventListener js/document "click" on-click)
   (.addEventListener js/document "pointermove" on-pointermove true)

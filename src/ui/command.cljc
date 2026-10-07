@@ -143,8 +143,9 @@
      :class       - additional CSS classes
      :attrs       - additional HTML attributes
    Children are command-group / command-item forms."
-  [{:keys [id placeholder hotkey empty leading class attrs] :as _props} & children]
-  (let [placeholder* (or placeholder "Type a command or search…")
+  [{:keys [id placeholder hotkey quick-nav empty leading class attrs] :as _props} & children]
+  (let [quick-nav*   (when quick-nav (if (keyword? quick-nav) (name quick-nav) quick-nav))
+        placeholder* (or placeholder "Type a command or search…")
         empty*       (or empty "No results found.")
         leading*     (or leading (icon/icon {:icon-name :search :size :sm :class "command-search-icon"}))
         search   [:div {:class "command-search"}
@@ -158,6 +159,7 @@
              base    (merge {:class classes :role "dialog" :aria-modal "true"}
                             (when id {:id id})
                             (when hotkey {:data-command-hotkey hotkey})
+                            (when quick-nav* {:data-command-quick-nav quick-nav*})
                             attrs)]
          (into [:dialog base]
                [search
@@ -169,6 +171,7 @@
              base    (merge {:class classes :role "dialog" :aria-modal "true"}
                             (when id {:id id})
                             (when hotkey {:data-command-hotkey hotkey})
+                            (when quick-nav* {:data-command-quick-nav quick-nav*})
                             attrs)]
          (into [:dialog base]
                [search
@@ -180,6 +183,7 @@
              base    (merge {:class classes :role "dialog" :aria-modal "true"}
                             (when id {:id id})
                             (when hotkey {:data-command-hotkey hotkey})
+                            (when quick-nav* {:data-command-quick-nav quick-nav*})
                             attrs)]
          (into [:dialog base]
                [search
