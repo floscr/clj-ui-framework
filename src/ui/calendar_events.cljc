@@ -105,11 +105,15 @@
 (defn event-pill-class-list
   "Returns a vector of CSS class strings for an event pill.
    Options:
-     :color - one of event-colors, or nil
-     :done? - boolean
-     :task? - boolean (render as a checkbox to-do item, not a solid pill)"
-  [{:keys [color done? task?]}]
+     :color  - one of event-colors, or nil
+     :done?  - boolean
+     :task?  - boolean (render as a checkbox to-do item, not a solid pill)
+     :layout - :inline (default) one row: stripe, time, title;
+               :stacked a filled block with the muted time range above a
+               bold title (roomy desktop month grids)"
+  [{:keys [color done? task? layout]}]
   (cond-> ["cal-event-pill" (event-color-class color)]
+    (= "stacked" (some-> layout util/kw-name)) (conj "cal-event-pill-stacked")
     task? (conj "cal-event-task")
     done? (conj "cal-event-done")))
 
@@ -177,15 +181,16 @@
      :event    - event map
      :on-click - click handler (receives event map)
      :on-context-menu - context-menu handler (receives [event dom-event]); wired
-                        to right-click and (via ui.js.gestures) long-press"
-  [{:keys [event on-click on-context-menu]}]
+                        to right-click and (via ui.js.gestures) long-press
+     :layout   - :inline (default) or :stacked (see event-pill-class-list)"
+  [{:keys [event on-click on-context-menu layout]}]
   (let [title (:title event)
         time-str (event-time-display event)
         color (:color event)
         done? (:done? event)
         task? (:task? event)]
     #?(:squint
-       [:div {:class (event-pill-classes {:color color :done? done? :task? task?})
+       [:div {:class (event-pill-classes {:color color :done? done? :task? task? :layout layout})
               :on-click (when on-click
                           (fn [e]
                             (.stopPropagation e)
@@ -201,7 +206,7 @@
         [:span {:class "cal-event-title"} title]]
 
        :cljs
-       [:div {:class (event-pill-class-list {:color color :done? done? :task? task?})
+       [:div {:class (event-pill-class-list {:color color :done? done? :task? task? :layout layout})
               :on (cond-> {}
                     on-click (assoc :click (fn [e]
                                              (.stopPropagation e)
@@ -217,7 +222,7 @@
         [:span {:class ["cal-event-title"]} title]]
 
        :clj
-       [:div {:class (event-pill-classes {:color color :done? done? :task? task?})}
+       [:div {:class (event-pill-classes {:color color :done? done? :task? task? :layout layout})}
         (when task? (task-check done?))
         (when time-str
           [:span {:class "cal-event-time"} time-str])
@@ -237,9 +242,10 @@
      :indicator     - :pills (default) shows in-cell event pills;
                       :dots shows a compact row of coloured dots (mobile-friendly)
      :max-visible   - max events to show before '+N more' (pills mode, default 3)
+     :pill-layout   - event-pill :layout for pills mode (:inline default, :stacked)
      :max-dots      - max dots to show (dots mode, default 4)"
   [{:keys [day events today-str selected-date on-select on-event-click
-           on-event-context-menu on-more-click indicator max-visible max-dots]}]
+           on-event-context-menu on-more-click indicator max-visible max-dots pill-layout]}]
   (let [{:keys [current-month? date-str]} day
         d           (:day day)
         today?      (= date-str today-str)
@@ -268,7 +274,8 @@
           (into [:div {:class "cal-day-events"}]
                 (concat
                  (map (fn [evt] (event-pill {:event evt :on-click on-event-click
-                                             :on-context-menu on-event-context-menu}))
+                                             :on-context-menu on-event-context-menu
+                                             :layout pill-layout}))
                       visible-evts)
                  (when (pos? overflow)
                    [[:div {:class "cal-event-more"
@@ -291,7 +298,8 @@
           (into [:div {:class ["cal-day-events"]}]
                 (concat
                  (map (fn [evt] (event-pill {:event evt :on-click on-event-click
-                                             :on-context-menu on-event-context-menu}))
+                                             :on-context-menu on-event-context-menu
+                                             :layout pill-layout}))
                       visible-evts)
                  (when (pos? overflow)
                    [[:div {:class ["cal-event-more"]
@@ -311,7 +319,7 @@
                      dot-evts))
           (into [:div {:class "cal-day-events"}]
                 (concat
-                 (map (fn [evt] (event-pill {:event evt}))
+                 (map (fn [evt] (event-pill {:event evt :layout pill-layout}))
                       visible-evts)
                  (when (pos? overflow)
                    [[:div {:class "cal-event-more"} (str "+" overflow " more")]]))))])))
@@ -330,11 +338,12 @@
      :on-next-month  - callback for next month nav
      :on-event-click - callback for event click
      :max-visible    - max events per cell (default 3)
+     :pill-layout    - event-pill :layout (:inline default, :stacked)
      :class          - additional CSS classes
      :attrs          - additional HTML attributes"
   [{:keys [year month today-str selected-date events on-select
            on-prev-month on-next-month on-event-click on-event-context-menu
-           max-visible class attrs]}]
+           max-visible pill-layout class attrs]}]
   (let [days (cal/calendar-days year month)]
     #?(:squint
        (let [classes (cond-> "cal cal-has-events" class (str " " class))
@@ -353,7 +362,8 @@
                                         :on-select on-select
                                         :on-event-click on-event-click
                                         :on-event-context-menu on-event-context-menu
-                                        :max-visible max-visible}))
+                                        :max-visible max-visible
+                                        :pill-layout pill-layout}))
                      days))])
 
        :cljs
@@ -374,7 +384,8 @@
                                         :on-select on-select
                                         :on-event-click on-event-click
                                         :on-event-context-menu on-event-context-menu
-                                        :max-visible max-visible}))
+                                        :max-visible max-visible
+                                        :pill-layout pill-layout}))
                      days))])
 
        :clj
@@ -389,7 +400,8 @@
                                         :events events
                                         :today-str today-str
                                         :selected-date selected-date
-                                        :max-visible max-visible}))
+                                        :max-visible max-visible
+                                        :pill-layout pill-layout}))
                      days))]))))
 
 ;; ── Day Ticker ──────────────────────────────────────────────────────

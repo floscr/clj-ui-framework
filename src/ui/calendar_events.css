@@ -228,6 +228,40 @@
   text-overflow: ellipsis;
 }
 
+/* Stacked layout (:layout :stacked): a filled block with the small muted
+   time range above a bold title, each on its own full-width line, no side
+   stripe. Suits roomy desktop month grids. Task pills stay a flat inline
+   checkbox row. */
+.cal-event-pill-stacked {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+  padding: var(--size-1) var(--size-2);
+  border-left: none;
+  border-radius: var(--radius-sm);
+  line-height: 1.35;
+}
+
+.cal-event-pill-stacked .cal-event-time {
+  font-weight: 500;
+  opacity: 0.7;
+}
+
+.cal-event-pill-stacked .cal-event-title {
+  font-size: var(--font-sm);
+  font-weight: 600;
+}
+
+.cal-event-pill-stacked.cal-event-task {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--size-1);
+}
+
+.cal-event-pill-stacked.cal-event-task .cal-event-title {
+  min-width: 0;
+}
+
 /* Task (to-do / repeating) items render as a flat checkbox row instead of a
    solid color pill. */
 .cal-event-pill.cal-event-task,

@@ -48,7 +48,25 @@ A full month grid with colored event pills inside day cells.
    :on-prev-month (fn [_] ...)
    :on-next-month (fn [_] ...)
    :on-event-click (fn [event-map] ...)
-   :max-visible 3})
+   :max-visible 3
+   :pill-layout :stacked})   ;; optional, see Event Pills
+```
+
+## Event Pills
+
+`event-pill` renders one event inside a day cell. `:layout` picks the shape:
+
+- `:inline` (default) — one row: colour stripe, time range, title.
+- `:stacked` — a filled block with the small muted time range above a bold
+  title (`.cal-event-pill-stacked`). Suits roomy desktop month grids.
+
+Task pills (`:task? true`) stay a flat checkbox row in both layouts.
+`event-day-cell` and `calendar-event-grid` pass `:pill-layout` through to
+their pills.
+
+```clojure
+(cal-events/event-pill {:event evt :layout :stacked
+                        :on-click (fn [event-map] ...)})
 ```
 
 ## Day Ticker

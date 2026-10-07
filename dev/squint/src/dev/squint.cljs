@@ -369,6 +369,16 @@
                                                            (render!)))
                                         :on-event-click (fn [evt] (js/console.log "Event clicked:" (:title evt)))})
 
+      [:h5 "Event Pills"]
+      (let [evts [{:title "Team standup" :time-start "09:00" :time-end "09:30" :color :accent}
+                  {:title "Lunch with Anna" :time-start "12:30" :time-end "13:30" :color :warning}
+                  {:title "Pay rent" :color :danger :task? true}]]
+        [:div {:style {"display" "grid" "grid-template-columns" "repeat(2, 12rem)" "gap" "0.5rem 1.5rem"}}
+         (into [:div {:style {"display" "flex" "flex-direction" "column" "gap" "3px"}}]
+               (map (fn [e] (cal-events/event-pill {:event e})) evts))
+         (into [:div {:style {"display" "flex" "flex-direction" "column" "gap" "3px"}}]
+               (map (fn [e] (cal-events/event-pill {:event e :layout :stacked})) evts))])
+
       [:h5 "Day Ticker"]
       (cal-events/ticker-strip {:days [{:date "2026-03-27" :day-num 27 :day-label "Fr"}
                                         {:date "2026-03-28" :day-num 28 :day-label "Sa"}

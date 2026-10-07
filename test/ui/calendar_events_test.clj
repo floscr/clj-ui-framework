@@ -70,7 +70,16 @@
            (cal-events/event-pill-class-list {:done? true}))))
   (testing "color + done"
     (is (= ["cal-event-pill" "cal-event-danger" "cal-event-done"]
-           (cal-events/event-pill-class-list {:color :danger :done? true})))))
+           (cal-events/event-pill-class-list {:color :danger :done? true}))))
+  (testing "stacked layout"
+    (is (= ["cal-event-pill" "cal-event-accent" "cal-event-pill-stacked"]
+           (cal-events/event-pill-class-list {:color :accent :layout :stacked}))))
+  (testing "inline layout adds no class"
+    (is (= ["cal-event-pill" "cal-event-default"]
+           (cal-events/event-pill-class-list {:layout :inline}))))
+  (testing "stacked task"
+    (is (= ["cal-event-pill" "cal-event-default" "cal-event-pill-stacked" "cal-event-task"]
+           (cal-events/event-pill-class-list {:layout :stacked :task? true})))))
 
 (deftest ticker-day-class-list-test
   (testing "default"
@@ -100,7 +109,22 @@
           result (cal-events/event-pill {:event evt})]
       (is (= :div (first result)))
       (is (= "cal-event-pill cal-event-accent"
+             (get-in result [1 :class])))))
+  (testing "stacked layout"
+    (let [result (cal-events/event-pill {:event {:title "Test" :color :accent}
+                                         :layout :stacked})]
+      (is (= "cal-event-pill cal-event-accent cal-event-pill-stacked"
              (get-in result [1 :class]))))))
+
+(deftest event-day-cell-pill-layout-test
+  (testing "passes :pill-layout through to its pills"
+    (let [day {:day 29 :date-str "2026-03-29" :current-month? true}
+          result (cal-events/event-day-cell {:day day
+                                             :events [{:title "A" :date "2026-03-29"}]
+                                             :pill-layout :stacked})
+          pill (-> result (nth 3) (nth 2))]
+      (is (= "cal-event-pill cal-event-default cal-event-pill-stacked"
+             (get-in pill [1 :class]))))))
 
 (deftest agenda-event-row-component-test
   (testing "renders agenda event row (clj target)"
