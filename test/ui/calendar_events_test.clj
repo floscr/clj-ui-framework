@@ -122,3 +122,44 @@
                                                 :label "Wed"
                                                 :events sample-events})]
       (is (nil? result)))))
+
+(deftest agenda-day-group-class-list-test
+  (testing "plain day"
+    (is (= ["cal-agenda-day-group"] (cal-events/agenda-day-group-class-list {}))))
+  (testing "today"
+    (is (= ["cal-agenda-day-group" "cal-agenda-day-today"]
+           (cal-events/agenda-day-group-class-list {:today? true})))))
+
+(deftest agenda-day-group-today-test
+  (testing "empty today still renders, with the empty card"
+    (let [result (cal-events/agenda-day-group {:date "2026-04-01" :label "Today"
+                                                :events sample-events
+                                                :today-str "2026-04-01"})
+          s (pr-str result)]
+      (is (some? result))
+      (is (re-find #"cal-agenda-day-today" s))
+      (is (re-find #"cal-agenda-day-empty" s))
+      (is (re-find #"Nothing scheduled" s))
+      (is (re-find #"A clear day" s))))
+  (testing "today with events is highlighted and has no empty card"
+    (let [s (pr-str (cal-events/agenda-day-group {:date "2026-03-29" :label "Today"
+                                                   :events sample-events
+                                                   :today-str "2026-03-29"}))]
+      (is (re-find #"cal-agenda-day-today" s))
+      (is (not (re-find #"cal-agenda-day-empty" s)))))
+  (testing "other empty days are still dropped"
+    (is (nil? (cal-events/agenda-day-group {:date "2026-04-01" :label "Wed"
+                                             :events sample-events
+                                             :today-str "2026-03-29"})))))
+
+(deftest agenda-day-empty-test
+  (testing "defaults, no Add button without :on-add"
+    (let [s (pr-str (cal-events/agenda-day-empty {:date "2026-04-01"}))]
+      (is (re-find #"Nothing scheduled" s))
+      (is (not (re-find #"cal-agenda-day-empty-add" s)))))
+  (testing "custom text + Add button"
+    (let [s (pr-str (cal-events/agenda-day-empty {:date "2026-04-01" :title "Free" :hint "Go outside"
+                                                   :on-add identity}))]
+      (is (re-find #"Free" s))
+      (is (re-find #"Go outside" s))
+      (is (re-find #"cal-agenda-day-empty-add" s)))))

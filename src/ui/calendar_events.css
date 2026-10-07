@@ -659,6 +659,78 @@
   flex-direction: column;
 }
 
+/* Today's group — accent bar down the left edge + accent day label. */
+.cal-agenda-day-today {
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.cal-agenda-day-today .cal-agenda-day-label,
+.cal-agenda-day-today .cal-agenda-day-date {
+  color: var(--accent);
+}
+
+/* Placeholder card for a day that is always shown but has no events. */
+.cal-agenda-day-empty {
+  display: flex;
+  align-items: center;
+  gap: var(--size-3);
+  margin: var(--size-1) var(--size-4) var(--size-3);
+  padding: var(--size-3);
+  border: var(--border-0);
+  border-radius: var(--radius-md);
+  background: var(--bg-1);
+}
+
+.cal-agenda-day-empty-icon {
+  display: grid;
+  place-items: center;
+  width: var(--size-8);
+  height: var(--size-8);
+  flex-shrink: 0;
+  border-radius: 9999px;
+  background: var(--bg-2);
+  color: var(--fg-1);
+}
+
+.cal-agenda-day-empty-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.cal-agenda-day-empty-title {
+  font-size: var(--font-sm);
+  font-weight: 500;
+  color: var(--fg-0);
+}
+
+.cal-agenda-day-empty-hint {
+  font-size: var(--font-xs);
+  font-style: italic;
+  color: var(--fg-2);
+}
+
+.cal-agenda-day-empty-add {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--size-1);
+  margin-left: auto;
+  padding: var(--size-1) var(--size-2);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--accent);
+  font: inherit;
+  font-size: var(--font-xs);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cal-agenda-day-empty-add:hover {
+  background: var(--bg-2);
+}
+
 .cal-agenda-event {
   display: flex;
   align-items: flex-start;

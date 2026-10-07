@@ -66,12 +66,20 @@ Horizontal scrollable strip showing days with event dot indicators.
 
 ## Agenda List
 
-Vertical list of events grouped by day.
+Vertical list of events grouped by day. Days without events are dropped —
+except today when `:today-str` is passed: today's group is always shown,
+highlighted (`.cal-agenda-day-today`, accent edge + label), and renders an
+`agenda-day-empty` card ("Nothing scheduled / A clear day") when it has no
+events. Pass `:on-add-event` to give that card an **Add** button.
 
 ```clojure
 (cal-events/agenda-list
   {:days [{:date "2026-03-29" :label "Today"} ...]
    :events events
+   :today-str "2026-03-29"                       ;; highlight + always show today
+   :today-empty-title "Nothing scheduled"        ;; optional, this is the default
+   :today-empty-hint "A clear day"               ;; optional, this is the default
+   :on-add-event (fn [date-str] ...)             ;; optional Add button on the empty card
    :on-event-click (fn [event-map] ...)})
 ```
 

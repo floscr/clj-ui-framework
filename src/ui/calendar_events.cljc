@@ -2,7 +2,8 @@
   "Event-aware calendar components. See src/ui/calendar.md for full documentation."
   (:require [clojure.string :as str]
             [ui.util :as util]
-            [ui.calendar :as cal]))
+            [ui.calendar :as cal]
+            [ui.icon :as icon]))
 
 ;; ── Event Data Helpers ──────────────────────────────────────────────
 ;; Events are maps with:
@@ -561,6 +562,58 @@
            [:div {:class "cal-agenda-event-time"} time-str])
          [:div {:class "cal-agenda-event-title"} title]]])))
 
+(defn agenda-day-group-class-list
+  "Classes for one agenda day group. Today's group gets
+   cal-agenda-day-today so it stands out in the list."
+  [{:keys [today?]}]
+  (cond-> ["cal-agenda-day-group"]
+    today? (conj "cal-agenda-day-today")))
+
+(defn agenda-day-empty
+  "Placeholder card for a day that is always shown but has no events (today).
+   A calendar icon bubble, a title + hint, and — when :on-add is given — an Add
+   button that calls (on-add date).
+
+   Props:
+     :date   - YYYY-MM-DD string passed to :on-add
+     :title  - headline (default \"Nothing scheduled\")
+     :hint   - muted subline (default \"A clear day\")
+     :on-add - optional (fn [date]) for the Add button"
+  [{:keys [date title hint on-add]}]
+  (let [title (or title "Nothing scheduled")
+        hint  (or hint "A clear day")]
+    #?(:squint
+       [:div {:class "cal-agenda-day-empty"}
+        [:span {:class "cal-agenda-day-empty-icon"} (icon/icon {:icon-name "calendar" :size "sm"})]
+        [:div {:class "cal-agenda-day-empty-text"}
+         [:div {:class "cal-agenda-day-empty-title"} title]
+         [:div {:class "cal-agenda-day-empty-hint"} hint]]
+        (when on-add
+          [:button {:class "cal-agenda-day-empty-add" :type "button"
+                    :on-click (fn [e] (.stopPropagation e) (on-add date))}
+           (icon/icon {:icon-name "plus" :size "sm"}) "Add"])]
+
+       :cljs
+       [:div {:class ["cal-agenda-day-empty"]}
+        [:span {:class ["cal-agenda-day-empty-icon"]} (icon/icon {:icon-name "calendar" :size "sm"})]
+        [:div {:class ["cal-agenda-day-empty-text"]}
+         [:div {:class ["cal-agenda-day-empty-title"]} title]
+         [:div {:class ["cal-agenda-day-empty-hint"]} hint]]
+        (when on-add
+          [:button {:class ["cal-agenda-day-empty-add"] :type "button"
+                    :on {:click (fn [e] (.stopPropagation e) (on-add date))}}
+           (icon/icon {:icon-name "plus" :size "sm"}) "Add"])]
+
+       :clj
+       [:div {:class "cal-agenda-day-empty"}
+        [:span {:class "cal-agenda-day-empty-icon"} (icon/icon {:icon-name "calendar" :size "sm"})]
+        [:div {:class "cal-agenda-day-empty-text"}
+         [:div {:class "cal-agenda-day-empty-title"} title]
+         [:div {:class "cal-agenda-day-empty-hint"} hint]]
+        (when on-add
+          [:button {:class "cal-agenda-day-empty-add" :type "button"}
+           (icon/icon {:icon-name "plus" :size "sm"}) "Add"])])))
+
 (defn agenda-day-group
   "Render a day group in the agenda list with header and event rows.
 
@@ -568,43 +621,54 @@
      :date       - YYYY-MM-DD string
      :label      - display label (e.g. 'Today', 'Tomorrow', 'Mon')
      :events     - all events (filtered internally)
+     :today-str  - today's YYYY-MM-DD. Today's group is highlighted and always
+                   rendered as an agenda-day-empty card when it has no events.
+     :empty-title / :empty-hint - text for that card (see agenda-day-empty)
+     :on-add-event - optional (fn [date]) wired to the empty card's Add button
      :on-event-click - callback for event click"
-  [{:keys [date label events on-event-click on-event-context-menu on-toggle-done]}]
-  (let [day-evts (events-for-date events date)]
-    (when (seq day-evts)
+  [{:keys [date label events today-str empty-title empty-hint on-add-event on-event-click on-event-context-menu on-toggle-done]}]
+  (let [day-evts (events-for-date events date)
+        today?   (and today-str (= date today-str))]
+    (when (or (seq day-evts) today?)
       #?(:squint
-         [:div {:class "cal-agenda-day-group"}
+         [:div {:class (str/join " " (agenda-day-group-class-list {:today? today?}))}
           [:div {:class "cal-agenda-day-header"}
            [:span {:class "cal-agenda-day-label"} label]
            [:span {:class "cal-agenda-day-date"} (str/replace date "-" "/")]]
-          (into [:div {:class "cal-agenda-day-events"}]
-                (map (fn [evt]
-                       (agenda-event-row {:event evt :on-click on-event-click
-                                          :on-context-menu on-event-context-menu
-                                          :on-toggle-done on-toggle-done}))
-                     day-evts))]
+          (if (seq day-evts)
+            (into [:div {:class "cal-agenda-day-events"}]
+                  (map (fn [evt]
+                         (agenda-event-row {:event evt :on-click on-event-click
+                                            :on-context-menu on-event-context-menu
+                                            :on-toggle-done on-toggle-done}))
+                       day-evts))
+            (agenda-day-empty {:date date :title empty-title :hint empty-hint :on-add on-add-event}))]
 
          :cljs
-         [:div {:class ["cal-agenda-day-group"]}
+         [:div {:class (agenda-day-group-class-list {:today? today?})}
           [:div {:class ["cal-agenda-day-header"]}
            [:span {:class ["cal-agenda-day-label"]} label]
            [:span {:class ["cal-agenda-day-date"]} (str/replace date "-" "/")]]
-          (into [:div {:class ["cal-agenda-day-events"]}]
-                (map (fn [evt]
-                       (agenda-event-row {:event evt :on-click on-event-click
-                                          :on-context-menu on-event-context-menu
-                                          :on-toggle-done on-toggle-done}))
-                     day-evts))]
+          (if (seq day-evts)
+            (into [:div {:class ["cal-agenda-day-events"]}]
+                  (map (fn [evt]
+                         (agenda-event-row {:event evt :on-click on-event-click
+                                            :on-context-menu on-event-context-menu
+                                            :on-toggle-done on-toggle-done}))
+                       day-evts))
+            (agenda-day-empty {:date date :title empty-title :hint empty-hint :on-add on-add-event}))]
 
          :clj
-         [:div {:class "cal-agenda-day-group"}
+         [:div {:class (str/join " " (agenda-day-group-class-list {:today? today?}))}
           [:div {:class "cal-agenda-day-header"}
            [:span {:class "cal-agenda-day-label"} label]
            [:span {:class "cal-agenda-day-date"} (str/replace date "-" "/")]]
-          (into [:div {:class "cal-agenda-day-events"}]
-                (map (fn [evt]
-                       (agenda-event-row {:event evt}))
-                     day-evts))]))))
+          (if (seq day-evts)
+            (into [:div {:class "cal-agenda-day-events"}]
+                  (map (fn [evt]
+                         (agenda-event-row {:event evt}))
+                       day-evts))
+            (agenda-day-empty {:date date :title empty-title :hint empty-hint :on-add on-add-event}))]))))
 
 (defn agenda-list
   "Render the full agenda list view with grouped events by day.
@@ -612,14 +676,22 @@
    Props:
      :days           - vector of {:date :label} maps for days to show
      :events         - all events
+     :today-str      - today's YYYY-MM-DD; highlights today's group and keeps
+                       it visible (as an agenda-day-empty card) even when empty
+     :today-empty-title / :today-empty-hint - text for that card
+     :on-add-event   - optional (fn [date]) for the empty card's Add button
      :on-event-click - callback for event click
      :class          - additional CSS classes
      :attrs          - additional HTML attributes"
-  [{:keys [days events on-event-click on-event-context-menu on-toggle-done class attrs]}]
+  [{:keys [days events today-str today-empty-title today-empty-hint on-add-event on-event-click on-event-context-menu on-toggle-done class attrs]}]
   (let [groups (keep (fn [d]
                        (agenda-day-group {:date (:date d)
                                           :label (:label d)
                                           :events events
+                                          :today-str today-str
+                                          :empty-title today-empty-title
+                                          :empty-hint today-empty-hint
+                                          :on-add-event on-add-event
                                           :on-event-click on-event-click
                                           :on-event-context-menu on-event-context-menu
                                           :on-toggle-done on-toggle-done}))

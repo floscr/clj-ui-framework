@@ -263,6 +263,7 @@
                                      {:date "2026-04-01" :label "Wed"}
                                      {:date "2026-04-02" :label "Thu"}
                                      {:date "2026-04-03" :label "Fri"}]
+                              :today-str "2026-03-29"
                               :events sample-calendar-events})))
 
 ;; ── Pages ───────────────────────────────────────────────────────────
