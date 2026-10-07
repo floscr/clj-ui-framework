@@ -246,7 +246,19 @@
                  (fn [_ _]
                    (let [input (.querySelector dialog ".command-input")]
                      (filter! dialog (if input (.-value input) "")))))]
-        (.observe obs list #js {:childList true :subtree true})
+        ;; Besides added/removed rows, watch what a vdom framework patches
+        ;; *in place* when a sub-page re-ranks per keystroke: the search value
+        ;; and label text of a row that survives the re-render. Frameworks
+        ;; render after our input listener ran (eucalypt: microtask; replicant:
+        ;; animation frame), so that pass saw the previous rows and may have
+        ;; hidden the survivor; only these mutations re-run it against the
+        ;; new rows. The attribute filter excludes everything filter! writes
+        ;; itself (hidden, style, class, data-command-hint), so it can't loop.
+        (.observe obs list #js {:childList true :subtree true
+                                :characterData true
+                                :attributes true
+                                :attributeFilter #js ["data-command-value"
+                                                      "data-command-search-only"]})
         (aset dialog "__cmdListObs" obs)))))
 
 ;; ── Keyboard-aware sizing ───────────────────────────────────────────

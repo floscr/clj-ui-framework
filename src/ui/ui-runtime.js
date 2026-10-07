@@ -1170,7 +1170,7 @@
         const input6 = dialog.querySelector(".command-input");
         return filter_BANG_(dialog, truth_(input6) ? input6.value : "");
       }));
-      obs4.observe(list3, { "childList": true, "subtree": true });
+      obs4.observe(list3, { "childList": true, "subtree": true, "characterData": true, "attributes": true, "attributeFilter": ["data-command-value", "data-command-search-only"] });
       return dialog["__cmdListObs"] = obs4;
     }
     ;
