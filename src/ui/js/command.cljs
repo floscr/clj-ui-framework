@@ -40,9 +40,13 @@
                 (.sort (.filter vis (fn [el] (identical? c (container el))))
                        (fn [a b] (- (item-order a) (item-order b))))))))
 
-(defn- item-text [el]
+(defn- item-text
+  "The text an item is matched against: its explicit data-command-value when
+   present — even an empty one, which makes the item match no query at all
+   (a \"recents\" row shown only while the input is empty) — else its text."
+  [el]
   (let [v (.. el -dataset -commandValue)]
-    (.toLowerCase (or v (.-textContent el) ""))))
+    (.toLowerCase (if (some? v) v (or (.-textContent el) "")))))
 
 (defn- item-label [el]
   (let [lbl (.querySelector el ".command-item-label")]
@@ -177,7 +181,12 @@
     ;; Show / hide individual items.
     (.forEach (items dialog)
               (fn [el]
-                (let [match (or (not searching?) (.includes (item-text el) q))]
+                (let [match (if searching?
+                              (.includes (item-text el) q)
+                              ;; data-command-search-only rows (a deep archive,
+                              ;; per-parent sub-actions, …) stay out of the
+                              ;; empty-query list and only surface as results.
+                              (not (.. el -dataset -commandSearchOnly)))]
                   (set! (.-hidden el) (not match))
                   ;; Rank matches by quality via flex `order` (the group item
                   ;; container is a flex column) so better matches float to

@@ -80,4 +80,9 @@
   (testing "explicit value and disabled"
     (let [[_ attrs] (command/command-item {:value "cal" :disabled true} "Calendar")]
       (is (= "cal" (:data-command-value attrs)))
-      (is (true? (:disabled attrs))))))
+      (is (true? (:disabled attrs)))))
+  (testing "search-only renders its data attribute"
+    (let [[_ attrs] (command/command-item {:search-only true} "Archive")]
+      (is (= "true" (:data-command-search-only attrs))))
+    (let [[_ attrs] (command/command-item {} "Calendar")]
+      (is (not (contains? attrs :data-command-search-only))))))

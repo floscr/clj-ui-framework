@@ -35,13 +35,18 @@
      :shortcut - keyboard shortcut hint string (optional, e.g. \"⌘P\")
      :url      - if set, renders an <a> that navigates on select
      :description - secondary subline text shown under the label (optional)
-     :value    - explicit search text (defaults to the item's text content)
+     :value    - explicit search text (defaults to the item's text content).
+                 An empty string matches no query: the item shows only while
+                 the input is empty (a \"recents\" row).
+     :search-only - the inverse: hide the item while the input is empty and
+                 only surface it as a search result (an archive tier, a
+                 parent's sub-actions, …). Rendered as data-command-search-only.
      :on-click - selection callback (replicant/squint only)
      :disabled - boolean
      :class    - additional CSS classes
      :attrs    - additional HTML attributes
    Children form the item label."
-  [{:keys [icon shortcut description url value on-click disabled class attrs] :as _props} & children]
+  [{:keys [icon shortcut description url value search-only on-click disabled class attrs] :as _props} & children]
   (let [tag       (if url :a :button)
         icon-el   (when icon (icon/icon {:icon-name icon :size :sm
                                          :class "command-item-icon"}))
@@ -50,6 +55,7 @@
        (let [classes (cond-> "command-item" class (str " " class))
              base    (merge {:class classes :role "option"}
                             (when value {:data-command-value value})
+                            (when search-only {:data-command-search-only "true"})
                             (when disabled {:disabled true})
                             (when url {:href url})
                             (when (= tag :button) {:type "button"})
@@ -68,6 +74,7 @@
        (let [classes (util/conj-classes ["command-item"] class)
              base    (merge {:class classes :role "option"}
                             (when value {:data-command-value value})
+                            (when search-only {:data-command-search-only "true"})
                             (when disabled {:disabled true})
                             (when url {:href url})
                             (when (= tag :button) {:type "button"})
@@ -86,6 +93,7 @@
        (let [classes (cond-> "command-item" class (str " " class))
              base    (merge {:class classes :role "option"}
                             (when value {:data-command-value value})
+                            (when search-only {:data-command-search-only "true"})
                             (when disabled {:disabled true})
                             (when url {:href url})
                             (when (= tag :button) {:type "button"})
