@@ -18,6 +18,9 @@
 (def weekday-labels
   ["Mo" "Tu" "We" "Th" "Fr" "Sa" "Su"])
 
+(def long-weekday-labels
+  ["Mon" "Tue" "Wed" "Thu" "Fri" "Sat" "Sun"])
+
 (defn leap-year?
   "Returns true if year is a leap year."
   [year]
@@ -48,6 +51,23 @@
                  7)]
     ;; Convert from 0=Sun to 0=Mon
     (mod (+ dow 6) 7)))
+
+(defn day-of-year
+  "Returns the 1-based ordinal day of the year."
+  [year month day]
+  (+ day (reduce + 0 (map (fn [m] (days-in-month year m)) (range 1 month)))))
+
+(defn iso-week
+  "Returns the ISO 8601 week number (1-53) of a date. A week belongs to the
+   year holding its Thursday."
+  [year month day]
+  (let [days-in-year (fn [y] (if (leap-year? y) 366 365))
+        ;; ordinal of this week's Thursday, possibly outside `year`
+        thu (+ (day-of-year year month day) (- 3 (day-of-week year month day)))
+        thu (cond (< thu 1) (+ thu (days-in-year (dec year)))
+                  (> thu (days-in-year year)) (- thu (days-in-year year))
+                  :else thu)]
+    (inc (quot (dec thu) 7))))
 
 (defn first-day-of-week
   "Returns day-of-week (0=Mon..6=Sun) for the 1st of the given month."
@@ -249,33 +269,51 @@
                         :class "cal-nav-btn"
                         :attrs {:aria-label "Next month"}})])))
 
+(defn- weekday-today-class
+  "Class for one weekday head; the column at `today-index` is lit."
+  [i today-index]
+  (if (= i today-index) "cal-weekday is-today" "cal-weekday"))
+
 (defn calendar-weekdays
   "Render the weekday header row.
 
    Props:
-     :class - additional CSS classes
-     :attrs - additional HTML attributes"
-  [{:keys [class attrs]}]
-  #?(:squint
-     (let [classes (cond-> "cal-weekdays" class (str " " class))
-           base-attrs (merge {:class classes} attrs)]
-       (into [:div base-attrs]
-             (map (fn [label] [:div {:class "cal-weekday"} label])
-                  weekday-labels)))
+     :labels      - seven labels Mon..Sun (default weekday-labels \"Mo\"..)
+     :today-index - 0 (Mon)..6 (Sun) column to light as today: is-today
+                    class plus a leading cal-weekday-dot. nil = none.
+     :class       - additional CSS classes
+     :attrs       - additional HTML attributes"
+  [{:keys [labels today-index class attrs]}]
+  (let [labels (or labels weekday-labels)]
+    #?(:squint
+       (let [classes (cond-> "cal-weekdays" class (str " " class))
+             base-attrs (merge {:class classes} attrs)]
+         (into [:div base-attrs]
+               (map-indexed (fn [i label]
+                              [:div {:class (weekday-today-class i today-index)}
+                               (when (= i today-index) [:span {:class "cal-weekday-dot"}])
+                               label])
+                            labels)))
 
-     :cljs
-     (let [classes (cond-> ["cal-weekdays"] class (conj class))
-           base-attrs (merge {:class classes} attrs)]
-       (into [:div base-attrs]
-             (map (fn [label] [:div {:class ["cal-weekday"]} label])
-                  weekday-labels)))
+       :cljs
+       (let [classes (cond-> ["cal-weekdays"] class (conj class))
+             base-attrs (merge {:class classes} attrs)]
+         (into [:div base-attrs]
+               (map-indexed (fn [i label]
+                              [:div {:class (cond-> ["cal-weekday"] (= i today-index) (conj "is-today"))}
+                               (when (= i today-index) [:span {:class ["cal-weekday-dot"]}])
+                               label])
+                            labels)))
 
-     :clj
-     (let [classes (cond-> "cal-weekdays" class (str " " class))
-           base-attrs (merge {:class classes} attrs)]
-       (into [:div base-attrs]
-             (map (fn [label] [:div {:class "cal-weekday"} label])
-                  weekday-labels)))))
+       :clj
+       (let [classes (cond-> "cal-weekdays" class (str " " class))
+             base-attrs (merge {:class classes} attrs)]
+         (into [:div base-attrs]
+               (map-indexed (fn [i label]
+                              [:div {:class (weekday-today-class i today-index)}
+                               (when (= i today-index) [:span {:class "cal-weekday-dot"}])
+                               label])
+                            labels))))))
 
 (defn calendar-day
   "Render a single day cell in the calendar grid.

@@ -52,6 +52,50 @@ A full month grid with colored event pills inside day cells.
    :pill-layout :stacked})   ;; optional, see Event Pills
 ```
 
+## Month Grid
+
+`month-grid` is a frameless month view (no `.cal` frame, no nav header — the
+host brings its own toolbar and layout): weekday heads over a 7-column grid of
+`event-day-cell`s. Its two variants share every cell class and diverge only
+through the root's variant class:
+
+- `:full` (default, `.cal-month-full`) — roomy desktop month: long weekday
+  heads with today lit (`.cal-weekday.is-today` + `.cal-weekday-dot`),
+  right-aligned day number pills, the short month name on each 1st, optional
+  ISO week numbers on Mondays, stacked pills with a `+N more` button, and rows
+  stretching to fill the root (give the root a height, e.g. via `:class`).
+- `:compact` (`.cal-month-compact`) — phone month: short heads, centred day
+  number circles over coloured event dots.
+
+```clojure
+(cal-events/month-grid
+  {:year 2026 :month 10
+   :events events
+   :today-str "2026-10-08"
+   :selected-date "2026-10-08"
+   :variant :full                    ;; or :compact
+   :week-numbers? true               ;; :full only
+   :max-visible 4                    ;; :full only, pills before "+N more"
+   :class "my-month"                 ;; host class on the root
+   :on-select (fn [date-str] ...)
+   :on-double-click (fn [date-str] ...)
+   :on-more-click (fn [date-str] ...)
+   :on-event-click (fn [event-map] ...)
+   :on-event-context-menu (fn [event-map e] ...)})
+```
+
+Every `event-day-cell` renders the same markup:
+
+```
+.cal-day.cal-event-day[.cal-event-day-dots]
+  .cal-day-head                   ;; display:contents unless the variant lays it out
+    .cal-day-week                 ;; optional, :week-number
+    .cal-day-label
+      .cal-day-month              ;; optional, :month-label
+      .cal-day-number
+  .cal-day-events | .cal-day-dots
+```
+
 ## Event Pills
 
 `event-pill` renders one event inside a day cell. `:layout` picks the shape:
@@ -130,6 +174,8 @@ All date math is pure (no JS Date dependency) and works on all targets:
 - `(days-in-month year month)` — days in a month (handles leap years)
 - `(day-of-week year month day)` — 0=Mon..6=Sun
 - `(first-day-of-week year month)` — weekday of the 1st
+- `(day-of-year year month day)` — 1-based ordinal day
+- `(iso-week year month day)` — ISO 8601 week number (1–53)
 - `(calendar-days year month)` — full grid including prev/next month padding
 - `(prev-month year month)` / `(next-month year month)` — returns `[year month]`
 - `(date-str year month day)` — formats as `"YYYY-MM-DD"`

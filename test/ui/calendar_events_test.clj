@@ -187,3 +187,48 @@
       (is (re-find #"Free" s))
       (is (re-find #"Go outside" s))
       (is (re-find #"cal-agenda-day-empty-add" s)))))
+
+(deftest event-day-cell-head-test
+  (let [day {:day 1 :month 10 :year 2026 :date-str "2026-10-01" :current-month? true}]
+    (testing "head holds the number in a label; no week/month by default"
+      (let [[_ _ head] (cal-events/event-day-cell {:day day :events []})]
+        (is (= [:div {:class "cal-day-head"}
+                nil
+                [:span {:class "cal-day-label"} nil [:span {:class "cal-day-number"} "1"]]]
+               head))))
+    (testing "week number, month label and extra class"
+      (let [[_ attrs head] (cal-events/event-day-cell {:day day :events [] :class "x"
+                                                       :week-number "W40" :month-label "Oct"})]
+        (is (re-find #" x$" (:class attrs)))
+        (is (= [:span {:class "cal-day-week"} "W40"] (nth head 2)))
+        (is (= [:span {:class "cal-day-month"} "Oct"] (get-in head [3 2])))))
+    (testing "overflow renders a button"
+      (let [evts (for [i (range 5)] {:title (str i) :date "2026-10-01"})
+            [_ _ _ body] (cal-events/event-day-cell {:day day :events evts :max-visible 4})]
+        (is (= [:button {:class "cal-event-more" :type "button"} "+1 more"] (last body)))))))
+
+(deftest month-grid-test
+  (let [evts [{:title "A" :date "2026-10-12"}]]
+    (testing "full variant: long heads with today lit, week numbers on Mondays, month labels on the 1st"
+      (let [[_ attrs heads grid] (cal-events/month-grid {:year 2026 :month 10 :events evts
+                                                         :today-str "2026-10-08" :week-numbers? true
+                                                         :class "host"})
+            cells (drop 2 grid)
+            s (pr-str grid)]
+        (is (= "cal-month cal-month-full host" (:class attrs)))
+        (is (= "cal-weekday is-today" (get-in (vec heads) [5 1 :class])))
+        (is (= "cal-grid cal-grid-events" (get-in grid [1 :class])))
+        (is (= 35 (count cells)))
+        (is (= ["W40" "W41" "W42" "W43" "W44"] (vec (re-seq #"W\d+" s))))
+        (is (= ["Oct" "Nov"] (vec (re-seq #"Oct|Nov" s))))
+        (is (re-find #"cal-event-pill-stacked" s))))
+    (testing "compact variant: short heads, dots, no week numbers or month labels"
+      (let [[_ attrs heads grid] (cal-events/month-grid {:year 2026 :month 10 :events evts
+                                                         :today-str "2026-10-08" :variant :compact
+                                                         :week-numbers? true})
+            s (pr-str [heads grid])]
+        (is (= "cal-month cal-month-compact" (:class attrs)))
+        (is (= "cal-grid cal-grid-events cal-grid-dots" (get-in grid [1 :class])))
+        (is (re-find #"cal-event-day-dots" s))
+        (is (re-find #"cal-day-dot " s))
+        (is (not (re-find #"is-today|cal-day-week|cal-day-month" s)))))))

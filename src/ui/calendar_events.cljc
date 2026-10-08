@@ -231,21 +231,32 @@
 (defn event-day-cell
   "Render a day cell for the calendar event grid.
 
+   Every cell shares one markup: a .cal-day-head (optional week number, then
+   a .cal-day-label holding the optional month label and the .cal-day-number)
+   over the indicator body. The head is display:contents by default, so
+   grids that don't style it lay the number out directly in the cell; the
+   month-grid :full variant turns it into a right-aligned header row.
+
    Props:
-     :day           - day info map from calendar-days
-     :events        - all events (will be filtered to this date)
-     :today-str     - YYYY-MM-DD string for today
-     :selected-date - YYYY-MM-DD string of selected date
-     :on-select     - callback for day selection
-     :on-event-click - callback for event click
-     :on-more-click - callback (fn [date-str]) for the '+N more' overflow indicator
-     :indicator     - :pills (default) shows in-cell event pills;
-                      :dots shows a compact row of coloured dots (mobile-friendly)
-     :max-visible   - max events to show before '+N more' (pills mode, default 3)
-     :pill-layout   - event-pill :layout for pills mode (:inline default, :stacked)
-     :max-dots      - max dots to show (dots mode, default 4)"
-  [{:keys [day events today-str selected-date on-select on-event-click
-           on-event-context-menu on-more-click indicator max-visible max-dots pill-layout]}]
+     :day             - day info map from calendar-days
+     :events          - all events (will be filtered to this date)
+     :today-str       - YYYY-MM-DD string for today
+     :selected-date   - YYYY-MM-DD string of selected date
+     :on-select       - callback (fn [date-str]) for day selection
+     :on-double-click - callback (fn [date-str]) for a double-click on the day
+     :on-event-click  - callback for event click
+     :on-more-click   - callback (fn [date-str]) for the '+N more' overflow indicator
+     :indicator       - :pills (default) shows in-cell event pills;
+                        :dots shows a compact row of coloured dots (mobile-friendly)
+     :max-visible     - max events to show before '+N more' (pills mode, default 3)
+     :pill-layout     - event-pill :layout for pills mode (:inline default, :stacked)
+     :max-dots        - max dots to show (dots mode, default 4)
+     :week-number     - label shown at the head's start (e.g. \"W41\"), or nil
+     :month-label     - label shown before the day number (e.g. \"Oct\"), or nil
+     :class           - additional CSS class(es) for the cell"
+  [{:keys [day events today-str selected-date on-select on-double-click on-event-click
+           on-event-context-menu on-more-click indicator max-visible max-dots pill-layout
+           week-number month-label class]}]
   (let [{:keys [current-month? date-str]} day
         d           (:day day)
         today?      (= date-str today-str)
@@ -261,11 +272,18 @@
                      :current-month? current-month?}]
     #?(:squint
        [:div {:class (str (cal/day-cell-classes cls-opts) " cal-event-day"
-                          (when dots? " cal-event-day-dots"))
+                          (when dots? " cal-event-day-dots")
+                          (when class (str " " class)))
               :on-click (when (and on-select (not (empty? date-str)))
                           (fn [_e] (on-select date-str)))
+              :on-dblclick (when on-double-click
+                             (fn [_e] (on-double-click date-str)))
               :data-date date-str}
-        [:div {:class "cal-day-number"} (str d)]
+        [:div {:class "cal-day-head"}
+         (when week-number [:span {:class "cal-day-week"} week-number])
+         [:span {:class "cal-day-label"}
+          (when month-label [:span {:class "cal-day-month"} month-label])
+          [:span {:class "cal-day-number"} (str d)]]]
         (if dots?
           (into [:div {:class "cal-day-dots"}]
                 (map (fn [evt]
@@ -278,18 +296,24 @@
                                              :layout pill-layout}))
                       visible-evts)
                  (when (pos? overflow)
-                   [[:div {:class "cal-event-more"
-                           :on-click (when on-more-click
-                                       (fn [e] (.stopPropagation e) (on-more-click date-str)))}
+                   [[:button {:class "cal-event-more" :type "button"
+                              :on-click (when on-more-click
+                                          (fn [e] (.stopPropagation e) (on-more-click date-str)))}
                      (str "+" overflow " more")]]))))]
 
        :cljs
        [:div {:class (cond-> (conj (cal/day-cell-class-list cls-opts) "cal-event-day")
-                       dots? (conj "cal-event-day-dots"))
-              :on (when on-select
-                    {:click (fn [_e] (on-select date-str))})
+                       dots? (conj "cal-event-day-dots")
+                       class (conj class))
+              :on (cond-> {}
+                    on-select (assoc :click (fn [_e] (on-select date-str)))
+                    on-double-click (assoc :dblclick (fn [_e] (on-double-click date-str))))
               :data-date date-str}
-        [:div {:class ["cal-day-number"]} (str d)]
+        [:div {:class ["cal-day-head"]}
+         (when week-number [:span {:class ["cal-day-week"]} week-number])
+         [:span {:class ["cal-day-label"]}
+          (when month-label [:span {:class ["cal-day-month"]} month-label])
+          [:span {:class ["cal-day-number"]} (str d)]]]
         (if dots?
           (into [:div {:class ["cal-day-dots"]}]
                 (map (fn [evt]
@@ -302,16 +326,21 @@
                                              :layout pill-layout}))
                       visible-evts)
                  (when (pos? overflow)
-                   [[:div {:class ["cal-event-more"]
-                           :on (when on-more-click
-                                 {:click (fn [e] (.stopPropagation e) (on-more-click date-str))})}
+                   [[:button {:class ["cal-event-more"] :type "button"
+                              :on (when on-more-click
+                                    {:click (fn [e] (.stopPropagation e) (on-more-click date-str))})}
                      (str "+" overflow " more")]]))))]
 
        :clj
        [:div {:class (str (cal/day-cell-classes cls-opts) " cal-event-day"
-                          (when dots? " cal-event-day-dots"))
+                          (when dots? " cal-event-day-dots")
+                          (when class (str " " class)))
               :data-date date-str}
-        [:div {:class "cal-day-number"} (str d)]
+        [:div {:class "cal-day-head"}
+         (when week-number [:span {:class "cal-day-week"} week-number])
+         [:span {:class "cal-day-label"}
+          (when month-label [:span {:class "cal-day-month"} month-label])
+          [:span {:class "cal-day-number"} (str d)]]]
         (if dots?
           (into [:div {:class "cal-day-dots"}]
                 (map (fn [evt]
@@ -322,7 +351,8 @@
                  (map (fn [evt] (event-pill {:event evt :layout pill-layout}))
                       visible-evts)
                  (when (pos? overflow)
-                   [[:div {:class "cal-event-more"} (str "+" overflow " more")]]))))])))
+                   [[:button {:class "cal-event-more" :type "button"}
+                     (str "+" overflow " more")]]))))])))
 
 (defn calendar-event-grid
   "Render a month grid calendar with events displayed in day cells.
@@ -403,6 +433,84 @@
                                         :max-visible max-visible
                                         :pill-layout pill-layout}))
                      days))]))))
+
+;; ── Month Grid ──────────────────────────────────────────────────────
+
+(defn month-grid
+  "Frameless month view: weekday heads over a 7-column grid of event-day-cells.
+   No .cal frame or nav header — the host supplies its own toolbar and layout.
+   Both variants share every cell class and diverge only through the root's
+   variant class:
+
+     :full    (.cal-month-full)    roomy desktop month: long weekday heads with
+                                   today lit, right-aligned day numbers, stacked
+                                   pills, rows stretching to fill the root.
+     :compact (.cal-month-compact) phone month: short heads, centred day number
+                                   circles over coloured event dots.
+
+   Props:
+     :year, :month    - displayed month (1-12)
+     :events          - vector of event maps
+     :today-str       - YYYY-MM-DD string for today
+     :selected-date   - YYYY-MM-DD string of the selected date
+     :variant         - :full (default) or :compact
+     :week-numbers?   - :full only: ISO week label on each Monday
+     :max-visible     - :full only: pills per cell before '+N more' (default 4)
+     :on-select       - (fn [date-str]) day click
+     :on-double-click - (fn [date-str]) day double-click
+     :on-more-click   - (fn [date-str]) '+N more' click
+     :on-event-click / :on-event-context-menu - event pill handlers
+     :class           - additional CSS classes for the root
+     :attrs           - additional HTML attributes for the root"
+  [{:keys [year month events today-str selected-date variant week-numbers? max-visible
+           on-select on-double-click on-more-click on-event-click on-event-context-menu
+           class attrs]}]
+  (let [compact? (= variant :compact)
+        days     (cal/calendar-days year month)
+        today-ix (some (fn [[i d]] (when (= (:date-str d) today-str) (mod i 7)))
+                       (map-indexed vector days))
+        weekdays (if compact?
+                   (cal/calendar-weekdays {})
+                   (cal/calendar-weekdays {:labels cal/long-weekday-labels
+                                           :today-index today-ix}))
+        cell     (fn [i d]
+                   (event-day-cell
+                    (if compact?
+                      {:day d :events events :today-str today-str
+                       :selected-date selected-date :indicator :dots
+                       :on-select on-select :on-double-click on-double-click}
+                      {:day d :events events :today-str today-str
+                       :selected-date selected-date
+                       :max-visible (or max-visible 4) :pill-layout :stacked
+                       :week-number (when (and week-numbers? (zero? (mod i 7)))
+                                      (str "W" (cal/iso-week (:year d) (:month d) (:day d))))
+                       :month-label (when (= 1 (:day d)) (cal/short-month-name (:month d)))
+                       :on-select on-select :on-double-click on-double-click
+                       :on-more-click on-more-click :on-event-click on-event-click
+                       :on-event-context-menu on-event-context-menu})))]
+    #?(:cljs
+       [:div (merge {:class (cond-> ["cal-month" (if compact? "cal-month-compact" "cal-month-full")]
+                              class (conj class))}
+                    attrs)
+        weekdays
+        (into [:div {:class (cond-> ["cal-grid" "cal-grid-events"] compact? (conj "cal-grid-dots"))}]
+              (map-indexed cell days))]
+
+       :squint
+       [:div (merge {:class (str "cal-month " (if compact? "cal-month-compact" "cal-month-full")
+                                 (when class (str " " class)))}
+                    attrs)
+        weekdays
+        (into [:div {:class (str "cal-grid cal-grid-events" (when compact? " cal-grid-dots"))}]
+              (map-indexed cell days))]
+
+       :clj
+       [:div (merge {:class (str "cal-month " (if compact? "cal-month-compact" "cal-month-full")
+                                 (when class (str " " class)))}
+                    attrs)
+        weekdays
+        (into [:div {:class (str "cal-grid cal-grid-events" (when compact? " cal-grid-dots"))}]
+              (map-indexed cell days))])))
 
 ;; ── Day Ticker ──────────────────────────────────────────────────────
 

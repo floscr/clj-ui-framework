@@ -164,3 +164,36 @@
                            children)]
         (is (some? title-div))
         (is (= "March 2026" (last title-div)))))))
+
+(deftest day-of-year-test
+  (is (= 1 (cal/day-of-year 2026 1 1)))
+  (is (= 60 (cal/day-of-year 2024 2 29)))
+  (is (= 365 (cal/day-of-year 2026 12 31)))
+  (is (= 366 (cal/day-of-year 2024 12 31))))
+
+(deftest iso-week-test
+  (testing "mid-year"
+    (is (= 41 (cal/iso-week 2026 10 8)))
+    (is (= 40 (cal/iso-week 2026 9 28))))
+  (testing "early January belongs to the previous year's last week"
+    (is (= 53 (cal/iso-week 2021 1 3)))
+    (is (= 52 (cal/iso-week 2023 1 1))))
+  (testing "late December can be week 1 of the next year"
+    (is (= 1 (cal/iso-week 2024 12 30)))
+    (is (= 1 (cal/iso-week 2025 12 29))))
+  (testing "53-week years"
+    (is (= 53 (cal/iso-week 2020 12 31)))
+    (is (= 53 (cal/iso-week 2026 12 31)))))
+
+(deftest calendar-weekdays-test
+  (testing "default short labels, no today marker"
+    (let [s (pr-str (cal/calendar-weekdays {}))]
+      (is (re-find #"\"Mo\"" s))
+      (is (not (re-find #"is-today" s)))))
+  (testing "custom labels + today column"
+    (let [[_ _ & cols] (cal/calendar-weekdays {:labels cal/long-weekday-labels :today-index 3})
+          thu (nth cols 3)]
+      (is (= "cal-weekday is-today" (get-in thu [1 :class])))
+      (is (= [:span {:class "cal-weekday-dot"}] (nth thu 2)))
+      (is (= "Thu" (nth thu 3)))
+      (is (= "cal-weekday" (get-in (first cols) [1 :class]))))))
