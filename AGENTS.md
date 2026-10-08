@@ -221,46 +221,37 @@ bb sync-consumer-agents   # Upsert UI-framework note into consumers' AGENTS.md
 
 Replicant and squint need `npm install` in their dev directories first.
 
-## Deploying — CRITICAL
+## Deploying / Releasing — CRITICAL
 
-**The deploy target is the `hetzner` remote, NOT `origin`.** Pushing to
-`hetzner` triggers a post-receive hook that regenerates `dist/theme.css`,
-copies assets to dev targets, and restarts the running service:
-
-```sh
-git push hetzner master   # deploys: rebuilds CSS + restarts service
-```
-
-`origin` (git.example.com) is the source-of-truth mirror consumers
-pull as a git dependency — push there too so downstream repos can bump the
-`:sha`. A full deploy pushes to **both**:
+**Release with `bb release` — never push remotes by hand.** It runs the
+whole pipeline: tests, rebuilds the JS runtime and both demo SPAs, commits
+changed build artifacts, pushes `master` to **all three remotes**, and
+prints the sha consumers pin:
 
 ```sh
-git push origin master
-git push hetzner master
+bb release
 ```
 
-There is also a `github` remote (`github.com/floscr/clj-ui-framework`).
-Some consumers (currently **xi**) pin the GitHub URL, not gitea, so a sha
-that only exists on `origin` fails to resolve for them. When rolling out,
-check each consumer's `:git/url` and push `github` too if any points there:
+The three remotes it covers (a sha that reaches only one of the git-dep
+mirrors breaks consumers pinning the other — this has happened):
 
-```sh
-git push github master
-```
+- `origin` (git.example.com, gitea) — source-of-truth mirror most
+  consumers pull as a git dependency.
+- `github` (`github.com/floscr/clj-ui-framework`) — some consumers
+  (currently **xi**) pin the GitHub URL instead.
+- `hetzner` — the deploy target: its post-receive hook regenerates
+  `dist/theme.css`, copies assets to dev targets, and restarts the
+  running service.
 
-The production server (ui.example.com) serves all three
-targets: hiccup renders live, while the Replicant and Squint SPAs are
-served as **committed static builds** at `/replicant/` and `/squint/`
-(the server has no node/npm — same reason `src/ui/ui-runtime.js` is
-committed). After changing components or the dev SPA pages, rebuild and
-commit the artifacts before deploying:
+Why the demo builds are part of the release: the production server
+(ui.example.com) serves hiccup live, but the Replicant and Squint
+SPAs as **committed static builds** at `/replicant/` and `/squint/` (the
+server has no node/npm — same reason `src/ui/ui-runtime.js` is committed).
+`bb release` rebuilds them (`bb build-demos`) and commits the artifacts
+before pushing.
 
-```sh
-bb build-demos   # → dev/replicant/prod/js/main.js + dev/squint/dist/
-```
-
-Pushing is a shared, hard-to-reverse action — only deploy when explicitly asked.
+Releasing pushes shared remotes and restarts the demo service — a
+hard-to-reverse action. Only run `bb release` when explicitly asked.
 
 ## Rolling Out a Shared Resource to All Consumers
 
@@ -269,13 +260,11 @@ consumer apps ("update all consumers"), follow this pipeline. Steps 2+
 are shared/hard-to-reverse — only run them when explicitly asked to roll
 out/deploy.
 
-1. **Verify in the framework**: `bb build-theme`, `bb build-js-runtime`
-   (if `src/ui/js/` changed), `bb test`, `bb check-dev`, and `bb gen-docs`
+1. **Verify in the framework**: `bb check-dev`, and `bb gen-docs`
    (if components/icons changed). Commit.
-2. **Push the remotes**: `git push origin master && git push hetzner master`,
-   plus `git push github master` if any consumer pins the GitHub URL (xi
-   does — verify with `grep git/url ~/Code/Projects/xi/deps.edn`; server-lib
-   uses gitea). Then grab the new full sha: `git rev-parse master`.
+2. **Release**: `bb release` — runs the tests, rebuilds + commits the
+   build artifacts, pushes all three remotes (origin, github, hetzner)
+   and prints the new full sha to pin.
 3. **Find consumers**: `bb scan-consumers` — lists every consumer project
    and marks stale pins.
 4. **Bump the active consumers** (sed-replace the old full sha with the new

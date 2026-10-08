@@ -283,4 +283,17 @@
   {:doc "Check all ui-dev tmux panes for errors and verify dev servers"
    :task (load-file "scripts/check-dev.bb")}
 
+  release
+  {:doc "Full release: test, rebuild JS runtime + demo SPAs, commit changed build artifacts, push master to ALL remotes — origin (gitea) + github (consumers pin either :git/url, the sha must exist on both) and hetzner (deploys the demo server). Prints the sha consumers pin."
+   :depends [test build-js-runtime build-demos]
+   :task (do
+           (shell "git" "add" "dev/replicant/prod" "dev/squint/dist" "src/ui/ui-runtime.js")
+           (when-not (zero? (:exit (shell {:continue true} "git" "diff" "--cached" "--quiet")))
+             (shell "git" "commit" "-m" "chore: rebuild demo artifacts for release"))
+           (shell "git" "push" "origin" "master")
+           (shell "git" "push" "github" "master")
+           (shell "git" "push" "hetzner" "master")
+           (println "Released. Pin in consumers — :git/sha"
+                    (clojure.string/trim (:out (shell {:out :string} "git" "rev-parse" "master")))))}
+
 }}
