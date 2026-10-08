@@ -232,3 +232,18 @@
         (is (re-find #"cal-event-day-dots" s))
         (is (re-find #"cal-day-dot " s))
         (is (not (re-find #"is-today|cal-day-week|cal-day-month" s)))))))
+
+(deftest month-grid-highlight-week-test
+  (let [active (fn [grid] (->> (drop 2 grid)
+                               (filter #(re-find #"cal-week-active" (get-in % [1 :class])))
+                               (map #(get-in % [1 :data-date]))))]
+    (testing "marks the seven cells of the highlighted date's row"
+      (let [[_ _ _ grid] (cal-events/month-grid {:year 2026 :month 10 :events []
+                                                 :variant :compact :highlight-week "2026-10-13"})]
+        (is (= ["2026-10-12" "2026-10-13" "2026-10-14" "2026-10-15"
+                "2026-10-16" "2026-10-17" "2026-10-18"]
+               (active grid)))))
+    (testing "no band for an off-grid date or without the prop"
+      (is (empty? (active (nth (cal-events/month-grid {:year 2026 :month 10 :events []
+                                                       :highlight-week "2026-12-01"}) 3))))
+      (is (empty? (active (nth (cal-events/month-grid {:year 2026 :month 10 :events []}) 3)))))))

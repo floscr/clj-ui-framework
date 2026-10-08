@@ -65,7 +65,8 @@ through the root's variant class:
   ISO week numbers on Mondays, stacked pills with a `+N more` button, and rows
   stretching to fill the root (give the root a height, e.g. via `:class`).
 - `:compact` (`.cal-month-compact`) — phone month: short heads, centred day
-  number circles over coloured event dots.
+  number circles over coloured event dots. `:highlight-week` draws the row of
+  that date as a rounded band (Fantastical-style "current week").
 
 ```clojure
 (cal-events/month-grid
@@ -76,6 +77,7 @@ through the root's variant class:
    :variant :full                    ;; or :compact
    :week-numbers? true               ;; :full only
    :max-visible 4                    ;; :full only, pills before "+N more"
+   :highlight-week "2026-10-13"     ;; that date's row gets .cal-week-active
    :class "my-month"                 ;; host class on the root
    :on-select (fn [date-str] ...)
    :on-double-click (fn [date-str] ...)

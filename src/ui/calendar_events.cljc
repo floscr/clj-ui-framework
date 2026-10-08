@@ -456,6 +456,9 @@
      :variant         - :full (default) or :compact
      :week-numbers?   - :full only: ISO week label on each Monday
      :max-visible     - :full only: pills per cell before '+N more' (default 4)
+     :highlight-week  - YYYY-MM-DD; every cell in that date's row gets
+                        .cal-week-active (the compact variant draws it as a
+                        rounded band behind the row)
      :on-select       - (fn [date-str]) day click
      :on-double-click - (fn [date-str]) day double-click
      :on-more-click   - (fn [date-str]) '+N more' click
@@ -463,12 +466,16 @@
      :class           - additional CSS classes for the root
      :attrs           - additional HTML attributes for the root"
   [{:keys [year month events today-str selected-date variant week-numbers? max-visible
-           on-select on-double-click on-more-click on-event-click on-event-context-menu
+           highlight-week on-select on-double-click on-more-click on-event-click on-event-context-menu
            class attrs]}]
   (let [compact? (= variant :compact)
         days     (cal/calendar-days year month)
         today-ix (some (fn [[i d]] (when (= (:date-str d) today-str) (mod i 7)))
                        (map-indexed vector days))
+        ;; row index (i / 7) of the highlighted week, nil when it's off-grid
+        hi-row   (when highlight-week
+                   (some (fn [[i d]] (when (= (:date-str d) highlight-week) (quot i 7)))
+                         (map-indexed vector days)))
         weekdays (if compact?
                    (cal/calendar-weekdays {})
                    (cal/calendar-weekdays {:labels cal/long-weekday-labels
@@ -478,6 +485,7 @@
                     (if compact?
                       {:day d :events events :today-str today-str
                        :selected-date selected-date :indicator :dots
+                       :class (when (= hi-row (quot i 7)) "cal-week-active")
                        :on-select on-select :on-double-click on-double-click}
                       {:day d :events events :today-str today-str
                        :selected-date selected-date
@@ -485,6 +493,7 @@
                        :week-number (when (and week-numbers? (zero? (mod i 7)))
                                       (str "W" (cal/iso-week (:year d) (:month d) (:day d))))
                        :month-label (when (= 1 (:day d)) (cal/short-month-name (:month d)))
+                       :class (when (= hi-row (quot i 7)) "cal-week-active")
                        :on-select on-select :on-double-click on-double-click
                        :on-more-click on-more-click :on-event-click on-event-click
                        :on-event-context-menu on-event-context-menu})))]

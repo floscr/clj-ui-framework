@@ -715,6 +715,24 @@
   color: var(--fg-0);
 }
 
+/* Compact variant (.cal-month-compact): the dots grid above. The
+   :highlight-week row is a rounded band behind its seven cells. */
+
+.cal-month-compact .cal-event-day.cal-week-active {
+  background: var(--bg-2);
+  /* bleed 1px right so fractional column widths leave no seams */
+  box-shadow: 1px 0 0 var(--bg-2);
+}
+
+.cal-month-compact .cal-event-day.cal-week-active:nth-child(7n + 1) {
+  border-radius: var(--radius-md) 0 0 var(--radius-md);
+}
+
+.cal-month-compact .cal-event-day.cal-week-active:nth-child(7n) {
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  box-shadow: none;
+}
+
 /* ── Ticker Strip ────────────────────────────────────────────────── */
 
 .cal-ticker {
