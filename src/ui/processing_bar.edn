@@ -1,0 +1,33 @@
+{:id :processing-bar
+ :title "Processing bar"
+ :summary "A compact accent-bordered panel listing background jobs in progress with thumbnails, labels and spinners."
+ :category :feedback
+ :group "Status"
+ :keywords ["background jobs" "processing" "in progress" "queue status"]
+
+ :when-to-use
+ ["Several background jobs running at once (scans, imports, conversions) that people should see without blocking."]
+
+ :when-not-to-use
+ ["Use toast for the result of one finished job."
+  "Use file-progress for per-file upload progress."]
+
+ :usage "(require '[ui.processing-bar :as processing-bar])\n\n(when (seq jobs)\n  (processing-bar/processing-bar {:title \"2 scans in progress\"}\n    (for [j jobs]\n      (processing-bar/processing-item {:thumb (:thumb j) :label (:label j) :status (:status j)}))))"
+
+ :api
+ [{:fn "processing-bar" :doc "The panel; renders unconditionally, the host decides visibility."
+   :children "processing-item elements."
+   :props [{:name :title :type "string"} {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "processing-item" :doc "One job row with spinner and status."
+   :props [{:name :thumb :type "image URL"} {:name :label :type "string" :doc "Secondary line above the status."} {:name :status :type "string | hiccup"}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}]
+
+ :accessibility ["Mark the panel as a polite live region in :attrs when jobs change often."]
+ :motion ["The panel slides in over --duration-standard with --ease-enter."]
+ :responsive ["Full width of its column; thumbnails are 32px."]
+
+ :targets {:clj "Re-render with HTMX polling." :cljs "Render from state." :squint "Same as Replicant."}
+
+ :notes-for-ai ["Status text is a present participle: Analyzing, Resizing."]
+
+ :related [:file-progress :toast :spinner]}

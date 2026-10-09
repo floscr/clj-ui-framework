@@ -1,0 +1,61 @@
+{:id :sidebar
+ :title "Sidebar"
+ :summary "An app shell: a sticky sidebar with brand, search, grouped menus, collapsible sections, user footer and a mobile drawer, next to the main area."
+ :category :layout
+ :group "App shell"
+ :keywords ["sidebar" "app shell" "navigation" "layout" "mobile drawer" "nav menu"]
+
+ :when-to-use
+ ["App-level navigation between sections, with groups and an account block."
+  "Any page that needs the sidebar plus main layout with a mobile toggle."]
+
+ :when-not-to-use
+ ["Use tabs or breadcrumb for navigation inside one page."
+  "Use panels when the sidebar must be resizable."]
+
+ :usage "(require '[ui.sidebar :as sidebar])\n\n(sidebar/sidebar-layout {}\n  (sidebar/sidebar {}\n    (sidebar/sidebar-header {} (sidebar/sidebar-brand {:title \"Acme\" :subtitle \"v1.0\" :icon \"A\"}))\n    (sidebar/sidebar-content {}\n      (sidebar/sidebar-group {:label \"Pages\"}\n        (sidebar/sidebar-menu {}\n          (sidebar/sidebar-menu-item {:href \"/\" :icon-name :home :active true} \"Home\")\n          (sidebar/sidebar-menu-item {:href \"/settings\" :icon-name :settings :badge \"2\"} \"Settings\"))))\n    (sidebar/sidebar-footer {} (sidebar/sidebar-user {:user-name \"Ada\" :email \"ada@example.com\" :avatar \"AL\"})))\n  (sidebar/sidebar-overlay {})\n  (sidebar/sidebar-layout-main {}\n    (sidebar/sidebar-mobile-toggle {})\n    page-content))"
+
+ :api
+ [{:fn "sidebar-layout" :doc "Flex row wrapping the sidebar, overlay and main area."
+   :props [{:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "sidebar-layout-main" :doc "Main content area." :props [{:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "sidebar" :doc "The sticky sidebar container (bg-0, right border)." :props [{:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "sidebar-header" :doc "Top area." :props [{:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "sidebar-brand" :doc "Logo block with an icon badge, title and subtitle."
+   :props [{:name :title :type "string"} {:name :subtitle :type "string"} {:name :icon :type "string" :doc "One or two characters."} {:name :href :type "string"} {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "sidebar-search" :doc "Search input."
+   :props [{:name :placeholder :type "string"} {:name :value :type "string"} {:name :on-change :type "fn"} {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "sidebar-content" :doc "Scrollable middle area." :props [{:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "sidebar-group" :doc "A labeled nav group." :props [{:name :label :type "string"} {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "sidebar-menu" :doc "List of menu items." :props [{:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "sidebar-menu-item" :doc "A nav row: <a> with :href, <button> otherwise."
+   :children "The label."
+   :props [{:name :href :type "string"} {:name :active :type "boolean"} {:name :icon-name :type "icon keyword"} {:name :badge :type "string | number"}
+           {:name :on-click :type "fn"} {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "sidebar-collapsible" :doc "Collapsible section using details and summary."
+   :props [{:name :title :type "string"} {:name :open :type "boolean"} {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "sidebar-mobile-toggle" :doc "Hamburger button, hidden on desktop; toggles data-sidebar-open on the layout."
+   :props [{:name :on-click :type "fn"} {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "sidebar-overlay" :doc "Backdrop for the mobile drawer; clicking closes it."
+   :props [{:name :on-click :type "fn"} {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "sidebar-separator" :doc "Divider between groups."}
+  {:fn "sidebar-footer" :doc "Bottom area." :props [{:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "sidebar-user" :doc "Account block with avatar initials, name (:user-name) and email."
+   :props [{:name :email :type "string"} {:name :avatar :type "string" :doc "One or two characters."} {:name :class :type "string"} {:name :attrs :type "map"}]}]
+
+ :keyboard [["Tab" "Moves through menu items."] ["Enter / Space" "Toggles collapsible sections and the mobile drawer."]]
+
+ :accessibility ["Menu items are links or buttons; mark the current one with aria-current via :attrs. Group labels are plain headings."]
+ :motion ["The mobile drawer slides in over --duration-standard; item hover tints over --duration-fast."]
+ :responsive ["Below the breakpoint the sidebar becomes an off-canvas drawer with the overlay; the toggle sits in the main area."]
+
+ :targets
+ {:clj "Works without JS for navigation; the mobile toggle uses a tiny inline handler in the runtime."
+  :cljs "Pass :on-click on items for client-side routing."
+  :squint "Same as Replicant."}
+
+ :notes-for-ai
+ ["Group labels are sentence case; keep groups to five or six items."
+  "Spend the accent on the active item only."]
+
+ :related [:panels :breadcrumb :theme-toggle :command]}

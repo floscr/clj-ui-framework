@@ -1,0 +1,45 @@
+{:id :timeline
+ :title "Editing timeline"
+ :summary "A media editing timeline: a scrubbable ruler, labeled tracks with draggable and trimmable segments, a playhead and a floating transport."
+ :category :media
+ :group "Media"
+ :keywords ["timeline" "video editor" "segments" "scrub" "playhead" "trim"]
+
+ :when-to-use
+ ["Editing clips, zoom ranges or keyframes against a media duration."
+  "Scrubbing a playhead with keyboard nudges and snapping."]
+
+ :when-not-to-use
+ ["Use player-bar for playback without editing."
+  "For an activity feed (events newest first) build a list, this timeline is not that."]
+
+ :usage "(require '[ui.timeline :as timeline])\n\n(timeline/timeline {:duration 12.5 :current 4.2 :playing false\n                    :tracks [{:id :clip :label \"Clip\" :segments [{:id 1 :start 0.8 :end 11.4 :label \"video.mp4\"}]}\n                             {:id :zoom :label \"Zoom\" :segments [{:id 2 :start 3.5 :end 6.2} {:id 3 :start 7.6 :end 9.1}]}]\n                    :on-seek seek! :on-segment-change edit! :on-play-pause toggle!})"
+
+ :api
+ [{:fn "timeline" :doc "Controlled: renders from props and reports edits through callbacks. Interactive on Squint only; other targets render it static."
+   :props [{:name :duration :type "seconds" :doc "Required."} {:name :current :type "seconds"}
+           {:name :tracks :type "vector of {:id :label :segments [{:id :start :end :label}]}"}
+           {:name :playing :type "boolean"} {:name :loop :type "boolean"} {:name :transport :type "boolean" :default "true" :doc "false hides the transport."}
+           {:name :min-gap :type "seconds" :default "0"} {:name :step :type "seconds" :default "0.1"} {:name :big-step :type "seconds" :default "1"}
+           {:name :on-seek :type "fn [t]" :doc "Ruler click or drag and keyboard; shift snaps to segment edges."}
+           {:name :on-segment-change :type "fn [{:track-id :segment-id :start :end :edge :phase}]" :doc ":phase is :drag or :commit; persist on :commit."}
+           {:name :on-play-pause :type "fn"} {:name :on-skip-start :type "fn"} {:name :on-loop :type "fn"}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "ticks" :doc "Tick times for a duration."}
+  {:fn "format-time" :doc "Tick label format (m:ss or seconds)."}
+  {:fn "format-readout" :doc "Transport readout, e.g. 1:23 / 4:56."}]
+
+ :keyboard [["ArrowLeft / ArrowRight" "Nudge the playhead or focused segment by :step (Shift for :big-step)."] ["Space" "Play or pause from the transport."]]
+
+ :accessibility ["Segments and the ruler are focusable with keyboard editing; values are announced through the readout."]
+ :motion ["Segments follow the pointer directly; the playhead has no easing. Snapping highlights over --duration-fast."]
+ :responsive ["The ruler fills its width; on narrow screens long timelines get fewer ticks."]
+
+ :targets
+ {:clj "Static rendering of the current state."
+  :cljs "Static rendering; interaction is Squint only for now."
+  :squint "Fully interactive."}
+
+ :notes-for-ai ["Persist segment edits only on :phase :commit; :drag fires continuously."]
+
+ :related [:player-bar :progress]}

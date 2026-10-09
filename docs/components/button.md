@@ -125,10 +125,10 @@ Same as button-classes but returns a vector of class tokens (what Replicant need
 
 ## Related
 
-- `button-group`: Button group — a cluster of related buttons rendered as a segmented
-- `toolbar`: Toolbar — a rounded container that groups buttons (typically icon buttons)
-- `spinner`
-- `icon`
+- [Button group](button-group.md): Related actions as one segmented control: ghost or boxed, with icon items, counts and separators.
+- [Toolbar](toolbar.md): A pill-shaped container that groups icon buttons with separators, horizontal or vertical, optionally floating in a popover.
+- [Spinner](spinner.md): An indeterminate loading indicator in four sizes that inherits the current text color.
+- [Icon](icon.md): Inline Lucide-style SVG icons in four sizes, outlined by default with filled variants for media controls.
 
 ## Guidance for AI tools
 

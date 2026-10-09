@@ -1,0 +1,49 @@
+{:id :chip
+ :title "Chip"
+ :summary "A small selectable pill for filters, tags and presets, with an optional color dot."
+ :category :inputs
+ :group "Selection"
+ :keywords ["chip" "filter chip" "tag" "preset" "facet"]
+
+ :when-to-use
+ ["Filtering by a few facets where several can be on at once."
+  "Presets (theme, size) where the chosen one is highlighted."]
+
+ :when-not-to-use
+ ["Use badge for a non-interactive status label."
+  "Use button-group for an exclusive choice between views."
+  "Use tag-input for free-text tags that are added and removed."]
+
+ :usage "(require '[ui.chip :as chip])\n\n[:div.hstack.gap-1\n (chip/chip {:active true :on-click #(toggle! :photos)} \"Photos\")\n (chip/chip {:on-click #(toggle! :videos)} \"Videos\")]"
+
+ :examples
+ [{:title "Color presets"
+   :code "(chip/chip {:dot-color \"var(--accent-500)\" :active true} \"Purple\")\n(chip/chip {:dot-color \"var(--blue-500)\"} \"Blue\")"}]
+
+ :api
+ [{:fn "chip"
+   :doc "A <button> pill."
+   :children "The label."
+   :props [{:name :active :type "boolean" :doc "Selected state (accent tint)."}
+           {:name :dot-color :type "CSS color" :doc "Leading color dot."}
+           {:name :on-click :type "fn" :doc ":cljs and :squint only."}
+           {:name :class :type "string"} {:name :attrs :type "map" :doc "Add aria-pressed for toggles."}]}
+  {:fn "chip-classes" :doc "Class string for {:active}."}
+  {:fn "chip-class-list" :doc "Vector form."}]
+
+ :keyboard [["Enter / Space" "Toggles the chip."]]
+
+ :accessibility ["Add aria-pressed through :attrs so the selected state is announced."]
+
+ :motion ["Background, border and color change over --duration-fast."]
+
+ :responsive ["Chips wrap in an hstack; each is at least 32px tall, add hit-area for 44px targets."]
+
+ :targets
+ {:clj "Use :attrs {:onclick ...} or a form."
+  :cljs ":on-click becomes {:on {:click f}}."
+  :squint "Flat :on-click."}
+
+ :notes-for-ai ["Keep the active set in app state; chips are stateless."]
+
+ :related [:badge :button-group :tag-input]}

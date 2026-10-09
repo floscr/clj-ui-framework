@@ -5,7 +5,7 @@
 - Type: Component (actions, Menus)
 - Namespace: `ui.context-menu`
 - Source: `src/ui/context_menu.cljc`
-- Public fns: `icon-paths-for`, `normalize-item`, `context-menu-trigger`
+- Public fns: `icon-paths-for`, `normalize-item`, `items->json`, `context-menu-trigger`
 - JS runtime: `ui.js.context-menu`, `ui.js.gestures` (bundled in ui-runtime.js)
 - Keywords: context menu, right click, long press, actions menu, row actions
 

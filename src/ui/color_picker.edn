@@ -1,0 +1,45 @@
+{:id :color-picker
+ :title "Color picker"
+ :summary "A saturation and brightness plane with hue and alpha tracks, a format switch (oklch, hex, rgb, hsl) and a CSS value field, driven by the runtime."
+ :category :inputs
+ :group "Special inputs"
+ :keywords ["color picker" "oklch" "hex" "hue" "alpha" "swatch"]
+
+ :when-to-use
+ ["Choosing a color in a theme or settings UI where the exact value matters."
+  "Any place a CSS color string must be produced in a specific format."]
+
+ :when-not-to-use
+ ["Use chip with :dot-color for a small set of preset colors."
+  "Use form-input with a pattern when only a hex code is typed."]
+
+ :usage "(require '[ui.color-picker :as color-picker])\n\n(color-picker/color-picker {:value \"oklch(0.6 0.23 286)\"\n                            :formats [:oklch :hex]\n                            :alpha true\n                            :on-change #(set-color! (.. % -target -value))})"
+
+ :api
+ [{:fn "color-picker"
+   :doc "Data-attributed markup; the color-picker runtime paints the plane and tracks and keeps a hidden input in sync."
+   :props [{:name :value :type "CSS color string" :doc "Any CSS color; converted to the active format."}
+           {:name :formats :type "vector of :oklch :hex :rgb :hsl" :default "all" :doc "Offered output formats; one format hides the switch."}
+           {:name :alpha :type "boolean" :default "false" :doc "Shows the opacity track."}
+           {:name :disabled :type "boolean"}
+           {:name :name :type "string" :doc "On the hidden value input (form submission)."}
+           {:name :id :type "string"}
+           {:name :on-change :type "fn [event]" :doc ":cljs and :squint; the color is event.target.value."}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "normalize-formats" :doc "Known formats from a list, deduplicated and ordered."}]
+
+ :keyboard [["Arrow keys" "Nudge the plane marker and the tracks."] ["Tab" "Moves between plane, tracks, format switch and the value field."]]
+
+ :accessibility ["Plane and tracks are focusable with labels; the text field accepts any CSS color and shows the exact value."]
+ :motion ["Marker and track thumbs move instantly while dragging; no easing on input."]
+ :responsive ["Fills its column with a minimum width around 240px; thumbs are 44px targets."]
+ :runtime ["ui.js.color-picker"]
+
+ :targets
+ {:clj "Submit the hidden input with a form; needs ui-runtime.js."
+  :cljs "Controlled through :value; re-rendering never resets the hue of a gray pick."
+  :squint "Same as Replicant; require ui.js.color-picker in the SPA."}
+
+ :notes-for-ai ["Prefer :oklch output for tokens; hex for user-facing fields."]
+
+ :related [:form :chip :number-field]}

@@ -1,0 +1,45 @@
+{:id :panels
+ :title "Resizable panels"
+ :summary "Panel groups whose panes trade space by dragging a separator, with collapse, keyboard resizing and persisted sizes."
+ :category :layout
+ :group "Layout"
+ :keywords ["resizable panels" "split view" "sidebar resize" "drag separator" "collapsible pane"]
+
+ :when-to-use
+ ["Two or more panes that trade space: a sidebar beside content, an editor beside a preview."
+  "Layouts whose pane sizes should persist per user (:persist-key)."]
+
+ :when-not-to-use
+ ["Use sidebar-layout for a fixed-width app sidebar."
+  "Use dialog or popover for temporary surfaces."]
+
+ :usage "(require '[ui.panels :as panels])\n\n(panels/group {:orientation :horizontal}\n  (panels/panel {:size 240 :min-size 160 :max-size 420 :collapsible true :persist-key \"sidebar\"}\n    sidebar-content)\n  (panels/separator {:label \"Resize sidebar\"})\n  (panels/panel {:pin true} main-content))"
+
+ :api
+ [{:fn "group" :doc "Flex container for panels."
+   :props [{:name :orientation :type ":horizontal | :vertical" :default ":horizontal"} {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "panel" :doc "A pane. With :size it is resizable; without, it fills the rest."
+   :props [{:name :size :type "px number | \"NN%\""} {:name :min-size :type "px"} {:name :max-size :type "px"} {:name :default-size :type "px"}
+           {:name :collapsible :type "boolean"} {:name :collapsed :type "boolean"} {:name :persist-key :type "string" :doc "localStorage key for size and collapsed state."}
+           {:name :pin :type "boolean" :doc "On the fill panel: keep content anchored while a sized panel collapses."}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "separator" :doc "Draggable, keyboard-operable seam between two panels."
+   :props [{:name :label :type "string" :doc "aria-label."} {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "panel-attrs" :doc "Data attributes for a sized panel, for custom markup."}
+  {:fn "group-attrs" :doc "Data attributes for a group."}]
+
+ :keyboard [["Arrow keys on the separator" "Resize in steps."] ["Enter on the separator" "Toggle collapse when collapsible."]]
+
+ :accessibility ["The separator has role=separator with an aria-label and aria-valuenow."]
+ :motion ["Collapse and programmatic size changes animate over --duration-standard; dragging tracks the pointer."]
+ :responsive ["Percent sizes scale with the group; set :min-size so panes stay usable on phones, or stack vertically."]
+ :runtime ["ui.js.panels"]
+
+ :targets
+ {:clj "Markup plus ui-runtime.js; sizes persist in the browser."
+  :cljs "Listen for ui-panels-resize and ui-panels-collapse CustomEvents via :attrs, or drive data-size and data-collapsed."
+  :squint "Same as Replicant; require ui.js.panels in the SPA."}
+
+ :notes-for-ai ["Exactly one fill panel per group; give every sized panel a :min-size."]
+
+ :related [:sidebar :separator]}

@@ -1,0 +1,56 @@
+{:id :number-field
+ :title "Number field"
+ :summary "A bounded numeric input with increment and decrement steppers and scroll-wheel support."
+ :category :inputs
+ :group "Text fields"
+ :keywords ["number input" "stepper" "numeric field" "spinner" "quantity"]
+
+ :when-to-use
+ ["Bounded numbers that people nudge: quantity, hours, font size, zoom."
+  "Values with a natural step where keyboard entry should still work."]
+
+ :when-not-to-use
+ ["Use form-input :type :text with a pattern for ids, codes and phone numbers."
+  "Use form-range when the exact number matters less than the position."]
+
+ :usage "(require '[ui.number-field :as number-field])\n\n(number-field/number-field {:value 2 :min 1 :max 10 :step 1\n                            :on-change #(set-qty! (.. % -target -value))})"
+
+ :examples
+ [{:title "Variants"
+   :code "(number-field/number-field {:value 16 :variant :right :size :sm})\n(number-field/number-field {:value 1.5 :step 0.5 :variant :spinner})"}]
+
+ :api
+ [{:fn "number-field"
+   :doc "Wrapper with an <input type=number> and stepper buttons. The number-field runtime clamps steppers and wheel changes and fires a native input event."
+   :props [{:name :value :type "number" :doc "Current value."}
+           {:name :min :type "number"} {:name :max :type "number"}
+           {:name :step :type "number" :default "1"}
+           {:name :size :type ":sm | :md | :lg" :default ":md"}
+           {:name :variant :type ":default | :right | :spinner" :default ":default" :doc "Steppers flanking the input, both on the right, or a detached up and down box."}
+           {:name :disabled :type "boolean"}
+           {:name :placeholder :type "string"}
+           {:name :name :type "string" :doc "Forwarded to the input."}
+           {:name :id :type "string" :doc "Forwarded to the input."}
+           {:name :on-change :type "fn [event]" :doc ":cljs and :squint; fires for typing, steppers and wheel."}
+           {:name :class :type "string" :doc "On the wrapper."}
+           {:name :attrs :type "map" :doc "On the wrapper."}
+           {:name :input-attrs :type "map" :doc "On the <input>."}]}
+  {:fn "clamp-value" :doc "Clamps a number into [min max]."}
+  {:fn "step-value" :doc "Steps a value by {:step :min :max} in a direction."}
+  {:fn "number-field-classes" :doc "Class string for {:size :variant :disabled}."}]
+
+ :keyboard [["ArrowUp / ArrowDown" "Step by :step (native)."] ["Scroll wheel over the field" "Steps the value (runtime)."]]
+
+ :accessibility ["Native number input; steppers have aria-labels. Pair with form-field for a visible label."]
+ :motion ["Stepper hover tint over --duration-fast."]
+ :responsive ["Height follows :size; steppers are at least 36px targets."]
+ :runtime ["ui.js.number-field"]
+
+ :targets
+ {:clj "Uncontrolled: submit the input with a form. Needs ui-runtime.js for the steppers."
+  :cljs "Pass :value and :on-change; read the value from the event target."
+  :squint "Same as Replicant; require ui.js.number-field in the SPA."}
+
+ :notes-for-ai ["Wrap in form-field for the label; do not add a second stepper UI."]
+
+ :related [:form :select]}

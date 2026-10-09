@@ -9,10 +9,8 @@
   (let [{:keys [invalid missing]} (registry/validate-all)]
     (testing "every sidecar passes schema + prop checks"
       (is (empty? invalid) (pr-str invalid)))
-    (testing "components without a sidecar are reported (backfill in progress)"
-      (when (seq missing)
-        (println "  registry: no sidecar yet for" (count missing) "components:"
-                 (str/join ", " (map name missing)))))))
+    (testing "every component has a sidecar (src/ui/<name>.edn)"
+      (is (empty? missing) (str "missing sidecars: " (str/join ", " (map name missing)))))))
 
 (deftest component-md-test
   (let [comps (registry/components)

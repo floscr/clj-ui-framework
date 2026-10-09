@@ -1,0 +1,74 @@
+{:id :calendar-events
+ :title "Calendar events"
+ :summary "Event-aware calendar views: month grids with pills, a day ticker, an agenda list and day and week timelines, all from plain event maps."
+ :category :data
+ :group "Dates"
+ :keywords ["calendar" "events" "agenda" "week view" "day view" "month view" "event pills"]
+
+ :when-to-use
+ ["A month overview with events per day (full desktop or compact phone variant)."
+  "An agenda grouped by day, a horizontal day strip, or an hour-based day and week timeline."]
+
+ :when-not-to-use
+ ["Use calendar for a plain date picker without events."
+  "Use table for records that merely have a date column."]
+
+ :usage "(require '[ui.calendar-events :as cal-events])\n\n(cal-events/month-grid\n  {:year 2026 :month 10 :today-str \"2026-10-09\" :variant :full\n   :events [{:title \"Standup\" :date \"2026-10-09\" :time-start \"09:00\" :time-end \"09:30\" :color :accent}]\n   :on-select select-day! :on-event-click open-event!})"
+
+ :examples
+ [{:title "Agenda with today always shown"
+   :code "(cal-events/agenda-list {:days days :events events :today-str today\n                         :on-add-event add! :on-event-click open!})"}
+  {:title "Week timeline"
+   :code "(cal-events/week-timeline {:days week :events events :today-str today :now-minutes 615})"}]
+
+ :api
+ [{:fn "month-grid"
+   :doc "Frameless month view (the host brings the toolbar). :full is the roomy desktop month, :compact the phone month with dots."
+   :props [{:name :year :type "int"} {:name :month :type "int"} {:name :events :type "vector of event maps"}
+           {:name :today-str :type "string"} {:name :selected-date :type "string"}
+           {:name :variant :type ":full | :compact" :default ":full"}
+           {:name :week-numbers? :type "boolean" :doc ":full only."}
+           {:name :max-visible :type "int" :doc "Pills before a +N more button (:full)."}
+           {:name :highlight-week :type "date string" :doc "That date's row gets the active week band (:compact)."}
+           {:name :on-select :type "fn [date-str]"} {:name :on-double-click :type "fn [date-str]"} {:name :on-more-click :type "fn [date-str]"}
+           {:name :on-event-click :type "fn [event]"} {:name :on-event-context-menu :type "fn [event e]"}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "calendar-event-grid"
+   :doc "Framed month grid with navigation header and event pills."
+   :props [{:name :year :type "int"} {:name :month :type "int"} {:name :today-str :type "string"} {:name :selected-date :type "string"}
+           {:name :events :type "vector"} {:name :on-select :type "fn"} {:name :on-prev-month :type "fn"} {:name :on-next-month :type "fn"}
+           {:name :on-event-click :type "fn"} {:name :on-event-context-menu :type "fn"} {:name :max-visible :type "int"}
+           {:name :pill-layout :type ":inline | :stacked"} {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "event-pill" :doc "One event inside a day cell; task events render as a checkbox row."
+   :props [{:name :event :type "event map"} {:name :on-click :type "fn"} {:name :on-context-menu :type "fn"} {:name :layout :type ":inline | :stacked"}]}
+  {:fn "ticker-strip" :doc "Horizontal scrollable day strip with event dots."
+   :props [{:name :days :type "vector of {:date :day-num :day-label}"} {:name :today-str :type "string"} {:name :selected :type "string"} {:name :events :type "vector"} {:name :on-select :type "fn"} {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "agenda-list" :doc "Events grouped by day; today is always shown, with an empty card when it has nothing."
+   :props [{:name :days :type "vector of {:date :label}"} {:name :events :type "vector"} {:name :today-str :type "string"}
+           {:name :today-empty-title :type "string"} {:name :today-empty-hint :type "string"} {:name :on-add-event :type "fn [date-str]"}
+           {:name :on-event-click :type "fn"} {:name :on-event-context-menu :type "fn"} {:name :on-toggle-done :type "fn [event]"} {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "day-timeline" :doc "One day on an hour axis with positioned event blocks and a now line."
+   :props [{:name :events :type "vector"} {:name :date :type "string"} {:name :today-str :type "string"} {:name :now-minutes :type "int"}
+           {:name :on-event-click :type "fn"} {:name :on-event-context-menu :type "fn"} {:name :hour-height :type "px"} {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "week-timeline" :doc "Seven day columns on a shared hour axis."
+   :props [{:name :days :type "vector of day maps"} {:name :events :type "vector"} {:name :today-str :type "string"} {:name :now-minutes :type "int"}
+           {:name :on-event-click :type "fn"} {:name :on-event-context-menu :type "fn"} {:name :hour-height :type "px"} {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "events-for-date" :doc "Events whose :date matches."}
+  {:fn "event-duration-minutes" :doc "Minutes between :time-start and :time-end."}]
+
+ :keyboard [["Tab" "Day cells and event pills are buttons."] ["Enter" "Opens the focused event or day."]]
+
+ :accessibility ["Event colors are categorical; titles and times are always text. Task pills are real checkboxes."]
+ :motion ["Pill and cell hover tints over --duration-fast."]
+ :responsive ["Use :compact on phones and the ticker plus agenda for the narrowest layouts; the week timeline scrolls horizontally."]
+
+ :targets
+ {:clj "Renders statically from the event vector; actions via links in :attrs or page reloads."
+  :cljs "All callbacks available; events are plain maps."
+  :squint "Same as Replicant; keep event keys as strings or keywords consistently."}
+
+ :notes-for-ai
+ ["Event maps: {:title :date :time-start :time-end :color :done? :task?}; colors are :accent :danger :success :warning :blue :teal :pink :orange."
+  "Full documentation with markup contracts lives in src/ui/calendar.md."]
+
+ :related [:calendar :table :context-menu]}

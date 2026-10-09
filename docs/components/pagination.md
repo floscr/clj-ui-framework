@@ -92,7 +92,7 @@ Vector form.
 
 - [Table](table.md): Records in columns from a headers vector and row vectors, with striped and bordered variants.
 - [Breadcrumb](breadcrumb.md): Shows where a page sits in a hierarchy; every item but the last is a link.
-- `button-group`: Button group — a cluster of related buttons rendered as a segmented
+- [Button group](button-group.md): Related actions as one segmented control: ghost or boxed, with icon items, counts and separators.
 
 ## Guidance for AI tools
 

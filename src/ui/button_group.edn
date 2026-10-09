@@ -1,0 +1,64 @@
+{:id :button-group
+ :title "Button group"
+ :summary "Related actions as one segmented control: ghost or boxed, with icon items, counts and separators."
+ :category :actions
+ :group "Buttons"
+ :keywords ["button group" "segmented control" "view switcher" "filter" "toggle group"]
+
+ :when-to-use
+ ["Two to five views of the same data: a range (7d, 30d, 90d), a layout (grid, list), a filter with counts."
+  "Header toolbars with icon toggles and steppers (:ghost)."]
+
+ :when-not-to-use
+ ["Use tabs for peer panels of one object with their own content."
+  "Use toolbar for icon buttons that are independent actions, not a choice."
+  "Use select when there are more than five options."]
+
+ :usage "(require '[ui.button-group :as button-group])\n\n(button-group/button-group {:variant :boxed}\n  (button-group/button-group-item {:active true :count 353} \"All\")\n  (button-group/button-group-item {:count 28} \"Downloaded\")\n  (button-group/button-group-item {:count 325} \"Missing\"))"
+
+ :examples
+ [{:title "Icon toggles with a separator"
+   :code "(button-group/button-group {}\n  (button-group/button-group-item {:icon :grid :active true :attrs {:aria-label \"Grid\"}})\n  (button-group/button-group-item {:icon :list :attrs {:aria-label \"List\"}})\n  (button-group/button-group-separator {})\n  (button-group/button-group-item {:icon :settings :attrs {:aria-label \"Settings\"}}))"}
+  {:title "Navigation segments as links"
+   :code "(button-group/button-group {:variant :boxed}\n  (button-group/button-group-item {:href \"/photos\" :active true} \"Photos\")\n  (button-group/button-group-item {:href \"/albums\"} \"Albums\"))"}]
+
+ :api
+ [{:fn "button-group"
+   :doc "The container (role=group)."
+   :children "button-group-item and button-group-separator elements."
+   :props [{:name :variant :type ":ghost | :boxed" :default ":ghost" :doc ":ghost is a tight cluster with a filled active item; :boxed is a track with a raised active segment (concentric radii)."}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "button-group-item"
+   :doc "One segment: a <button>, or an <a> when :href is set."
+   :children "The label; omit for an icon-only item."
+   :props [{:name :active :type "boolean" :doc "Selected state."}
+           {:name :icon :type "icon keyword" :doc "Leading icon; icon-only when there are no children."}
+           {:name :count :type "number | string" :doc "Muted trailing count."}
+           {:name :href :type "string" :doc "Render as a link."}
+           {:name :on-click :type "fn" :doc ":cljs and :squint only."}
+           {:name :class :type "string"} {:name :attrs :type "map" :doc "aria-label for icon-only items."}]}
+  {:fn "button-group-separator" :doc "Thin divider between sub-clusters."
+   :props [{:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "button-group-classes" :doc "Class string for {:variant}."}
+  {:fn "button-group-item-classes" :doc "Class string for {:active :icon-only}."}]
+
+ :keyboard [["Tab" "Moves through the items (each is a button or link)."] ["Enter / Space" "Activates the focused item."]]
+
+ :accessibility
+ ["The container has role=group; add aria-label via :attrs to name it."
+  "Mark the active item with aria-pressed or aria-current via :attrs when it is a toggle or a nav."]
+
+ :motion ["Background and color change over --duration-fast."]
+
+ :responsive ["Items do not wrap; keep labels short. Counts use tabular numerals."]
+
+ :targets
+ {:clj "Use :href for navigation; no handlers."
+  :cljs ":on-click per item; manage :active in state."
+  :squint "Same as Replicant."}
+
+ :notes-for-ai
+ ["Exactly one item is :active at a time."
+  "For a settings-style on or off, use switch instead."]
+
+ :related [:tabs :toolbar :button :chip]}

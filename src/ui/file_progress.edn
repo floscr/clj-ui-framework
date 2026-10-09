@@ -1,0 +1,38 @@
+{:id :file-progress
+ :title "File progress"
+ :summary "A bordered list of files with size, status and an optional progress bar and remove button."
+ :category :feedback
+ :group "Status"
+ :keywords ["upload list" "file progress" "upload status" "attachments"]
+
+ :when-to-use
+ ["Showing each file's upload or processing state after a drop or pick."
+  "Attachment lists in a composer before sending."]
+
+ :when-not-to-use
+ ["Use progress for a single overall bar."
+  "Use processing-bar for background jobs that are not files."]
+
+ :usage "(require '[ui.file-progress :as fp])\n\n(fp/file-progress-list {}\n  (fp/file-progress-item {:name \"photo.jpg\" :size \"2.4 MB\" :progress 67 :status :uploading\n                          :icon (icon/icon {:icon-name :image :size :sm}) :on-remove #(cancel! 1)})\n  (fp/file-progress-item {:name \"doc.pdf\" :size \"1.1 MB\" :status :complete}))"
+
+ :api
+ [{:fn "file-progress-list" :doc "Continuous bordered list."
+   :children "file-progress-item elements."
+   :props [{:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "file-progress-item" :doc "One file row."
+   :props [{:name :name :type "string"} {:name :size :type "string" :doc "Formatted, e.g. 2.4 MB."}
+           {:name :icon :type "hiccup" :doc "Icon slot, e.g. from file-type-icon."}
+           {:name :progress :type "0 to 100 | nil" :doc "nil hides the bar."}
+           {:name :status :type ":idle | :uploading | :complete | :error"}
+           {:name :on-remove :type "fn []" :doc "Shows a remove button when given."}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}]
+
+ :accessibility ["Status is a word plus an icon; the progress bar carries aria values. Remove buttons are labeled with the file name."]
+ :motion ["Progress width animates over --duration-standard."]
+ :responsive ["Names truncate with the full value in the title attribute."]
+
+ :targets {:clj "Static; re-render on progress updates (HTMX polling works)." :cljs "Pass live :progress." :squint "Same as Replicant."}
+
+ :notes-for-ai ["Errors say what to do: Too large, pick a file under 10 MB."]
+
+ :related [:drop-zone :progress :processing-bar]}

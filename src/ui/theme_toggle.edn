@@ -1,0 +1,45 @@
+{:id :theme-toggle
+ :title "Theme toggle"
+ :summary "A three-way segmented control for light, system and dark appearance, hydrated by the JS runtime."
+ :category :actions
+ :group "Buttons"
+ :keywords ["theme switcher" "dark mode" "light mode" "appearance" "color scheme"]
+
+ :when-to-use
+ ["An appearance setting in a sidebar footer, header or settings page."]
+
+ :when-not-to-use
+ ["Use switch for a plain two-state setting that is not the color scheme."
+  "Do not place more than one theme toggle on a page."]
+
+ :usage "(require '[ui.theme-toggle :as theme-toggle])\n\n(theme-toggle/theme-toggle {:mode \"auto\"})"
+
+ :examples
+ [{:title "Controlled in Replicant or Squint"
+   :code "(theme-toggle/theme-toggle {:mode theme :on-change set-theme! :size :sm})"}]
+
+ :api
+ [{:fn "theme-toggle"
+   :doc "A radiogroup of three icon buttons (sun, monitor, moon). The runtime module applies data-theme on <html> and persists the choice."
+   :props [{:name :mode :type "\"light\" | \"auto\" | \"dark\"" :default "\"auto\""}
+           {:name :on-change :type "fn [mode]" :doc ":cljs and :squint; receives the new mode string."}
+           {:name :size :type ":sm | :md" :default ":md"}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "theme-toggle-classes" :doc "Class string for {:size}."}
+  {:fn "theme-toggle-class-list" :doc "Vector form."}]
+
+ :keyboard [["Tab / Arrow keys" "Move between the three options."] ["Enter / Space" "Selects."]]
+
+ :accessibility ["role=radiogroup labeled Theme; each option has role=radio with aria-checked and a label."]
+ :motion ["The active pill changes over --duration-fast."]
+ :responsive ["Fixed size; :sm fits a sidebar footer."]
+ :runtime ["ui.js.theme"]
+
+ :targets
+ {:clj "Markup only; ui-runtime.js wires the clicks and persistence."
+  :cljs "Pass :mode and :on-change, or let the runtime handle it."
+  :squint "Same as Replicant."}
+
+ :notes-for-ai ["Themes are data-theme on <html>; accents are data-accent. The toggle only changes the theme."]
+
+ :related [:switch :button-group :sidebar]}

@@ -1,0 +1,54 @@
+{:id :drop-zone
+ :title "Drop zone"
+ :summary "A generous target for dropping or picking files, with a full-page overlay variant and a click-to-add label."
+ :category :inputs
+ :group "Special inputs"
+ :keywords ["drop zone" "file upload" "drag and drop" "file input" "dropzone"]
+
+ :when-to-use
+ ["Uploading one or more files where dragging onto the page is natural (photos, documents)."
+  "A whole-page drop target with an overlay while dragging (init-body-drop-zone! plus drop-zone-overlay)."]
+
+ :when-not-to-use
+ ["Use form-file for a single small file field inside a form."
+  "Use camera to take a new photo."]
+
+ :usage "(require '[ui.drop-zone :as drop-zone])\n\n(drop-zone/drop-zone {:title \"Drop photos here\" :hint \"or click to choose\"\n                      :accept \"image/*\" :multiple true\n                      :on-files upload!})"
+
+ :examples
+ [{:title "Custom content with a click-to-add label"
+   :code "(drop-zone/drop-zone {:on-files upload!}\n  (file-progress/file-progress-list {} items)\n  (drop-zone/file-label {:on-files upload!} \"Add more\"))"}
+  {:title "Page-level drop with overlay (Replicant, Squint)"
+   :code "(drop-zone/init-body-drop-zone! {:on-files upload! :on-active-change set-dragging!})\n(when dragging? (drop-zone/drop-zone-overlay {}))"}]
+
+ :api
+ [{:fn "drop-zone"
+   :doc "Without children: a <label> around a hidden file input with icon, title and hint. With children: a container for your own content."
+   :props [{:name :accept :type "string" :default "\"image/*\""} {:name :multiple :type "boolean" :default "true"}
+           {:name :icon :type "icon keyword" :default ":upload"} {:name :title :type "string"} {:name :hint :type "string"}
+           {:name :size :type ":md | :lg" :default ":md"} {:name :drag-over? :type "boolean" :doc "Externally controlled active state."}
+           {:name :disabled :type "boolean"}
+           {:name :on-files :type "fn [files]" :doc ":cljs and :squint."}
+           {:name :on-drag-change :type "fn [boolean]" :doc "Omit to let the zone toggle its own active class."}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "file-label" :doc "Styled label wrapping a hidden file input, for custom zone content."
+   :props [{:name :accept :type "string"} {:name :multiple :type "boolean"} {:name :on-files :type "fn [files]"} {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "drop-zone-overlay" :doc "Full-screen overlay shown while files are dragged over the page."
+   :props [{:name :title :type "string" :default "\"Drop files to upload\""} {:name :hint :type "string"} {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "init-body-drop-zone!" :doc "Document-level drag listeners for page drops (browser only). Returns a cleanup fn. Opts :on-files :on-active-change."}]
+
+ :keyboard [["Enter / Space" "On the label, opens the file picker."]]
+
+ :accessibility ["The zone is a labeled file input, so keyboard users can pick files; the drag state is visual only."]
+ :motion ["Border and background change over --duration-standard when dragging over."]
+ :responsive ["Full width; :lg adds padding for empty pages."]
+ :runtime ["ui.js.drop-zone"]
+
+ :targets
+ {:clj "The runtime toggles the active class and dispatches a ui:drop-zone-files CustomEvent on the zone; listen with inline JS or HTMX."
+  :cljs ":on-files receives a vector of File objects."
+  :squint "Same as Replicant."}
+
+ :notes-for-ai ["Pair with file-progress-list to show each file's upload state inside the zone."]
+
+ :related [:file-progress :form :camera :processing-bar]}

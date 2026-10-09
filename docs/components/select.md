@@ -103,7 +103,7 @@ Label for the selected value, else the placeholder.
 - [Form](form.md): Labeled fields, inputs, textareas, checkboxes, radios, file and range inputs, joined groups and a search bar.
 - [Command palette](command.md): A searchable command menu in a native dialog with groups, icons, shortcut hints, a global hotkey and Alt quick-select.
 - [Popover](popover.md): A small anchored panel for contextual controls, built on the native Popover API so it works without app state.
-- `tag-input`
+- [Tag input](tag-input.md): Turns short text into removable tags with a filtered suggestion dropdown; fully controlled by the host.
 
 ## Guidance for AI tools
 

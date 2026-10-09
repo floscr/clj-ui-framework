@@ -1,0 +1,59 @@
+{:id :calendar
+ :title "Calendar"
+ :summary "A compact month grid date picker with navigation, today and selection, plus pure date math that runs on every target."
+ :category :inputs
+ :group "Dates"
+ :keywords ["calendar" "date picker" "month grid" "date math" "iso week"]
+
+ :when-to-use
+ ["Picking a single date inline (a filter, a form field with the grid visible)."
+  "Any date arithmetic in shared code: the helpers are pure and need no JS Date."]
+
+ :when-not-to-use
+ ["Use calendar-events for grids with events, agendas and week or day timelines."
+  "Use form-input :type :date when a native picker is acceptable and space is tight."]
+
+ :usage "(require '[ui.calendar :as calendar])\n\n(calendar/calendar {:year 2026 :month 10 :today-str \"2026-10-09\"\n                    :selected-date selected\n                    :on-select set-date!\n                    :on-prev-month prev! :on-next-month next!})"
+
+ :examples
+ [{:title "Date helpers"
+   :code "(calendar/days-in-month 2026 2)        ; 28\n(calendar/day-of-week 2026 10 9)       ; 4 (0 = Monday)\n(calendar/iso-week 2026 10 9)          ; 41\n(calendar/calendar-days 2026 10)       ; 42 day maps incl. padding"}]
+
+ :api
+ [{:fn "calendar"
+   :doc "The full picker: header with month navigation, weekday row and the day grid."
+   :props [{:name :year :type "int"} {:name :month :type "int" :doc "1 to 12."}
+           {:name :today-str :type "\"YYYY-MM-DD\"" :doc "Today, for highlighting."}
+           {:name :selected-date :type "\"YYYY-MM-DD\" | nil"}
+           {:name :on-select :type "fn [date-str]"}
+           {:name :on-prev-month :type "fn"} {:name :on-next-month :type "fn"}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "calendar-header" :doc "Month and year title with previous and next buttons."
+   :props [{:name :year :type "int"} {:name :month :type "int"} {:name :on-prev-month :type "fn"} {:name :on-next-month :type "fn"} {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "calendar-weekdays" :doc "Weekday header row."
+   :props [{:name :labels :type "vector of 7 strings" :doc "Mon to Sun."} {:name :today-index :type "int | nil" :doc "Column to mark as today."} {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "calendar-day" :doc "One day cell."
+   :props [{:name :day :type "day map" :doc "From calendar-days."} {:name :today-str :type "string"} {:name :selected-date :type "string"} {:name :on-select :type "fn [date-str]"} {:name :disabled? :type "boolean"}]}
+  {:fn "calendar-days" :doc "The 6 by 7 grid of day maps for a month, padded with adjacent months."}
+  {:fn "days-in-month" :doc "Days in a month, leap years included."}
+  {:fn "day-of-week" :doc "0 = Monday to 6 = Sunday."}
+  {:fn "iso-week" :doc "ISO 8601 week number."}
+  {:fn "date-str" :doc "Formats year, month, day as YYYY-MM-DD."}
+  {:fn "week-days" :doc "The seven day maps of the week containing a date."}]
+
+ :keyboard [["Tab" "Moves through navigation and day buttons."] ["Enter / Space" "Selects the focused day."]]
+
+ :accessibility ["Days are buttons with the full date as their label; today and selected states are classes plus text."]
+ :motion ["Day hover tint over --duration-fast."]
+ :responsive ["Fits its content; cells are 36px targets, use hit-area on small screens."]
+
+ :targets
+ {:clj "Static grid; wire day clicks with :attrs or links in your own cell renderer."
+  :cljs "Controlled through :selected-date and the callbacks."
+  :squint "Same as Replicant."}
+
+ :notes-for-ai
+ ["All dates are YYYY-MM-DD strings; the component never touches JS Date."
+  "See src/ui/calendar.md for the full documentation of both calendar namespaces."]
+
+ :related [:calendar-events :form]}

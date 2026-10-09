@@ -92,9 +92,9 @@ Vector form of badge-classes.
 
 ## Related
 
-- `chip`
+- [Chip](chip.md): A small selectable pill for filters, tags and presets, with an optional color dot.
 - [Alert](alert.md): A persistent inline message with a tone, icon and optional title that helps people recover or continue.
-- `icon`
+- [Icon](icon.md): Inline Lucide-style SVG icons in four sizes, outlined by default with filled variants for media controls.
 
 ## Guidance for AI tools
 

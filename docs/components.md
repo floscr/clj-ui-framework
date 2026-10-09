@@ -11,16 +11,24 @@
 | Component | Namespace | Description | Public API |
 |-----------|-----------|-------------|------------|
 | [Button](components/button.md) | `ui.button` | A single action with quiet secondary states, press feedback and a loading spinner. | `button-class-list`, `button-classes`, `button` |
+| [Button group](components/button-group.md) | `ui.button-group` | Related actions as one segmented control: ghost or boxed, with icon items, counts and separators. | `button-group-class-list`, `button-group-classes`, `button-group-item-class-list`, `button-group-item-classes`, `button-group`, `button-group-item`, `button-group-separator` |
 | [Command palette](components/command.md) | `ui.command` | A searchable command menu in a native dialog with groups, icons, shortcut hints, a global hotkey and Alt quick-select. | `command-item`, `command-group`, `command-dialog`, `command-trigger` |
-| [Context menu](components/context-menu.md) | `ui.context-menu` | Secondary actions close to the object: a right-click (or long-press on touch) menu for any wrapped element. | `icon-paths-for`, `normalize-item`, `context-menu-trigger` |
+| [Context menu](components/context-menu.md) | `ui.context-menu` | Secondary actions close to the object: a right-click (or long-press on touch) menu for any wrapped element. | `icon-paths-for`, `normalize-item`, `items->json`, `context-menu-trigger` |
+| [Theme toggle](components/theme-toggle.md) | `ui.theme-toggle` | A three-way segmented control for light, system and dark appearance, hydrated by the JS runtime. | `theme-toggle-class-list`, `theme-toggle-classes`, `theme-toggle` |
 
 ### Inputs
 
 | Component | Namespace | Description | Public API |
 |-----------|-----------|-------------|------------|
+| [Calendar](components/calendar.md) | `ui.calendar` | A compact month grid date picker with navigation, today and selection, plus pure date math that runs on every target. | `leap-year?`, `days-in-month`, `day-of-week`, `day-of-year`, `iso-week`, `first-day-of-week`, `pad2`, `date-str`, `month-name`, `short-month-name`, `prev-month`, `next-month`, `calendar-days`, `inc-date`, `dec-date`, `week-start`, `week-days`, `calendar-class-list`, `calendar-classes`, `day-cell-class-list`, `day-cell-classes`, `calendar-header`, `calendar-weekdays`, `calendar-day`, `calendar` |
+| [Chip](components/chip.md) | `ui.chip` | A small selectable pill for filters, tags and presets, with an optional color dot. | `chip-class-list`, `chip-classes`, `chip` |
+| [Color picker](components/color-picker.md) | `ui.color-picker` | A saturation and brightness plane with hue and alpha tracks, a format switch (oklch, hex, rgb, hsl) and a CSS value field, driven by the runtime. | `normalize-formats`, `color-picker-class-list`, `color-picker-classes`, `color-picker` |
+| [Drop zone](components/drop-zone.md) | `ui.drop-zone` | A generous target for dropping or picking files, with a full-page overlay variant and a click-to-add label. | `drop-zone-class-list`, `drop-zone-classes`, `file-label`, `drop-zone`, `init-body-drop-zone!`, `drop-zone-overlay` |
 | [Form](components/form.md) | `ui.form` | Labeled fields, inputs, textareas, checkboxes, radios, file and range inputs, joined groups and a search bar. | `form-field-class-list`, `form-field-classes`, `form-field`, `form-input-class-list`, `form-input-classes`, `form-input`, `form-textarea-class-list`, `form-textarea-classes`, `form-textarea`, `form-textarea-auto`, `form-select`, `form-checkbox`, `form-radio-group`, `form-file`, `form-range`, `form-group`, `form-group-addon`, `search-bar` |
+| [Number field](components/number-field.md) | `ui.number-field` | A bounded numeric input with increment and decrement steppers and scroll-wheel support. | `normalize-variant`, `clamp-value`, `step-value`, `number-field-class-list`, `number-field-classes`, `number-field` |
 | [Select](components/select.md) | `ui.select` | A compact choice field with a framework-drawn listbox, keyboard navigation and form support. | `normalize-options`, `selected-label`, `select` |
 | [Switch](components/switch.md) | `ui.switch` | A toggle for a setting that takes effect immediately. | `switch-class-list`, `switch-classes`, `switch-toggle` |
+| [Tag input](components/tag-input.md) | `ui.tag-input` | Turns short text into removable tags with a filtered suggestion dropdown; fully controlled by the host. | `tag-input-class-list`, `tag-input-classes`, `tag-pill-class-list`, `tag-pill-classes`, `tag-pill`, `tag-dropdown-item`, `tag-dropdown`, `tag-input`, `filter-tags` |
 
 ### Disclosure
 
@@ -38,49 +46,51 @@
 | Component | Namespace | Description | Public API |
 |-----------|-----------|-------------|------------|
 | [Alert](components/alert.md) | `ui.alert` | A persistent inline message with a tone, icon and optional title that helps people recover or continue. | `alert-class-list`, `alert-classes`, `alert` |
+| [Empty state](components/empty-state.md) | `ui.empty-state` | A centered placeholder with an optional icon for lists and views that have nothing to show yet. | `empty-state-class-list`, `empty-state-classes`, `empty-state` |
+| [File progress](components/file-progress.md) | `ui.file-progress` | A bordered list of files with size, status and an optional progress bar and remove button. | `file-progress-item`, `file-progress-list` |
+| [Processing bar](components/processing-bar.md) | `ui.processing-bar` | A compact accent-bordered panel listing background jobs in progress with thumbnails, labels and spinners. | `processing-item`, `processing-bar` |
 | [Progress](components/progress.md) | `ui.progress` | Shows how much of a known task is complete as a filled track. | `progress-bar-class-list`, `progress-bar-classes`, `progress` |
 | [Skeleton](components/skeleton.md) | `ui.skeleton` | Reserves space with a pulsing placeholder while content loads. | `skeleton-class-list`, `skeleton-classes`, `skeleton` |
-| [Toast](components/toast.md) | `ui.toast` | A brief floating confirmation for completed background work, shown by the JS runtime on every target. | `toast-class-list`, `toast-classes`, `toast`, `toast-flash` |
+| [Spinner](components/spinner.md) | `ui.spinner` | An indeterminate loading indicator in four sizes that inherits the current text color. | `spinner-class-list`, `spinner-classes`, `spinner` |
+| [Toast](components/toast.md) | `ui.toast` | A brief floating confirmation for completed background work, shown by the JS runtime on every target. | `toast-class-list`, `toast-classes`, `toast`, `toast-flash`, `show-toast!` |
 
 ### Data
 
 | Component | Namespace | Description | Public API |
 |-----------|-----------|-------------|------------|
 | [Badge](components/badge.md) | `ui.badge` | A small pill for status, category or a count, with an optional leading icon. | `badge-class-list`, `badge-classes`, `badge` |
+| [Calendar events](components/calendar-events.md) | `ui.calendar-events` | Event-aware calendar views: month grids with pills, a day ticker, an agenda list and day and week timelines, all from plain event maps. | `event-color-class`, `events-for-date`, `format-time`, `event-time-display`, `parse-int*`, `round*`, `hhmm->minutes`, `event-duration-minutes`, `format-duration`, `format-hour-label`, `event-pill-class-list`, `event-pill-classes`, `ticker-day-class-list`, `ticker-day-classes`, `agenda-event-class-list`, `agenda-event-classes`, `task-check`, `event-pill`, `event-day-cell`, `calendar-event-grid`, `month-grid`, `ticker-dot`, `ticker-day-item`, `ticker-strip`, `agenda-event-row`, `agenda-day-group-class-list`, `agenda-day-empty`, `agenda-day-group`, `agenda-list`, `day-timeline`, `week-timeline` |
 | [Card](components/card.md) | `ui.card` | A bordered surface that groups related content and actions, plus a divided list variant. | `card-class-list`, `card-classes`, `card`, `card-header`, `card-body`, `card-footer`, `card-list-class-list`, `card-list-classes`, `card-list`, `card-list-item` |
+| [Chat](components/chat.md) | `ui.chat` | Conversation building blocks: a message log, user and assistant bubbles, a thinking indicator, a toolbar and an auto-growing composer. | `chat-bubble-class-list`, `chat-bubble-classes`, `chat-log`, `chat-bubble`, `chat-thinking`, `chat-toolbar`, `chat-input` |
+| [File browser](components/file-browser.md) | `ui.file-browser` | Grid tiles and a sortable list or table of files and folders with type icons, selection and per-item context menus. | `file-type->icon`, `file-type-icon`, `file-view-toggle`, `file-item-grid`, `col-name`, `col-size`, `col-modified`, `col-type`, `file-table`, `file-list-header`, `file-item-list` |
+| [Icon](components/icon.md) | `ui.icon` | Inline Lucide-style SVG icons in four sizes, outlined by default with filled variants for media controls. | `icon-class-list`, `icon-classes`, `icon` |
 | [Pagination](components/pagination.md) | `ui.pagination` | Move through a long collection with numbered pages and previous and next links. | `pagination-item-class-list`, `pagination-item-classes`, `pagination` |
 | [Table](components/table.md) | `ui.table` | Records in columns from a headers vector and row vectors, with striped and bordered variants. | `table-class-list`, `table-classes`, `table` |
 
-### Not yet categorized
+### Layout
 
 | Component | Namespace | Description | Public API |
 |-----------|-----------|-------------|------------|
-| button-group | `ui.button-group` | Button group — a cluster of related buttons rendered as a segmented | `button-group-class-list`, `button-group-classes`, `button-group-item-class-list`, `button-group-item-classes`, `button-group`, `button-group-item`, `button-group-separator` |
-| calendar | `ui.calendar` | Month-grid date picker. See src/ui/calendar.md for full documentation. | `leap-year?`, `days-in-month`, `day-of-week`, `day-of-year`, `iso-week`, `first-day-of-week`, `pad2`, `date-str`, `month-name`, `short-month-name`, `prev-month`, `next-month`, `calendar-days`, `inc-date`, `dec-date`, `week-start`, `week-days`, `calendar-class-list`, `calendar-classes`, `day-cell-class-list`, `day-cell-classes`, `calendar-header`, `calendar-weekdays`, `calendar-day`, `calendar` |
-| calendar-events | `ui.calendar-events` | Event-aware calendar components. See src/ui/calendar.md for full documentation. | `event-color-class`, `events-for-date`, `format-time`, `event-time-display`, `parse-int*`, `round*`, `hhmm->minutes`, `event-duration-minutes`, `format-duration`, `format-hour-label`, `event-pill-class-list`, `event-pill-classes`, `ticker-day-class-list`, `ticker-day-classes`, `agenda-event-class-list`, `agenda-event-classes`, `task-check`, `event-pill`, `event-day-cell`, `calendar-event-grid`, `month-grid`, `ticker-dot`, `ticker-day-item`, `ticker-strip`, `agenda-event-row`, `agenda-day-group-class-list`, `agenda-day-empty`, `agenda-day-group`, `agenda-list`, `day-timeline`, `week-timeline` |
-| camera | `ui.camera` | Camera capture: capability detection, getUserMedia stream helpers, and | `camera-view` |
-| chat | `ui.chat` | Chat conversation components: message log, bubbles, thinking indicator, | `chat-bubble-class-list`, `chat-bubble-classes`, `chat-log`, `chat-bubble`, `chat-thinking`, `chat-toolbar`, `chat-input` |
-| chip | `ui.chip` |  | `chip-class-list`, `chip-classes`, `chip` |
-| color-picker | `ui.color-picker` | Color picker — saturation/brightness plane, hue and opacity tracks, format switch and CSS value field. | `normalize-formats`, `color-picker-class-list`, `color-picker-classes`, `color-picker` |
-| drop-zone | `ui.drop-zone` | Drag & drop file upload zone. | `drop-zone-class-list`, `drop-zone-classes`, `file-label`, `drop-zone`, `drop-zone-overlay` |
-| empty-state | `ui.empty-state` |  | `empty-state-class-list`, `empty-state-classes`, `empty-state` |
-| file-browser | `ui.file-browser` | File browser components — grid/list views. | `file-type->icon`, `file-type-icon`, `file-view-toggle`, `file-item-grid`, `col-name`, `col-size`, `col-modified`, `col-type`, `file-table`, `file-list-header`, `file-item-list` |
-| file-progress | `ui.file-progress` | File progress list — shows files with upload/processing status. | `file-progress-item`, `file-progress-list` |
-| grid | `ui.grid` | Responsive tile grid with square and masonry layouts, plus toolbar | `grid-class-list`, `grid-classes`, `grid`, `layout-toggle`, `step-size`, `size-stepper` |
-| icon | `ui.icon` |  | `icon-class-list`, `icon-classes`, `icon` |
-| lightbox | `ui.lightbox` | Lightbox component for fullscreen image viewing. | `lightbox`, `image-thumbnail` |
-| markdown | `ui.markdown` | Minimal markdown-to-hiccup renderer for dev documentation pages. | `markdown->hiccup` |
-| number-field | `ui.number-field` |  | `normalize-variant`, `clamp-value`, `step-value`, `number-field-class-list`, `number-field-classes`, `number-field` |
-| panels | `ui.panels` | Resizable panel groups — a port of motion-panels | `size-str`, `group-attrs`, `panel-attrs`, `group`, `separator`, `panel` |
-| player-bar | `ui.player-bar` |  | `player-bar-class-list`, `player-bar-classes`, `player-bar` |
-| processing-bar | `ui.processing-bar` | Processing bar — compact panel showing background jobs in progress. | `processing-item`, `processing-bar` |
-| separator | `ui.separator` |  | `separator-class-list`, `separator-classes`, `separator` |
-| sidebar | `ui.sidebar` |  | `sidebar-layout-class-list`, `sidebar-layout-classes`, `sidebar-layout`, `sidebar-layout-main`, `sidebar-class-list`, `sidebar-classes`, `sidebar`, `sidebar-header`, `sidebar-brand-class-list`, `sidebar-brand-classes`, `sidebar-brand`, `sidebar-search-class-list`, `sidebar-search-classes`, `sidebar-search`, `sidebar-content`, `sidebar-group-class-list`, `sidebar-group-classes`, `sidebar-group`, `sidebar-menu`, `sidebar-menu-item-class-list`, `sidebar-menu-item-classes`, `sidebar-menu-item`, `sidebar-collapsible`, `sidebar-mobile-toggle-class-list`, `sidebar-mobile-toggle-classes`, `sidebar-mobile-toggle`, `sidebar-overlay`, `sidebar-separator`, `sidebar-footer`, `sidebar-user` |
-| spinner | `ui.spinner` |  | `spinner-class-list`, `spinner-classes`, `spinner` |
-| tag-input | `ui.tag-input` |  | `tag-input-class-list`, `tag-input-classes`, `tag-pill-class-list`, `tag-pill-classes`, `tag-pill`, `tag-dropdown-item`, `tag-dropdown`, `tag-input` |
-| theme-toggle | `ui.theme-toggle` |  | `theme-toggle-class-list`, `theme-toggle-classes`, `theme-toggle` |
-| timeline | `ui.timeline` | Motion-Studio-style editing timeline — ruler with ticks, labeled tracks | `total-time`, `tick-step`, `ticks`, `time->pct`, `span->pct`, `format-time`, `format-readout`, `timeline-class-list`, `timeline-classes`, `dragging?`, `timeline` |
-| toolbar | `ui.toolbar` | Toolbar — a rounded container that groups buttons (typically icon buttons) | `toolbar-class-list`, `toolbar-classes`, `toolbar`, `toolbar-separator` |
+| [Tile grid](components/grid.md) | `ui.grid` | A responsive auto-fill grid of square or masonry tiles with size presets, plus a layout toggle and size stepper for toolbars. | `grid-class-list`, `grid-classes`, `grid`, `layout-toggle`, `step-size`, `size-stepper` |
+| [Resizable panels](components/panels.md) | `ui.panels` | Panel groups whose panes trade space by dragging a separator, with collapse, keyboard resizing and persisted sizes. | `size-str`, `group-attrs`, `panel-attrs`, `group`, `separator`, `panel` |
+| [Separator](components/separator.md) | `ui.separator` | A hairline divider, horizontal or vertical, for grouping content. | `separator-class-list`, `separator-classes`, `separator` |
+| [Sidebar](components/sidebar.md) | `ui.sidebar` | An app shell: a sticky sidebar with brand, search, grouped menus, collapsible sections, user footer and a mobile drawer, next to the main area. | `sidebar-layout-class-list`, `sidebar-layout-classes`, `sidebar-layout`, `sidebar-layout-main`, `sidebar-class-list`, `sidebar-classes`, `sidebar`, `sidebar-header`, `sidebar-brand-class-list`, `sidebar-brand-classes`, `sidebar-brand`, `sidebar-search-class-list`, `sidebar-search-classes`, `sidebar-search`, `sidebar-content`, `sidebar-group-class-list`, `sidebar-group-classes`, `sidebar-group`, `sidebar-menu`, `sidebar-menu-item-class-list`, `sidebar-menu-item-classes`, `sidebar-menu-item`, `sidebar-collapsible`, `sidebar-mobile-toggle-class-list`, `sidebar-mobile-toggle-classes`, `sidebar-mobile-toggle`, `sidebar-overlay`, `sidebar-separator`, `sidebar-footer`, `sidebar-user` |
+| [Toolbar](components/toolbar.md) | `ui.toolbar` | A pill-shaped container that groups icon buttons with separators, horizontal or vertical, optionally floating in a popover. | `toolbar-class-list`, `toolbar-classes`, `toolbar`, `toolbar-separator` |
+
+### Media
+
+| Component | Namespace | Description | Public API |
+|-----------|-----------|-------------|------------|
+| [Camera](components/camera.md) | `ui.camera` | A viewfinder with capture and camera switch, falling back to the native file input capture on plain HTTP, plus stream helpers. | `camera-capable?`, `has-camera-api?`, `detect-camera!`, `stop-camera!`, `start-camera!`, `capture-photo!`, `camera-view` |
+| [Lightbox](components/lightbox.md) | `ui.lightbox` | A fullscreen image overlay with pinch, wheel and double-tap zoom and drag to pan, plus a clickable thumbnail. | `lightbox`, `image-thumbnail` |
+| [Player bar](components/player-bar.md) | `ui.player-bar` | A music player bar with artwork, track info, transport controls, a scrubbable progress track and volume. | `player-bar-class-list`, `player-bar-classes`, `player-bar` |
+| [Editing timeline](components/timeline.md) | `ui.timeline` | A media editing timeline: a scrubbable ruler, labeled tracks with draggable and trimmable segments, a playhead and a floating transport. | `total-time`, `tick-step`, `ticks`, `time->pct`, `span->pct`, `format-time`, `format-readout`, `timeline-class-list`, `timeline-classes`, `dragging?`, `timeline` |
+
+### Text
+
+| Component | Namespace | Description | Public API |
+|-----------|-----------|-------------|------------|
+| [Markdown](components/markdown.md) | `ui.markdown` | A minimal markdown to hiccup renderer for docs and chat replies: headings, code blocks, tables, lists, inline code and bold. | `markdown->hiccup` |
 
 ## Icons (77)
 

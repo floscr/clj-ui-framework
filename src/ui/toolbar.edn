@@ -1,0 +1,43 @@
+{:id :toolbar
+ :title "Toolbar"
+ :summary "A pill-shaped container that groups icon buttons with separators, horizontal or vertical, optionally floating in a popover."
+ :category :layout
+ :group "Layout"
+ :keywords ["toolbar" "floating toolbar" "icon buttons" "editor toolbar"]
+
+ :when-to-use
+ ["A cluster of independent icon actions that should read as one surface: formatting, zoom, map controls."
+  "A floating toolbar anchored to a selection or trigger (inside a popover-content with popover-content--flush)."]
+
+ :when-not-to-use
+ ["Use button-group when the buttons are a choice (one active)."
+  "Use a header with button for a page's primary actions."]
+
+ :usage "(require '[ui.toolbar :as toolbar])\n\n(toolbar/toolbar {}\n  (button/button {:variant :ghost :icon :edit :attrs {:aria-label \"Edit\"}})\n  (button/button {:variant :ghost :icon :copy :attrs {:aria-label \"Copy\"}})\n  (toolbar/toolbar-separator {})\n  (button/button {:variant :ghost :icon :trash :attrs {:aria-label \"Delete\"}}))"
+
+ :examples
+ [{:title "Vertical zoom controls"
+   :code "(toolbar/toolbar {:orientation :vertical}\n  (button/button {:variant :ghost :icon :plus :attrs {:aria-label \"Zoom in\"}})\n  (button/button {:variant :ghost :icon :minus :attrs {:aria-label \"Zoom out\"}})\n  (toolbar/toolbar-separator {})\n  (button/button {:variant :ghost :icon :search :attrs {:aria-label \"Fit\"}}))"}]
+
+ :api
+ [{:fn "toolbar"
+   :doc "The container (role=toolbar) with a pill radius and a border; buttons inside are clipped to the pill."
+   :children "Buttons and toolbar-separator elements."
+   :props [{:name :orientation :type ":horizontal | :vertical" :default ":horizontal"}
+           {:name :class :type "string"} {:name :attrs :type "map" :doc "Add aria-label to name the toolbar."}]}
+  {:fn "toolbar-separator" :doc "Divider perpendicular to the toolbar flow."
+   :props [{:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "toolbar-classes" :doc "Class string for {:orientation}."}
+  {:fn "toolbar-class-list" :doc "Vector form."}]
+
+ :keyboard [["Tab" "Moves through the buttons."]]
+
+ :accessibility ["role=toolbar with aria-orientation; every icon button needs an aria-label."]
+ :motion ["None on the container; buttons keep their press feedback."]
+ :responsive ["Horizontal toolbars do not wrap; split long ones with separators or move overflow into a context menu."]
+
+ :targets {:clj "Static markup." :cljs ":class may be a vector." :squint "Static markup."}
+
+ :notes-for-ai ["Use :variant :ghost buttons inside; the toolbar provides the surface."]
+
+ :related [:button :button-group :popover :separator]}

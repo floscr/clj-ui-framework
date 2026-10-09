@@ -1,0 +1,38 @@
+{:id :icon
+ :title "Icon"
+ :summary "Inline Lucide-style SVG icons in four sizes, outlined by default with filled variants for media controls."
+ :category :data
+ :group "Primitives"
+ :keywords ["icon" "svg" "lucide" "filled icon" "icon size"]
+
+ :when-to-use
+ ["A plain icon beside its label in buttons, menus, nav items and empty states."
+  "Icon-only controls with an aria-label."]
+
+ :when-not-to-use
+ ["Do not put icons in rounded tiles or circles unless the shape is the control itself."
+  "Use a text label when it is clearer than an icon, especially for destructive or unfamiliar actions."]
+
+ :usage "(require '[ui.icon :as icon])\n\n(icon/icon {:icon-name :search :size :sm})\n(icon/icon {:icon-name :play :filled true})"
+
+ :api
+ [{:fn "icon"
+   :doc "Returns an inline <svg> with currentColor strokes, or nil for an unknown name. See docs/components.md for the full icon list."
+   :props [{:name :icon-name :type "keyword" :doc "One of the registered names, e.g. :home, :search, :settings."}
+           {:name :size :type ":sm | :md | :lg | :xl" :default ":md" :doc "16, 20, 24 or 32px."}
+           {:name :filled :type "boolean" :doc "Solid variant; falls back to the outline paths with fill when no dedicated filled shape exists."}
+           {:name :class :type "string"} {:name :attrs :type "map" :doc "Extra SVG attributes."}]}
+  {:fn "icon-classes" :doc "Class string for {:size}."}
+  {:fn "icon-class-list" :doc "Vector form."}]
+
+ :accessibility ["Icons are aria-hidden by default; the control they sit in carries the name."]
+ :motion ["None."]
+ :responsive ["Sizes are fixed; use :sm inside small buttons and :md in nav."]
+
+ :targets {:clj "Static markup." :cljs "Static markup." :squint "Icon names are strings at runtime."}
+
+ :notes-for-ai
+ ["Add new icons to icon-paths in src/ui/icon.cljc (Lucide 24x24 paths), then run bb gen-docs."
+  "Pick :sm for 16px toolbars, :md for menus, :xl only in empty states."]
+
+ :related [:button :empty-state :badge]}

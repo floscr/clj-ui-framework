@@ -96,9 +96,9 @@ Vector form.
 
 ## Related
 
-- `button-group`: Button group — a cluster of related buttons rendered as a segmented
+- [Button group](button-group.md): Related actions as one segmented control: ghost or boxed, with icon items, counts and separators.
 - [Accordion](accordion.md): Progressively reveal supporting content in place, using native details and summary with no JS.
-- `toolbar`: Toolbar — a rounded container that groups buttons (typically icon buttons)
+- [Toolbar](toolbar.md): A pill-shaped container that groups icon buttons with separators, horizontal or vertical, optionally floating in a popover.
 
 ## Guidance for AI tools
 

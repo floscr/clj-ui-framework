@@ -1,0 +1,53 @@
+{:id :chat
+ :title "Chat"
+ :summary "Conversation building blocks: a message log, user and assistant bubbles, a thinking indicator, a toolbar and an auto-growing composer."
+ :category :data
+ :group "Conversation"
+ :keywords ["chat" "messages" "assistant" "composer" "ai chat" "bubbles"]
+
+ :when-to-use
+ ["An assistant or support conversation with a composer at the bottom."
+  "Streaming replies where a pending bubble shows progress."]
+
+ :when-not-to-use
+ ["Use toast or alert for one-off system messages."
+  "Use form-textarea-auto alone when there is no conversation to show."]
+
+ :usage "(require '[ui.chat :as chat])\n\n[:div\n (chat/chat-log {}\n   (chat/chat-bubble {:role :user} \"Summarize this page\")\n   (chat/chat-bubble {:role :assistant} rendered-markdown)\n   (chat/chat-thinking {}))\n (chat/chat-input {:placeholder \"Message…\" :on-submit send! :input-attrs {:name \"message\"}})]"
+
+ :examples
+ [{:title "Hiccup with HTMX"
+   :code "(chat/chat-input {:attrs {:hx-post \"/chat\" :hx-target \"#log\" :hx-swap \"beforeend\"}\n                  :input-attrs {:name \"message\"}})"}]
+
+ :api
+ [{:fn "chat-log" :doc "Flex column for bubbles."
+   :props [{:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "chat-bubble" :doc "One message. Children are text or pre-rendered markdown hiccup."
+   :props [{:name :role :type ":user | :assistant" :default ":assistant"} {:name :pending :type "boolean" :doc "Muted in-progress styling."}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "chat-thinking" :doc "Pending assistant bubble with a spinner."
+   :props [{:name :label :type "string" :default "\"Thinking…\""} {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "chat-toolbar" :doc "Right-aligned actions above the log."
+   :props [{:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "chat-input" :doc "A <form> with an auto-growing textarea, an optional hint and a send button."
+   :props [{:name :placeholder :type "string"} {:name :hint :type "hiccup | string"} {:name :send-label :type "string" :default "\"Send\""}
+           {:name :send-icon :type "icon keyword"} {:name :max-rows :type "int" :default "5"} {:name :disabled :type "boolean"}
+           {:name :on-submit :type "fn [event]" :doc ":cljs and :squint."}
+           {:name :input-attrs :type "map" :doc "On the textarea (name, required)."} {:name :send-attrs :type "map"}
+           {:name :class :type "string"} {:name :attrs :type "map" :doc "On the form (HTMX attributes)."}]}
+  {:fn "chat-bubble-classes" :doc "Class string for {:role :pending}."}]
+
+ :keyboard [["Enter" "Submits the composer (Shift+Enter inserts a newline)."]]
+
+ :accessibility ["Bubbles are plain blocks; mark the log as a live region in :attrs when replies stream in."]
+ :motion ["Thinking spinner only; new bubbles do not animate in."]
+ :responsive ["Bubbles cap at 85% width; the composer sticks to the bottom of its container."]
+
+ :targets
+ {:clj "Composer submits as a normal form or via HTMX attributes."
+  :cljs "Handle :on-submit and append bubbles from state."
+  :squint "Same as Replicant."}
+
+ :notes-for-ai ["Render markdown yourself (ui.markdown or your own) and pass hiccup as bubble children."]
+
+ :related [:markdown :form :spinner]}

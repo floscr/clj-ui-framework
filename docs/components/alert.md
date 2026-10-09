@@ -95,7 +95,7 @@ Vector form.
 
 - [Toast](toast.md): A brief floating confirmation for completed background work, shown by the JS runtime on every target.
 - [Badge](badge.md): A small pill for status, category or a count, with an optional leading icon.
-- `empty-state`
+- [Empty state](empty-state.md): A centered placeholder with an optional icon for lists and views that have nothing to show yet.
 
 ## Guidance for AI tools
 

@@ -24,16 +24,13 @@ Nothing below starts until the decisions in that doc's section 6 are made.
 - [ ] `bb check-dev` against running dev servers (servers were not running in this session; Replicant and Squint still need a visual pass)
 - [ ] em-dash lint for UI copy in `.cljc` strings (deferred: docstrings use them legitimately)
 
-## Phase 1: Component metadata and generated docs
+## Phase 1: Component metadata and generated docs (done 2026-10-09, except the examples split)
 
-- [ ] Define sidecar EDN schema + validation (spec or malli-free plain checks)
-- [ ] tools.registry reads sidecars; `bb gen-docs` emits docs/components/<id>.md, docs/components.md, docs/llms.txt, docs/llms-full.txt
-- [ ] Test: every .cljc has a sidecar; every documented prop is destructured
-- [ ] Split dev/shared demos.cljc into dev/examples/<component>.cljc with source-capturing macro
-- [ ] Backfill sidecars: batch 1 (button, badge, card, alert, form, select, switch, tabs, dialog, popover)
-- [ ] Backfill sidecars: batch 2 (command, context-menu, toast, tooltip, table, accordion, breadcrumb, pagination, progress, skeleton)
-- [ ] Backfill sidecars: batch 3 (calendar, calendar-events, sidebar, toolbar, button-group, chip, tag-input, number-field, color-picker, chat)
-- [ ] Backfill sidecars: batch 4 (grid, lightbox, drop-zone, file-browser, file-progress, processing-bar, player-bar, panels, timeline, camera, empty-state, separator, spinner, icon, theme-toggle, markdown)
+- [x] Sidecar EDN schema + validation in tools.registry (required keys, public fns, destructured or documented props, related ids, categories)
+- [x] `bb gen-docs` emits docs/components/<id>.md, docs/components.md, docs/llms.txt, docs/llms-full.txt
+- [x] ui.registry-test: every component has a valid sidecar; markdown renders; llms.txt has the agent rules
+- [ ] Split dev/shared demos.cljc into dev/examples/<component>.cljc with source-capturing macro (moved to Phase 2, it is part of the site design)
+- [x] All 46 sidecars written (ui.theme and ui.util are helpers, exempt)
 
 ## Phase 2: Demo site rebuild
 

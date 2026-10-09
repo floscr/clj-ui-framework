@@ -1,0 +1,28 @@
+{:id :markdown
+ :title "Markdown"
+ :summary "A minimal markdown to hiccup renderer for docs and chat replies: headings, code blocks, tables, lists, inline code and bold."
+ :category :text
+ :group "Text"
+ :keywords ["markdown" "render" "hiccup" "docs" "code block"]
+
+ :when-to-use
+ ["Rendering documentation, help text or assistant replies written in simple markdown."]
+
+ :when-not-to-use
+ ["Use a full parser for nested lists, links in tables, footnotes or HTML passthrough."
+  "Escape untrusted input yourself before rendering."]
+
+ :usage "(require '[ui.markdown :as markdown])\n\n(into [:div.md] (markdown/markdown->hiccup \"# Title\\n\\nSome **bold** text with `code`.\"))"
+
+ :api
+ [{:fn "markdown->hiccup" :doc "Converts a markdown string to a vector of hiccup elements with md- classes."}]
+
+ :accessibility ["Produces semantic headings, lists, tables and pre blocks."]
+ :motion ["None."]
+ :responsive ["Code blocks scroll horizontally; tables are plain and may need a wrapper on phones."]
+
+ :targets {:clj "Pure function." :cljs "Pure function." :squint "Pure function."}
+
+ :notes-for-ai ["Pass the output as children of a chat-bubble or a card body."]
+
+ :related [:chat :card]}

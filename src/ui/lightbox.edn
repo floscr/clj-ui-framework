@@ -1,0 +1,37 @@
+{:id :lightbox
+ :title "Lightbox"
+ :summary "A fullscreen image overlay with pinch, wheel and double-tap zoom and drag to pan, plus a clickable thumbnail."
+ :category :media
+ :group "Media"
+ :keywords ["lightbox" "image viewer" "zoom" "fullscreen image" "gallery"]
+
+ :when-to-use
+ ["Viewing one image large from a grid or a message."]
+
+ :when-not-to-use
+ ["Use dialog for content that is not a single image."
+  "Use grid plus thumbnails for the collection itself."]
+
+ :usage "(require '[ui.lightbox :as lightbox])\n\n(lightbox/image-thumbnail {:src thumb :on-click #(open! full})\n(lightbox/lightbox {:src (:open-image state) :on-close close!})"
+
+ :api
+ [{:fn "lightbox" :doc "Renders the overlay only while :src is set. Clicking the backdrop or the close button calls :on-close."
+   :props [{:name :src :type "string | nil"} {:name :alt :type "string" :default "\"image\""} {:name :on-close :type "fn"}]}
+  {:fn "image-thumbnail" :doc "A clickable image."
+   :props [{:name :src :type "string"} {:name :alt :type "string"} {:name :on-click :type "fn"} {:name :class :type "string | vector"}]}]
+
+ :keyboard [["Escape" "Closes (wire in the host for the overlay variant)."]]
+
+ :accessibility ["The image keeps its alt text; the close button is labeled."]
+ :motion ["The overlay fades in over --duration-fast; zoom follows the gesture directly and snaps back into bounds on release."]
+ :responsive ["Two-finger pinch and one-finger pan on touch; the page-level pinch block stays in place."]
+ :runtime ["ui.js.lightbox"]
+
+ :targets
+ {:clj "Render the overlay from a query parameter or open it with inline JS."
+  :cljs "Controlled by state via :src and :on-close."
+  :squint "Same as Replicant; require ui.js.lightbox in the SPA."}
+
+ :notes-for-ai ["Do not hand-roll zoom; the runtime owns it and resets on image load."]
+
+ :related [:grid :dialog :camera]}

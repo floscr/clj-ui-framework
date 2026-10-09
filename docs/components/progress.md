@@ -82,10 +82,10 @@ Vector form.
 
 ## Related
 
-- `spinner`
+- [Spinner](spinner.md): An indeterminate loading indicator in four sizes that inherits the current text color.
 - [Skeleton](skeleton.md): Reserves space with a pulsing placeholder while content loads.
-- `file-progress`: File progress list — shows files with upload/processing status.
-- `processing-bar`: Processing bar — compact panel showing background jobs in progress.
+- [File progress](file-progress.md): A bordered list of files with size, status and an optional progress bar and remove button.
+- [Processing bar](processing-bar.md): A compact accent-bordered panel listing background jobs in progress with thumbnails, labels and spinners.
 
 ## Guidance for AI tools
 

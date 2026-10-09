@@ -1,0 +1,33 @@
+{:id :separator
+ :title "Separator"
+ :summary "A hairline divider, horizontal or vertical, for grouping content."
+ :category :layout
+ :group "Layout"
+ :keywords ["separator" "divider" "hr" "rule"]
+
+ :when-to-use
+ ["Dividing groups inside a surface where spacing alone is not enough (menus, sidebars, toolbars)."]
+
+ :when-not-to-use
+ ["Prefer spacing first; a border second; a separator only where the two cannot do the job."
+  "Inside toolbar or button-group use their own separator components."]
+
+ :usage "(require '[ui.separator :as separator])\n\n(separator/separator {})\n(separator/separator {:orientation :vertical :class \"mx-2\"})"
+
+ :api
+ [{:fn "separator"
+   :doc "A <div role=none> line."
+   :props [{:name :orientation :type ":horizontal | :vertical" :default ":horizontal"}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "separator-classes" :doc "Class string for {:orientation}."}
+  {:fn "separator-class-list" :doc "Vector form."}]
+
+ :accessibility ["Decorative (role=none). Use a heading, not a separator, to announce a new section."]
+ :motion ["None."]
+ :responsive ["A vertical separator needs a flex row with a defined height."]
+
+ :targets {:clj "Static markup." :cljs ":class may be a vector." :squint "Static markup."}
+
+ :notes-for-ai ["Uses border-subtle; never draw your own 1px lines."]
+
+ :related [:toolbar :button-group :sidebar]}

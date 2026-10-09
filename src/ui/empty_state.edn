@@ -1,0 +1,37 @@
+{:id :empty-state
+ :title "Empty state"
+ :summary "A centered placeholder with an optional icon for lists and views that have nothing to show yet."
+ :category :feedback
+ :group "Status"
+ :keywords ["empty state" "no results" "placeholder" "zero state"]
+
+ :when-to-use
+ ["A list, search or filter returned nothing."
+  "A feature not set up yet, with one next step."]
+
+ :when-not-to-use
+ ["Use skeleton while content is still loading."
+  "Use alert for an error that prevented loading."]
+
+ :usage "(require '[ui.empty-state :as empty-state])\n\n(empty-state/empty-state {:icon :inbox}\n  [:p \"No projects yet\"]\n  [:p.text-muted \"Projects you create or join appear here.\"]\n  (button/button {:variant :primary :icon-left :plus} \"Create project\"))"
+
+ :api
+ [{:fn "empty-state"
+   :doc "A centered column with muted text and an optional large icon above."
+   :children "Title, description and at most one action."
+   :props [{:name :icon :type "icon keyword" :doc "Rendered at :xl above the content."}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "empty-state-classes" :doc "Class string."}
+  {:fn "empty-state-class-list" :doc "Vector form."}]
+
+ :accessibility ["Say why it is empty and what to do next in text; the icon is decorative."]
+ :motion ["None."]
+ :responsive ["Fills its region with generous padding; keep copy to two short lines."]
+
+ :targets {:clj "Static markup." :cljs ":class may be a vector." :squint "Static markup."}
+
+ :notes-for-ai
+ ["Title: No projects yet. Description: why and when something appears. Action: a verb plus object."
+  "No results from a search gets a Clear filters action, not a Create action."]
+
+ :related [:skeleton :alert :button]}

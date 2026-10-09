@@ -260,8 +260,8 @@ Preset: icon input joined to a primary button; wrapped in a GET <form> when :act
 
 - [Select](select.md): A compact choice field with a framework-drawn listbox, keyboard navigation and form support.
 - [Switch](switch.md): A toggle for a setting that takes effect immediately.
-- `number-field`
-- `tag-input`
+- [Number field](number-field.md): A bounded numeric input with increment and decrement steppers and scroll-wheel support.
+- [Tag input](tag-input.md): Turns short text into removable tags with a filtered suggestion dropdown; fully controlled by the host.
 - [Button](button.md): A single action with quiet secondary states, press feedback and a loading spinner.
 
 ## Guidance for AI tools

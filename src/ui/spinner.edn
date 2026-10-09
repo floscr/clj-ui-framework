@@ -1,0 +1,38 @@
+{:id :spinner
+ :title "Spinner"
+ :summary "An indeterminate loading indicator in four sizes that inherits the current text color."
+ :category :feedback
+ :group "Status"
+ :keywords ["spinner" "loading" "indeterminate" "busy"]
+
+ :when-to-use
+ ["Short waits with no layout to reserve: inside a button, next to a label, in a toolbar."
+  "Unknown duration."]
+
+ :when-not-to-use
+ ["Use skeleton to reserve space for content that is loading."
+  "Use progress when the completion is known."
+  "Prefer button :loading over placing a spinner next to a button."]
+
+ :usage "(require '[ui.spinner :as spinner])\n\n(spinner/spinner {:size :sm})"
+
+ :api
+ [{:fn "spinner"
+   :doc "A <span> with role=status and a Loading label; the ring uses currentColor."
+   :props [{:name :size :type ":xs | :sm | :md | :lg" :default ":md"}
+           {:name :class :type "string"} {:name :attrs :type "map" :doc "Override aria-label with something specific."}]}
+  {:fn "spinner-classes" :doc "Class string for {:size}."}
+  {:fn "spinner-class-list" :doc "Vector form."}]
+
+ :accessibility ["Announces Loading once via role=status; pass a specific aria-label when several spinners are on screen."]
+
+ :motion ["Spins continuously; reduced motion stops the rotation (the ring stays visible)."]
+
+ :responsive ["Sizes are fixed; :sm fits inside a button, :lg centers in an empty region."]
+
+ :targets
+ {:clj "Static markup." :cljs ":class may be a vector." :squint "Static markup."}
+
+ :notes-for-ai ["Inside a button use the button's :loading prop; it picks the right size and color."]
+
+ :related [:skeleton :progress :button]}

@@ -1,0 +1,52 @@
+{:id :camera
+ :title "Camera"
+ :summary "A viewfinder with capture and camera switch, falling back to the native file input capture on plain HTTP, plus stream helpers."
+ :category :media
+ :group "Media"
+ :keywords ["camera" "getUserMedia" "capture photo" "viewfinder" "mobile camera"]
+
+ :when-to-use
+ ["Taking a photo inside the app: scanning documents, receipts, attaching a picture."
+  "Mobile-first flows where the OS camera via a file input is enough on HTTP."]
+
+ :when-not-to-use
+ ["Use drop-zone or form-file to pick existing images."
+  "Do not use for video recording; the helpers capture single JPEG frames."]
+
+ :usage "(require '[ui.camera :as camera])\n\n(camera/camera-view {:active? live?\n                     :on-capture #(camera/capture-photo! {})\n                     :on-switch toggle-facing!\n                     :on-files handle-files!})\n;; after rendering with :active? true\n(camera/start-camera! {:facing \"environment\" :on-error show-error!})"
+
+ :api
+ [{:fn "camera-view"
+   :doc "Live viewfinder (video, crosshair, round capture button, optional switch) when :active?, otherwise a tap-to-capture placeholder wrapping <input type=file capture>."
+   :props [{:name :active? :type "boolean" :default "false"}
+           {:name :video-id :type "string" :default "\"ui-camera-video\""}
+           {:name :facing :type "\"environment\" | \"user\"" :default "\"environment\""}
+           {:name :placeholder :type "string" :default "\"Tap to take a photo\""}
+           {:name :accept :type "string" :default "\"image/*\""}
+           {:name :on-capture :type "fn []" :doc ":cljs and :squint."}
+           {:name :on-switch :type "fn []" :doc "Shows the facing toggle when given."}
+           {:name :on-files :type "fn [files]" :doc "Native input selection."}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "start-camera!" :doc "Starts a getUserMedia stream on the <video> (browser only). Opts :video-id :facing :on-active :on-error."}
+  {:fn "stop-camera!" :doc "Stops the active stream."}
+  {:fn "capture-photo!" :doc "Returns {:preview data-url :data base64 :mime-type} for the current frame. Opts :video-id :quality."}
+  {:fn "camera-capable?" :doc "HTTP-safe heuristic: touch plus coarse pointer."}
+  {:fn "has-camera-api?" :doc "True when getUserMedia exists (secure context)."}
+  {:fn "detect-camera!" :doc "Refines capability via enumerateDevices in secure contexts."}]
+
+ :keyboard [["Enter / Space" "On the placeholder, opens the OS camera or file picker."]]
+
+ :accessibility ["The capture and switch buttons have labels; the placeholder is a labeled file input."]
+ :motion ["Capture button press feedback over --duration-fast."]
+ :responsive ["The viewfinder keeps a 4 by 3 ratio and fills its column; the placeholder is a large tap target."]
+
+ :targets
+ {:clj "Placeholder only (native capture input); the stream helpers are browser-only."
+  :cljs "Full viewfinder with the stream helpers."
+  :squint "Same as Replicant."}
+
+ :notes-for-ai
+ ["Seed with camera-capable?, then refine with detect-camera! on HTTPS."
+  "Call stop-camera! when leaving the view."]
+
+ :related [:drop-zone :lightbox :form]}

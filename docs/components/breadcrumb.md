@@ -73,7 +73,7 @@ Renders <nav aria-label=Breadcrumb> with an ordered list. The last item is the c
 ## Related
 
 - [Pagination](pagination.md): Move through a long collection with numbered pages and previous and next links.
-- `sidebar`
+- [Sidebar](sidebar.md): An app shell: a sticky sidebar with brand, search, grouped menus, collapsible sections, user footer and a mobile drawer, next to the main area.
 - [Tabs](tabs.md): Switch between peer panels of one object, with no JS: hidden radios drive the panels.
 
 ## Guidance for AI tools

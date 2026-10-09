@@ -1,0 +1,59 @@
+{:id :tag-input
+ :title "Tag input"
+ :summary "Turns short text into removable tags with a filtered suggestion dropdown; fully controlled by the host."
+ :category :inputs
+ :group "Selection"
+ :keywords ["tag input" "multi-select" "tokens" "chips input" "autocomplete"]
+
+ :when-to-use
+ ["Several values from a known list (labels, people, categories) in a form."
+  "Free-text tags where each entry becomes a removable pill."]
+
+ :when-not-to-use
+ ["Use select for exactly one value."
+  "Use chip for a small fixed set of filters shown all at once."]
+
+ :usage "(require '[ui.tag-input :as tag-input])\n\n(tag-input/tag-input {:tags selected\n                      :input-value query\n                      :open (seq suggestions)\n                      :filtered-items suggestions\n                      :active-index active\n                      :placeholder \"Add label…\"\n                      :on-input set-query!\n                      :on-select add-tag!\n                      :on-remove remove-tag!\n                      :on-backspace remove-last!\n                      :on-key-down handle-key!})"
+
+ :examples
+ [{:title "Filtering suggestions"
+   :code "(tag-input/filter-tags all-tags selected query) ; excludes selected, matches case-insensitively"}]
+
+ :api
+ [{:fn "tag-input"
+   :doc "The field: selected tag pills, a text input and the dropdown. All state lives in the host."
+   :props [{:name :tags :type "vector of {:label :value}" :doc "Selected tags."}
+           {:name :input-value :type "string"}
+           {:name :open :type "boolean" :doc "Show the dropdown."}
+           {:name :filtered-items :type "vector" :doc "Suggestions to show (already filtered)."}
+           {:name :active-index :type "int" :doc "Highlighted suggestion."}
+           {:name :placeholder :type "string" :default "\"Add tag...\""}
+           {:name :disabled :type "boolean"}
+           {:name :on-input :type "fn [value]"} {:name :on-remove :type "fn [tag]"} {:name :on-select :type "fn [item]"}
+           {:name :on-backspace :type "fn []" :doc "Backspace on an empty input."}
+           {:name :on-clear :type "fn []"} {:name :on-focus :type "fn []"} {:name :on-blur :type "fn []"}
+           {:name :on-key-down :type "fn [key-code]" :doc "Arrow and Enter handling."}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "tag-pill" :doc "One selected tag with a remove button."
+   :props [{:name :label :type "string"} {:name :on-remove :type "fn"} {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "tag-dropdown" :doc "The suggestion list."
+   :props [{:name :open :type "boolean"} {:name :items :type "vector"} {:name :on-select :type "fn"} {:name :active-index :type "int"}
+           {:name :empty-text :type "string"} {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "tag-dropdown-item" :doc "One suggestion row."
+   :props [{:name :label :type "string"} {:name :on-select :type "fn"} {:name :active :type "boolean"} {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "tag-input-classes" :doc "Class string for {:focused :disabled}."}]
+
+ :keyboard [["Type" "Filters suggestions."] ["ArrowUp / ArrowDown" "Move the highlight (host handles :on-key-down)."] ["Enter" "Adds the highlighted suggestion."] ["Backspace on empty" "Removes the last tag."]]
+
+ :accessibility ["Pills have remove buttons with labels; the dropdown items are buttons. Give the field a label with form-field."]
+ :motion ["Focus ring and dropdown fade over --duration-fast."]
+ :responsive ["Pills wrap inside the field; the dropdown is capped and scrolls."]
+
+ :targets
+ {:clj "Renders the current state statically; no interaction without app JS."
+  :cljs "Controlled; keep tags, query, open and active index in state."
+  :squint "Controlled; filter-tags is available on all targets."}
+
+ :notes-for-ai ["The component owns no state; wire every callback or use a small reducer in the host."]
+
+ :related [:select :chip :form]}

@@ -1,0 +1,53 @@
+{:id :grid
+ :title "Tile grid"
+ :summary "A responsive auto-fill grid of square or masonry tiles with size presets, plus a layout toggle and size stepper for toolbars."
+ :category :layout
+ :group "Layout"
+ :keywords ["grid" "masonry" "tiles" "photo grid" "gallery" "tile size"]
+
+ :when-to-use
+ ["Photo and media galleries, cards of equal weight, any tile collection that should reflow by width."
+  "Letting people pick tile size and layout from a toolbar."]
+
+ :when-not-to-use
+ ["Use file-browser for files with names, sizes and list views."
+  "Use the layout.css 12-column helpers for page layout, not for collections."]
+
+ :usage "(require '[ui.grid :as grid])\n\n(grid/grid {:layout :masonry :size :m}\n  (for [img images] (lightbox/image-thumbnail {:src (:src img)})))"
+
+ :examples
+ [{:title "Toolbar controls"
+   :code "(grid/layout-toggle {:value layout :on-change set-layout! :boxed true})\n(grid/size-stepper {:value size :on-change set-size!})"}
+  {:title "Server-rendered toggle with links"
+   :code "(grid/layout-toggle {:value \"grid\" :options [{:value \"grid\" :icon :grid :label \"Grid\" :href \"/?view=grid\"}\n                                            {:value \"masonry\" :icon :layers :label \"Masonry\" :href \"/?view=masonry\"}]})"}]
+
+ :api
+ [{:fn "grid" :doc "The grid container. Masonry uses the runtime where the browser lacks native masonry rows."
+   :children "Tiles."
+   :props [{:name :layout :type ":grid | :masonry" :default ":grid"}
+           {:name :size :type ":s | :m | :l | :xl | :xxl" :default ":m" :doc "Tile minimum width preset."}
+           {:name :min :type "CSS length" :doc "Explicit tile min width; wins over :size."}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "layout-toggle" :doc "Segmented icon toggle between layouts."
+   :props [{:name :value :type "keyword | string"} {:name :options :type "vector of {:value :icon :label :href}" :default "grid and masonry"}
+           {:name :on-change :type "fn [value]"} {:name :boxed :type "boolean"} {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "size-stepper" :doc "Minus and plus stepper over the size presets, disabled at the ends."
+   :props [{:name :value :type "keyword | string"} {:name :sizes :type "vector" :default "ui.grid/sizes"} {:name :on-change :type "fn [size]"}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "step-size" :doc "Pure: next size along a vector, clamped."}]
+
+ :keyboard [["Tab" "Moves through the toggle and stepper buttons."]]
+
+ :accessibility ["Toggle options have labels; the stepper buttons are labeled and disabled at the ends."]
+ :motion ["None on the grid; masonry re-layout happens on resize without animation."]
+ :responsive ["Auto-fill reflows by width; pick :s on phones through the stepper."]
+ :runtime ["ui.js.masonry"]
+
+ :targets
+ {:clj "Give toggle options :href; the masonry runtime self-initializes."
+  :cljs "Use :on-change on both controls."
+  :squint "Same as Replicant."}
+
+ :notes-for-ai ["Tiles decide their own aspect ratio; the grid only sets columns."]
+
+ :related [:lightbox :file-browser :button-group]}

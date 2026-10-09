@@ -5,7 +5,7 @@
 - Type: Component (feedback, Messages)
 - Namespace: `ui.toast`
 - Source: `src/ui/toast.cljc`
-- Public fns: `toast-class-list`, `toast-classes`, `toast`, `toast-flash`
+- Public fns: `toast-class-list`, `toast-classes`, `toast`, `toast-flash`, `show-toast!`
 - JS runtime: `ui.js.toast` (bundled in ui-runtime.js)
 - Keywords: toast, notification, snackbar, flash message, htmx
 
@@ -104,7 +104,7 @@ Vector form.
 ## Related
 
 - [Alert](alert.md): A persistent inline message with a tone, icon and optional title that helps people recover or continue.
-- `processing-bar`: Processing bar — compact panel showing background jobs in progress.
+- [Processing bar](processing-bar.md): A compact accent-bordered panel listing background jobs in progress with thumbnails, labels and spinners.
 - [Dialog](dialog.md): A focused modal surface for decisions that need attention, as a native <dialog> or an overlay for reactive apps.
 
 ## Guidance for AI tools

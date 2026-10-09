@@ -26,22 +26,29 @@
         str/trim)))
 
 (defn- public-fns
-  "Names of public defns (excludes defn-)."
+  "Names of public defns (excludes defn-), including those nested in
+   reader-conditional splices."
   [src]
-  (->> (re-seq #"(?m)^\(defn (\S+)" src)
+  (->> (re-seq #"\(defn\s+([^\s\[]+)" src)
        (map second)
        distinct
        vec))
 
 (defn- fn-keys
-  "Keys destructured by the first arg of `fn-name` ({:keys [...]}), or nil
-   when the fn does not destructure a map."
+  "Props accepted by `fn-name`: the keys destructured by its first arg
+   ({:keys [...]}) plus every :keyword mentioned in its docstring (for
+   props passed through an `:as props` map). Nil when the fn neither
+   destructures a map nor documents props."
   [src fn-name]
   (when-let [[_ body] (re-find (re-pattern (str "(?s)\\(defn " (java.util.regex.Pattern/quote fn-name)
                                                 "\\s(.*?)(?=\\n\\(def|\\z)"))
                                src)]
-    (when-let [[_ ks] (re-find #"\{:keys\s+\[([^\]]*)\]" body)]
-      (set (map keyword (str/split (str/trim ks) #"\s+"))))))
+    (let [destructured (when-let [[_ ks] (re-find #"\{:keys\s+\[([^\]]*)\]" body)]
+                         (map keyword (str/split (str/trim ks) #"\s+")))
+          docstring    (second (re-find #"(?s)^\s*\"((?:[^\"\\]|\\.)*)\"" body))
+          documented   (when docstring (map (comp keyword second) (re-seq #":([a-z][a-z0-9-]*)" docstring)))]
+      (when (or destructured documented)
+        (set (concat destructured documented))))))
 
 (defn- load-meta [name]
   (let [f (fs/file "src/ui" (str name ".edn"))]
@@ -340,6 +347,6 @@
             (str (llms-txt comps) "\n\n---\n\n"
                  (str/join "\n\n---\n\n" (map second pages))))
       (println "Generated docs/components.md, docs/llms.txt, docs/llms-full.txt and"
-               (count pages) "component pages;"
-               (count missing) "components without a sidecar"
-               (when (seq missing) (str ": " (str/join ", " (map name missing))))))))
+               (count pages) "component pages")
+      (when (seq missing)
+        (println "  no sidecar yet:" (str/join ", " (map name missing)))))))

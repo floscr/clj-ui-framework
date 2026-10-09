@@ -93,7 +93,7 @@ Vector form.
 ## Related
 
 - [Form](form.md): Labeled fields, inputs, textareas, checkboxes, radios, file and range inputs, joined groups and a search bar.
-- `button-group`: Button group — a cluster of related buttons rendered as a segmented
+- [Button group](button-group.md): Related actions as one segmented control: ghost or boxed, with icon items, counts and separators.
 - [Tabs](tabs.md): Switch between peer panels of one object, with no JS: hidden radios drive the panels.
 
 ## Guidance for AI tools

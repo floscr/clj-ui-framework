@@ -88,7 +88,7 @@ Vector form.
 ## Related
 
 - [Card](card.md): A bordered surface that groups related content and actions, plus a divided list variant.
-- `file-browser`: File browser components — grid/list views.
+- [File browser](file-browser.md): Grid tiles and a sortable list or table of files and folders with type icons, selection and per-item context menus.
 - [Pagination](pagination.md): Move through a long collection with numbered pages and previous and next links.
 - [Badge](badge.md): A small pill for status, category or a count, with an optional leading icon.
 

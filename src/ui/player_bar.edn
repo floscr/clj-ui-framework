@@ -1,0 +1,40 @@
+{:id :player-bar
+ :title "Player bar"
+ :summary "A music player bar with artwork, track info, transport controls, a scrubbable progress track and volume."
+ :category :media
+ :group "Media"
+ :keywords ["player" "audio player" "transport controls" "now playing" "scrubber"]
+
+ :when-to-use
+ ["A persistent playback bar at the bottom of a music or podcast app."]
+
+ :when-not-to-use
+ ["Use timeline for editing media with segments."
+  "Use progress for a plain non-interactive bar."]
+
+ :usage "(require '[ui.player-bar :as player-bar])\n\n(player-bar/player-bar {:track-name \"Across the Universe\" :subtitle \"The Beatles\"\n                        :playing true :progress 36 :current-time \"1:23\" :duration \"3:48\"\n                        :on-play-pause toggle! :on-next next! :on-previous prev!\n                        :on-seek seek-from-event!})"
+
+ :api
+ [{:fn "player-bar" :doc "The full bar. All state comes from props; every control reports through a callback."
+   :props [{:name :track-name :type "string"} {:name :subtitle :type "string"} {:name :artwork :type "hiccup"}
+           {:name :playing :type "boolean"} {:name :progress :type "0 to 100"} {:name :current-time :type "string"} {:name :duration :type "string"}
+           {:name :shuffle :type "boolean"} {:name :repeat :type "boolean"} {:name :favorited :type "boolean"}
+           {:name :on-play-pause :type "fn"} {:name :on-next :type "fn"} {:name :on-previous :type "fn"} {:name :on-shuffle :type "fn"} {:name :on-repeat :type "fn"}
+           {:name :on-favorite :type "fn"} {:name :on-seek :type "fn [pointer-event]" :doc "Fires on tap and while dragging the track; compute the position from clientX and the target rect."}
+           {:name :on-volume :type "fn"} {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "player-bar-classes" :doc "Class string for the container."}]
+
+ :keyboard [["Tab" "Moves through the transport buttons."] ["Space on play" "Toggles playback."]]
+
+ :accessibility ["Every control is a labeled icon button; times use tabular numerals."]
+ :motion ["The scrubber thumb appears on hover (always on touch) over --duration-fast; press feedback on buttons."]
+ :responsive ["Secondary controls hide below the small breakpoint; the track stays scrubbable by touch."]
+
+ :targets
+ {:clj "Static bar; wire controls with :attrs or HTMX."
+  :cljs "All callbacks; :on-seek receives the pointer event."
+  :squint "Same as Replicant."}
+
+ :notes-for-ai ["Keep the bar outside scrolling containers so it stays fixed at the bottom."]
+
+ :related [:timeline :progress :button]}

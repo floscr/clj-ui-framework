@@ -1,0 +1,57 @@
+{:id :file-browser
+ :title "File browser"
+ :summary "Grid tiles and a sortable list or table of files and folders with type icons, selection and per-item context menus."
+ :category :data
+ :group "Collections"
+ :keywords ["file browser" "file manager" "folder" "grid view" "list view" "sortable columns"]
+
+ :when-to-use
+ ["Browsing files, folders, media or any collection that switches between a tile grid and a detail list."
+  "Lists that need sortable columns and a right-click menu per row."]
+
+ :when-not-to-use
+ ["Use table for plain records without a grid view."
+  "Use grid for image tiles without file semantics."]
+
+ :usage "(require '[ui.file-browser :as fb])\n\n[:div.fb-list\n (fb/file-list-header {:sort-key :name :sort-dir :asc :on-sort sort!})\n (for [item files]\n   (fb/file-item-list {:item item :on-click open!\n                       :context-menu-items [{:label \"Open\" :icon :folder}\n                                            {:label \"Delete\" :icon :trash :variant :danger}]}))]"
+
+ :examples
+ [{:title "Grid tiles with a view toggle"
+   :code "(fb/file-view-toggle {:view :grid :on-grid-click #(set-view! :grid) :on-list-click #(set-view! :list)})\n[:div.fb-grid (for [item files] (fb/file-item-grid {:item item :selected (= item current)}))]"}
+  {:title "Custom table columns"
+   :code "(fb/file-table {:columns [fb/col-name fb/col-size {:key :owner :label \"Owner\" :width \"120px\"}]\n                :items files :sort-key :name :sort-dir :asc :on-sort sort! :on-row-click open!})"}]
+
+ :api
+ [{:fn "file-item-grid" :doc "A file as a grid tile (icon, name, size)."
+   :props [{:name :item :type "{:name :file-type :size}"} {:name :selected :type "boolean"} {:name :on-click :type "fn"}
+           {:name :context-menu-items :type "vector" :doc "Wraps the tile in a context-menu-trigger."} {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "file-item-list" :doc "A file as a list row (name, size, modified, type)."
+   :props [{:name :item :type "{:name :file-type :size :modified}"} {:name :selected :type "boolean"} {:name :on-click :type "fn"}
+           {:name :context-menu-items :type "vector"} {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "file-list-header" :doc "Column headers for the list view with sort indicators."
+   :props [{:name :sort-key :type ":name | :size | :modified | :type"} {:name :sort-dir :type ":asc | :desc"} {:name :on-sort :type "fn [col-key]"} {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "file-table" :doc "Configurable CSS-grid table with sortable headers, row click, selection and per-row context menus."
+   :props [{:name :columns :type "vector of {:key :label :width :render :class}" :default "default-columns"} {:name :items :type "vector"}
+           {:name :sort-key :type "keyword"} {:name :sort-dir :type ":asc | :desc"} {:name :on-sort :type "fn [col-key]"} {:name :on-row-click :type "fn [item]"}
+           {:name :selected-fn :type "fn [item] -> boolean"} {:name :context-menu-items-fn :type "fn [item] -> items"} {:name :row-attrs-fn :type "fn [item] -> map"}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "file-view-toggle" :doc "Grid and list toggle buttons."
+   :props [{:name :view :type ":grid | :list"} {:name :on-grid-click :type "fn"} {:name :on-list-click :type "fn"}]}
+  {:fn "file-type-icon" :doc "Icon for a file type."
+   :props [{:name :file-type :type "keyword" :doc ":folder :image :video :audio :document and so on."} {:name :size :type "icon size"}]}
+  {:fn "file-type->icon" :doc "Icon name for a file type."}]
+
+ :keyboard [["Tab / Enter" "Rows and tiles are buttons."] ["Shift+F10" "Opens the row's context menu."]]
+
+ :accessibility ["Sortable headers are buttons with the sort direction in text; type icons are decorative next to the name."]
+ :motion ["Row and tile hover tints over --duration-fast."]
+ :responsive ["The list header and rows share a grid template; on phones prefer the grid view or hide secondary columns with :columns."]
+
+ :targets
+ {:clj "Render links in :attrs or :row-attrs-fn for navigation; context menus work through the runtime."
+  :cljs "All callbacks available."
+  :squint "Same as Replicant; file-type->icon returns strings."}
+
+ :notes-for-ai ["Sort in the host and pass the sorted :items; the component only renders indicators."]
+
+ :related [:table :grid :context-menu :drop-zone]}
