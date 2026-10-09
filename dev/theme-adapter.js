@@ -57,7 +57,7 @@
 
   // ── Border radius ──────────────────────────────────────────────
   // Base values in px, scaled by a multiplier (0–2×)
-  var RADIUS_DEFAULTS = [['sm',6],['md',10],['lg',16],['control',12],['panel',18],['surface',24]];
+  var RADIUS_DEFAULTS = [['xs',3],['sm',5],['md',8],['lg',12],['control',9],['panel',14],['surface',18]];
   var DEFAULT_RADIUS_SCALE = 1.0;
 
   // ── State ──────────────────────────────────────────────────────

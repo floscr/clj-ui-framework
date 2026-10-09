@@ -7,7 +7,7 @@ Nothing below starts until the decisions in that doc's section 6 are made.
 
 - [x] Fonts: system stack behind `--font-body` / `--font-display` tokens; a self-hosted face is a one-token swap later
 - [x] Default palette: tinted gray + purple; `data-accent` offers neutral, blue, teal, green, amber, orange, red, pink
-- [x] Radii scale: tamer concentric set, control 12 / panel 18 / surface 24 / pill
+- [x] Radii scale: concentric set, control 9 / panel 14 / surface 18 / pill (started at 12 / 18 / 24, scaled to 75% on review)
 - [x] Metadata: EDN sidecar per component (Phase 1)
 - [x] Blocks live in `ui.blocks.*` in this repo (Phase 5)
 
