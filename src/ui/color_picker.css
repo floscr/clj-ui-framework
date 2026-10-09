@@ -1,0 +1,153 @@
+/* ── Color picker (ui.color-picker + ui.js.color-picker runtime) ───── */
+
+.color-picker {
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-2);
+  width: 100%;
+}
+
+.color-picker--disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* format segmented control */
+.color-picker-formats {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 2px;
+  padding: 2px;
+  background: var(--bg-1);
+  border: var(--border-0);
+  border-radius: var(--radius-sm);
+}
+
+.color-picker-format {
+  height: 24px;
+  font-size: var(--font-xs);
+  color: var(--fg-1);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-xs);
+  cursor: pointer;
+}
+
+.color-picker-format:hover { color: var(--fg-0); }
+
+.color-picker-format[data-active="true"] {
+  color: var(--fg-0);
+  background: var(--bg-2);
+  box-shadow: var(--shadow-0);
+}
+
+/* 2D saturation / brightness plane */
+.color-picker-plane {
+  position: relative;
+  width: 100%;
+  height: 140px;
+  border-radius: var(--radius-sm);
+  border: var(--border-0);
+  cursor: crosshair;
+  outline: none;
+  touch-action: none;
+  overflow: hidden;
+}
+
+.color-picker-plane:focus-visible { box-shadow: inset 0 0 0 1px var(--accent); }
+
+.color-picker-marker {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.4);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+/* hue + opacity tracks */
+.color-picker-tracks {
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-1);
+}
+
+.color-picker-track-row {
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  align-items: center;
+  gap: var(--size-2);
+  font-size: var(--font-xs);
+  color: var(--fg-1);
+}
+
+.color-picker-track {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 12px;
+  margin: 0;
+  border-radius: 999px;
+  border: var(--border-0);
+  cursor: pointer;
+  outline: none;
+}
+
+.color-picker-track:focus-visible { box-shadow: 0 0 0 2px var(--accent); }
+
+.color-picker-hue {
+  background: linear-gradient(to right,
+    hsl(0, 100%, 50%), hsl(60, 100%, 50%), hsl(120, 100%, 50%),
+    hsl(180, 100%, 50%), hsl(240, 100%, 50%), hsl(300, 100%, 50%), hsl(360, 100%, 50%));
+}
+
+.color-picker-opacity {
+  --color-picker-solid: #000;
+  background-color: #fff;
+  background-image:
+    linear-gradient(to right, transparent, var(--color-picker-solid)),
+    linear-gradient(45deg, #ccc 25%, transparent 25%, transparent 75%, #ccc 75%),
+    linear-gradient(45deg, #ccc 25%, transparent 25%, transparent 75%, #ccc 75%);
+  background-size: 100% 100%, 8px 8px, 8px 8px;
+  background-position: 0 0, 0 0, 4px 4px;
+}
+
+.color-picker-track::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.35);
+  box-shadow: var(--shadow-0);
+  cursor: pointer;
+}
+
+.color-picker-track::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.35);
+  box-shadow: var(--shadow-0);
+  cursor: pointer;
+}
+
+/* css value input */
+.color-picker-text {
+  width: 100%;
+  font-size: var(--font-xs);
+  font-family: var(--font-mono, monospace);
+  color: var(--fg-0);
+  background: var(--bg-1);
+  border: var(--border-0);
+  border-radius: var(--radius-sm);
+  padding: var(--size-1) var(--size-2);
+  outline: none;
+}
+
+.color-picker-text:focus-visible { box-shadow: inset 0 0 0 1px var(--accent); }

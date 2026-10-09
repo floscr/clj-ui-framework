@@ -38,6 +38,7 @@
             [ui.tabs :as tabs]
             [ui.form :as form]
             [ui.number-field :as number-field]
+            [ui.color-picker :as color-picker]
             [ui.chat :as chat]))
 
 ;; ── Cross-target helpers ────────────────────────────────────────────
@@ -656,6 +657,20 @@
      (nf-cell "In form" (form/form-field {:label "Amount" :hint "Between 10 and 100."}
                           (number-field/number-field {:value 5 :min 0 :max 100 :name "amount"})))
      (nf-cell "Disabled" (number-field/number-field {:value 5 :disabled true}))]))
+
+(defn- cp-cell [label picker]
+  [:div {:style (sx {:width "16rem"})}
+   [:h4 {:style (sx {:margin-bottom "0.75rem"})} label]
+   picker])
+
+(defn color-picker-demo []
+  (section "Color Picker"
+    [:p {:style (sx {:margin "0" :color "var(--fg-2)" :font-size "var(--font-sm)"})}
+     "Drag the plane, move the tracks, or type any CSS color and press Enter."]
+    [:div {:style (sx {:display "flex" :flex-wrap "wrap" :gap "1.5rem" :align-items "flex-start"})}
+     (cp-cell "All formats + opacity" (color-picker/color-picker {:value "#3b82f6" :alpha true}))
+     (cp-cell "Hex only" (color-picker/color-picker {:value "#1f2937" :formats [:hex]}))
+     (cp-cell "Disabled" (color-picker/color-picker {:value "hsl(140, 60%, 45%)" :disabled true}))]))
 
 (defn chat-demo []
   (section "Chat"

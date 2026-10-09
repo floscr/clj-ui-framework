@@ -4,7 +4,7 @@
 > See `AGENTS.md` for conventions, per-target pitfalls, and how to
 > add new components and icons.
 
-## Components (47)
+## Components (48)
 
 | Component | Namespace | Description | Public API |
 |-----------|-----------|-------------|------------|
@@ -20,6 +20,7 @@
 | card | `ui.card` |  | `card-class-list`, `card-classes`, `card`, `card-header`, `card-body`, `card-footer`, `card-list-class-list`, `card-list-classes`, `card-list`, `card-list-item` |
 | chat | `ui.chat` | Chat conversation components: message log, bubbles, thinking indicator, | `chat-bubble-class-list`, `chat-bubble-classes`, `chat-log`, `chat-bubble`, `chat-thinking`, `chat-toolbar`, `chat-input` |
 | chip | `ui.chip` |  | `chip-class-list`, `chip-classes`, `chip` |
+| color_picker | `ui.color-picker` | Color picker — saturation/brightness plane, hue and opacity tracks, format switch and CSS value field. | `normalize-formats`, `color-picker-class-list`, `color-picker-classes`, `color-picker` |
 | command | `ui.command` | Command palette — a searchable command menu (cmdk-style) rendered in a | `command-item`, `command-group`, `command-dialog`, `command-trigger` |
 | context_menu | `ui.context-menu` | Context menu component — right-click menu for wrapped elements. | `icon-paths-for`, `normalize-item`, `context-menu-trigger` |
 | dialog | `ui.dialog` |  | `dialog-class-list`, `dialog-classes`, `dialog`, `dialog-overlay`, `dialog-panel`, `dialog-header`, `dialog-body`, `dialog-footer` |

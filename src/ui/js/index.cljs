@@ -1,5 +1,6 @@
 (ns index
-  (:require [command]
+  (:require [color-picker]
+            [command]
             [context-menu]
             [dial]
             [drop-zone]
