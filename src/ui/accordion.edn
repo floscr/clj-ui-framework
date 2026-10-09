@@ -1,0 +1,48 @@
+{:id :accordion
+ :title "Accordion"
+ :summary "Progressively reveal supporting content in place, using native details and summary with no JS."
+ :category :disclosure
+ :group "Navigation"
+ :keywords ["accordion" "collapsible" "details" "faq" "expand"]
+
+ :when-to-use
+ ["Stacked sections read in order where most people only need some: FAQ, advanced settings, long help."
+  "Content that must collapse on server-rendered pages without JS."]
+
+ :when-not-to-use
+ ["Use tabs for peer panels of one object where one is always visible."
+  "Use dialog or popover for content that should float over the page."
+  "Do not hide the primary content of a page in a collapsed accordion."]
+
+ :usage "(require '[ui.accordion :as accordion])\n\n[:div\n (accordion/accordion {:title \"What is this framework?\" :open true}\n   [:p \"A cross-target component library for Clojure.\"])\n (accordion/accordion {:title \"How do I use it?\"}\n   [:p \"Require the namespace and call the functions.\"])]"
+
+ :api
+ [{:fn "accordion"
+   :doc "One collapsible item: <details> with a styled <summary> and a chevron. Stack several for a group; adjacent items join their borders."
+   :children "The revealed content."
+   :props [{:name :title :type "string" :doc "Trigger text."}
+           {:name :open :type "boolean" :doc "Initially expanded."}
+           {:name :class :type "string"} {:name :attrs :type "map" :doc "For example {:name \"faq\"} to make items exclusive in supporting browsers."}]}
+  {:fn "accordion-classes" :doc "Class string for the item."}
+  {:fn "accordion-class-list" :doc "Vector form."}]
+
+ :keyboard [["Enter / Space" "Toggles the focused item (native summary)."]]
+
+ :accessibility
+ ["Native details and summary expose the expanded state without ARIA."
+  "The chevron is aria-hidden; the title is the accessible name."]
+
+ :motion ["The chevron rotates and the trigger tints over --duration-fast. Height does not animate."]
+
+ :responsive ["Full width of its column; the title wraps."]
+
+ :targets
+ {:clj "Works without JS. State is browser-side only."
+  :cljs "Uncontrolled; listen for the toggle event via :attrs if you must react."
+  :squint "Uncontrolled; never pass :open false, use (when x true)."}
+
+ :notes-for-ai
+ ["Titles are questions or short labels in sentence case."
+  "For a FAQ, keep one item open by default on first paint."]
+
+ :related [:tabs :card]}

@@ -136,7 +136,8 @@
               [ui.theme-toggle-test]
               [ui.chat-test]
               [ui.panels-test]
-              [ui.hover-test])
+              [ui.hover-test]
+              [ui.registry-test])
    :task (let [{:keys [fail error]} (t/run-tests
                                       'ui.button-test
                                       'ui.button-group-test
@@ -182,7 +183,8 @@
                                       'ui.theme-toggle-test
                                       'ui.chat-test
                                       'ui.panels-test
-                                      'ui.hover-test)]
+                                      'ui.hover-test
+                                      'ui.registry-test)]
            (when (pos? (+ fail error))
              (System/exit 1)))}
 
@@ -267,7 +269,7 @@
    :task (registry/print-icons!)}
 
   gen-docs
-  {:doc "Generate docs/components.md (component + icon listing)"
+  {:doc "Generate docs/components.md, docs/components/<id>.md, docs/llms.txt and docs/llms-full.txt from the component sidecars"
    :requires ([tools.registry :as registry])
    :task (registry/gen-docs!)}
 

@@ -1,0 +1,45 @@
+{:id :tooltip
+ :title "Tooltip"
+ :summary "Short supporting text for an unfamiliar control, shown on hover and focus with pure CSS."
+ :category :disclosure
+ :group "Overlays"
+ :keywords ["tooltip" "hint" "hover text" "title"]
+
+ :when-to-use
+ ["A one-line hint for an icon-only control or an abbreviation."
+  "Extra context that is helpful but not required to use the control."]
+
+ :when-not-to-use
+ ["Essential information belongs in visible text; tooltips hide it from touch users."
+  "Use popover for rich content or anything interactive."
+  "Use form-field :hint for guidance under an input."]
+
+ :usage "(require '[ui.tooltip :as tooltip])\n\n(tooltip/tooltip {:text \"Copy link\"}\n  (button/button {:icon :link :variant :ghost :attrs {:aria-label \"Copy link\"}}))"
+
+ :api
+ [{:fn "tooltip"
+   :doc "Wraps children in a span that shows :text above it on hover or focus-within."
+   :children "The control the hint belongs to."
+   :props [{:name :text :type "string" :doc "The hint."}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}]
+
+ :keyboard [["Tab" "Focusing the wrapped control shows the tooltip."]]
+
+ :accessibility
+ ["The tooltip is a CSS pseudo-element, so it is not read by screen readers; icon-only controls still need an aria-label."
+  "Hover reveal is gated to hover-capable pointers so touch users do not get a double-tap."]
+
+ :motion ["Fades and lifts in over --duration-fast."]
+
+ :responsive ["Hidden on touch devices; never place required information in a tooltip."]
+
+ :targets
+ {:clj "Static markup, works without JS."
+  :cljs ":class may be a vector."
+  :squint "Static markup."}
+
+ :notes-for-ai
+ ["Keep the text to a few words; no punctuation at the end."
+  "Prefer a visible label when space allows."]
+
+ :related [:popover :button :icon]}

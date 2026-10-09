@@ -1,0 +1,67 @@
+{:id :card
+ :title "Card"
+ :summary "A bordered surface that groups related content and actions, plus a divided list variant."
+ :category :data
+ :group "Surfaces"
+ :keywords ["card" "panel" "surface" "list" "settings rows" "section"]
+
+ :when-to-use
+ ["Grouping a title, body and actions that belong together (a form section, a summary)."
+  "A list of rows on one surface with hairline dividers (card-list), for settings or options."
+  "A real boundary between regions of a page. Prefer proximity and spacing first, a card second."]
+
+ :when-not-to-use
+ ["Do not nest cards inside cards; use card-list rows or plain spacing inside a card."
+  "Use dialog for content that must interrupt, popover for a small anchored panel."
+  "Use table for records with columns."]
+
+ :usage "(require '[ui.card :as card])\n\n(card/card {}\n  (card/card-header {} [:h3 \"Card title\"] [:p \"Description\"])\n  (card/card-body {} \"Content\")\n  (card/card-footer {}\n    (button/button {} \"Cancel\")\n    (button/button {:variant :primary} \"Save changes\")))"
+
+ :examples
+ [{:title "Divided list with inset dividers"
+   :code "(card/card-list {:divider :inset}\n  (card/card-list-item {} \"Notifications\")\n  (card/card-list-item {} \"Privacy\")\n  (card/card-list-item {} \"Appearance\"))"}
+  {:title "Flush card with sections"
+   :code "(card/card {:class \"card-flush\"}\n  [:div.card-section \"Header row\"]\n  [:div.card-section \"Body row\"])"}]
+
+ :api
+ [{:fn "card"
+   :doc "The surface: bg-1 background, border-0, radius-surface, no shadow. Add class card-flush to remove padding and use .card-section children with dividers."
+   :children "Any hiccup; usually card-header, card-body, card-footer."
+   :props [{:name :class :type "string" :doc "Extra classes (card-flush for a padding-less card)."}
+           {:name :attrs :type "map" :doc "Extra HTML attributes."}]}
+  {:fn "card-header" :doc "Title block; headings inside lose their margin, a <p> renders as the muted description."
+   :props [{:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "card-body" :doc "Main content; first and last child margins are trimmed."
+   :props [{:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "card-footer" :doc "Right-aligned action row."
+   :props [{:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "card-list"
+   :doc "A card surface whose children are rows separated by hairline dividers."
+   :children "card-list-item elements."
+   :props [{:name :divider :type ":full | :inset" :default ":full" :doc "Edge-to-edge dividers or dividers inset from the sides."}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "card-list-item" :doc "One row of a card-list."
+   :props [{:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "card-classes" :doc "Class string for a card."}
+  {:fn "card-list-classes" :doc "Class string for {:divider}."}]
+
+ :accessibility
+ ["A card is a <div>; add a heading inside card-header so the region has a name."
+  "Interactive rows in a card-list should be real buttons or links, not clickable divs."]
+
+ :motion ["None."]
+
+ :responsive
+ ["Cards fill their column; the page sets gutters. Side-by-side cards share the same top and height (align-items stretch)."
+  "Wide tables inside a card scroll inside the card, not the page."]
+
+ :targets
+ {:clj "Static markup."
+  :cljs ":class may be a vector."
+  :squint "Static markup."}
+
+ :notes-for-ai
+ ["Nested radii are concentric: inner = outer minus padding. Use calc(var(--radius-surface) - var(--size-6)) for media inside a padded card."
+  "Settings pages are one card-list per section with label-plus-control rows, not one card per row."]
+
+ :related [:dialog :popover :table :accordion]}

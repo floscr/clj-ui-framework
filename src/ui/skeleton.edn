@@ -1,0 +1,47 @@
+{:id :skeleton
+ :title "Skeleton"
+ :summary "Reserves space with a pulsing placeholder while content loads."
+ :category :feedback
+ :group "Status"
+ :keywords ["skeleton" "loading placeholder" "shimmer" "lazy loading"]
+
+ :when-to-use
+ ["Loading a region whose final layout is known: a card, a list, an avatar and name."
+  "First paint of data-driven views so nothing jumps when the data arrives."]
+
+ :when-not-to-use
+ ["Use spinner for a short action with no layout to reserve, such as a button."
+  "Use progress when the completion is known."
+  "Use empty-state when loading finished and there is nothing to show."]
+
+ :usage "(require '[ui.skeleton :as skeleton])\n\n[:div.vstack\n (skeleton/skeleton {:variant :heading})\n (skeleton/skeleton {:variant :line})\n (skeleton/skeleton {:variant :line :class \"w-full\"})]"
+
+ :examples
+ [{:title "Avatar row"
+   :code "[:div.hstack\n (skeleton/skeleton {:variant :circle})\n (skeleton/skeleton {:variant :line})]"}]
+
+ :api
+ [{:fn "skeleton"
+   :doc "A pulsing block with role=status and an accessible Loading label."
+   :props [{:name :variant :type ":line | :box | :circle | :heading" :doc "Shape and default size."}
+           {:name :class :type "string" :doc "Size it with utilities (w-full) or a custom class."}
+           {:name :attrs :type "map"}]}
+  {:fn "skeleton-classes" :doc "Class string for {:variant}."}
+  {:fn "skeleton-class-list" :doc "Vector form."}]
+
+ :accessibility
+ ["Announces Loading once; mark the surrounding region aria-busy while skeletons show."]
+
+ :motion ["A slow pulse loops while visible; reduced motion stops it."]
+
+ :responsive ["Skeletons take the dimensions of the content they stand in for; match the final layout."]
+
+ :targets
+ {:clj "Static markup."
+  :cljs ":class may be a vector."
+  :squint "Static markup."}
+
+ :notes-for-ai
+ ["Build the skeleton in the final layout with the same dimensions, not a generic block."]
+
+ :related [:spinner :progress :empty-state]}

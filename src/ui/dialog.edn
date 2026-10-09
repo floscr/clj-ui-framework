@@ -1,0 +1,63 @@
+{:id :dialog
+ :title "Dialog"
+ :summary "A focused modal surface for decisions that need attention, as a native <dialog> or an overlay for reactive apps."
+ :category :disclosure
+ :group "Overlays"
+ :keywords ["modal" "dialog" "confirm" "overlay" "showModal"]
+
+ :when-to-use
+ ["A decision that must interrupt: confirm a destructive action, pick before continuing."
+  "A short form (one to four fields) that returns to the page afterwards."]
+
+ :when-not-to-use
+ ["Use popover for small anchored controls that should not dim the page."
+  "Use card or a route for long forms and record detail."
+  "Do not open a dialog for every delete; a danger button with a clear label is enough for reversible actions."]
+
+ :usage "(require '[ui.dialog :as dialog])\n\n;; Native <dialog>, opened with showModal()\n(dialog/dialog {:id \"confirm\"}\n  (dialog/dialog-header {} [:h3 \"Delete project?\"])\n  (dialog/dialog-body {} \"Its 12 files are removed for everyone.\")\n  (dialog/dialog-footer {}\n    (button/button {:attrs {:onclick \"confirm.close()\"}} \"Cancel\")\n    (button/button {:variant :danger} \"Delete project\")))"
+
+ :examples
+ [{:title "Overlay dialog driven by app state (Squint, Replicant)"
+   :code "(when open?\n  (dialog/dialog-overlay {:on-close #(close!)}\n    (dialog/dialog-panel {}\n      (dialog/dialog-header {} [:h3 \"Rename\"])\n      (dialog/dialog-body {} (form/form-input {:value name :on-change set-name!}))\n      (dialog/dialog-footer {}\n        (button/button {:on-click close!} \"Cancel\")\n        (button/button {:variant :primary :on-click save!} \"Save changes\")))))"}]
+
+ :api
+ [{:fn "dialog"
+   :doc "Native <dialog>. Open it with element.showModal() for a backdrop and focus trapping; clicking the backdrop closes it."
+   :children "dialog-header, dialog-body, dialog-footer."
+   :props [{:name :open :type "boolean" :doc "Render open (non-modal) on first paint."}
+           {:name :id :type "string" :doc "Id used to call showModal() / close()."}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "dialog-overlay"
+   :doc "Backdrop that covers the viewport and centers its children. For frameworks where a native <dialog> is impractical."
+   :children "A dialog-panel."
+   :props [{:name :on-close :type "fn" :doc "Called when the backdrop is clicked."}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "dialog-panel" :doc "The surface inside an overlay: bg-1, radius-surface, floating shadow."
+   :props [{:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "dialog-header" :doc "Title block." :props [{:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "dialog-body" :doc "Content block." :props [{:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "dialog-footer" :doc "Right-aligned actions." :props [{:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "dialog-classes" :doc "Class string for the dialog element."}]
+
+ :keyboard [["Escape" "Closes a native dialog (built in). Overlay dialogs close on backdrop click; wire Escape in the app."]
+            ["Tab" "Native dialogs trap focus inside the modal."]]
+
+ :accessibility
+ ["Prefer the native <dialog>: role, focus trap and Escape come for free."
+  "Give the dialog a heading in dialog-header and reference it with aria-labelledby via :attrs."
+  "Overlay dialogs must return focus to the trigger when closed."]
+
+ :motion ["The panel fades and scales in over --duration-fast with --ease-enter; reduced motion keeps the fade only."]
+
+ :responsive ["The panel is capped to the viewport with a margin; below 480px it fills the width."]
+
+ :targets
+ {:clj "Use the native dialog with an inline onclick calling showModal()."
+  :cljs "Either variant; the overlay is driven by state and :on-close."
+  :squint "Use dialog-overlay plus dialog-panel; Eucalypt re-renders on state change."}
+
+ :notes-for-ai
+ ["Name the object and the consequence in the title and body: Delete Harbour? Its 12 files are removed for everyone."
+  "Exactly one primary action in the footer; Cancel is secondary."]
+
+ :related [:popover :command :toast :card]}

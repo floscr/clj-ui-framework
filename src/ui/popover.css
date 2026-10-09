@@ -33,7 +33,7 @@
 }
 
 .popover-content:popover-open {
-  animation: popover-in 0.12s ease;
+  animation: popover-in var(--duration-fast) var(--ease-enter);
 }
 
 @keyframes popover-in {

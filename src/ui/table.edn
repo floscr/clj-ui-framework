@@ -1,0 +1,50 @@
+{:id :table
+ :title "Table"
+ :summary "Records in columns from a headers vector and row vectors, with striped and bordered variants."
+ :category :data
+ :group "Collections"
+ :keywords ["table" "data table" "rows" "columns" "records"]
+
+ :when-to-use
+ ["Structured records with the same fields per row that people compare across columns."
+  "Admin and settings lists with a handful of columns."]
+
+ :when-not-to-use
+ ["Use card-list for one-column lists of options or settings rows."
+  "Use file-browser for files and folders with grid and list views."
+  "For sortable or filterable data, add controls above the table; sorting is not built in yet."]
+
+ :usage "(require '[ui.table :as table])\n\n(table/table {:variant :striped\n              :headers [\"Name\" \"Email\" \"Role\"]\n              :rows [[\"Alice Johnson\" \"alice@example.com\" (badge/badge {:variant :success} \"Active\")]\n                     [\"Bob Smith\" \"bob@example.com\" \"Editor\"]]})"
+
+ :examples
+ [{:title "Bordered, inside a card"
+   :code "(card/card {:class \"card-flush\"}\n  (table/table {:variant :bordered :headers [\"Key\" \"Value\"] :rows rows}))"}]
+
+ :api
+ [{:fn "table"
+   :doc "Renders <table> inside a .table-wrapper that scrolls horizontally when the columns overflow."
+   :props [{:name :headers :type "vector" :doc "Column header cells (strings or hiccup)."}
+           {:name :rows :type "vector of vectors" :doc "Each row is a vector of cell values (strings or hiccup)."}
+           {:name :variant :type "nil | :striped | :bordered" :doc "Zebra rows, or a bordered rounded frame."}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "table-classes" :doc "Class string for {:variant}."}
+  {:fn "table-class-list" :doc "Vector form."}]
+
+ :accessibility
+ ["Real <table>, <thead> and <th> markup, so screen readers get column headers."
+  "Put status in a badge with a word, never color alone."]
+
+ :motion ["Row hover tint over --duration-fast."]
+
+ :responsive ["Wide tables scroll inside the wrapper, not the page. On phones consider a card-list per record instead."]
+
+ :targets
+ {:clj "Static markup."
+  :cljs ":class may be a vector."
+  :squint "Static markup."}
+
+ :notes-for-ai
+ ["Numbers that align in a column get class tabular-nums and right alignment."
+  "Headers are sentence case."]
+
+ :related [:card :file-browser :pagination :badge]}

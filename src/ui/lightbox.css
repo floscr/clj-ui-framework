@@ -9,7 +9,7 @@
   align-items: center;
   justify-content: center;
   cursor: zoom-out;
-  animation: lightbox-in 0.15s ease;
+  animation: lightbox-in var(--duration-fast) var(--ease-enter);
   /* pinch / pan are handled by the ui/js/lightbox runtime */
   touch-action: none;
   overscroll-behavior: contain;

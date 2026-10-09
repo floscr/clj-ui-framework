@@ -1,0 +1,43 @@
+{:id :breadcrumb
+ :title "Breadcrumb"
+ :summary "Shows where a page sits in a hierarchy; every item but the last is a link."
+ :category :disclosure
+ :group "Navigation"
+ :keywords ["breadcrumb" "hierarchy" "navigation path" "ancestors"]
+
+ :when-to-use
+ ["Pages nested two or more levels deep: Projects, Harbour, Settings."
+  "Record pages where people jump back up a level often."]
+
+ :when-not-to-use
+ ["Top-level sections belong in the sidebar or header, not a breadcrumb."
+  "Use pagination for sequential pages of one collection."]
+
+ :usage "(require '[ui.breadcrumb :as breadcrumb])\n\n(breadcrumb/breadcrumb {:items [{:label \"Projects\" :href \"/projects\"}\n                                {:label \"Harbour\" :href \"/projects/harbour\"}\n                                {:label \"Settings\"}]})"
+
+ :api
+ [{:fn "breadcrumb"
+   :doc "Renders <nav aria-label=Breadcrumb> with an ordered list. The last item is the current page and is not a link."
+   :props [{:name :items :type "vector of {:label :href}" :doc "Ancestors first; the last item needs no :href."}
+           {:name :class :type "string"} {:name :attrs :type "map" :doc "Attributes on the <ol>."}]}]
+
+ :keyboard [["Tab" "Moves through the links."]]
+
+ :accessibility
+ ["Landmark nav with a label; the current item is plain text."
+  "Add {:aria-current \"page\"} on the last item via :attrs on the list if your app relies on it."]
+
+ :motion ["None."]
+
+ :responsive ["Below about 560px hide the root item or truncate long labels; the list does not wrap by default."]
+
+ :targets
+ {:clj "Static links."
+  :cljs "Static links; use your router's href scheme."
+  :squint "Static links."}
+
+ :notes-for-ai
+ ["Labels mirror the page titles exactly."
+  "Three to four levels at most; collapse deeper paths."]
+
+ :related [:pagination :sidebar :tabs]}

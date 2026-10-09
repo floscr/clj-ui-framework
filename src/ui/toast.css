@@ -28,7 +28,7 @@
   text-align: center;
   max-width: 100%;
   overflow-wrap: break-word;
-  animation: toast-in 200ms ease;
+  animation: toast-in var(--duration-standard) var(--ease-enter);
   transition: opacity var(--duration-standard) var(--ease-standard);
 }
 

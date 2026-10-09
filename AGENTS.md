@@ -470,15 +470,51 @@ test
 
 Add the component to all three dev targets so it renders in the visual test page. Each target has its own rendering style — see existing button examples in `dev/*/src/dev/*.cljs`.
 
-### 5. Run verification
+### 5. Add the metadata sidecar `src/ui/COMPONENT.edn` — CRITICAL
+
+Every component carries an EDN sidecar next to its `.cljc`. It is the
+single source for the agent docs (`docs/components/<id>.md`,
+`docs/llms.txt`, `docs/llms-full.txt`) and, later, the demo site pages.
+Squint bundles never see it (only bb tooling reads it). Shape:
+
+```edn
+{:id :card                      ; file name with - instead of _
+ :title "Card"
+ :summary "One sentence, what it is for."
+ :category :data                ; :actions :inputs :disclosure :feedback :data :layout :media :text
+ :group "Surfaces"              ; sidebar sub-group
+ :keywords ["card" "panel"]
+ :when-to-use ["..." "..."]
+ :when-not-to-use ["Use X when ..."]   ; name the better component
+ :usage "(card/card {} ...)"           ; one code sample (string)
+ :examples [{:title "..." :code "..."}]
+ :api [{:fn "card" :doc "..." :children "..."
+        :props [{:name :class :type "string" :default "..." :doc "..."}]}]
+ :keyboard [["Enter" "Activates"]]
+ :accessibility ["..."] :motion ["..."] :responsive ["..."]
+ :targets {:clj "..." :cljs "..." :squint "..."}   ; per-target differences
+ :runtime ["ui.js.popover"]                        ; JS runtime modules it needs
+ :notes-for-ai ["..."]
+ :related [:dialog :popover]}
+```
+
+Rules (enforced by `ui.registry-test` and `bb gen-docs`): required keys are
+`:id :title :summary :category :when-to-use :api`; every `:api` `:fn` must
+be a public fn and every prop `:name` must be destructured by that fn;
+`:related` ids must exist. Write copy in sentence case, no em dashes, and
+name the better alternative in "when not to use". `ui.theme` and `ui.util`
+are helpers and need no sidecar.
+
+### 6. Run verification
 
 ```sh
 bb build-theme   # Regenerate CSS with new component styles
-bb test          # All tests pass
-bb gen-docs      # Refresh docs/components.md (component/icon listing)
+bb lint-css      # Design-system rules (tokens, motion, weights, uppercase)
+bb test          # All tests pass (includes sidecar validation)
+bb gen-docs      # Refresh docs/components.md, docs/components/*.md, docs/llms*.txt
 ```
 
-### 6. Never start dev servers from the agent — CRITICAL
+### 7. Never start dev servers from the agent — CRITICAL
 
 **Do not run `bb dev`, `bb dev-hiccup`, `bb dev-replicant`, `bb dev-squint`, or any long-running server process from the agent.** The user manages dev servers via `bb dev` (tmux-dev session `ui-dev`). Starting servers from the agent blocks the session, spawns orphan processes, and can break existing tmux panes.
 
@@ -489,7 +525,7 @@ The agent may only:
 
 If a dev server needs restarting, **tell the user** — don't do it yourself.
 
-### 7. Check running dev servers before committing — CRITICAL
+### 8. Check running dev servers before committing — CRITICAL
 
 A tmux session `ui-dev` runs all three dev servers (`bb dev`). **Always run the check script before committing:**
 
@@ -508,9 +544,19 @@ touch src/ui/<module>.cljc
 
 ## Consumer Tooling & Docs
 
-`docs/components.md` is the generated listing of every component (with
-public API) and every icon. Regenerate with `bb gen-docs` whenever a
-component or icon is added/removed — consumers' AGENTS.md files point to it.
+`bb gen-docs` generates everything under `docs/` that agents read, from the
+component sidecars (`src/ui/*.edn`, see § How to Add a New Component):
+
+- `docs/llms.txt` — the entry point for assistants: install, rules, every
+  component by category with a one-line summary and a link
+- `docs/llms-full.txt` — the same with every component page inlined
+- `docs/components/<id>.md` — one page per component: when to use, when not,
+  usage, props, keyboard, accessibility, motion, responsive, targets, notes
+  for AI
+- `docs/components.md` — index with public API per component plus every icon
+
+Regenerate whenever a component, sidecar or icon changes — consumers'
+AGENTS.md files point to these.
 
 - `bb scan-consumers [roots...]` — walks `~/Code` and `~/.config/dotfiles`
   (or the given roots) for `bb.edn`/`deps.edn` that depend on this

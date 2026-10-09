@@ -1,0 +1,51 @@
+{:id :pagination
+ :title "Pagination"
+ :summary "Move through a long collection with numbered pages and previous and next links."
+ :category :data
+ :group "Collections"
+ :keywords ["pagination" "pages" "next previous" "paging"]
+
+ :when-to-use
+ ["Collections split into pages on the server, where each page has a URL."
+  "Tables and lists with a known total page count."]
+
+ :when-not-to-use
+ ["Use infinite scroll or a Load more button for feeds without a meaningful page number."
+  "Use tabs or button-group to switch between views, not pages."]
+
+ :usage "(require '[ui.pagination :as pagination])\n\n(pagination/pagination {:current 3 :total 10\n                        :href-fn #(str \"/items?page=\" %)})"
+
+ :examples
+ [{:title "Client-side paging"
+   :code "(pagination/pagination {:current page :total 10 :on-click set-page!})"}]
+
+ :api
+ [{:fn "pagination"
+   :doc "Renders <nav aria-label=Pagination> with Previous, every page number and Next."
+   :props [{:name :current :type "int" :doc "Current page, 1-based."}
+           {:name :total :type "int" :doc "Total number of pages."}
+           {:name :href-fn :type "fn [page] -> url" :doc "Builds each page link (hiccup)."}
+           {:name :on-click :type "fn [page]" :doc "Click handler on :cljs and :squint; prevents the default navigation."}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "pagination-item-classes" :doc "Class string for {:active :disabled}."}
+  {:fn "pagination-item-class-list" :doc "Vector form."}]
+
+ :keyboard [["Tab" "Moves through the page links."] ["Enter" "Follows the link."]]
+
+ :accessibility
+ ["Links inside a labeled nav; the active page is marked by its class and should also carry aria-current via :attrs when needed."
+  "Disabled Previous and Next keep their href but are styled inert."]
+
+ :motion ["Hover tint over --duration-fast."]
+
+ :responsive ["Every page number renders; for more than about ten pages show a window of pages in the app before passing :total."]
+
+ :targets
+ {:clj "Use :href-fn; each page is a real link."
+  :cljs "Use :on-click for client-side paging; :href-fn is optional."
+  :squint "Same as Replicant."}
+
+ :notes-for-ai
+ ["Numbers use tabular-nums; keep Previous and Next as words, not arrows alone."]
+
+ :related [:table :breadcrumb :button-group]}

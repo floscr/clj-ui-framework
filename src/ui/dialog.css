@@ -80,7 +80,7 @@
   justify-content: center;
   padding: var(--size-4);
   background: rgba(0, 0, 0, 0.3);
-  animation: dialog-overlay-in 0.15s ease;
+  animation: dialog-overlay-in var(--duration-fast) var(--ease-enter);
 }
 
 @keyframes dialog-overlay-in {
@@ -103,7 +103,7 @@
   border-radius: var(--radius-surface);
   box-shadow: var(--shadow-floating);
   overflow: hidden;
-  animation: dialog-panel-in 0.15s ease;
+  animation: dialog-panel-in var(--duration-fast) var(--ease-enter);
 }
 
 @keyframes dialog-panel-in {

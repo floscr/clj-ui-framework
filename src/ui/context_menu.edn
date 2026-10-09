@@ -1,0 +1,55 @@
+{:id :context-menu
+ :title "Context menu"
+ :summary "Secondary actions close to the object: a right-click (or long-press on touch) menu for any wrapped element."
+ :category :actions
+ :group "Menus"
+ :keywords ["context menu" "right click" "long press" "actions menu" "row actions"]
+
+ :when-to-use
+ ["Secondary actions on a specific object: a file, a row, a tile, a message."
+  "Actions that should stay out of the way until asked for, on desktop and touch alike."]
+
+ :when-not-to-use
+ ["Use command for global actions and search."
+  "Use popover for a panel with controls, not a list of actions."
+  "Put primary actions in visible buttons; a menu must never be the only way to reach an important action."]
+
+ :usage "(require '[ui.context-menu :as context-menu])\n\n(context-menu/context-menu-trigger\n  {:items [{:label \"Edit\" :url \"/edit/123\" :icon :edit}\n           {:type :separator}\n           {:label \"Delete\" :url \"/del/123\" :icon :trash :variant :danger :confirm true}]}\n  [:div.file-tile \"report.pdf\"])"
+
+ :examples
+ [{:title "Callbacks in Replicant or Squint"
+   :code "(context-menu/context-menu-trigger\n  {:items [{:label \"Rename\" :icon :edit :on-click #(rename! id)}\n           {:label \"Delete\" :icon :trash :variant :danger\n            :confirm \"Delete this file permanently?\" :on-click #(delete! id)}]}\n  tile)"}]
+
+ :api
+ [{:fn "context-menu-trigger"
+   :doc "Wraps children in a trigger element. The menu itself is built by the JS runtime on contextmenu."
+   :children "The element that owns the actions."
+   :props [{:name :items :type "vector of item maps" :doc "{:label :url :icon :variant :confirm :on-click} or {:type :separator}. :variant :danger tints the row; :confirm true (or a string) asks before running."}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "normalize-item" :doc "Flattens an item map for the runtime (adds :icon-paths, stringifies keywords)."}
+  {:fn "icon-paths-for" :doc "SVG child elements for an icon name, for the runtime to draw without the icon module."}]
+
+ :keyboard [["Shift+F10 / Menu key" "Opens the menu on the focused trigger (native contextmenu)."]
+            ["ArrowUp / ArrowDown" "Move between items."]
+            ["Enter" "Runs the item."]
+            ["Escape" "Closes."]]
+
+ :accessibility
+ ["Items are real buttons or links inside the runtime menu; disabled items use aria-disabled."
+  "Long-press on touch is handled globally by the gestures runtime; the pressed element shows press feedback."]
+
+ :motion ["The menu scales in from its corner over --duration-fast with --ease-enter and is clamped to the viewport."]
+
+ :responsive ["On touch, a 500ms long-press opens the menu; the iOS callout is suppressed on the trigger."]
+ :runtime ["ui.js.context-menu" "ui.js.gestures"]
+
+ :targets
+ {:clj "Items are serialized into a data attribute; :url drives navigation."
+  :cljs "Items are passed to the runtime directly; :on-click works."
+  :squint "Same as Replicant."}
+
+ :notes-for-ai
+ ["Add :data-long-press to any element with a custom contextmenu handler so touch users get the same menu."
+  "Destructive items: :variant :danger plus :confirm; label with verb and object."]
+
+ :related [:command :popover :button]}

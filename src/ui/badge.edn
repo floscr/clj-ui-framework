@@ -1,0 +1,55 @@
+{:id :badge
+ :title "Badge"
+ :summary "A small pill for status, category or a count, with an optional leading icon."
+ :category :data
+ :group "Status"
+ :keywords ["status" "tag" "label" "pill" "count"]
+
+ :when-to-use
+ ["Status next to a record: Active, Pending, Failed (use the matching tone)."
+  "A category or type marker in a list or table cell."
+  "Emphasis beside a heading: Recommended, New, Beta (use :primary)."]
+
+ :when-not-to-use
+ ["Use chip for a selectable or removable token (filters, tag inputs)."
+  "Use alert for a message with a sentence of text and an action."
+  "Do not use status tones for decoration; green means success, red means failure."]
+
+ :usage "(require '[ui.badge :as badge])\n\n(badge/badge {:variant :success :icon-name :check} \"Verified\")"
+
+ :examples
+ [{:title "Outline and compact"
+   :code "(badge/badge {:variant :outline :size :sm} \"Draft\")"}
+  {:title "Count"
+   :code "(badge/badge {:variant :secondary} \"12\")"}]
+
+ :api
+ [{:fn "badge"
+   :doc "Renders an inline <span> pill."
+   :children "The label text."
+   :props [{:name :variant :type ":primary | :secondary | :outline | :success | :warning | :danger" :default ":primary" :doc "Tone. :primary uses the accent and is for emphasis; the status tones are for real status."}
+           {:name :icon-name :type "icon keyword" :doc "Optional leading icon at the small size."}
+           {:name :size :type ":sm" :doc "Compact variant."}
+           {:name :class :type "string" :doc "Extra classes."}
+           {:name :attrs :type "map" :doc "Extra HTML attributes."}]}
+  {:fn "badge-classes" :doc "Class string for {:variant :size}."}
+  {:fn "badge-class-list" :doc "Vector form of badge-classes."}]
+
+ :accessibility
+ ["A badge is plain text; the tone must never be the only carrier of meaning, so the label says the status."
+  "Decorative icons inside a badge are aria-hidden by the icon component."]
+
+ :motion ["None."]
+
+ :responsive ["Text does not wrap; keep labels to one or two words."]
+
+ :targets
+ {:clj "Static markup."
+  :cljs ":class may be a vector."
+  :squint "Static markup; keywords are strings."}
+
+ :notes-for-ai
+ ["Pair every status badge with the word for the status; never a colored dot alone."
+  "Use :primary only for emphasis (Recommended, New), not for a status."]
+
+ :related [:chip :alert :icon]}

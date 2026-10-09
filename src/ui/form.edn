@@ -1,0 +1,96 @@
+{:id :form
+ :title "Form"
+ :summary "Labeled fields, inputs, textareas, checkboxes, radios, file and range inputs, joined groups and a search bar."
+ :category :inputs
+ :group "Text fields"
+ :keywords ["input" "textarea" "form field" "label" "checkbox" "radio" "file input" "range" "search bar" "validation"]
+
+ :when-to-use
+ ["Any text, number, date or file entry; wrap each control in form-field for its label, hint and error."
+  "Inline validation: pass :error on both form-field and the input."
+  "A search entry with a joined button (search-bar) at the top of a list."]
+
+ :when-not-to-use
+ ["Use switch for an on or off setting that applies immediately."
+  "Use select (or form-select) for one of many; use form-radio-group for two to five visible options."
+  "Use number-field for bounded numbers with steppers, tag-input for several values, color-picker for colors."]
+
+ :usage "(require '[ui.form :as form])\n\n(form/form-field {:label \"Email\" :hint \"Used for sign-in and notifications.\" :error email-error}\n  (form/form-input {:type :email :value email :error (some? email-error) :on-change set-email!}))"
+
+ :examples
+ [{:title "Search bar that submits as GET"
+   :code "(form/search-bar {:action \"/search\" :placeholder \"Search movies…\" :button-label \"Search\"})"}
+  {:title "Radio group"
+   :code "(form/form-radio-group {:label \"Preference\" :radio-name \"pref\" :radio-value \"a\"\n                        :options [{:value \"a\" :label \"Option A\"} {:value \"b\" :label \"Option B\"}]})"}
+  {:title "Joined input and addon"
+   :code "(form/form-group {}\n  (form/form-group-addon {} \"https://\")\n  (form/form-input {:placeholder \"example.com\"}))"}]
+
+ :api
+ [{:fn "form-field"
+   :doc "Wrapper with label above, hint or error below. The error text also sets the error state."
+   :children "The control."
+   :props [{:name :label :type "string"} {:name :hint :type "string"} {:name :error :type "string" :doc "Error message; shown in place of the hint."}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "form-input"
+   :doc "Single-line input. With :icon-left or :icon-right it is wrapped in .form-input-wrap."
+   :props [{:name :type :type "keyword" :default ":text" :doc ":text, :email, :password, :date, :datetime-local, ..."}
+           {:name :placeholder :type "string"} {:name :value :type "string"} {:name :disabled :type "boolean"}
+           {:name :error :type "boolean" :doc "Error styling."}
+           {:name :icon-left :type "icon keyword"} {:name :icon-right :type "icon keyword"}
+           {:name :on-change :type "fn" :doc ":cljs and :squint only."}
+           {:name :class :type "string"} {:name :attrs :type "map" :doc "name, required, autocomplete, pattern and so on."}]}
+  {:fn "form-textarea" :doc "Multi-line input."
+   :props [{:name :placeholder :type "string"} {:name :value :type "string"} {:name :disabled :type "boolean"} {:name :error :type "boolean"}
+           {:name :on-change :type "fn"} {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "form-textarea-auto" :doc "Textarea that grows with its content up to :max-rows."
+   :props [{:name :placeholder :type "string"} {:name :value :type "string"} {:name :disabled :type "boolean"} {:name :error :type "boolean"}
+           {:name :max-rows :type "int" :doc "Growth cap in rows."} {:name :on-change :type "fn"} {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "form-select" :doc "Delegates to ui.select with form styling."
+   :props [{:name :options :type "vector"} {:name :placeholder :type "string"} {:name :value :type "string"} {:name :disabled :type "boolean"}
+           {:name :on-change :type "fn [value]"} {:name :name :type "string"} {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "form-checkbox" :doc "Checkbox with its label."
+   :props [{:name :label :type "string"} {:name :checked :type "boolean"} {:name :disabled :type "boolean"} {:name :on-change :type "fn"}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "form-radio-group" :doc "Fieldset of radios with a legend."
+   :props [{:name :label :type "string" :doc "Legend."} {:name :radio-name :type "string" :doc "Shared name of the radios."}
+           {:name :options :type "vector of {:value :label} or strings"} {:name :radio-value :type "string" :doc "Selected value."}
+           {:name :disabled :type "boolean"} {:name :on-change :type "fn"} {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "form-file" :doc "File input with a styled chooser button."
+   :props [{:name :accept :type "string"} {:name :multiple :type "boolean"} {:name :disabled :type "boolean"} {:name :on-change :type "fn"}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "form-range" :doc "Native range slider with an accent thumb."
+   :props [{:name :min :type "number"} {:name :max :type "number"} {:name :step :type "number"} {:name :value :type "number"}
+           {:name :disabled :type "boolean"} {:name :on-change :type "fn"} {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "form-group" :doc "Joins inputs, addons and buttons into one bordered row with shared corners."
+   :props [{:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "form-group-addon" :doc "Static text cell inside a form-group."
+   :props [{:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "search-bar" :doc "Preset: icon input joined to a primary button; wrapped in a GET <form> when :action or :on-submit is set."
+   :props [{:name :name :type "string" :default "\"q\""} {:name :value :type "string"} {:name :placeholder :type "string" :default "\"Search…\""}
+           {:name :icon :type "icon keyword" :default ":search"} {:name :button-label :type "string" :default "\"Search\""}
+           {:name :disabled :type "boolean"} {:name :action :type "string" :doc "Form action URL."}
+           {:name :on-change :type "fn"} {:name :on-submit :type "fn"} {:name :class :type "string"} {:name :attrs :type "map"}
+           {:name :form-attrs :type "map" :doc "Attributes on the wrapping <form>."}]}]
+
+ :keyboard [["Tab" "Moves between fields."] ["Space" "Toggles a checkbox or radio."] ["Arrow keys" "Move within a radio group or a range."]]
+
+ :accessibility
+ ["form-field renders a real <label>; pass an id via :attrs on the control and the label picks it up through nesting."
+  "Errors sit next to the field and say how to fix it; do not rely on the red border alone."
+  "Inputs are 44px tall by default, the phone tap minimum."]
+
+ :motion ["Border and background transitions over --duration-fast. Focus shows the shared ring."]
+
+ :responsive ["Fields fill their column; forms read best at 640 to 720px wide. form-group stays on one line and scrolls its content."]
+
+ :targets
+ {:clj "Uncontrolled inputs that submit with a <form>; use :attrs for name and required."
+  :cljs "Controlled via :value and :on-change (receives the DOM event)."
+  :squint "Controlled; never pass false to :disabled or :required (use (when x true))."}
+
+ :notes-for-ai
+ ["One form-field per control; the label is the only heading a field needs."
+  "Use search-bar for the search pattern instead of assembling form-group by hand; the joined corners are easy to get wrong."
+  "Submit buttons are verb plus object: Save changes, Create project."]
+
+ :related [:select :switch :number-field :tag-input :button]}

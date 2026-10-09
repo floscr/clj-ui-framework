@@ -1,0 +1,63 @@
+{:id :popover
+ :title "Popover"
+ :summary "A small anchored panel for contextual controls, built on the native Popover API so it works without app state."
+ :category :disclosure
+ :group "Overlays"
+ :keywords ["popover" "anchored panel" "popovertarget" "dropdown panel" "settings panel"]
+
+ :when-to-use
+ ["Small anchored controls (a couple of fields, a picker) that should not dim the page."
+  "Contextual information next to its trigger."]
+
+ :when-not-to-use
+ ["Use dialog for a decision that must interrupt."
+  "Use context-menu for a list of actions on right-click or long press."
+  "Use tooltip for one line of hint text."]
+
+ :usage "(require '[ui.popover :as popover])\n\n(popover/popover-trigger {:target \"dimensions\"\n                          :class (button/button-classes {:variant :secondary})}\n  \"Open\")\n(popover/popover-content {:id \"dimensions\" :side :bottom :align :start}\n  (popover/popover-header {}\n    (popover/popover-title {} \"Dimensions\")\n    (popover/popover-description {} \"Set the dimensions for the layer.\"))\n  (form/form-field {:label \"Width\"} (form/form-input {:value \"100%\"})))"
+
+ :examples
+ [{:title "Turn an existing button into a trigger"
+   :code "(button/button {:variant :ghost :icon :settings\n                :attrs (merge {:aria-label \"Settings\"} (popover/trigger-attrs \"settings\"))})"}]
+
+ :api
+ [{:fn "popover-trigger"
+   :doc "A <button> with popovertarget pointing at the content's id."
+   :children "The trigger label."
+   :props [{:name :target :type "string" :doc "Id of the matching popover-content (required)."}
+           {:name :class :type "string" :doc "Usually a button class string."}
+           {:name :attrs :type "map"}]}
+  {:fn "popover-content"
+   :doc "The floating panel (popover=\"auto\"). The JS runtime anchors it to the trigger."
+   :children "popover-header and any content."
+   :props [{:name :id :type "string" :doc "Must match the trigger's :target (required)."}
+           {:name :side :type ":top | :right | :bottom | :left" :default ":bottom" :doc "Which side of the trigger the panel opens on."}
+           {:name :align :type ":start | :center | :end" :default ":center" :doc "Alignment along that side."}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "popover-header" :doc "Title block." :props [{:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "popover-title" :doc "Heading text." :props [{:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "popover-description" :doc "Muted description." :props [{:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "trigger-attrs" :doc "Attribute map {:popovertarget id :aria-haspopup \"dialog\"} to spread onto any element."}
+  {:fn "content-class-list" :doc "Class vector for {:side}."}]
+
+ :keyboard [["Escape" "Closes the popover (native)."] ["Enter / Space" "On the trigger, toggles it."]]
+
+ :accessibility
+ ["The trigger carries aria-haspopup=dialog; the native Popover API manages light dismiss and Escape."
+  "Give the panel a title so it has an accessible name."]
+
+ :motion ["The panel fades and nudges in from its side over --duration-fast; reduced motion fades only."]
+
+ :responsive ["Max width is 20rem or the viewport minus a margin; the runtime flips sides when there is no room."]
+ :runtime ["ui.js.popover"]
+
+ :targets
+ {:clj "Works in server-rendered pages: load ui-runtime.js once."
+  :cljs "Same markup; no state needed. Replicant keeps the popover attribute."
+  :squint "Same markup; ids must be stable across re-renders."}
+
+ :notes-for-ai
+ ["The trigger :target and the content :id must match and be unique on the page."
+  "Keep the content to a few controls; a long form belongs in a dialog or a page."]
+
+ :related [:dialog :context-menu :tooltip :select]}

@@ -64,7 +64,7 @@
   border: var(--border-0);
   border-radius: var(--radius-panel);
   box-shadow: var(--shadow-floating);
-  animation: select-menu-in 0.12s ease;
+  animation: select-menu-in var(--duration-fast) var(--ease-enter);
 }
 
 @keyframes select-menu-in {

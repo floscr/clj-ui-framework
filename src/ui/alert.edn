@@ -1,0 +1,54 @@
+{:id :alert
+ :title "Alert"
+ :summary "A persistent inline message with a tone, icon and optional title that helps people recover or continue."
+ :category :feedback
+ :group "Messages"
+ :keywords ["alert" "banner" "error message" "warning" "info" "inline feedback"]
+
+ :when-to-use
+ ["An error next to its cause, with how to fix it (We could not save. Check your connection and try again)."
+  "A warning or notice that stays until the situation changes."
+  "A success state that needs more than a label change, for example after a multi-step import."]
+
+ :when-not-to-use
+ ["Use toast for brief confirmation of background work."
+  "Use badge for a one-word status."
+  "Use form-field :error for a single field's validation message."]
+
+ :usage "(require '[ui.alert :as alert])\n\n(alert/alert {:variant :danger :title \"Could not save\"}\n  \"Check your connection and try again.\")"
+
+ :examples
+ [{:title "Neutral notice without an icon"
+   :code "(alert/alert {:icon-name false} \"Changes apply after the next deploy.\")"}
+  {:title "Custom icon"
+   :code "(alert/alert {:variant :info :icon-name :zap :title \"New\"} \"Keyboard shortcuts are available.\")"}]
+
+ :api
+ [{:fn "alert"
+   :doc "Renders a tinted panel with icon, title and body."
+   :children "The message body."
+   :props [{:name :variant :type ":success | :warning | :danger | :info | nil" :default "nil (neutral)" :doc "Tone; picks the tint and the default icon."}
+           {:name :title :type "string" :doc "Optional bold first line."}
+           {:name :icon-name :type "icon keyword | false" :doc "Override the tone's icon, or false to hide it."}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "alert-classes" :doc "Class string for {:variant}."}
+  {:fn "alert-class-list" :doc "Vector form."}]
+
+ :accessibility
+ ["Tone is never the only signal: the title or body names the situation."
+  "For messages that appear after an action, add :attrs {:role \"status\"} (or \"alert\" for errors) so screen readers announce them."]
+
+ :motion ["None; alerts should not shift layout when they appear, reserve the space or place them at the top of the region."]
+
+ :responsive ["Full width of its column; the body wraps."]
+
+ :targets
+ {:clj "Static markup."
+  :cljs ":class may be a vector."
+  :squint "Static markup."}
+
+ :notes-for-ai
+ ["Error copy says what happened and how to fix it; no exclamation marks."
+  "One alert per region. Do not stack alerts for a single problem."]
+
+ :related [:toast :badge :empty-state]}

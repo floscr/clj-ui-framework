@@ -1,0 +1,77 @@
+{:id :button
+ :title "Button"
+ :summary "A single action with quiet secondary states, press feedback and a loading spinner."
+ :category :actions
+ :group "Buttons"
+ :keywords ["action" "submit" "loading button" "icon button" "link button" "press feedback"]
+
+ :when-to-use
+ ["Any single action on a page, form or dialog: Save, Continue, Cancel."
+  "Short async work where a spinner on the button is enough feedback (:loading)."
+  "Icon-only actions in toolbars and headers (:icon), optionally :round."]
+
+ :when-not-to-use
+ ["Use button-group for two to five related options that act as one segmented control."
+  "Use toolbar for a cluster of icon buttons that should read as one surface."
+  "Use a plain link for navigation inside body text; :href on a button is for call-to-action styling only."]
+
+ :usage "(require '[ui.button :as button])\n\n(button/button {:variant :primary :icon-left :plus :on-click save!}\n  \"Add item\")"
+
+ :examples
+ [{:title "Loading state"
+   :code "(button/button {:variant :primary :loading saving?} \"Save changes\")"}
+  {:title "Icon-only, round"
+   :code "(button/button {:icon :x :round true :variant :ghost\n                :attrs {:aria-label \"Close\"}})"}
+  {:title "Link styled as a button"
+   :code "(button/button {:href \"/docs\" :variant :secondary :icon-right :arrow-right}\n  \"Read the docs\")"}
+  {:title "Hiccup with an inline handler"
+   :code "(button/button {:variant :danger :attrs {:onclick \"deleteItem()\"}} \"Delete item\")"}]
+
+ :api
+ [{:fn "button"
+   :doc "Renders a <button>, or an <a> when :href is set."
+   :children "The label (text, icons, any hiccup)."
+   :props [{:name :variant :type ":primary | :secondary | :ghost | :danger | :success | :link" :default ":secondary" :doc "Visual weight. One :primary action per surface."}
+           {:name :size :type ":sm | :md | :lg" :default ":md" :doc "Height, padding and icon size."}
+           {:name :href :type "string" :doc "Render as an anchor pointing at this URL."}
+           {:name :on-click :type "fn" :doc "Click handler on :cljs and :squint. Ignored on :clj (use :attrs)."}
+           {:name :disabled :type "boolean" :doc "Disables the control. The attribute is emitted only when true."}
+           {:name :loading :type "boolean" :doc "Shows a spinner in place of the leading icon and disables the button."}
+           {:name :icon-left :type "icon keyword" :doc "Leading icon, e.g. :plus."}
+           {:name :icon-right :type "icon keyword" :doc "Trailing icon, e.g. :arrow-right."}
+           {:name :icon :type "icon keyword" :doc "Icon-only button (no children). Add an aria-label via :attrs."}
+           {:name :round :type "boolean" :doc "Fully round shape for icon-only buttons."}
+           {:name :class :type "string" :doc "Extra classes for layout."}
+           {:name :attrs :type "map" :doc "Extra HTML attributes merged onto the element (id, aria-*, data-*, onclick on :clj)."}]}
+  {:fn "button-classes"
+   :doc "Class string for {:variant :size :icon :round :loading}. Use it to style another element like a button, for example a popover-trigger or a label."}
+  {:fn "button-class-list"
+   :doc "Same as button-classes but returns a vector of class tokens (what Replicant needs)."}]
+
+ :keyboard [["Enter / Space" "Activates the button."]]
+
+ :accessibility
+ ["Native <button> (or <a> with :href), so role and focus come for free."
+  "Icon-only buttons need an aria-label through :attrs."
+  "Loading sets disabled, so focus can move away; keep loading operations short."]
+
+ :motion
+ ["Presses scale to 0.97 (0.94 for icon buttons) over --duration-fast."
+  "Hover changes color only. Reduced motion drops the press scale."]
+
+ :responsive
+ ["Size is fixed by :size; pick :lg for primary touch targets."
+  "Hover styles apply only on hover-capable pointers (gated by the CSS build)."]
+
+ :targets
+ {:clj "No event handlers. Use :attrs {:onclick \"...\"} or HTMX attributes."
+  :cljs ":on-click becomes {:on {:click f}}; :class may be a vector of tokens."
+  :squint ":on-click is passed as a flat attribute; keywords are strings at runtime."}
+
+ :notes-for-ai
+ ["The default variant is :secondary. Set :variant :primary on the one main action of a surface."
+  "Pass a changing label as children (Save, then Saved) instead of swapping two buttons."
+  "Never hand-write <button class=\"btn\">; call the component so loading, icons and disabled stay consistent."
+  "Destructive actions use :variant :danger with a verb plus object label (Delete project)."]
+
+ :related [:button-group :toolbar :spinner :icon]}

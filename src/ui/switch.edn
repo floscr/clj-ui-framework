@@ -1,0 +1,52 @@
+{:id :switch
+ :title "Switch"
+ :summary "A toggle for a setting that takes effect immediately."
+ :category :inputs
+ :group "Selection"
+ :keywords ["toggle" "switch" "on off" "setting" "checkbox alternative"]
+
+ :when-to-use
+ ["A binary setting that applies as soon as it changes (notifications on, dark mode)."
+  "Rows in a settings list where the control sits at the end of the row."]
+
+ :when-not-to-use
+ ["Use form-checkbox inside a form that is submitted later, or for agree and include choices."
+  "Use button-group or tabs to switch between views of the same content."]
+
+ :usage "(require '[ui.switch :as switch])\n\n(switch/switch-toggle {:checked notifications?\n                       :label \"Email notifications\"\n                       :on-change #(toggle! :notifications)})"
+
+ :examples
+ [{:title "Disabled"
+   :code "(switch/switch-toggle {:checked true :disabled true :label \"Managed by your admin\"})"}]
+
+ :api
+ [{:fn "switch-toggle"
+   :doc "A <label> wrapping a hidden checkbox, a track and a thumb, plus the label text."
+   :props [{:name :checked :type "boolean" :doc "On or off."}
+           {:name :disabled :type "boolean" :doc "Disables the input; the attribute is emitted only when true."}
+           {:name :on-change :type "fn" :doc "Change handler on :cljs and :squint."}
+           {:name :label :type "string" :doc "Visible label next to the track."}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "switch-classes" :doc "Class string for {:disabled}."}
+  {:fn "switch-class-list" :doc "Vector form."}]
+
+ :keyboard [["Space" "Toggles the switch."] ["Tab" "Moves focus to the hidden checkbox; the ring shows on the control."]]
+
+ :accessibility
+ ["Built on a real checkbox input, so state is exposed natively."
+  "Always pass :label; a switch without a visible label needs an aria-label via :attrs."]
+
+ :motion ["Track color and thumb position animate over --duration-standard; reduced motion snaps."]
+
+ :responsive ["The track is a fixed 40 by 22px target inside a taller label hit area."]
+
+ :targets
+ {:clj "Uncontrolled: the browser tracks the state. Submit it with a form or wire :attrs {:onchange \"...\"}."
+  :cljs "Controlled: pass :checked from state and update it in :on-change."
+  :squint "Controlled; :disabled is omitted when falsy so Eucalypt does not disable the input."}
+
+ :notes-for-ai
+ ["A switch applies immediately; if the page has a Save button, use form-checkbox instead."
+  "Put the label on the left and the switch on the right in settings rows."]
+
+ :related [:form :button-group :tabs]}

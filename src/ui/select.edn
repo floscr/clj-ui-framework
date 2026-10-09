@@ -1,0 +1,56 @@
+{:id :select
+ :title "Select"
+ :summary "A compact choice field with a framework-drawn listbox, keyboard navigation and form support."
+ :category :inputs
+ :group "Selection"
+ :keywords ["select" "dropdown" "listbox" "combobox" "choice field"]
+
+ :when-to-use
+ ["One of many options (more than about five) in a form or a toolbar."
+  "A choice that must look the same in every browser and both themes."]
+
+ :when-not-to-use
+ ["Use form-radio-group for two to five visible options."
+  "Use command for a searchable list of actions or a long list that needs filtering."
+  "Use button-group to switch between views."]
+
+ :usage "(require '[ui.select :as select])\n\n(select/select {:options [{:value \"eu\" :label \"Europe\"}\n                          {:value \"us\" :label \"United States\"}]\n                :value region\n                :placeholder \"Pick a region\"\n                :on-change set-region!})"
+
+ :examples
+ [{:title "Hiccup form field (uncontrolled, submits with the form)"
+   :code "(select/select {:name \"region\" :options [\"Europe\" \"United States\"] :value \"Europe\"})"}]
+
+ :api
+ [{:fn "select"
+   :doc "Renders the trigger button; the listbox is created by the __uiSelect runtime on open."
+   :props [{:name :options :type "vector of {:value :label} or strings" :doc "The choices. Bare strings use the string as value and label."}
+           {:name :value :type "string" :doc "Selected value."}
+           {:name :placeholder :type "string" :doc "Shown when nothing is selected."}
+           {:name :disabled :type "boolean"}
+           {:name :on-change :type "fn [value]" :doc "Receives the picked value (:cljs and :squint)."}
+           {:name :name :type "string" :doc "On :clj emits a hidden <input> so the value submits with a form."}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "normalize-options" :doc "Coerces strings into {:value :label} maps."}
+  {:fn "selected-label" :doc "Label for the selected value, else the placeholder."}]
+
+ :keyboard [["Enter / Space / ArrowDown" "Opens the listbox."] ["ArrowUp / ArrowDown" "Moves the highlighted option."] ["Enter" "Picks the highlighted option."] ["Escape" "Closes without changing."]]
+
+ :accessibility
+ ["The trigger has role=combobox with aria-haspopup=listbox and aria-expanded."
+  "Options are focusable rows; the selected one is marked."]
+
+ :motion ["The listbox fades and scales in over --duration-fast."]
+
+ :responsive ["The listbox is capped to the viewport and scrolls; on touch the outside tap that dismisses it is consumed."]
+ :runtime ["ui.js.select"]
+
+ :targets
+ {:clj "Uncontrolled; pass :name for form submission. Needs ui-runtime.js."
+  :cljs "Controlled through :value and :on-change."
+  :squint "Controlled; the trigger re-renders with the new label."}
+
+ :notes-for-ai
+ ["form-select in ui.form delegates here; use it inside form-field for a label and hint."
+  "Keep option labels short; put the long explanation in a hint."]
+
+ :related [:form :command :popover :tag-input]}

@@ -1,0 +1,48 @@
+{:id :progress
+ :title "Progress"
+ :summary "Shows how much of a known task is complete as a filled track."
+ :category :feedback
+ :group "Status"
+ :keywords ["progress bar" "percentage" "upload progress" "determinate"]
+
+ :when-to-use
+ ["Known progress: an upload, an import, steps completed out of a total."
+  "Usage against a limit when paired with a label."]
+
+ :when-not-to-use
+ ["Use spinner for unknown duration."
+  "Use skeleton while content is loading in place."
+  "Use file-progress for a list of files each with their own status."]
+
+ :usage "(require '[ui.progress :as progress])\n\n(progress/progress {:value 62 :attrs {:aria-label \"Upload progress\"}})"
+
+ :examples
+ [{:title "Tones"
+   :code "(progress/progress {:value 90 :variant :warning})\n(progress/progress {:value 100 :variant :success})"}]
+
+ :api
+ [{:fn "progress"
+   :doc "A track with a fill at :value percent; role=progressbar with aria-valuenow."
+   :props [{:name :value :type "number 0 to 100" :default "0"}
+           {:name :variant :type "nil | :success | :warning | :danger" :doc "Fill tone; default is the accent."}
+           {:name :class :type "string"} {:name :attrs :type "map" :doc "Add aria-label or aria-labelledby."}]}
+  {:fn "progress-bar-classes" :doc "Class string for the fill given {:variant}."}
+  {:fn "progress-bar-class-list" :doc "Vector form."}]
+
+ :accessibility
+ ["Exposes value, min and max; give it a name with aria-label."
+  "Show the percentage or count as text next to it when the number matters."]
+
+ :motion ["The fill width animates over --duration-standard."]
+
+ :responsive ["Fills its column."]
+
+ :targets
+ {:clj "Static; re-render to update."
+  :cljs "Pass the live :value."
+  :squint "Pass the live :value; style uses string keys internally."}
+
+ :notes-for-ai
+ ["Status tones only for real status: warning near a limit, danger when failed."]
+
+ :related [:spinner :skeleton :file-progress :processing-bar]}

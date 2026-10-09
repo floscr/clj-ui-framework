@@ -26,7 +26,7 @@
 .command-dialog[open] {
   display: flex;
   flex-direction: column;
-  animation: command-in 0.14s ease;
+  animation: command-in var(--duration-fast) var(--ease-enter);
 }
 
 @keyframes command-in {

@@ -1,0 +1,55 @@
+{:id :toast
+ :title "Toast"
+ :summary "A brief floating confirmation for completed background work, shown by the JS runtime on every target."
+ :category :feedback
+ :group "Messages"
+ :keywords ["toast" "notification" "snackbar" "flash message" "htmx"]
+
+ :when-to-use
+ ["Result of background work: an export finished, a sync failed, a message was sent."
+  "Server-rendered and HTMX responses that need a confirmation after a swap (toast-flash)."]
+
+ :when-not-to-use
+ ["Confirm foreground actions in place (the button label, the row, the value); never as the only confirmation."
+  "Use alert for a message that must stay until resolved."]
+
+ :usage "(require '[ui.toast :as toast])\n\n;; Replicant / Squint\n(toast/show-toast! {:message \"Export finished\" :variant :success})\n\n;; Hiccup / HTMX: include the marker in the response fragment\n(toast/toast-flash {:message \"Saved\" :variant :success})"
+
+ :examples
+ [{:title "Sticky error"
+   :code "(toast/show-toast! {:message \"Sync failed. Retry from Settings.\" :variant :danger :duration 0})"}]
+
+ :api
+ [{:fn "toast-flash"
+   :doc "Invisible marker element the runtime consumes and shows as a floating toast. Works inside hx-swap-oob fragments."
+   :props [{:name :message :type "string" :doc "Toast text (required)."}
+           {:name :variant :type ":info | :success | :warning | :danger" :default ":info"}
+           {:name :duration :type "ms" :default "5000" :doc "0 keeps the toast until dismissed."}]}
+  {:fn "toast"
+   :doc "Static toast element for previews; the runtime renders real toasts into its own container."
+   :children "Toast content."
+   :props [{:name :variant :type ":info | :success | :warning | :danger"} {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "toast-classes" :doc "Class string for {:variant}."}
+  {:fn "toast-class-list" :doc "Vector form."}]
+
+ :keyboard [["Click / tap" "Dismisses a toast early."]]
+
+ :accessibility
+ ["The runtime container is a polite live region, so new toasts are announced."
+  "Keep messages to one sentence; include the next step for errors."]
+
+ :motion ["Toasts slide in over --duration-standard with --ease-enter and fade out; reduced motion fades only."]
+
+ :responsive ["Toasts stack at the bottom edge and are full width on phones."]
+ :runtime ["ui.js.toast"]
+
+ :targets
+ {:clj "Use toast-flash in the page or an HTMX fragment; needs ui-runtime.js."
+  :cljs "Call show-toast!; it is a no-op when the runtime is missing."
+  :squint "Same as Replicant."}
+
+ :notes-for-ai
+ ["A toast never carries the only copy of an error; errors that need action use alert."
+  "Success toasts are a label change in words: Export finished, not Success!"]
+
+ :related [:alert :processing-bar :dialog]}

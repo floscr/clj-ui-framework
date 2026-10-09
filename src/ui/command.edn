@@ -1,0 +1,83 @@
+{:id :command
+ :title "Command palette"
+ :summary "A searchable command menu in a native dialog with groups, icons, shortcut hints, a global hotkey and Alt quick-select."
+ :category :actions
+ :group "Menus"
+ :keywords ["command palette" "cmdk" "search commands" "keyboard" "hotkey" "quick switcher"]
+
+ :when-to-use
+ ["Global search and actions behind one hotkey (mod+k): navigate, create, switch."
+  "A long list that needs filtering and keyboard selection, such as a file or page switcher."]
+
+ :when-not-to-use
+ ["Use select for one of many values in a form."
+  "Use context-menu for actions on a specific object under the pointer."
+  "Use form search-bar for a search that submits and shows results on a page."]
+
+ :usage "(require '[ui.command :as command])\n\n(command/command-trigger {:target \"cmdk\" :class (button/button-classes {})} \"Search…\")\n\n(command/command-dialog {:id \"cmdk\" :placeholder \"Type a command or search…\" :hotkey \"mod+k\"}\n  (command/command-group {:heading \"Pages\"}\n    (command/command-item {:icon :calendar :url \"/calendar\" :shortcut \"⌘P\"} \"Calendar\")\n    (command/command-item {:icon :settings :url \"/settings\"} \"Settings\")))"
+
+ :examples
+ [{:title "Recents and search-only rows"
+   :code "(command/command-group {:heading \"Recent\"}\n  (command/command-item {:value \"\" :url \"/p/42\"} \"Harbour redesign\"))\n(command/command-group {:heading \"Archive\"}\n  (command/command-item {:search-only true :url \"/p/7\" :description \"Archived 2025\"} \"Old site\"))"}
+  {:title "Alt quick-select with letters"
+   :code "(command/command-dialog {:id \"cmdk\" :hotkey \"mod+k\" :quick-nav :letters} ...)"}]
+
+ :api
+ [{:fn "command-dialog"
+   :doc "The palette: a native <dialog> with a search input and the item list. The runtime filters, navigates and selects."
+   :children "command-group and command-item forms."
+   :props [{:name :id :type "string" :doc "Matched by command-trigger :target (required)."}
+           {:name :placeholder :type "string" :default "\"Type a command or search…\""}
+           {:name :hotkey :type "string" :doc "Global open shortcut, e.g. \"mod+k\" (mod is ⌘ on Mac, Ctrl elsewhere)."}
+           {:name :quick-nav :type ":letters | :numbers | string" :doc "Hold Alt to show key badges on the visible rows; Alt+key selects. Off by default."}
+           {:name :empty :type "string" :default "\"No results found.\"" :doc "Empty-state text."}
+           {:name :leading :type "hiccup" :doc "Replaces the search icon, e.g. a back button."}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "command-group"
+   :doc "Groups items under an optional heading. While searching, groups flatten into one ranked list."
+   :props [{:name :heading :type "string"} {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "command-item"
+   :doc "One row: a <button>, or an <a> when :url is set. Selection closes the dialog."
+   :children "The label."
+   :props [{:name :icon :type "icon keyword"}
+           {:name :shortcut :type "string" :doc "Shortcut hint shown as a kbd, e.g. \"⌘P\"."}
+           {:name :description :type "string" :doc "Secondary line under the label."}
+           {:name :url :type "string" :doc "Navigate on select."}
+           {:name :value :type "string" :doc "Explicit search text. An empty string shows the row only while the input is empty (recents)."}
+           {:name :search-only :type "boolean" :doc "Hide while the input is empty; surface only as a search result."}
+           {:name :on-click :type "fn" :doc "Selection callback (:cljs and :squint)."}
+           {:name :disabled :type "boolean"}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "command-trigger"
+   :doc "A <button> that opens the matching dialog."
+   :children "The trigger label."
+   :props [{:name :target :type "string" :doc "Id of the command-dialog (required)."}
+           {:name :class :type "string" :doc "Usually a button class string."}
+           {:name :attrs :type "map"}]}]
+
+ :keyboard [["mod+k (or :hotkey)" "Opens the palette."]
+            ["Type" "Filters items live; groups flatten into one ranked list."]
+            ["ArrowUp / ArrowDown, Ctrl+j / Ctrl+k" "Move the highlighted row."]
+            ["Enter" "Selects the highlighted row."]
+            ["Alt+key" "Selects the badged row when :quick-nav is on."]
+            ["Escape" "Closes."]]
+
+ :accessibility
+ ["The dialog is a native <dialog> (focus trap, Escape); items have role=option inside role=group."
+  "The trigger carries aria-haspopup=dialog."]
+
+ :motion ["The dialog fades and scales in over --duration-fast with --ease-enter."]
+
+ :responsive ["The dialog is capped to the viewport; on phones it fills the width and the list scrolls."]
+ :runtime ["ui.js.command"]
+
+ :targets
+ {:clj "Static markup plus ui-runtime.js; items navigate via :url."
+  :cljs "Items may use :on-click; the dialog stays uncontrolled."
+  :squint "Same as Replicant. The runtime re-filters when rows are patched in place."}
+
+ :notes-for-ai
+ ["One palette per app, opened from a trigger in the header and the hotkey."
+  "Give every item a verb or a destination as its label; use :description for context, not for a second label."]
+
+ :related [:select :context-menu :dialog :form]}

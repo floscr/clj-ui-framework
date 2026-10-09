@@ -13,9 +13,9 @@
 (def rules
   [{:id :hex        :level :error :re #"#[0-9a-fA-F]{3,8}\b"
     :msg "raw hex color — use a token or scale variable"}
-   {:id :duration   :level :error :re #"transition[^;]*\b\d*\.?\d+(ms|s)\b"
-    :msg "literal duration — use var(--duration-fast|standard|considered)"}
-   {:id :easing     :level :error :re #"transition[^;]*(?<![\w-])(ease|ease-in|ease-out|ease-in-out)(?![\w-])"
+   {:id :duration   :level :error :re #"(?:transition|animation)[^;]*\b\d*\.?\d+(ms|s)\b"
+    :msg "literal duration — use var(--duration-fast|standard|considered); loops may use /* lint-allow */"}
+   {:id :easing     :level :error :re #"(?:transition|animation)[^;]*(?<![\w-])(ease|ease-in|ease-out|ease-in-out)(?![\w-])"
     :msg "literal easing — use var(--ease-standard|enter|exit|spring)"}
    {:id :weight     :level :error :re #"font-weight:\s*(600|700|800|900|bold)\b"
     :msg "weight above 500 — only 400 and 500 (var(--weight-medium))"}

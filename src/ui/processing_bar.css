@@ -6,7 +6,7 @@
   border-left: 3px solid var(--accent);
   border-radius: var(--radius-panel);
   padding: var(--size-3) var(--size-4);
-  animation: processing-bar-in 300ms ease;
+  animation: processing-bar-in var(--duration-standard) var(--ease-enter);
 }
 
 @keyframes processing-bar-in {

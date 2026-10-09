@@ -5,7 +5,7 @@
   border: 2px solid var(--bg-2);
   border-top-color: var(--accent);
   border-radius: var(--radius-pill);
-  animation: spinner-spin 1s linear infinite;
+  animation: spinner-spin 1s linear infinite; /* lint-allow */
 }
 
 .spinner-xs {
@@ -44,7 +44,7 @@
   border: 2px solid var(--bg-2);
   border-top-color: var(--accent);
   border-radius: var(--radius-pill);
-  animation: spinner-spin 1s linear infinite;
+  animation: spinner-spin 1s linear infinite; /* lint-allow */
 }
 
 @keyframes spinner-spin {
