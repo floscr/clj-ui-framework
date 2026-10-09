@@ -10,12 +10,12 @@
   font-weight: 500;
   line-height: var(--size-4);
   border: var(--border-0);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-pill);
   background: transparent;
   color: var(--fg-1);
   cursor: pointer;
   font-family: inherit;
-  transition: background 150ms ease, border-color 150ms ease, color 150ms ease;
+  transition: background var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);
 }
 
 .chip:hover:not(.chip-active) {
@@ -32,6 +32,6 @@
   display: inline-block;
   width: 6px;
   height: 6px;
-  border-radius: 9999px;
+  border-radius: var(--radius-pill);
   flex-shrink: 0;
 }

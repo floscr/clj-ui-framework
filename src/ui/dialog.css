@@ -49,11 +49,11 @@
   max-height: 85vh;
   margin: auto;
   padding: 0;
-  background: var(--bg-0);
+  background: var(--bg-1);
   color: var(--fg-0);
   border: var(--border-0);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-3);
+  border-radius: var(--radius-surface);
+  box-shadow: var(--shadow-floating);
   overflow: hidden;
 }
 
@@ -100,8 +100,8 @@
   background: var(--bg-1);
   color: var(--fg-0);
   border: var(--border-0);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-3);
+  border-radius: var(--radius-surface);
+  box-shadow: var(--shadow-floating);
   overflow: hidden;
   animation: dialog-panel-in 0.15s ease;
 }

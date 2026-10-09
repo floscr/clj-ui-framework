@@ -35,7 +35,7 @@
   margin: 0;
   padding: var(--size-3);
   background: var(--bg-2);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-control);
   overflow-x: auto;
 }
 
@@ -60,7 +60,7 @@
 }
 
 .md-table th {
-  font-weight: 600;
+  font-weight: 500;
   color: var(--fg-1);
   background: var(--bg-2);
 }

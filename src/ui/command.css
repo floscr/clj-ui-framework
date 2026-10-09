@@ -15,11 +15,11 @@
   margin-inline: auto;
   margin-top: 0;
   padding: 0;
-  background: var(--bg-0);
+  background: var(--bg-1);
   color: var(--fg-0);
   border: var(--border-0);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-3);
+  border-radius: var(--radius-surface);
+  box-shadow: var(--shadow-floating);
   overflow: hidden;
 }
 
@@ -118,7 +118,7 @@
 .command-group-heading {
   padding: var(--size-2) var(--size-2) var(--size-1);
   font-size: var(--font-xs);
-  font-weight: 600;
+  font-weight: 500;
   color: var(--fg-2);
   user-select: none;
 }
@@ -251,7 +251,7 @@
   padding: 0 var(--size-1);
   box-sizing: border-box;
   font-size: var(--font-xs);
-  font-weight: 600;
+  font-weight: 500;
   line-height: var(--size-5);
   text-align: center;
   color: var(--fg-0);

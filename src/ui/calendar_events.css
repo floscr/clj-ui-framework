@@ -48,7 +48,7 @@
 .cal-event-day.cal-day-today .cal-day-number {
   background: var(--accent);
   color: var(--fg-on-accent);
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .cal-event-day.cal-day-selected {
@@ -56,7 +56,7 @@
 }
 
 .cal-event-day.cal-day-selected .cal-day-number {
-  font-weight: 600;
+  font-weight: 500;
   color: var(--fg-0);
 }
 
@@ -108,14 +108,14 @@
   height: var(--size-8);
   margin-bottom: 0;
   border-radius: 9999px;
-  transition: background 0.15s, color 0.15s;
+  transition: background var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);
 }
 
 /* Today: filled accent circle */
 .cal-event-day-dots.cal-day-today .cal-day-number {
   background: var(--accent);
   color: var(--fg-on-accent);
-  font-weight: 600;
+  font-weight: 500;
 }
 
 /* Selected: soft accent tint (whole-cell fill from base is cancelled) */
@@ -126,7 +126,7 @@
 .cal-event-day-dots.cal-day-selected .cal-day-number {
   background: var(--accent-100);
   color: var(--accent-800);
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .cal-event-day-dots.cal-day-today.cal-day-selected .cal-day-number {
@@ -203,7 +203,7 @@
   gap: var(--size-1);
   font-weight: 500;
   cursor: pointer;
-  transition: filter 0.12s;
+  transition: filter var(--duration-fast) var(--ease-standard);
   border-left: 3px solid transparent;
 }
 
@@ -249,7 +249,7 @@
 
 .cal-event-pill-stacked .cal-event-title {
   font-size: var(--font-sm);
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .cal-event-pill-stacked.cal-event-task {
@@ -302,7 +302,7 @@
   top: 0;
   width: 4px;
   height: 7px;
-  border: solid #fff;
+  border: solid var(--control-thumb);
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
 }
@@ -588,7 +588,7 @@
 
 .cal-month-full .cal-weekday.is-today {
   color: var(--fg-0);
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .cal-weekday-dot {
@@ -613,7 +613,7 @@
   align-items: stretch;
   gap: var(--size-1);
   overflow: hidden;
-  transition: background 0.12s ease;
+  transition: background var(--duration-fast) var(--ease-standard);
 }
 
 .cal-month-full .cal-event-day:hover {
@@ -659,7 +659,7 @@
 
 .cal-month-full .cal-day-month {
   color: var(--fg-1);
-  font-weight: 600;
+  font-weight: 500;
 }
 
 /* Number pill, replacing the plain event grid's fixed circle. */
@@ -688,8 +688,8 @@
 
 .cal-month-full .cal-event-day.cal-day-today .cal-day-number {
   background: var(--accent-500);
-  color: #fff;
-  font-weight: 700;
+  color: var(--fg-on-accent);
+  font-weight: 500;
 }
 
 .cal-month-full .cal-day-events {
@@ -765,7 +765,7 @@
   cursor: pointer;
   border-radius: var(--radius-md);
   scroll-snap-align: center;
-  transition: background 0.15s;
+  transition: background var(--duration-fast) var(--ease-standard);
   flex-shrink: 0;
 }
 
@@ -775,9 +775,7 @@
 
 .cal-ticker-day-name {
   font-size: var(--font-xs);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  font-weight: 500;
   color: var(--fg-2);
   line-height: 1;
 }
@@ -802,7 +800,7 @@
 .cal-ticker-today .cal-ticker-day-num {
   background: var(--accent);
   color: var(--fg-on-accent);
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .cal-ticker-selected {
@@ -810,7 +808,7 @@
 }
 
 .cal-ticker-selected .cal-ticker-day-num {
-  font-weight: 600;
+  font-weight: 500;
   color: var(--fg-0);
 }
 
@@ -865,9 +863,7 @@
 
 .cal-agenda-day-label {
   font-size: var(--font-sm);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
+  font-weight: 500;
   color: var(--fg-0);
 }
 
@@ -946,7 +942,7 @@
   color: var(--accent);
   font: inherit;
   font-size: var(--font-xs);
-  font-weight: 600;
+  font-weight: 500;
   cursor: pointer;
 }
 
@@ -960,7 +956,7 @@
   gap: var(--size-3);
   padding: var(--size-2) var(--size-4);
   cursor: pointer;
-  transition: background 0.12s;
+  transition: background var(--duration-fast) var(--ease-standard);
 }
 
 .cal-agenda-event:hover {
@@ -1080,7 +1076,7 @@
   border-left-style: solid;
   overflow: hidden;
   cursor: pointer;
-  transition: filter 0.12s;
+  transition: filter var(--duration-fast) var(--ease-standard);
 }
 
 .cal-timeline-event:hover {
@@ -1098,7 +1094,7 @@
   flex: 1;
   min-width: 0;
   font-size: var(--font-sm);
-  font-weight: 600;
+  font-weight: 500;
   line-height: 1.2;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1109,8 +1105,6 @@
   flex-shrink: 0;
   font-size: var(--font-xs);
   font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
   white-space: nowrap;
   opacity: 0.55;
 }
@@ -1254,7 +1248,7 @@
 
 .cal-week-headnum {
   font-size: var(--font-sm);
-  font-weight: 600;
+  font-weight: 500;
   color: var(--fg-1);
   font-variant-numeric: tabular-nums;
 }
@@ -1400,7 +1394,7 @@
   border-left-style: solid;
   overflow: hidden;
   cursor: pointer;
-  transition: filter 0.12s;
+  transition: filter var(--duration-fast) var(--ease-standard);
 }
 
 .cal-week-event:hover {
@@ -1418,7 +1412,7 @@
   flex: 1;
   min-width: 0;
   font-size: var(--font-xs);
-  font-weight: 600;
+  font-weight: 500;
   line-height: 1.2;
   overflow: hidden;
   text-overflow: ellipsis;

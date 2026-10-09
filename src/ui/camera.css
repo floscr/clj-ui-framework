@@ -2,9 +2,9 @@
 
 .camera-section {
   position: relative;
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-surface);
   overflow: hidden;
-  background: #000;
+  background: #000; /* lint-allow */
   aspect-ratio: 4/3;
 }
 
@@ -46,7 +46,7 @@
   background: rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(4px);
   cursor: pointer;
-  transition: transform 150ms ease, background 150ms ease;
+  transition: transform var(--duration-fast) var(--ease-standard), background var(--duration-fast) var(--ease-standard);
 }
 
 .camera-capture-btn:hover {
@@ -68,7 +68,7 @@
   border-radius: 50%;
   border: 2px solid rgba(255, 255, 255, 0.6);
   background: rgba(0, 0, 0, 0.3);
-  color: #fff;
+  color: #fff; /* lint-allow */
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -85,7 +85,7 @@
   height: 100%;
   color: rgba(255, 255, 255, 0.6);
   cursor: pointer;
-  transition: background 200ms ease;
+  transition: background var(--duration-standard) var(--ease-standard);
 }
 
 .camera-placeholder:hover {

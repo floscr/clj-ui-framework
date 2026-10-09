@@ -24,7 +24,7 @@
   background-position: right var(--size-2) center;
   color: var(--fg-0);
   border: var(--border-1);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-control);
   cursor: pointer;
 }
 
@@ -60,10 +60,10 @@
   max-height: 16rem;
   padding: var(--size-1);
   overflow-y: auto;
-  background: var(--bg-0);
+  background: var(--bg-1);
   border: var(--border-0);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-3);
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow-floating);
   animation: select-menu-in 0.12s ease;
 }
 
@@ -86,7 +86,7 @@
   color: var(--fg-0);
   background: none;
   border: none;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-control);
   cursor: pointer;
   white-space: nowrap;
 }

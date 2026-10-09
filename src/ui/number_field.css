@@ -12,8 +12,8 @@
   background: var(--bg-0);
   color: var(--fg-0);
   border: var(--border-1);
-  border-radius: var(--radius-md);
-  transition: border-color 0.12s ease, box-shadow 0.12s ease;
+  border-radius: var(--radius-control);
+  transition: border-color var(--duration-fast) var(--ease-standard), box-shadow var(--duration-fast) var(--ease-standard);
 }
 
 .number-field:focus-within {
@@ -63,7 +63,7 @@
   border: none;
   cursor: pointer;
   user-select: none;
-  transition: background 0.12s ease, color 0.12s ease;
+  transition: background var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);
 }
 
 .number-field-btn:hover:not(:disabled) {
@@ -83,13 +83,13 @@
 
 /* Round the outer corners so the buttons hug the wrapper's radius. */
 .number-field-btn--dec {
-  border-top-left-radius: var(--radius-md);
-  border-bottom-left-radius: var(--radius-md);
+  border-top-left-radius: var(--radius-control);
+  border-bottom-left-radius: var(--radius-control);
 }
 
 .number-field-btn--inc {
-  border-top-right-radius: var(--radius-md);
-  border-bottom-right-radius: var(--radius-md);
+  border-top-right-radius: var(--radius-control);
+  border-bottom-right-radius: var(--radius-control);
 }
 
 /* ── "right" variant — both steppers after the input ───────────────── */
@@ -137,13 +137,13 @@
 
 /* Round the outer corners so the stepper cell hugs the wrapper radius. */
 .number-field-spin .number-field-btn--inc {
-  border-top-right-radius: var(--radius-md);
+  border-top-right-radius: var(--radius-control);
 }
 
 /* Divider between the two chevrons + hug the bottom-right corner. */
 .number-field-spin .number-field-btn--dec {
   border-top: var(--border-1);
-  border-bottom-right-radius: var(--radius-md);
+  border-bottom-right-radius: var(--radius-control);
 }
 
 /* ── Sizes ─────────────────────────────────────────────────────────── */

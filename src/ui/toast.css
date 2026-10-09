@@ -18,10 +18,10 @@
   pointer-events: auto;
   cursor: pointer;
   padding: var(--size-3) var(--size-5);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-panel);
   background: var(--bg-1);
   border: var(--border-0);
-  box-shadow: var(--shadow-2);
+  box-shadow: var(--shadow-floating);
   color: var(--fg-0);
   font-size: var(--font-sm);
   font-weight: 500;
@@ -29,7 +29,7 @@
   max-width: 100%;
   overflow-wrap: break-word;
   animation: toast-in 200ms ease;
-  transition: opacity 300ms ease;
+  transition: opacity var(--duration-standard) var(--ease-standard);
 }
 
 @keyframes toast-in {

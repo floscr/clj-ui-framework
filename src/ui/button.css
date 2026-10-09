@@ -5,14 +5,25 @@
   gap: 0.5em;
   padding: var(--size-2) var(--size-4);
   font-size: var(--font-sm);
-  font-weight: 600;
+  font-weight: 500;
   line-height: var(--size-5);
   border: none;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-control);
   cursor: pointer;
   font-family: inherit;
   -webkit-user-select: none;
   user-select: none;
+  transition:
+    background-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard),
+    border-color var(--duration-fast) var(--ease-standard),
+    transform var(--duration-fast) var(--ease-standard);
+}
+
+/* Press feedback: a small scale on every button, slightly deeper on
+   icon-only buttons. Reduced motion drops it via the global rule. */
+.btn:active:not(:disabled) {
+  transform: scale(0.97);
 }
 
 .btn-primary {
@@ -20,7 +31,7 @@
   color: var(--fg-on-accent);
 }
 .btn-primary:hover:not(:disabled) {
-  filter: brightness(1.1);
+  background: var(--accent-strong);
 }
 
 .btn-secondary {
@@ -37,7 +48,7 @@
   color: var(--fg-0);
 }
 .btn-ghost:hover:not(:disabled) {
-  background: var(--bg-1);
+  background: var(--bg-2);
 }
 
 /* Pressed state for segmented toggles (e.g. ui.grid layout-toggle). */
@@ -51,7 +62,7 @@
   color: var(--fg-on-danger);
 }
 .btn-danger:hover:not(:disabled) {
-  filter: brightness(1.1);
+  background: var(--danger-strong);
 }
 
 .btn-success {
@@ -59,7 +70,7 @@
   color: var(--fg-on-success);
 }
 .btn-success:hover:not(:disabled) {
-  filter: brightness(1.1);
+  background: var(--success-strong);
 }
 
 .btn-link {
@@ -71,7 +82,7 @@
   border: none;
 }
 .btn-link:hover:not(:disabled) {
-  filter: brightness(1.2);
+  color: var(--accent-strong);
 }
 
 /* Link buttons rendered as <a> need reset styles */
@@ -102,6 +113,10 @@ a.btn-link {
   aspect-ratio: 1;
 }
 
+.btn-icon:active:not(:disabled) {
+  transform: scale(0.94);
+}
+
 .btn-icon.btn-sm {
   padding: var(--size-1);
 }
@@ -111,7 +126,7 @@ a.btn-link {
 }
 
 .btn-icon-round {
-  border-radius: 9999px;
+  border-radius: var(--radius-pill);
 }
 
 /* ── Loading ─────────────────────────────────────────────────── */

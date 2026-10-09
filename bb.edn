@@ -285,9 +285,14 @@
   {:doc "Check all ui-dev tmux panes for errors and verify dev servers"
    :task (load-file "scripts/check-dev.bb")}
 
+  lint-css
+  {:doc "Design-system lint for src/ui/*.css: raw colors, literal durations/easings, weights > 500, uppercase, hand-made focus rings (--warn lists raw rem too)"
+   :requires ([tools.lint-css :as lint])
+   :task (lint/lint! *command-line-args*)}
+
   release
   {:doc "Full release: test, rebuild JS runtime + demo SPAs, commit changed build artifacts, push master to ALL remotes — origin (gitea) + github (consumers pin either :git/url, the sha must exist on both) and hetzner (deploys the demo server). Prints the sha consumers pin."
-   :depends [test build-js-runtime build-demos]
+   :depends [lint-css test build-js-runtime build-demos]
    :task (do
            (shell "git" "add" "dev/replicant/prod" "dev/squint/dist" "src/ui/ui-runtime.js")
            (when-not (zero? (:exit (shell {:continue true} "git" "diff" "--cached" "--quiet")))

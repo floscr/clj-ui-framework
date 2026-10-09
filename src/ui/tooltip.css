@@ -9,7 +9,7 @@
   left: 50%;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 150ms ease, transform 150ms ease, visibility 150ms ease;
+  transition: opacity var(--duration-fast) var(--ease-standard), transform var(--duration-fast) var(--ease-standard), visibility var(--duration-fast) var(--ease-standard);
   pointer-events: none;
   z-index: 1000;
 }

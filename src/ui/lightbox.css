@@ -24,13 +24,13 @@
   max-width: 90vw;
   max-height: 90vh;
   object-fit: contain;
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-surface);
   cursor: default;
   user-select: none;
   -webkit-user-select: none;
   -webkit-user-drag: none;
   /* snap-back after a gesture; the runtime disables it while tracking */
-  transition: transform 0.2s ease;
+  transition: transform var(--duration-standard) var(--ease-standard);
 }
 
 .lightbox-image[data-zoomed] {
@@ -56,7 +56,7 @@
   cursor: pointer;
   color: white;
   padding: 0;
-  transition: background 0.15s;
+  transition: background var(--duration-fast) var(--ease-standard);
 }
 
 .lightbox-close:hover {
@@ -67,11 +67,11 @@
 
 .lightbox-thumb {
   cursor: pointer;
-  transition: opacity 0.1s;
+  transition: opacity var(--duration-fast) var(--ease-standard);
 }
 
 .lightbox-thumb:hover {
   opacity: 0.85;
-  outline: 2px solid var(--accent);
+  outline: var(--focus-outline);
   outline-offset: 1px;
 }

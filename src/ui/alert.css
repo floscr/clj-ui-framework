@@ -7,7 +7,7 @@
   padding: var(--size-3) var(--size-5);
   background: var(--bg-1);
   border: var(--border-0);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-panel);
   font-size: var(--font-sm);
 }
 
@@ -27,7 +27,7 @@
 }
 
 .alert-title {
-  font-weight: 600;
+  font-weight: 500;
   margin: 0;
 }
 

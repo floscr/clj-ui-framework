@@ -4,7 +4,7 @@
   background: var(--bg-1);
   border: var(--border-0);
   border-left: 3px solid var(--accent);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-panel);
   padding: var(--size-3) var(--size-4);
   animation: processing-bar-in 300ms ease;
 }
@@ -22,7 +22,7 @@
 
 .processing-bar-title {
   font-size: var(--font-sm);
-  font-weight: 600;
+  font-weight: 500;
   color: var(--fg-0);
 }
 

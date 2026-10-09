@@ -10,7 +10,7 @@
   border: var(--border-0);
   /* Fully-rounded pill: a large radius is clamped to half the height.
      overflow:hidden clips the square button corners to the pill shape. */
-  border-radius: 9999px;
+  border-radius: var(--radius-pill);
   overflow: hidden;
   box-shadow: var(--shadow-0);
 }

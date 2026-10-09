@@ -38,6 +38,11 @@
       (is (str/starts-with? hex "#") "should start with #")
       (is (= 7 (count hex))))))
 
+(defn- dark-attr-block
+  "The declarations inside the [data-theme=\"dark\"] { ... } block only."
+  [css]
+  (second (re-find #"(?s)\[data-theme=\"dark\"\] \{([^}]*)\}" css)))
+
 (deftest generate-css-test
   (let [token-data (gen/read-tokens "src/theme/tokens.edn")
         css (gen/generate-css token-data)]
@@ -47,21 +52,47 @@
 
     (testing "contains all base tokens as CSS variables"
       (doseq [token [:bg-0 :bg-1 :bg-2 :fg-0 :fg-1 :fg-2
-                      :accent :danger :success
-                      :border-0 :border-1 :border-2
-                      :shadow-0 :shadow-1 :shadow-2 :shadow-3
-                      :radius-sm :radius-md :radius-lg]]
+                      :accent :accent-strong :accent-subtle :danger :success
+                      :border-subtle :border-0 :border-1 :border-2
+                      :shadow-0 :shadow-1 :shadow-2 :shadow-3 :shadow-floating
+                      :radius-sm :radius-md :radius-lg
+                      :radius-control :radius-panel :radius-surface :radius-pill
+                      :control-track :control-thumb :series-1 :series-4 :focus-outline]]
         (is (str/includes? css (str "--" (name token) ":"))
             (str "Missing token: " (name token)))))
+
+    (testing "static tokens (type, motion, control heights) live in :root only"
+      (let [root-block (first (str/split css #"\[data-theme=\"dark\"\]"))
+            dark-block (dark-attr-block css)]
+        (doseq [token [:font-body :font-display :font-mono :weight-medium
+                       :duration-fast :duration-standard :duration-considered
+                       :ease-standard :ease-enter :control-md]]
+          (is (str/includes? root-block (str "--" (name token) ":"))
+              (str "Missing static token: " (name token)))
+          (is (not (str/includes? dark-block (str "--" (name token) ":")))
+              (str "Static token duplicated in dark block: " (name token))))))
+
+    (testing "accent variants"
+      (is (str/includes? css "[data-accent=\"blue\"] {"))
+      (is (str/includes? css "--accent-500: var(--blue-500);"))
+      (is (str/includes? css "[data-accent=\"neutral\"] {"))
+      (is (str/includes? css "[data-accent=\"neutral\"][data-theme=\"dark\"] {"))
+      (is (str/includes? css "[data-accent=\"neutral\"]:not([data-theme=\"light\"])")))
+
+    (testing "base styles: shared focus ring and reduced motion"
+      (is (str/includes? css "outline: var(--focus-outline);"))
+      (is (str/includes? css "@media (prefers-reduced-motion: reduce)"))
+      (is (str/includes? css "font-family: var(--font-body);")))
 
     (testing "contains color scale variables"
       (doseq [scale ["gray" "accent" "danger" "success" "warning"]]
         (doseq [step [50 100 200 300 400 500 600 700 800 900 950]]
           (is (str/includes? css (str "--" scale "-" step ":"))
-              (str "Missing color: " scale "-" step)))))
+              (str "Missing color: " scale "-" step))))
+      (is (str/includes? css "--gray-0: oklch(1.000 0.0000") "gray-0 is pure white"))
 
     (testing "color scales only in :root, not in dark theme blocks"
-      (let [dark-block (second (str/split css #"\[data-theme=\"dark\"\]"))]
+      (let [dark-block (dark-attr-block css)]
         (is (not (str/includes? dark-block "--gray-50:")))
         (is (not (str/includes? dark-block "--accent-500:")))))
 
@@ -85,7 +116,7 @@
             (str "Missing font-" label))))
 
     (testing "scales only in :root, not in dark theme blocks"
-      (let [dark-block (second (str/split css #"\[data-theme=\"dark\"\]"))]
+      (let [dark-block (dark-attr-block css)]
         (is (not (str/includes? dark-block "--size-1:")))
         (is (not (str/includes? dark-block "--font-base:")))))
 
@@ -110,4 +141,14 @@
           base-keys (set (keys (:tokens data)))
           dark-keys (set (keys (get-in data [:themes :dark])))]
       (is (= base-keys dark-keys)
-          "Dark theme should override all base tokens"))))
+          "Dark theme should override all base tokens")))
+
+  (testing "accent token overrides only name existing semantic tokens"
+    (let [data (gen/read-tokens "src/theme/tokens.edn")
+          base-keys (set (keys (:tokens data)))]
+      (doseq [[accent {:keys [scale tokens dark]}] (:accents data)]
+        (if scale
+          (is (contains? (get-in data [:scales :color]) scale)
+              (str accent " names an unknown scale " scale))
+          (do (is (every? base-keys (keys tokens)) (str accent " light overrides unknown tokens"))
+              (is (every? base-keys (keys dark)) (str accent " dark overrides unknown tokens"))))))))

@@ -41,7 +41,7 @@
   cursor: pointer;
   user-select: none;
   white-space: nowrap;
-  transition: color 150ms ease, background-color 150ms ease, box-shadow 150ms ease;
+  transition: color var(--duration-fast) var(--ease-standard), background-color var(--duration-fast) var(--ease-standard), box-shadow var(--duration-fast) var(--ease-standard);
 }
 
 .tabs-trigger:hover {
@@ -50,7 +50,7 @@
 
 /* The hidden radio takes keyboard focus; ring is drawn on its label. */
 .tabs-input:focus-visible + .tabs-trigger {
-  outline: 2px solid var(--accent);
+  outline: var(--focus-outline);
   outline-offset: 2px;
 }
 
@@ -77,13 +77,13 @@
 .tabs-boxed .tabs-list {
   gap: var(--size-1);
   background: var(--bg-2);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-control);
   padding: var(--size-1);
 }
 
 .tabs-boxed .tabs-trigger {
   padding: var(--size-1) var(--size-3);
-  border-radius: var(--radius-sm);
+  border-radius: calc(var(--radius-control) - var(--size-1));
 }
 
 .tabs-boxed .tabs-input:checked + .tabs-trigger {

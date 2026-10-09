@@ -23,7 +23,7 @@
    animates back when the menu dismisses. */
 .clj-ui-touch .context-menu-trigger,
 .clj-ui-touch [data-long-press] {
-  transition: transform 0.2s ease;
+  transition: transform var(--duration-standard) var(--ease-standard);
 }
 
 .clj-ui-touch .clj-ui-pressing {
@@ -35,10 +35,10 @@
   z-index: 9999;
   min-width: 10rem;
   padding: 0;
-  background: var(--bg-0);
+  background: var(--bg-1);
   border: var(--border-0);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-3);
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow-floating);
   overflow-x: hidden;
   overflow-y: auto;
   /* Never taller than the viewport — scroll instead of overflowing.

@@ -7,7 +7,7 @@
   gap: var(--size-1);
   padding: var(--size-1);
   background: var(--bg-1);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-control);
   border: var(--border-0);
 }
 
@@ -18,11 +18,11 @@
   width: 2rem;
   height: 2rem;
   border: none;
-  border-radius: var(--radius-sm);
+  border-radius: calc(var(--radius-control) - var(--size-1));
   background: transparent;
   color: var(--fg-2);
   cursor: pointer;
-  transition: color 150ms ease, background 150ms ease;
+  transition: color var(--duration-fast) var(--ease-standard), background var(--duration-fast) var(--ease-standard);
   font-family: inherit;
   padding: 0;
 }
@@ -43,7 +43,7 @@
 .theme-toggle-sm {
   gap: 2px;
   padding: 2px;
-  border-radius: var(--radius-sm);
+  border-radius: calc(var(--radius-control) - var(--size-1));
 }
 
 .theme-toggle-sm .theme-toggle-btn {

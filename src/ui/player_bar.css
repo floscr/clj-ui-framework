@@ -50,13 +50,13 @@
   height: var(--player-bar-track-h);
   background: var(--bg-2);
   overflow: hidden;
-  transition: height 0.1s;
+  transition: height var(--duration-fast) var(--ease-standard);
 }
 
 .player-bar-progress-fill {
   height: 100%;
   background: var(--accent);
-  transition: width 0.1s linear;
+  transition: width var(--duration-fast) linear;
 }
 
 /* Scrubber thumb — visible on hover.
@@ -76,7 +76,7 @@
   box-shadow: var(--shadow-1);
   opacity: 0;
   scale: 0.5;
-  transition: opacity 0.15s, scale 0.15s, bottom 0.1s;
+  transition: opacity var(--duration-fast) var(--ease-standard), scale var(--duration-fast) var(--ease-standard), bottom var(--duration-fast) var(--ease-standard);
   z-index: 1;
   pointer-events: none;
 }
@@ -184,7 +184,7 @@
   color: var(--fg-1);
   cursor: pointer;
   border-radius: var(--radius-sm);
-  transition: background 0.15s, color 0.15s;
+  transition: background var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);
 }
 
 .player-bar-icon-btn:hover {
@@ -221,7 +221,7 @@
   border: none;
   border-radius: 9999px;
   cursor: pointer;
-  transition: filter 0.15s;
+  transition: filter var(--duration-fast) var(--ease-standard);
 }
 
 .player-bar-play-btn:hover {

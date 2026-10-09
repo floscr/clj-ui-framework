@@ -9,7 +9,7 @@
 .chat-bubble {
   max-width: 85%;
   padding: var(--size-3);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-panel);
   overflow-wrap: anywhere;
 }
 

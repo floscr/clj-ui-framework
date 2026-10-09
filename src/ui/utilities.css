@@ -34,7 +34,7 @@
 /* Boxed variant — a segmented control in a visible track (matches .tabs-boxed). */
 .toolbar-group-boxed {
   background: var(--bg-2);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-control);
   padding: var(--size-1);
 }
 
@@ -42,6 +42,7 @@
   width: var(--size-8);
   height: var(--size-8);
   padding: 0;
+  border-radius: calc(var(--radius-control) - var(--size-1));
 }
 
 .toolbar-group-boxed > .btn:hover:not(:disabled) {
@@ -75,9 +76,10 @@
 .text-xs { font-size: var(--font-xs); }
 .text-sm { font-size: var(--font-sm); }
 .text-right { text-align: right; }
-.font-semibold { font-weight: 600; }
-.font-mono { font-family: ui-monospace, 'JetBrains Mono', monospace; }
-.uppercase { text-transform: uppercase; }
+.font-semibold { font-weight: 500; }
+.font-mono { font-family: var(--font-mono); }
+.tabular-nums { font-variant-numeric: tabular-nums; }
+.uppercase { text-transform: uppercase; } /* lint-allow */
 .tracking-wide { letter-spacing: 0.05em; }
 
 .w-full { width: 100%; }
@@ -105,7 +107,7 @@
 @media (hover: hover) {
   .hover-reveal .hover-reveal-item {
     opacity: 0;
-    transition: opacity 120ms ease;
+    transition: opacity var(--duration-fast) var(--ease-standard);
   }
 
   .hover-reveal:hover .hover-reveal-item,

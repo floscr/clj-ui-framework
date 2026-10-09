@@ -21,7 +21,8 @@
   {;; Gray — purplish tint (hue 285 in OKLCH). Change hue for warm/cool grays.
    ;; Chroma tapers at light/dark extremes for subtlety, peaks in mid-range.
    :gray {:hue 285 :chroma 0.025
-          :steps [[50  0.975 0.003]
+          :steps [[0   1.000 0.000]
+                  [50  0.975 0.003]
                   [100 0.955 0.005]
                   [200 0.915 0.010]
                   [300 0.850 0.012]
@@ -151,21 +152,77 @@
                     [900 0.395 0.100]
                     [950 0.280 0.070]]}}}
 
+ ;; ─── Static tokens ────────────────────────────────────────────────
+ ;; Theme-independent, emitted into :root only (like scales). Type,
+ ;; motion and control sizing. Consumers override via build-css :static.
+
+ :static
+ {:font-body    "ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif"
+  :font-display "var(--font-body)"
+  :font-mono    "ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace"
+  :weight-regular "400"
+  :weight-medium  "500"
+  :tracking-display "-0.02em"
+  :leading-display  "1.1"
+  :leading-body     "1.5"
+  ;; Motion — transitions animate transform/opacity/color on these.
+  :duration-fast       "160ms"
+  :duration-standard   "240ms"
+  :duration-considered "480ms"
+  :ease-standard "cubic-bezier(0.22, 1, 0.36, 1)"
+  :ease-enter    "cubic-bezier(0.16, 1, 0.3, 1)"
+  :ease-exit     "cubic-bezier(0.4, 0, 1, 1)"
+  :ease-spring   "cubic-bezier(0.34, 1.4, 0.64, 1)"
+  ;; Control heights (sm 36px · md 44px, the phone tap minimum · lg 48px)
+  :control-sm "var(--size-9)"
+  :control-md "var(--size-11)"
+  :control-lg "var(--size-12)"}
+
+ ;; ─── Accents ──────────────────────────────────────────────────────
+ ;; [data-accent="<name>"] on <html> swaps the accent. {:scale :blue}
+ ;; remaps --accent-50..950 onto another color scale; {:tokens .. :dark ..}
+ ;; overrides semantic tokens directly (used by :neutral, whose contrast
+ ;; text flips with the theme).
+
+ :accents
+ {:neutral {:tokens {:accent        "var(--gray-900)"
+                     :accent-strong "var(--gray-950)"
+                     :accent-subtle "color-mix(in oklch, var(--gray-900) 8%, transparent)"
+                     :fg-on-accent  "var(--gray-50)"
+                     :series-1      "var(--gray-700)"}
+            :dark   {:accent        "var(--gray-100)"
+                     :accent-strong "var(--gray-50)"
+                     :accent-subtle "color-mix(in oklch, var(--gray-100) 12%, transparent)"
+                     :fg-on-accent  "var(--gray-950)"
+                     :series-1      "var(--gray-300)"}}
+  :blue   {:scale :blue}
+  :teal   {:scale :teal}
+  :green  {:scale :success}
+  :amber  {:scale :warning}
+  :orange {:scale :orange}
+  :red    {:scale :danger}
+  :pink   {:scale :pink}}
+
  ;; ─── Semantic tokens (light theme) ────────────────────────────────
  ;; Reference color scale variables with var(--scale-step).
+ ;; bg-0 page · bg-1 surface (cards, sidebars) · bg-2 muted / hover
 
  :tokens
  {:bg-0      "var(--gray-50)"
-  :bg-1      "var(--gray-100)"
-  :bg-2      "var(--gray-200)"
+  :bg-1      "var(--gray-0)"
+  :bg-2      "var(--gray-100)"
   :fg-0      "var(--gray-950)"
   :fg-1      "var(--gray-600)"
   :fg-2      "var(--gray-400)"
   :accent    "var(--accent-500)"
+  :accent-strong "var(--accent-600)"
+  :accent-subtle "color-mix(in oklch, var(--accent) 12%, transparent)"
   :fg-on-accent "#ffffff"
   :danger    "var(--danger-500)"
+  :danger-strong "var(--danger-600)"
   :fg-on-danger "#ffffff"
   :success   "var(--success-500)"
+  :success-strong "var(--success-600)"
   :fg-on-success "#ffffff"
   :warning   "var(--warning-500)"
   :fg-on-warning "#ffffff"
@@ -173,6 +230,13 @@
   :teal      "var(--teal-500)"
   :pink      "var(--pink-500)"
   :orange    "var(--orange-500)"
+  :series-1  "var(--accent-500)"
+  :series-2  "var(--blue-500)"
+  :series-3  "var(--teal-500)"
+  :series-4  "var(--orange-500)"
+  :control-track "var(--gray-300)"
+  :control-thumb "#ffffff"
+  :border-subtle "1px solid var(--gray-100)"
   :border-0  "1px solid var(--gray-200)"
   :border-1  "1px solid var(--gray-300)"
   :border-2  "1px solid var(--gray-500)"
@@ -180,10 +244,18 @@
   :shadow-1  "0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06)"
   :shadow-2  "0 4px 6px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06)"
   :shadow-3  "0 10px 15px rgba(0,0,0,0.1), 0 4px 6px rgba(0,0,0,0.05)"
+  :shadow-floating "0 12px 32px rgba(0,0,0,0.12), 0 2px 6px rgba(0,0,0,0.06)"
+  :focus-outline "2px solid var(--accent)"
+  ;; Small radii for details (badges, thumbs, inline code)
   :radius-xs "4px"
   :radius-sm "6px"
   :radius-md "10px"
-  :radius-lg "16px"}
+  :radius-lg "16px"
+  ;; Concentric radii: inner = outer - padding (see AGENTS.md)
+  :radius-control "12px"
+  :radius-panel   "18px"
+  :radius-surface "24px"
+  :radius-pill    "9999px"}
 
  ;; ─── Dark theme overrides ─────────────────────────────────────────
  ;; Same keys, different scale stops. Scales themselves don't change.
@@ -197,10 +269,14 @@
    :fg-1      "var(--gray-300)"
    :fg-2      "var(--gray-500)"
    :accent    "var(--accent-400)"
+   :accent-strong "var(--accent-300)"
+   :accent-subtle "color-mix(in oklch, var(--accent) 16%, transparent)"
    :fg-on-accent "#ffffff"
    :danger    "var(--danger-400)"
+   :danger-strong "var(--danger-300)"
    :fg-on-danger "#ffffff"
    :success   "var(--success-400)"
+   :success-strong "var(--success-300)"
    :fg-on-success "#ffffff"
    :warning   "var(--warning-400)"
    :fg-on-warning "#ffffff"
@@ -208,6 +284,13 @@
    :teal      "var(--teal-400)"
    :pink      "var(--pink-400)"
    :orange    "var(--orange-400)"
+   :series-1  "var(--accent-400)"
+   :series-2  "var(--blue-400)"
+   :series-3  "var(--teal-400)"
+   :series-4  "var(--orange-400)"
+   :control-track "var(--gray-700)"
+   :control-thumb "#ffffff"
+   :border-subtle "1px solid color-mix(in oklch, var(--gray-800) 60%, transparent)"
    :border-0  "1px solid var(--gray-800)"
    :border-1  "1px solid var(--gray-700)"
    :border-2  "1px solid var(--gray-500)"
@@ -215,7 +298,13 @@
    :shadow-1  "0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2)"
    :shadow-2  "0 4px 6px rgba(0,0,0,0.3), 0 2px 4px rgba(0,0,0,0.2)"
    :shadow-3  "0 10px 15px rgba(0,0,0,0.3), 0 4px 6px rgba(0,0,0,0.2)"
+   :shadow-floating "0 22px 55px rgba(0,0,0,0.5), 0 2px 8px rgba(0,0,0,0.3)"
+   :focus-outline "2px solid var(--accent)"
    :radius-xs "4px"
    :radius-sm "6px"
    :radius-md "10px"
-   :radius-lg "16px"}}}
+   :radius-lg "16px"
+   :radius-control "12px"
+   :radius-panel   "18px"
+   :radius-surface "24px"
+   :radius-pill    "9999px"}}}

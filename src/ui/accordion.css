@@ -5,7 +5,7 @@
 
 .accordion {
   border: var(--border-0);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-panel);
   overflow: hidden;
 }
 
@@ -38,7 +38,7 @@
   cursor: pointer;
   user-select: none;
   color: var(--fg-0);
-  transition: background-color 150ms ease;
+  transition: background-color var(--duration-fast) var(--ease-standard);
   list-style: none;
 }
 
@@ -50,7 +50,7 @@
 }
 
 .accordion-trigger:hover {
-  background: var(--bg-1);
+  background: var(--bg-2);
 }
 
 .accordion-trigger-text {
@@ -67,7 +67,7 @@
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
-  transition: transform 150ms ease;
+  transition: transform var(--duration-fast) var(--ease-standard);
 }
 
 .accordion[open] > .accordion-trigger {

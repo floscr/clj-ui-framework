@@ -6,7 +6,7 @@
   width: 100%;
   background: var(--bg-1);
   border: var(--border-0);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-panel);
   overflow: hidden;
   user-select: none;
   -webkit-user-select: none;
@@ -116,7 +116,7 @@
 }
 
 .ui-timeline-bar:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: var(--focus-outline);
   outline-offset: 1px;
 }
 
@@ -157,7 +157,7 @@
   border-radius: 1px;
   background: var(--accent);
   opacity: 0;
-  transition: opacity 0.15s;
+  transition: opacity var(--duration-fast) var(--ease-standard);
 }
 
 /* Align the line with the segment edge the handle controls. */
@@ -253,7 +253,7 @@
 .ui-timeline-play {
   background: var(--fg-0);
   color: var(--bg-0);
-  transition: scale 0.15s;
+  transition: scale var(--duration-fast) var(--ease-standard);
 }
 
 @media (hover: hover) {

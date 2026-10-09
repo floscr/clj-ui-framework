@@ -12,9 +12,9 @@
   position: relative;
   width: 2.5rem;
   height: 1.375rem;
-  background: var(--bg-2);
-  border-radius: 9999px;
-  transition: background-color 200ms ease;
+  background: var(--control-track);
+  border-radius: var(--radius-pill);
+  transition: background-color var(--duration-standard) var(--ease-standard);
   flex-shrink: 0;
 }
 
@@ -28,10 +28,10 @@
   left: 2px;
   width: calc(1.375rem - 4px);
   height: calc(1.375rem - 4px);
-  background: var(--bg-0);
-  border-radius: 9999px;
+  background: var(--control-thumb);
+  border-radius: var(--radius-pill);
   box-shadow: var(--shadow-0);
-  transition: transform 200ms ease;
+  transition: transform var(--duration-standard) var(--ease-standard);
 }
 
 .switch-track--checked .switch-thumb {

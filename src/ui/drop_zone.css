@@ -2,8 +2,8 @@
 
 .drop-zone {
   border: 2px dashed var(--fg-2);
-  border-radius: var(--radius-lg);
-  transition: border-color 200ms ease, background 200ms ease;
+  border-radius: var(--radius-surface);
+  transition: border-color var(--duration-standard) var(--ease-standard), background var(--duration-standard) var(--ease-standard);
   display: flex;
   flex-direction: column;
 }
@@ -54,7 +54,7 @@
 .drop-zone-title {
   margin: 0;
   font-size: var(--font-base);
-  font-weight: 600;
+  font-weight: 500;
   color: var(--fg-0);
 }
 
@@ -86,11 +86,11 @@
   gap: var(--size-2);
   padding: var(--size-3);
   border: 1px dashed var(--fg-2);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-control);
   color: var(--fg-1);
   font-size: var(--font-sm);
   cursor: pointer;
-  transition: border-color 150ms ease, color 150ms ease;
+  transition: border-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);
 }
 
 .drop-zone-add:hover {
@@ -125,9 +125,9 @@
   gap: var(--size-3);
   padding: var(--size-10) var(--size-8);
   border: 2px dashed var(--accent);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-surface);
   background: var(--bg-0);
-  box-shadow: var(--shadow-3);
+  box-shadow: var(--shadow-floating);
 }
 
 .drop-zone-overlay-content .drop-zone-icon {

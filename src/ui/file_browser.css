@@ -72,10 +72,8 @@
   padding: var(--size-2) var(--size-3);
   gap: var(--size-3);
   font-size: var(--font-xs);
-  font-weight: 600;
+  font-weight: 500;
   color: var(--fg-2);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
   background: var(--bg-1);
 }
 
@@ -180,11 +178,11 @@
   border: none;
   color: var(--fg-2);
   cursor: pointer;
-  transition: background-color 150ms ease, color 150ms ease;
+  transition: background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);
 }
 
 .fb-view-toggle-btn:hover {
-  background: var(--bg-1);
+  background: var(--bg-2);
   color: var(--fg-0);
 }
 
@@ -235,10 +233,8 @@
   padding: var(--size-2) var(--size-3);
   text-align: left;
   font-size: var(--font-xs);
-  font-weight: 600;
+  font-weight: 500;
   color: var(--fg-2);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
   user-select: none;
   white-space: nowrap;
   background: var(--bg-1);

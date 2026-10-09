@@ -128,22 +128,81 @@
       (:font scales)  (conj (generate-font-scale (:font scales)))
       (:color scales) (conj (generate-color-scales (:color scales))))))
 
+;; ── Accents ──────────────────────────────────────────────────────
+
+(defn- indent-block
+  "Indent every line of a CSS declaration block by two more spaces."
+  [block]
+  (str/replace block #"(?m)^  " "    "))
+
+(defn generate-accent
+  "CSS for one [data-accent=\"name\"] variant.
+   {:scale :blue}            — remaps --accent-<step> onto the named scale
+   {:tokens {..} :dark {..}} — overrides semantic tokens (light + dark)."
+  [accent-name {:keys [scale tokens dark]} color-scales]
+  (let [sel (str "[data-accent=\"" (name accent-name) "\"]")]
+    (if scale
+      (let [steps (map first (get-in color-scales [scale :steps]))]
+        (str sel " {\n"
+             (str/join "\n" (map #(str "  --accent-" % ": var(--" (name scale) "-" % ");") steps))
+             "\n}"))
+      (str sel " {\n" (tokens->css-block tokens) "\n}\n\n"
+           sel "[data-theme=\"dark\"] {\n" (tokens->css-block dark) "\n}\n\n"
+           "@media (prefers-color-scheme: dark) {\n"
+           "  " sel ":not([data-theme=\"light\"]) {\n"
+           (indent-block (tokens->css-block dark))
+           "\n  }\n}"))))
+
+(defn generate-accents
+  "CSS blocks for every entry in :accents."
+  [accents color-scales]
+  (->> accents
+       (sort-by key)
+       (map (fn [[k v]] (generate-accent k v color-scales)))
+       (str/join "\n\n")))
+
 (defn base-css
-  "Generate base body/reset styles."
+  "Generate base body/reset styles: type, focus ring, reduced motion."
   []
   "*, *::before, *::after {
   box-sizing: border-box;
 }
 
+html {
+  font-family: var(--font-body);
+  line-height: var(--leading-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   margin: 0;
   background: var(--bg-0);
   color: var(--fg-0);
 }
 
+/* Two weights only: regular (400) and medium (500). Hierarchy comes from
+   size, color and spacing, not heavier weights. */
+h1, h2, h3, h4, h5, h6, b, strong, th {
+  font-weight: var(--weight-medium);
+}
+
+/* Display type: large headings get the display face, tight tracking and
+   a short leading. */
+h1, h2 {
+  font-family: var(--font-display);
+  letter-spacing: var(--tracking-display);
+  line-height: var(--leading-display);
+}
+
+code, kbd, pre, samp {
+  font-family: var(--font-mono);
+}
+
+/* One shared focus ring, keyboard only. Components never draw their own
+   rings on pointer focus. */
 :focus-visible {
-  outline: 2px solid var(--accent);
+  outline: var(--focus-outline);
   outline-offset: 2px;
   box-shadow: none;
 }
@@ -157,6 +216,16 @@ body {
 [data-no-transitions] *::before,
 [data-no-transitions] *::after {
   transition: none !important;
+}
+
+/* Reduced motion: keep end states and feedback, drop travel and loops. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }")
 
 (defn collect-component-css
@@ -327,23 +396,29 @@ body {
 
 (defn generate-css
   "Generate the full CSS output from parsed token data.
-   component-dir defaults to \"src/ui\" (for local dev)."
+   component-dir defaults to \"src/ui\" (for local dev).
+
+   Layers, in order: :root (semantic light tokens + :static + scales),
+   [data-theme=dark], the prefers-color-scheme fallback, [data-accent=*]
+   variants, base styles, component CSS."
   ([token-data] (generate-css token-data "src/ui"))
-  ([{:keys [tokens themes scales]} component-dir]
+  ([{:keys [tokens static themes scales accents]} component-dir]
    (let [dark-tokens (get themes :dark)
          scale-vars  (when scales (generate-scales scales))
          root-block  (str ":root {\n" (tokens->css-block tokens)
+                          (when (seq static) (str "\n" (tokens->css-block static)))
                           (when scale-vars (str "\n" scale-vars))
                           "\n}")
          dark-attr   (str "[data-theme=\"dark\"] {\n" (tokens->css-block dark-tokens) "\n}")
          dark-media  (str "@media (prefers-color-scheme: dark) {\n"
                           "  :root:not([data-theme=\"light\"]) {\n"
-                          (str/replace (tokens->css-block dark-tokens) #"(?m)^  " "    ")
+                          (indent-block (tokens->css-block dark-tokens))
                           "\n  }\n}")
+         accent-css  (when (seq accents) (generate-accents accents (:color scales)))
          base        (base-css)
          components  (collect-component-css component-dir)]
      (wrap-hover-media
-      (str/join "\n\n" [root-block dark-attr dark-media base components ""])))))
+      (str/join "\n\n" (remove nil? [root-block dark-attr dark-media accent-css base components ""]))))))
 
 (defn build-css
   "Generate bundled CSS string with theme tokens and all component styles.

@@ -535,12 +535,68 @@ The implementation lives in `scripts/tools/` (`tools.registry`,
 
 Semantic + scale tokens in `src/theme/tokens.edn`:
 
-- **Backgrounds**: `bg-0` (base), `bg-1` (surface), `bg-2` (elevated)
+- **Backgrounds**: `bg-0` (page), `bg-1` (surface: cards, sidebars, floating
+  panels — white in light), `bg-2` (muted: hover fills, tracks, boxed groups)
 - **Foregrounds**: `fg-0` (primary text), `fg-1` (secondary), `fg-2` (muted)
-- **Semantic**: `accent`, `danger`, `success` + `fg-on-*` for contrast text
-- **Borders**: `border-0/1/2` (full shorthand: `1px solid var(--gray-N)`)
-- **Shadows**: `shadow-0/1/2/3` (increasing elevation)
-- **Radii**: `radius-sm/md/lg`
+- **Semantic**: `accent`, `danger`, `success`, `warning` + `fg-on-*` for
+  contrast text. `accent-strong` (hover/pressed accent), `accent-subtle`
+  (translucent accent tint behind selected rows, active nav, accent icons)
+- **Controls**: `control-track`, `control-thumb` (switches, sliders)
+- **Chart series**: `series-1..4`
+- **Borders**: `border-subtle` (dividers inside a surface), `border-0`
+  (default), `border-1/2` (inputs, emphasis) — full shorthand
+  `1px solid var(--gray-N)`
+- **Shadows**: `shadow-floating` for layers that float (menus, popovers,
+  dialogs, toasts). Cards rest on a border with **no shadow**. `shadow-0..3`
+  remain for the rare lifted control (segmented thumb, switch thumb).
+- **Radii, concentric**: `radius-control` (buttons, inputs, menu items),
+  `radius-panel` (menus, popovers, toasts, alerts, accordions), `radius-surface`
+  (cards, dialogs, command palette), `radius-pill` (badges, chips, tracks).
+  `radius-xs/sm/md/lg` stay for small details. A nested corner is the outer
+  radius minus the padding between them so the curves stay parallel:
+  `.boxed { border-radius: var(--radius-control); padding: var(--size-1); }`
+  `.boxed > .item { border-radius: calc(var(--radius-control) - var(--size-1)); }`
+- **Focus**: `focus-outline` — one shared keyboard ring from the base styles.
+  Never draw rings on pointer focus; never hand-write `outline: 2px solid`.
+
+### Static tokens (`:static` in tokens.edn)
+
+Theme-independent, emitted into `:root` only. Override via `build-css {:static {...}}`.
+
+- **Type**: `font-body`, `font-display` (h1/h2; defaults to the body face —
+  swap in a self-hosted face with one token), `font-mono`, `weight-regular`
+  400 / `weight-medium` 500 (**only these two weights**; the base styles set
+  headings, `strong` and `th` to medium), `tracking-display`, `leading-display`,
+  `leading-body`.
+- **Motion**: `duration-fast` 160ms (hover, color, small state), `duration-standard`
+  240ms (panels, menus), `duration-considered` 480ms (rare reveals);
+  `ease-standard` (default), `ease-enter`, `ease-exit`, `ease-spring`.
+  Every `transition` in component CSS uses these — no literal `150ms ease`.
+  Animate transform, opacity and color; the base styles collapse all motion
+  under `prefers-reduced-motion`.
+- **Control heights**: `control-sm` 36px, `control-md` 44px (phone tap
+  minimum), `control-lg` 48px.
+
+### Accents (`:accents` in tokens.edn)
+
+`<html data-accent="blue">` swaps the accent without rebuilding CSS. Purple
+is the default; `neutral`, `blue`, `teal`, `green`, `amber`, `orange`,
+`red`, `pink` are generated. `{:scale :blue}` remaps `--accent-50..950` onto
+another scale; `{:tokens {..} :dark {..}}` overrides semantic tokens
+directly (`neutral` flips `fg-on-accent` with the theme). Spend the accent
+with intent: active nav, selected row, progress, one emphasized data series.
+Status colors (`danger`, `success`, `warning`) mean status, always with a label.
+
+### Design rules (enforced by `bb lint-css`)
+
+- No raw hex/rgb in component CSS (`/* lint-allow */` for the rare legit case)
+- No literal transition durations or easings — motion tokens only
+- No `font-weight` above 500, no `text-transform: uppercase`, no eyebrow labels
+- No hand-made focus outlines, no `filter: brightness` hovers
+- Raw `rem` is reported as a warning (`bb lint-css --warn`)
+- Copy is sentence case, buttons are verb + object, no em dashes in UI text
+- Press feedback: `.btn:active` scales to 0.97 (icon buttons 0.94); reuse the
+  pattern on other tappable controls instead of inventing new feedback
 
 ### Algorithmic scales
 
@@ -605,14 +661,16 @@ To adjust the entire scale, change `hue`, `saturation`, or `steps` — all value
 
 ### Adding tokens
 
-Add to both `:tokens` (light) and `:themes > :dark` in `tokens.edn`. They must have the same keys — the `tokens-roundtrip-test` enforces this. Scale config (`:scales`) is theme-independent and lives at the top level.
+Add to both `:tokens` (light) and `:themes > :dark` in `tokens.edn`. They must have the same keys — the `tokens-roundtrip-test` enforces this. Scale config (`:scales`), `:static` and `:accents` are theme-independent and live at the top level; accent overrides may only name existing semantic tokens (also tested).
 
 ### Dark mode
 
-Three CSS layers are generated:
-1. `:root { ... }` — light defaults + all scales (size, font, color)
+The CSS layers are generated in this order:
+1. `:root { ... }` — light defaults + static tokens + all scales (size, font, color)
 2. `[data-theme="dark"] { ... }` — explicit dark override (semantic tokens only)
 3. `@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { ... } }` — auto dark
+4. `[data-accent="…"]` variants (light, dark attr, dark media)
+5. base styles (type, focus ring, reduced motion), then component CSS
 
 Color scales are generated once in `:root` and never duplicated. Dark theme just reassigns which scale stop each semantic token points to.
 

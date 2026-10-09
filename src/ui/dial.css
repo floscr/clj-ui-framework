@@ -26,7 +26,7 @@
   background: var(--bg-0);
   border: var(--border-1);
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow-3);
+  box-shadow: var(--shadow-floating);
   overflow: hidden;
 }
 
@@ -45,7 +45,7 @@
 .dial-panel-head:active { cursor: grabbing; }
 
 .dial-panel-title {
-  font-weight: 600;
+  font-weight: 500;
   font-size: var(--font-sm);
   white-space: nowrap;
   overflow: hidden;
@@ -130,7 +130,7 @@
   background: var(--bg-1);
   border: var(--border-1);
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow-3);
+  box-shadow: var(--shadow-floating);
   cursor: pointer;
 }
 
@@ -424,7 +424,7 @@
   align-items: center;
   gap: var(--size-1);
   font-size: var(--font-xs);
-  font-weight: 600;
+  font-weight: 500;
   color: var(--fg-1);
   background: transparent;
   border: none;
@@ -441,7 +441,7 @@
   border-top: 4px solid transparent;
   border-bottom: 4px solid transparent;
   transform: rotate(90deg);
-  transition: transform 0.12s ease;
+  transition: transform var(--duration-fast) var(--ease-standard);
 }
 
 .dial-folder.is-collapsed .dial-chevron { transform: rotate(0deg); }

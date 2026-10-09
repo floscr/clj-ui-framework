@@ -6,7 +6,7 @@
   flex-direction: column;
   background: var(--bg-1);
   border: var(--border-0);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-panel);
   padding: var(--size-3);
   width: fit-content;
 }
@@ -22,7 +22,7 @@
 
 .cal-nav-title {
   font-size: var(--font-sm);
-  font-weight: 600;
+  font-weight: 500;
   color: var(--fg-0);
   text-align: center;
   flex: 1;
@@ -74,7 +74,7 @@
   justify-content: center;
   border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
+  transition: background var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);
   position: relative;
 }
 
@@ -83,7 +83,7 @@
 }
 
 .cal-day:focus-visible {
-  outline: 2px solid var(--accent);
+  outline: var(--focus-outline);
   outline-offset: -2px;
 }
 
@@ -105,7 +105,7 @@
 
 /* Today highlight */
 .cal-day-today {
-  font-weight: 600;
+  font-weight: 500;
   background: var(--bg-2);
 }
 
@@ -113,7 +113,7 @@
 .cal-day-selected {
   background: var(--accent);
   color: var(--fg-on-accent);
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .cal-day-selected:hover:not(:disabled) {

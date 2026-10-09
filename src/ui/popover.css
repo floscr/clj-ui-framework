@@ -24,11 +24,11 @@
   width: max-content;
   max-width: min(20rem, calc(100vw - var(--size-4)));
   padding: var(--size-4);
-  background: var(--bg-0);
+  background: var(--bg-1);
   color: var(--fg-0);
   border: var(--border-0);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-3);
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow-floating);
   font-size: var(--font-sm);
 }
 
@@ -70,7 +70,7 @@
 .popover-title {
   margin: 0;
   font-size: var(--font-base);
-  font-weight: 600;
+  font-weight: 500;
   line-height: var(--size-5);
 }
 

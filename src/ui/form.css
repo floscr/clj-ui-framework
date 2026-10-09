@@ -52,7 +52,7 @@
   background: var(--bg-0);
   color: var(--fg-0);
   border: var(--border-1);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-control);
 }
 
 .form-input::placeholder,
@@ -171,8 +171,7 @@
   border: var(--border-1);
   cursor: pointer;
   transition:
-    background-color 150ms ease,
-    border-color 150ms ease;
+    background-color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard);
   vertical-align: middle;
 }
 
@@ -181,7 +180,7 @@
 }
 
 .form-radio {
-  border-radius: 9999px;
+  border-radius: var(--radius-pill);
 }
 
 .form-checkbox:checked,
@@ -232,12 +231,11 @@
   background: var(--bg-2);
   color: var(--fg-0);
   border: var(--border-1);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-control);
   cursor: pointer;
   margin-right: var(--size-3);
   transition:
-    background-color 150ms ease,
-    border-color 150ms ease;
+    background-color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard);
 }
 
 .form-file::file-selector-button:hover {
@@ -261,7 +259,7 @@
   height: 6px;
   appearance: none;
   background: var(--bg-2);
-  border-radius: 9999px;
+  border-radius: var(--radius-pill);
   cursor: pointer;
 }
 
@@ -270,8 +268,8 @@
   width: 1.25rem;
   height: 1.25rem;
   background: var(--accent);
-  border-radius: 9999px;
-  transition: transform 150ms ease;
+  border-radius: var(--radius-pill);
+  transition: transform var(--duration-fast) var(--ease-standard);
 }
 
 .form-range::-webkit-slider-thumb:hover {
@@ -283,7 +281,7 @@
   height: 1.25rem;
   background: var(--accent);
   border: none;
-  border-radius: 9999px;
+  border-radius: var(--radius-pill);
 }
 
 .form-range:focus {
@@ -422,15 +420,15 @@
 .form-group > *:first-child,
 .form-group > *:first-child .form-input,
 .form-group > *:first-child .form-select {
-  border-top-left-radius: var(--radius-md);
-  border-bottom-left-radius: var(--radius-md);
+  border-top-left-radius: var(--radius-control);
+  border-bottom-left-radius: var(--radius-control);
 }
 
 .form-group > *:last-child,
 .form-group > *:last-child .form-input,
 .form-group > *:last-child .form-select {
-  border-top-right-radius: var(--radius-md);
-  border-bottom-right-radius: var(--radius-md);
+  border-top-right-radius: var(--radius-control);
+  border-bottom-right-radius: var(--radius-control);
 }
 
 .form-group > *:not(:first-child) {

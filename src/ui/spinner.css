@@ -4,7 +4,7 @@
   height: 1.5rem;
   border: 2px solid var(--bg-2);
   border-top-color: var(--accent);
-  border-radius: 9999px;
+  border-radius: var(--radius-pill);
   animation: spinner-spin 1s linear infinite;
 }
 
@@ -43,7 +43,7 @@
   height: 1.5rem;
   border: 2px solid var(--bg-2);
   border-top-color: var(--accent);
-  border-radius: 9999px;
+  border-radius: var(--radius-pill);
   animation: spinner-spin 1s linear infinite;
 }
 

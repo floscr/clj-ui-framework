@@ -2,7 +2,7 @@
 
 .fp-list {
   border: var(--border-0);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-panel);
   overflow: hidden;
   margin-top: var(--size-4);
 }
@@ -74,11 +74,11 @@
   color: var(--fg-2);
   cursor: pointer;
   border-radius: var(--radius-sm);
-  transition: color 150ms ease, background-color 150ms ease;
+  transition: color var(--duration-fast) var(--ease-standard), background-color var(--duration-fast) var(--ease-standard);
   flex-shrink: 0;
 }
 
 .fp-item-remove:hover {
   color: var(--fg-0);
-  background: var(--bg-1);
+  background: var(--bg-2);
 }
