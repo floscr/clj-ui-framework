@@ -407,14 +407,13 @@
     (when @added? (scan!))))
 
 (defn init! []
-  (.addEventListener js/document "pointerdown" on-pointerdown)
-  (.addEventListener js/document "pointermove" on-pointermove)
-  (.addEventListener js/document "pointerup" on-pointerup)
-  (.addEventListener js/document "pointercancel" on-pointerup)
-  (.addEventListener js/document "input" on-input)
-  (.addEventListener js/document "change" on-change)
-  (.addEventListener js/document "click" on-click)
-  (.addEventListener js/document "keydown" on-keydown)
+  ;; Capture phase: a dialog panel that stops click propagation (so clicks
+  ;; inside don't reach its overlay) must not swallow the picker's events.
+  (doseq [[type f] [["pointerdown" on-pointerdown] ["pointermove" on-pointermove]
+                    ["pointerup" on-pointerup] ["pointercancel" on-pointerup]
+                    ["input" on-input] ["change" on-change]
+                    ["click" on-click] ["keydown" on-keydown]]]
+    (.addEventListener js/document type f true))
   (scan!)
   (.observe (js/MutationObserver. on-mutations) js/document.documentElement
             #js {:childList true :subtree true

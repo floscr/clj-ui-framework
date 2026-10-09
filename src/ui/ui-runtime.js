@@ -1497,14 +1497,13 @@
     ;
   };
   var init_BANG_ = function() {
-    document.addEventListener("pointerdown", on_pointerdown);
-    document.addEventListener("pointermove", on_pointermove);
-    document.addEventListener("pointerup", on_pointerup);
-    document.addEventListener("pointercancel", on_pointerup);
-    document.addEventListener("input", on_input);
-    document.addEventListener("change", on_change);
-    document.addEventListener("click", on_click);
-    document.addEventListener("keydown", on_keydown);
+    for (let G__1 of iterable([["pointerdown", on_pointerdown], ["pointermove", on_pointermove], ["pointerup", on_pointerup], ["pointercancel", on_pointerup], ["input", on_input], ["change", on_change], ["click", on_click], ["keydown", on_keydown]])) {
+      const vec__25 = G__1;
+      const type6 = nth(vec__25, 0, null);
+      const f7 = nth(vec__25, 1, null);
+      document.addEventListener(type6, f7, true);
+    }
+    ;
     scan_BANG_();
     return new MutationObserver(on_mutations).observe(document.documentElement, { "childList": true, "subtree": true, "attributes": true, "attributeFilter": ["data-value"] });
   };
