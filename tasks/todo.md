@@ -29,11 +29,12 @@ Nothing below starts until the decisions in that doc's section 6 are made.
 - [x] Sidecar EDN schema + validation in tools.registry (required keys, public fns, destructured or documented props, related ids, categories)
 - [x] `bb gen-docs` emits docs/components/<id>.md, docs/components.md, docs/llms.txt, docs/llms-full.txt
 - [x] ui.registry-test: every component has a valid sidecar; markdown renders; llms.txt has the agent rules
-- [ ] Split dev/shared demos.cljc into dev/examples/<component>.cljc with source-capturing macro (moved to Phase 2, it is part of the site design)
+- [x] Split dev/shared demos.cljc into dev/examples/<component>.cljc (done 2026-10-10; examples are {:id :title :render} maps, source is read from the files by the site instead of a macro)
 - [x] All 46 sidecars written (ui.theme and ui.util are helpers, exempt)
 
-## Phase 2: Demo site rebuild
+## Phase 2: Demo site rebuild (decisions 2026-10-10: system font, catalogue-first home)
 
+- [x] dev.example helpers + dev.examples.<component> files + dev.examples.registry; the three targets render from the registry
 - [ ] dev.site router + shell: top nav, grouped sidebar with counts, appearance popover
 - [ ] Component page: header, Preview/Code/Props tabs, target switcher, width presets, Copy page
 - [ ] Replicant + Squint SPAs: `#/<id>` example host routes; keep `#/all`

@@ -30,14 +30,8 @@
             [ui.file-browser :as fb]
             [ui.file-progress :as fp]
             [ui.theme-toggle :as theme-toggle]
-            [dev.demos :refer [section page-header button-demo alert-demo badge-demo
-                               card-demo accordion-demo table-demo spinner-demo
-                               empty-state-demo drop-zone-demo processing-bar-demo
-                               toast-demo camera-demo grid-demo
-                               skeleton-demo progress-demo switch-demo tooltip-demo
-                               breadcrumb-demo separator-demo form-demo number-field-demo color-picker-demo chat-demo
-                               popover-demo command-demo toolbar-demo button-group-demo header-patterns-demo tabs-demo
-                               panels-demo]])
+            [dev.example :refer [section page-header]]
+            [dev.examples.registry :as examples])
   (:require-macros [ui.macros :refer [inline-file]]))
 
 ;; ── State ───────────────────────────────────────────────────────────
@@ -350,41 +344,41 @@
 (defn components-page []
   [:div
    (page-header "Components" "All UI components at a glance.")
-   (button-demo)
+   (examples/section-for :button)
    (player-bar-demo)
-   (alert-demo)
-   (badge-demo)
-   (card-demo)
-   (accordion-demo)
-   (table-demo)
+   (examples/section-for :alert)
+   (examples/section-for :badge)
+   (examples/section-for :card)
+   (examples/section-for :accordion)
+   (examples/section-for :table)
    (dialog-demo)
    (context-menu-demo)
-   (popover-demo)
-   (command-demo)
-   (toolbar-demo)
-   (button-group-demo)
-   (header-patterns-demo)
-   (tabs-demo)
-   (spinner-demo)
-   (empty-state-demo)
-   (drop-zone-demo)
-   (processing-bar-demo)
-   (toast-demo)
-   (camera-demo)
-   (grid-demo)
-   (skeleton-demo)
-   (progress-demo)
+   (examples/section-for :popover)
+   (examples/section-for :command)
+   (examples/section-for :toolbar)
+   (examples/section-for :button-group)
+   (examples/section-for :header-patterns)
+   (examples/section-for :tabs)
+   (examples/section-for :spinner)
+   (examples/section-for :empty-state)
+   (examples/section-for :drop-zone)
+   (examples/section-for :processing-bar)
+   (examples/section-for :toast)
+   (examples/section-for :camera)
+   (examples/section-for :grid)
+   (examples/section-for :skeleton)
+   (examples/section-for :progress)
    (theme-toggle-demo)
-   (switch-demo)
-   (tooltip-demo)
-   (breadcrumb-demo)
+   (examples/section-for :switch)
+   (examples/section-for :tooltip)
+   (examples/section-for :breadcrumb)
    (pagination-demo)
-   (separator-demo)
-   (panels-demo)
-   (form-demo)
-   (number-field-demo)
-   (color-picker-demo)
-   (chat-demo)
+   (examples/section-for :separator)
+   (examples/section-for :panels)
+   (examples/section-for :form)
+   (examples/section-for :number-field)
+   (examples/section-for :color-picker)
+   (examples/section-for :chat)
    (tag-input-demo)
    (lightbox-demo)])
 
