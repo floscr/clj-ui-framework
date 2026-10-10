@@ -35,13 +35,15 @@ Nothing below starts until the decisions in that doc's section 6 are made.
 ## Phase 2: Demo site rebuild (decisions 2026-10-10: system font, catalogue-first home)
 
 - [x] dev.example helpers + dev.examples.<component> files + dev.examples.registry; the three targets render from the registry
-- [ ] dev.site router + shell: top nav, grouped sidebar with counts, appearance popover
-- [ ] Component page: header, Preview/Code/Props tabs, target switcher, width presets, Copy page
-- [ ] Replicant + Squint SPAs: `#/<id>` example host routes; keep `#/all`
+- [x] dev.site: catalogue home (`/`, grouped by category with cards), sidebar nav grouped by category from the registry, old long page moved to `/all`
+- [x] Component page `/components/<id>`: breadcrumb, title, summary, meta, target switcher, every example with Preview and Code tabs (source read with rewrite-clj), then when to use, usage, API tables, keyboard, accessibility, motion, responsive, targets, notes for AI, related
+- [ ] Component page extras: Copy page (markdown to clipboard), width presets, props tab per example
+- [ ] Appearance popover in the shell (theme + accent); top nav
+- [ ] Replicant + Squint SPAs: `#/<id>` example host routes so the switcher lands on the component; keep `#/all`
 - [ ] Docs pages: introduction, installation, theming, motion, agents, changelog
-- [ ] Home page: hero, live showcases, three-targets section
-- [ ] Routes: /components/<id>/markdown, /llms.txt, /llms-full.txt, /catalog.edn|json
-- [ ] ⌘K search via ui.command
+- [x] Routes: /components/<id>/markdown, /llms.txt, /llms-full.txt
+- [ ] /catalog.edn and /catalog.json
+- [x] ⌘K search via ui.command (home page trigger + palette over every component)
 - [ ] Site-driven components: segmented-control, code-block, kbd, avatar, dropdown-menu, scroll-area, announcement-bar
 - [ ] check-dev: every registry id has a page and renders in all three targets
 

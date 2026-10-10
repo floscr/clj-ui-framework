@@ -35,7 +35,8 @@
             [ui.file-progress :as fp]
             [ui.theme-toggle :as theme-toggle]
             [dev.example :refer [section page-header]]
-            [dev.examples.registry :as examples]))
+            [dev.examples.registry :as examples]
+            [dev.site :as site]))
 
 ;; ── Query Params ────────────────────────────────────────────────────
 
@@ -607,50 +608,9 @@
 
 ;; ── Navigation Data ─────────────────────────────────────────────────
 
-(def component-nav
-  [{:title "General"
-    :items [{:label "Button" :anchor "button"}
-            {:label "Badge" :anchor "badge"}
-            {:label "Card" :anchor "card"}
-            {:label "Player Bar" :anchor "player-bar"}]}
-   {:title "Forms"
-    :items [{:label "Form" :anchor "form"}
-            {:label "Chat" :anchor "chat"}
-            {:label "Tag Input" :anchor "tag-input"}
-            {:label "Switch" :anchor "switch"}
-            {:label "Theme Toggle" :anchor "theme-toggle"}]}
-   {:title "Data Display"
-    :items [{:label "Table" :anchor "table"}
-            {:label "Accordion" :anchor "accordion"}
-            {:label "Progress" :anchor "progress"}]}
-   {:title "Feedback"
-    :items [{:label "Alert" :anchor "alert"}
-            {:label "Dialog" :anchor "dialog"}
-            {:label "Context Menu" :anchor "context-menu"}
-            {:label "Command" :anchor "command"}
-            {:label "Spinner" :anchor "spinner"}
-            {:label "Empty State" :anchor "empty-state"}
-            {:label "Drop Zone" :anchor "drop-zone"}
-            {:label "Processing Bar" :anchor "processing-bar"}
-            {:label "Toast" :anchor "toast"}
-            {:label "Camera" :anchor "camera"}
-            {:label "Grid" :anchor "grid"}
-            {:label "Skeleton" :anchor "skeleton"}
-            {:label "Tooltip" :anchor "tooltip"}]}
-   {:title "Layout"
-    :items [{:label "Separator" :anchor "separator"}
-            {:label "Toolbar" :anchor "toolbar"}
-            {:label "Button Group" :anchor "button-group"}
-            {:label "Header Patterns" :anchor "header-patterns"}]}
-   {:title "Overlay"
-    :items [{:label "Lightbox" :anchor "lightbox"}]}
-   {:title "Navigation"
-    :items [{:label "Breadcrumb" :anchor "breadcrumb"}
-            {:label "Pagination" :anchor "pagination"}
-            {:label "Tabs" :anchor "tabs"}]}])
-
 (def nav-items
-  [{:id :components :label "Components"  :icon-name :package    :href "/"}
+  [{:id :home       :label "Catalogue"   :icon-name :package    :href "/"}
+   {:id :components :label "All examples" :icon-name :list      :href "/all"}
    {:id :calendar   :label "Calendar"    :icon-name :calendar   :href "/calendar"}
    {:id :icons      :label "Icons"       :icon-name :image      :href "/icons"}
    {:id :sidebar    :label "Sidebar"     :icon-name :layout-dashboard :href "/sidebar"}
@@ -658,12 +618,18 @@
 
 (defn resolve-page [uri]
   (case uri
-    "/"          :components
+    "/"          :home
+    "/all"       :components
     "/calendar"  :calendar
     "/icons"     :icons
     "/sidebar"   :sidebar
     "/files"     :files
-    nil))
+    (when (re-matches #"/components/[a-z0-9-]+" uri) :component)))
+
+(defn component-id
+  "The component id in a /components/<id>[/markdown] path, or nil."
+  [path]
+  (second (re-matches #"/components/([a-z0-9-]+)(?:/markdown)?" path)))
 
 ;; ── App Shell ───────────────────────────────────────────────────────
 
@@ -705,11 +671,11 @@
               label))))
       (sidebar/sidebar-separator)
       (sidebar/sidebar-group {:label "Components"}
-        (for [{:keys [title items]} component-nav]
+        (for [{:keys [title items]} (site/nav-groups)]
           (sidebar/sidebar-collapsible {:title title :open true}
             (apply sidebar/sidebar-menu {}
-              (for [{:keys [label anchor]} items]
-                (sidebar/sidebar-menu-item {:href (str "/#" anchor)} label))))))
+              (for [{:keys [label href]} items]
+                (sidebar/sidebar-menu-item {:href href :active (= href active-page)} label))))))
       (sidebar/sidebar-separator)
       (sidebar/sidebar-group {:label "Targets"}
         (apply sidebar/sidebar-menu {}
@@ -743,7 +709,12 @@
   (let [params     (parse-query-params uri)
         theme      (get params "theme")
         path       (first (str/split uri #"\?" 2))
-        active-page (resolve-page path)]
+        active-page (resolve-page path)
+        cid        (component-id path)
+        title      (case active-page
+                     :component (str (get-in (site/component cid) [:meta :title] "Not found") " · clj-ui")
+                     :home "clj-ui components"
+                     "clj-ui")]
     (str
       "<!DOCTYPE html>\n"
       (h/html
@@ -751,8 +722,10 @@
          [:head
           [:meta {:charset "utf-8"}]
           [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
+          [:title title]
           [:link {:rel "stylesheet" :href "/theme.css"}]
           [:style (h/raw "html, body { margin: 0; padding: 0; }")]
+          [:style (h/raw site/site-css)]
           [:script (h/raw theme-persistence-script)]
           (when live-reload? [:script (h/raw live-reload-script)])]
          [:body
@@ -761,10 +734,10 @@
           (when live-reload? [:script {:src "/theme-adapter.js" :defer true}])
           (when live-reload? [:script {:src "/css-live-reload.js" :defer true}])
           (sidebar/sidebar-layout {}
-            (app-sidebar active-page port host)
+            (app-sidebar (if (= active-page :component) path active-page) port host)
             (sidebar/sidebar-overlay {})
             (sidebar/sidebar-layout-main {}
-              [:div {:style "--body-padding-inline: 2rem; padding: 2rem; max-width: 960px;"}
+              [:div {:style "--body-padding-inline: 2rem; padding: 2rem; max-width: 1100px;"}
                [:div {:style "display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;"}
                 (sidebar/sidebar-mobile-toggle {})
                 [:a.font-mono.text-xs.text-faint
@@ -774,6 +747,8 @@
                   :style "margin-left: auto; text-decoration: none;"}
                  deployed-sha]]
                (case active-page
+                 :home       (site/home-page)
+                 :component  (site/component-page cid (make-targets port host))
                  :components (components-page)
                  :calendar   (calendar-page)
                  :icons      (icons-page)
@@ -909,6 +884,17 @@
        :body (slurp "dev/css-live-reload.js")}
 
       spa spa
+
+      (and (component-id path) (str/ends-with? path "/markdown"))
+      (if-let [md (site/component-markdown (component-id path))]
+        {:status 200 :headers {"Content-Type" "text/markdown; charset=utf-8"} :body md}
+        {:status 404 :headers {"Content-Type" "text/plain"} :body "not found"})
+
+      (= path "/llms.txt")
+      {:status 200 :headers {"Content-Type" "text/plain; charset=utf-8"} :body (site/llms-txt)}
+
+      (= path "/llms-full.txt")
+      {:status 200 :headers {"Content-Type" "text/plain; charset=utf-8"} :body (site/llms-full-txt)}
 
       (resolve-page path)
       {:status 200

@@ -192,7 +192,12 @@ test/ui/
   theme_test.clj             # Unit tests for CSS generation
 dev/
   index.html                 # Tab shell with iframes for all 3 targets
-  hiccup/src/dev/hiccup.clj  # Babashka httpkit server (port 3003)
+  hiccup/src/dev/hiccup.clj  # Babashka httpkit server (port 3003): shell, routes, target pages
+  hiccup/src/dev/site.clj    # Catalogue site: / (by category), /components/<id> (examples with
+                             # Preview/Code + sidecar sections), /components/<id>/markdown, /llms.txt
+  shared/src/dev/example.cljc          # Example helpers (example, row, column, sx, cls)
+  shared/src/dev/examples/<name>.cljc  # Per-component example sets, registered in
+  shared/src/dev/examples/registry.cljc # dev.examples.registry (all three targets render from it)
   replicant/                 # shadow-cljs + Replicant (port 3001)
   squint/                    # Vite + Squint + Eucalypt (port 3002)
 ```
