@@ -587,7 +587,9 @@ The implementation lives in `scripts/tools/` (`tools.registry`,
 Semantic + scale tokens in `src/theme/tokens.edn`:
 
 - **Backgrounds**: `bg-0` (page), `bg-1` (surface: cards, sidebars, floating
-  panels — white in light), `bg-2` (muted: hover fills, tracks, boxed groups)
+  panels — white in light, via the `gray-0` step with a `#ffffff` fallback so
+  a custom gray scale without step 0 still works), `bg-2` (muted: hover fills,
+  tracks, boxed groups)
 - **Foregrounds**: `fg-0` (primary text), `fg-1` (secondary), `fg-2` (muted)
 - **Semantic**: `accent`, `danger`, `success`, `warning` + `fg-on-*` for
   contrast text. `accent-strong` (hover/pressed accent), `accent-subtle`
@@ -616,8 +618,9 @@ Theme-independent, emitted into `:root` only. Override via `build-css {:static {
 
 - **Type**: `font-body`, `font-display` (h1/h2; defaults to the body face —
   swap in a self-hosted face with one token), `font-mono`, `weight-regular`
-  400 / `weight-medium` 500 (**only these two weights**; the base styles set
-  headings, `strong` and `th` to medium), `tracking-display`, `leading-display`,
+  400 / `weight-medium` 500 (**only these two weights** in UI chrome; the base
+  styles set headings and `th` to medium, while `b`/`strong` keep the
+  browser's bold so emphasis in user content still reads), `tracking-display`, `leading-display`,
   `leading-body`.
 - **Motion**: `duration-fast` 160ms (hover, color, small state), `duration-standard`
   240ms (panels, menus), `duration-considered` 480ms (rare reveals);

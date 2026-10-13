@@ -209,7 +209,7 @@
 
  :tokens
  {:bg-0      "var(--gray-50)"
-  :bg-1      "var(--gray-0)"
+  :bg-1      "var(--gray-0, #ffffff)"
   :bg-2      "var(--gray-100)"
   :fg-0      "var(--gray-950)"
   :fg-1      "var(--gray-600)"

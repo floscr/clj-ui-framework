@@ -27,7 +27,7 @@
 
   // ── Scale step definitions [label, lightness, baseChroma] ──────
   var GRAY_STEPS = [
-    [50,0.975,0.003],[100,0.955,0.005],[200,0.915,0.010],[300,0.850,0.012],[400,0.690,0.025],
+    [0,1.0,0.0],[50,0.975,0.003],[100,0.955,0.005],[200,0.915,0.010],[300,0.850,0.012],[400,0.690,0.025],
     [500,0.530,0.035],[600,0.425,0.035],[700,0.350,0.035],[800,0.245,0.025],[900,0.190,0.016],[950,0.145,0.011]
   ];
   var ACCENT_STEPS = [
@@ -286,10 +286,10 @@
   }
 
   // ── Build swatch row ──────────────────────────────────────────
-  function makeSwatches() {
+  function makeSwatches(n) {
     var row = el('div', 'swatch-row');
     var items = [];
-    for (var i = 0; i < 11; i++) {
+    for (var i = 0; i < n; i++) {
       var sw = el('div', 'swatch');
       row.appendChild(sw);
       items.push(sw);
@@ -354,7 +354,7 @@
     graySection.appendChild(el('div', 'text-xs text-faint uppercase tracking-wide font-semibold', 'Gray'));
     graySection.appendChild(makeSlider('grayHue', 'Hue', 0, 360, 1, hueGradient()));
     graySection.appendChild(makeSlider('graySat', 'Chr', 0, 200, 1));
-    var graySwatches = makeSwatches();
+    var graySwatches = makeSwatches(GRAY_STEPS.length);
     swatchGray = graySwatches.items;
     graySection.appendChild(graySwatches.row);
 
@@ -363,7 +363,7 @@
     accentSection.appendChild(el('div', 'text-xs text-faint uppercase tracking-wide font-semibold', 'Accent'));
     accentSection.appendChild(makeSlider('accentHue', 'Hue', 0, 360, 1, hueGradient()));
     accentSection.appendChild(makeSlider('accentSat', 'Chr', 0, 200, 1));
-    var accentSwatches = makeSwatches();
+    var accentSwatches = makeSwatches(ACCENT_STEPS.length);
     swatchAccent = accentSwatches.items;
     accentSection.appendChild(accentSwatches.row);
 

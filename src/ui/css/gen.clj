@@ -181,9 +181,11 @@ body {
   color: var(--fg-0);
 }
 
-/* Two weights only: regular (400) and medium (500). Hierarchy comes from
-   size, color and spacing, not heavier weights. */
-h1, h2, h3, h4, h5, h6, b, strong, th {
+/* Two weights for UI chrome: regular (400) and medium (500). Hierarchy
+   comes from size, color and spacing, not heavier weights. b and strong
+   are left alone: emphasis inside user content (markdown, messages)
+   keeps the browser's bold. */
+h1, h2, h3, h4, h5, h6, th {
   font-weight: var(--weight-medium);
 }
 

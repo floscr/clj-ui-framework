@@ -79,6 +79,17 @@
       (is (str/includes? css "[data-accent=\"neutral\"][data-theme=\"dark\"] {"))
       (is (str/includes? css "[data-accent=\"neutral\"]:not([data-theme=\"light\"])")))
 
+    (testing "surfaces survive a gray scale override without the 0 step"
+      (let [custom (assoc-in token-data [:scales :color :gray :steps]
+                             (vec (remove #(zero? (first %)) (get-in token-data [:scales :color :gray :steps]))))
+            css2 (gen/generate-css custom)]
+        (is (not (str/includes? css2 "--gray-0:")))
+        (is (str/includes? css2 "--bg-1: var(--gray-0, #ffffff);"))))
+
+    (testing "emphasis in content keeps its bold; chrome uses medium"
+      (is (str/includes? css "h1, h2, h3, h4, h5, h6, th {"))
+      (is (not (re-find #"(?m)^h1, h2, h3, h4, h5, h6,[^{]*\b(b|strong)\b[^{]*\{" css))))
+
     (testing "base styles: shared focus ring and reduced motion"
       (is (str/includes? css "outline: var(--focus-outline);"))
       (is (str/includes? css "@media (prefers-reduced-motion: reduce)"))
