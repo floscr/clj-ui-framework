@@ -300,10 +300,21 @@ out/deploy.
    rebuilt assets.
 8. **Deploy to the pi**: `hey re:deploy-pi --no-build`. Then verify over
    tailscale `http://100.64.0.3:<port>` (NOT the LAN alias): xi 7474,
-   media 8096, music 8097, files 8098, photos 8100, editor 8102. Poll
-   until every port returns 200 (services take ~1min to restart), then
-   grep a served page / `theme.css` / bundle for a marker string from the
-   change to confirm the new version is actually live.
+   media 8096, music 8097, photos 8100, ebook 8101, editor 8102. Poll
+   until every port returns 200 (services take 1 to 2 min to restart while
+   they fetch the new sha), then grep a served page / `theme.css` / bundle
+   for a marker string from the change to confirm the new version is
+   actually live. Port 8098 (files/explorer) is not enabled on the pi, so
+   a refused connection there is normal. ebook-reader pins its own sha and
+   does not move with server-lib.
+
+   **xi has uncommitted work?** The full deploy rebuilds xi from its
+   working tree and would ship that work. Deploy only the bb-services
+   instead with `hey re:deploy-pi --service a,b,...` (builds their SPAs,
+   rsyncs dotfiles, restarts just those units, skips xi unless `xi-agent`
+   is listed), and leave the xi bump for its next full deploy. List the
+   pi's app units with:
+   `nix eval --json .#nixosConfigurations.pi4.config --apply 'c: builtins.filter (n: (c.modules.services.${n}.enable or false) && (c.systemd.services ? ${n}) && ((c.systemd.services.${n}.serviceConfig.Type or "simple") != "oneshot")) (builtins.attrNames c.modules.services)'`
 9. **AGENTS sync**: if the consumer set changed, run
    `bb sync-consumer-agents` (idempotent) so new consumers get the
    UI-framework section.
