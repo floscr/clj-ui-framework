@@ -52,36 +52,37 @@
 
 ;; ── Example source ──────────────────────────────────────────────────
 
-(defn- dedent [s]
-  (let [lines (str/split-lines s)
-        rest-lines (rest lines)
-        indents (->> rest-lines
-                     (remove str/blank?)
-                     (map #(count (re-find #"^\s*" %))))
-        indent (if (seq indents) (apply min indents) 0)]
-    (if (pos? indent)
-      (str/join "\n" (cons (first lines) (map #(if (str/blank? %) % (subs % (min indent (count %)))) rest-lines)))
-      s)))
+(defn- dedent
+  "Shift the continuation lines of a form left by `col` (the 0-based column
+   its first line starts at in the file), keeping relative indentation."
+  [s col]
+  (let [[head & more] (str/split-lines s)
+        strip (fn [line]
+                (let [lead (count (re-find #"^ *" line))]
+                  (subs line (min lead col))))]
+    (str/join "\n" (cons head (map strip more)))))
 
 (defn example-sources
   "Map of example id (string) -> source string of its render body, read
    from dev/shared/src/dev/examples/<name>.cljc."
   [component-name]
-  (let [f (io/file "dev/shared/src/dev/examples" (str component-name ".cljc"))]
+  (let [f (io/file "dev/shared/src/dev/examples" (str (str/replace component-name "-" "_") ".cljc"))]
     (when (.isFile f)
-      (loop [loc (z/of-string (slurp f)) acc {}]
+      (loop [loc (z/of-string (slurp f) {:track-position? true}) acc {}]
         (if (z/end? loc)
           acc
           (let [acc (if (and (z/list? loc)
                              (= 'example (some-> loc z/down z/sexpr)))
-                      (let [id   (-> loc z/down z/right z/sexpr)
+                      (let [id     (-> loc z/down z/right z/sexpr)
                             fn-loc (-> loc z/down z/right z/right z/right)
-                            body (when (and fn-loc (z/list? fn-loc))
-                                   (->> (iterate z/right (-> fn-loc z/down z/right z/right))
-                                        (take-while some?)
-                                        (map z/string)
-                                        (str/join "\n")))]
-                        (cond-> acc body (assoc (util/kw-name id) (dedent body))))
+                            forms  (when (and fn-loc (z/list? fn-loc))
+                                     (->> (iterate z/right (-> fn-loc z/down z/right z/right))
+                                          (take-while some?)))
+                            body   (when (seq forms)
+                                     (->> forms
+                                          (map (fn [form] (dedent (z/string form) (dec (second (z/position form))))))
+                                          (str/join "\n")))]
+                        (cond-> acc body (assoc (util/kw-name id) body)))
                       acc)]
             (recur (z/next loc) acc)))))))
 
@@ -104,7 +105,9 @@
 .site-page-head h1 { margin: 0; font-size: var(--font-2xl); }
 .site-page-head .site-summary { margin: 0; color: var(--fg-1); font-size: var(--font-md); max-width: 48rem; }
 .site-meta { display: flex; flex-wrap: wrap; gap: var(--size-2) var(--size-4); color: var(--fg-2); font-size: var(--font-sm); }
-.site-targets { display: inline-flex; gap: var(--size-1); background: var(--bg-2); border-radius: var(--radius-control); padding: var(--size-1); }
+.site-meta a { color: var(--accent); text-decoration: none; }
+.site-meta a:hover { color: var(--accent-strong); text-decoration: underline; text-underline-offset: var(--size-1); }
+.site-targets { display: inline-flex; align-self: flex-start; gap: var(--size-1); background: var(--bg-2); border-radius: var(--radius-control); padding: var(--size-1); }
 .site-targets a { padding: var(--size-1) var(--size-3); border-radius: calc(var(--radius-control) - var(--size-1)); color: var(--fg-1); text-decoration: none; font-size: var(--font-sm); }
 .site-targets a.is-active { background: var(--bg-1); color: var(--fg-0); box-shadow: var(--shadow-0); }
 .site-section { margin-bottom: var(--size-10); }
@@ -114,11 +117,16 @@
 .site-section p { color: var(--fg-1); margin: 0; }
 .site-example { margin-bottom: var(--size-6); }
 .site-example-title { font-size: var(--font-sm); color: var(--fg-1); margin: 0 0 var(--size-2); font-weight: var(--weight-medium); }
-.site-preview { padding: var(--size-6); background: var(--bg-1); border: var(--border-0); border-radius: var(--radius-surface); }
+.site-preview { padding: var(--size-6); background: var(--bg-1); border: var(--border-0); border-radius: var(--radius-surface); overflow-x: auto; }
+.site-preview .example-thumb { width: 8rem; aspect-ratio: 4 / 3; object-fit: cover; border-radius: var(--radius-control); }
+.site-preview .example-contained .lightbox-overlay,
+.site-preview .example-contained .drop-zone-overlay { position: absolute; }
 .site-code { margin: 0; padding: var(--size-4); background: var(--bg-1); border: var(--border-0); border-radius: var(--radius-surface); overflow-x: auto; font-size: var(--font-sm); line-height: 1.5; }
 .site-code code { font-family: var(--font-mono); }
 .site-example .tabs-list { margin-bottom: var(--size-2); }
+.site-table-scroll { overflow-x: auto; overscroll-behavior-x: contain; }
 .site-props { width: 100%; border-collapse: collapse; font-size: var(--font-sm); }
+.site-props td code { overflow-wrap: anywhere; }
 .site-props th, .site-props td { text-align: left; padding: var(--size-2) var(--size-3); border-bottom: var(--border-subtle); vertical-align: top; }
 .site-props th { color: var(--fg-2); font-weight: var(--weight-medium); }
 .site-props code { font-family: var(--font-mono); font-size: var(--font-xs); background: var(--bg-2); padding: 0 var(--size-1); border-radius: var(--radius-xs); }
@@ -183,15 +191,16 @@
 ;; ── Component page ──────────────────────────────────────────────────
 
 (defn- props-table [props]
-  [:table.site-props
-   [:thead [:tr [:th "Prop"] [:th "Type"] [:th "Default"] [:th "Description"]]]
-   (into [:tbody]
-         (for [{:keys [name type default doc]} props]
-           [:tr
-            [:td [:code (str name)]]
-            [:td (when type [:code type])]
-            [:td (if default [:code default] "–")]
-            [:td doc]]))])
+  [:div.site-table-scroll
+   [:table.site-props
+    [:thead [:tr [:th "Prop"] [:th "Type"] [:th "Default"] [:th "Description"]]]
+    (into [:tbody]
+          (for [{:keys [name type default doc]} props]
+            [:tr
+             [:td [:code (str name)]]
+             [:td (when type [:code type])]
+             [:td (if default [:code default] "–")]
+             [:td doc]]))]])
 
 (defn- api-section [api]
   (section "API"
@@ -205,9 +214,10 @@
 (defn- keyboard-section [kb]
   (when (seq kb)
     (section "Keyboard"
-      [:table.site-props
-       [:thead [:tr [:th "Keys"] [:th "Action"]]]
-       (into [:tbody] (for [[k a] kb] [:tr [:td [:code k]] [:td a]]))])))
+      [:div.site-table-scroll
+       [:table.site-props
+        [:thead [:tr [:th "Keys"] [:th "Action"]]]
+        (into [:tbody] (for [[k a] kb] [:tr [:td [:code k]] [:td a]]))]])))
 
 (defn- targets-section [targets]
   (when (seq targets)

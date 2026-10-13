@@ -631,6 +631,13 @@
   [path]
   (second (re-matches #"/components/([a-z0-9-]+)(?:/markdown)?" path)))
 
+(defn markdown-id
+  "The component id in a /components/<id>/markdown path, or nil. Matched
+   on the full path so the page of a component called markdown
+   (/components/markdown) stays an HTML page."
+  [path]
+  (second (re-matches #"/components/([a-z0-9-]+)/markdown" path)))
+
 ;; ── App Shell ───────────────────────────────────────────────────────
 
 (defn req-hostname
@@ -761,7 +768,7 @@
 (defonce !version (atom 0))
 (defonce !last-mtimes (atom {}))
 
-(def watch-dirs ["src" "dev/hiccup/src"])
+(def watch-dirs ["src" "dev/hiccup/src" "dev/shared/src" "scripts"])
 (def watch-exts #{".clj" ".cljc" ".css" ".edn"})
 
 (defn source-mtimes
@@ -776,13 +783,37 @@
                      (some #(str/ends-with? (.getName f) %) watch-exts))]
       [(.getPath f) (.lastModified f)])))
 
-(defn reload-namespaces!
-  "Reload dev.hiccup and all transitive deps (all ui.* namespaces)."
+(defn- shared-reload-order
+  "dev/shared files plus the site, in load order. The registry captures each
+   example vector at load time, so after any shared change the examples, the
+   registry and the site are all reloaded, examples first."
   []
-  (try
-    (require 'dev.hiccup :reload-all)
-    (catch Exception e
-      (println "⚠ Reload error:" (.getMessage e)))))
+  (concat ["dev/shared/src/dev/example.cljc"
+           "dev/shared/src/dev/examples/sample.cljc"]
+          (->> (fs/glob "dev/shared/src/dev/examples" "*.cljc")
+               (map str)
+               (remove #(re-find #"/(sample|registry)\.cljc$" %))
+               sort)
+          ["dev/shared/src/dev/examples/registry.cljc"
+           "dev/hiccup/src/dev/site.clj"]))
+
+(defn reload-namespaces!
+  "Reload what changed, then dev.hiccup. Babashka's :reload-all does not
+   reload already-loaded dependencies, so changed .clj/.cljc files are
+   loaded explicitly; a change under dev/shared or scripts reloads the whole
+   example chain (see shared-reload-order)."
+  ([] (reload-namespaces! []))
+  ([changed]
+   (try
+     (let [code    (filter #(re-find #"\.cljc?$" %) changed)
+           shared? (some #(re-find #"^(dev/shared|scripts)/" %) code)]
+       (doseq [f code :when (not (str/ends-with? f "dev/hiccup.clj"))]
+         (load-file f))
+       (when shared?
+         (doseq [f (shared-reload-order)] (load-file f)))
+       (require 'dev.hiccup :reload))
+     (catch Exception e
+       (println "⚠ Reload error:" (.getMessage e))))))
 
 (defn start-watcher!
   "Start a background thread that polls source files for changes."
@@ -802,7 +833,7 @@
                               (keys current))]
               (reset! !last-mtimes current)
               (println (str "♻ Reloading (" (count (concat changed new-files)) " file(s) changed)"))
-              (reload-namespaces!)
+              (reload-namespaces! (distinct (concat changed new-files)))
               (swap! !version inc))))
         (catch Exception e
           (println "⚠ Watcher error:" (.getMessage e))))
@@ -885,8 +916,8 @@
 
       spa spa
 
-      (and (component-id path) (str/ends-with? path "/markdown"))
-      (if-let [md (site/component-markdown (component-id path))]
+      (markdown-id path)
+      (if-let [md (site/component-markdown (markdown-id path))]
         {:status 200 :headers {"Content-Type" "text/markdown; charset=utf-8"} :body md}
         {:status 404 :headers {"Content-Type" "text/plain"} :body "not found"})
 

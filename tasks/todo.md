@@ -45,7 +45,10 @@ Nothing below starts until the decisions in that doc's section 6 are made.
 - [ ] /catalog.edn and /catalog.json
 - [x] ⌘K search via ui.command (home page trigger + palette over every component)
 - [ ] Site-driven components: segmented-control, code-block, kbd, avatar, dropdown-menu, scroll-area, announcement-bar
-- [ ] check-dev: every registry id has a page and renders in all three targets
+- [x] Every component has a shared example set (17 added 2026-10-13); ui.registry-test enforces coverage and that every example renders on :clj
+- [x] Site polish: /components/markdown route clash fixed, header link uses the accent, target switcher hugs its buttons, API and keyboard tables scroll inside a wrapper on phones, Code tab keeps relative indentation
+- [x] Hiccup live reload watches dev/shared and scripts and reloads changed files explicitly (bb's :reload-all skips loaded deps)
+- [ ] check-dev: every registry id has a page and renders in all three targets (pages verified by a crawl, not yet part of check-dev)
 
 ## Phase 3: Tier 1 components
 
