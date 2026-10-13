@@ -1,5 +1,5 @@
 (ns dev.examples.command
-  (:require [dev.example :refer [example note cls]]
+  (:require [dev.example :refer [example note cls sx]]
             [ui.command :as command]
             [ui.button :as button]
             [ui.icon :as icon]))
@@ -12,7 +12,7 @@
        [:div {}
         (note "Press " [:kbd {:class (cls "command-shortcut")} "⌘K"]
               " or click the button. Type to filter, arrows to navigate, Enter to select.")
-        [:div {:style "margin-top: 0.75rem;"}
+        [:div {:style (sx {:margin-top "0.75rem"})}
          (command/command-trigger {:target "cmdk" :class trigger-cls}
            (icon/icon {:icon-name :search :size :sm})
            [:span "Search commands…"]

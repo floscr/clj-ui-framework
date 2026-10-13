@@ -3,7 +3,8 @@
    generated markdown must render for every documented component."
   (:require [clojure.test :refer [deftest is testing]]
             [clojure.string :as str]
-            [tools.registry :as registry]))
+            [tools.registry :as registry]
+            [dev.examples.registry :as examples]))
 
 (deftest sidecars-valid-test
   (let [{:keys [invalid missing]} (registry/validate-all)]
@@ -22,6 +23,17 @@
           (is (str/includes? md "## When to use"))
           (is (str/includes? md "## API reference"))
           (is (str/includes? md "## Guidance for AI tools")))))))
+
+(deftest examples-cover-every-component-test
+  (testing "every component has a live example set in dev.examples.registry"
+    (let [ids (set (map (comp name :id) (registry/components)))
+          with-examples (set (map (comp name :id) examples/entries))]
+      (is (empty? (remove with-examples ids))
+          (str "no examples for: " (str/join ", " (sort (remove with-examples ids)))))))
+  (testing "every example renders to hiccup on :clj"
+    (doseq [{:keys [id examples]} examples/entries
+            {eid :id render :render} examples]
+      (is (vector? (render)) (str (name id) "/" (name eid) " did not render a vector")))))
 
 (deftest llms-txt-test
   (let [txt (registry/llms-txt (registry/components))]

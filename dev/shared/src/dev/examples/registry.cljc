@@ -1,9 +1,10 @@
 (ns dev.examples.registry
-  "Every shared (stateless, cross-target) example set, in catalogue order.
-   Each entry is {:id :title :examples}; :id matches the component sidecar
-   id so the site can pair examples with metadata. Target-specific demos
-   (dialog, context menu, calendar, lightbox, ...) still live in the target
-   mains and will move here as they become target-agnostic."
+  "Every shared (stateless, cross-target) example set. Each entry is
+   {:id :title :examples}; :id matches the component sidecar id so the site
+   can pair examples with metadata. Every component has an entry
+   (ui.registry-test enforces it). Stateful, interactive variants of some
+   demos (tag input, calendar navigation, timeline editing) additionally
+   live in the Replicant and Squint mains."
   (:require [dev.example :as ex]
             [ui.util :as util]
             [dev.examples.button :as button]
@@ -35,7 +36,24 @@
             [dev.examples.form :as form]
             [dev.examples.number-field :as number-field]
             [dev.examples.color-picker :as color-picker]
-            [dev.examples.chat :as chat]))
+            [dev.examples.chat :as chat]
+            [dev.examples.calendar :as calendar]
+            [dev.examples.calendar-events :as calendar-events]
+            [dev.examples.chip :as chip]
+            [dev.examples.context-menu :as context-menu]
+            [dev.examples.dialog :as dialog]
+            [dev.examples.file-browser :as file-browser]
+            [dev.examples.file-progress :as file-progress]
+            [dev.examples.icon :as icon]
+            [dev.examples.lightbox :as lightbox]
+            [dev.examples.markdown :as markdown]
+            [dev.examples.pagination :as pagination]
+            [dev.examples.player-bar :as player-bar]
+            [dev.examples.select :as select]
+            [dev.examples.sidebar :as sidebar]
+            [dev.examples.tag-input :as tag-input]
+            [dev.examples.theme-toggle :as theme-toggle]
+            [dev.examples.timeline :as timeline]))
 
 (def entries
   [{:id :button          :title "Button"          :examples button/examples}
@@ -67,7 +85,24 @@
    {:id :form            :title "Form"            :examples form/examples}
    {:id :number-field    :title "Number field"    :examples number-field/examples}
    {:id :color-picker    :title "Color picker"    :examples color-picker/examples}
-   {:id :chat            :title "Chat"            :examples chat/examples}])
+   {:id :chat            :title "Chat"            :examples chat/examples}
+   {:id :calendar        :title "Calendar"        :examples calendar/examples}
+   {:id :calendar-events :title "Calendar events" :examples calendar-events/examples}
+   {:id :chip            :title "Chip"            :examples chip/examples}
+   {:id :context-menu    :title "Context menu"    :examples context-menu/examples}
+   {:id :dialog          :title "Dialog"          :examples dialog/examples}
+   {:id :file-browser    :title "File browser"    :examples file-browser/examples}
+   {:id :file-progress   :title "File progress"   :examples file-progress/examples}
+   {:id :icon            :title "Icon"            :examples icon/examples}
+   {:id :lightbox        :title "Lightbox"        :examples lightbox/examples}
+   {:id :markdown        :title "Markdown"        :examples markdown/examples}
+   {:id :pagination      :title "Pagination"      :examples pagination/examples}
+   {:id :player-bar      :title "Player bar"      :examples player-bar/examples}
+   {:id :select          :title "Select"          :examples select/examples}
+   {:id :sidebar         :title "Sidebar"         :examples sidebar/examples}
+   {:id :tag-input       :title "Tag input"       :examples tag-input/examples}
+   {:id :theme-toggle    :title "Theme toggle"    :examples theme-toggle/examples}
+   {:id :timeline        :title "Timeline"        :examples timeline/examples}])
 
 (defn entry
   "The registry entry for a component id (keyword or string)."
