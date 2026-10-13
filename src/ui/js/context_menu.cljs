@@ -4,7 +4,7 @@
    targets via window.__uiContextMenu.
 
    Creates floating menu DOM at cursor position, handles dismiss on
-   click-outside / Escape / scroll, navigates on item click.")
+   click-outside / Escape / scrolling the trigger, navigates on item click.")
 
 ;; ── State (stored on window to avoid module scope issues) ───────────
 
@@ -189,6 +189,16 @@
     (.observe mo menu #js {:childList true :subtree true})
     (set! (.-growthObserver (get-state)) mo)))
 
+(defn- moves-trigger?
+  "Whether a scroll event's target carries `trigger` along: the document or a
+   scroll container around it. Unrelated scrollers (a chat pane following new
+   output) leave the menu's anchor where it is."
+  [trigger e]
+  (let [t (.-target e)]
+    (or (not trigger)
+        (not (.-contains t))
+        (.contains t trigger))))
+
 ;; ── Keyboard Navigation ─────────────────────────────────────────────
 
 (defn- focus-first-item! [menu]
@@ -223,7 +233,8 @@
             the trigger element's data-context-menu attribute."
   [event & args]
   (dismiss!)
-  (let [items (let [passed (first args)]
+  (let [trigger (.-currentTarget event)
+        items (let [passed (first args)]
                 (if passed
                   passed
                   (let [json (.. event -currentTarget -dataset -contextMenu)]
@@ -251,7 +262,7 @@
                           (do (.preventDefault e) (focus-next! menu "down"))
                           (= key "ArrowUp")
                           (do (.preventDefault e) (focus-next! menu "up")))))
-          on-scroll (fn [_] (dismiss!))
+          on-scroll (fn [e] (when (moves-trigger? trigger e) (dismiss!)))
           on-resize (fn [_] (dismiss!))
           cleanup   (fn []
                       (.removeEventListener js/document "click" on-click true)
