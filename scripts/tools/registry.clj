@@ -57,7 +57,7 @@
 
 (def helper-namespaces
   "ui/*.cljc files that are shared helpers, not components."
-  #{"theme" "util"})
+  #{"theme" "theme_model" "themes" "util"})
 
 (defn components
   "All ui/*.cljc components: {:name :id :ns :doc :fns :src :meta}."

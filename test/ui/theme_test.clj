@@ -84,7 +84,13 @@
                              (vec (remove #(zero? (first %)) (get-in token-data [:scales :color :gray :steps]))))
             css2 (gen/generate-css custom)]
         (is (not (str/includes? css2 "--gray-0:")))
-        (is (str/includes? css2 "--bg-1: var(--gray-0, #ffffff);"))))
+        (is (str/includes? css2 "--bg-1: var(--theme-bg-1-light, var(--gray-0, #ffffff));"))))
+
+    (testing "themable tokens read a parametric theme's per-mode property first"
+      (is (str/includes? css "--accent: var(--theme-accent-light, var(--accent-500));"))
+      (is (str/includes? (dark-attr-block css) "--accent: var(--theme-accent-dark, var(--accent-400));"))
+      (is (str/includes? css "--border-1: 1px solid var(--theme-border-1-light, var(--gray-300));"))
+      (is (str/includes? css "--shadow-1: 0 1px 3px") "other tokens untouched"))
 
     (testing "emphasis in content keeps its bold; chrome uses medium"
       (is (str/includes? css "h1, h2, h3, h4, h5, h6, th {"))

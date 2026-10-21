@@ -2,7 +2,8 @@
   (:require [babashka.fs :as fs]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
-            [clojure.string :as str]))
+            [clojure.string :as str]
+            [ui.theme-model :as theme-model]))
 
 (defn read-tokens
   "Read and parse the tokens EDN file."
@@ -21,6 +22,23 @@
        (sort-by key)
        (map (fn [[k v]] (str "  " (token->css-var k) ": " v ";")))
        (str/join "\n")))
+
+(defn themable
+  "`tokens` of `mode` (\"light\" / \"dark\") with each of
+   `ui.theme-model/themable-tokens` read through --theme-<token>-<mode>
+   first: the per-mode properties a parametric theme sets on <html>. A
+   border keeps its width and style, only its color is themable."
+  [tokens mode]
+  (let [themable? (set (map keyword theme-model/themable-tokens))]
+    (into {}
+          (map (fn [[k v]]
+                 [k (if-not (themable? k)
+                      v
+                      (let [hook (str "--theme-" (name k) "-" mode)]
+                        (if-let [[_ line color] (re-matches #"(\d+px solid )(.+)" v)]
+                          (str line "var(" hook ", " color ")")
+                          (str "var(" hook ", " v ")"))))]))
+          tokens)))
 
 (defn format-number
   "Format a number: strip trailing zeros, max 3 decimal places."
@@ -405,9 +423,9 @@ code, kbd, pre, samp {
    variants, base styles, component CSS."
   ([token-data] (generate-css token-data "src/ui"))
   ([{:keys [tokens static themes scales accents]} component-dir]
-   (let [dark-tokens (get themes :dark)
+   (let [dark-tokens (themable (get themes :dark) "dark")
          scale-vars  (when scales (generate-scales scales))
-         root-block  (str ":root {\n" (tokens->css-block tokens)
+         root-block  (str ":root {\n" (tokens->css-block (themable tokens "light"))
                           (when (seq static) (str "\n" (tokens->css-block static)))
                           (when scale-vars (str "\n" scale-vars))
                           "\n}")

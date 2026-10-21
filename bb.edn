@@ -133,6 +133,7 @@
               [ui.camera-test]
               [ui.grid-test]
               [ui.theme-test]
+              [ui.theme-model-test]
               [ui.theme-toggle-test]
               [ui.chat-test]
               [ui.panels-test]
@@ -180,6 +181,7 @@
                                       'ui.camera-test
                                       'ui.grid-test
                                       'ui.theme-test
+                                      'ui.theme-model-test
                                       'ui.theme-toggle-test
                                       'ui.chat-test
                                       'ui.panels-test

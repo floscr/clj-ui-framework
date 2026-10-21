@@ -178,6 +178,8 @@ src/
   theme/tokens.edn          # Design tokens (colors, borders, shadows, radii)
   ui/
     theme.cljc               # Token helpers (css-var)
+    theme_model.cljc         # Parametric themes → CSS custom properties (see Theme System)
+    themes.cljc              # Built-in theme catalog (light + dark pairs)
     button.cljc              # Button component (reference implementation)
     button.css               # Button component styles (read by gen.clj)
     css/gen.clj              # EDN → CSS generator (babashka)
@@ -190,6 +192,7 @@ dist/
 test/ui/
   button_test.clj            # Unit tests for button-classes, button component
   theme_test.clj             # Unit tests for CSS generation
+  theme_model_test.clj       # Parametric themes, the built-in catalog
 dev/
   index.html                 # Tab shell with iframes for all 3 targets
   hiccup/src/dev/hiccup.clj  # Babashka httpkit server (port 3003): shell, routes, target pages
@@ -740,6 +743,32 @@ The CSS layers are generated in this order:
 Color scales are generated once in `:root` and never duplicated. Dark theme just reassigns which scale stop each semantic token points to.
 
 Toggle with: `document.documentElement.dataset.theme = "dark" | "light"`
+
+### Parametric themes (`ui.theme-model`, `ui.themes`)
+
+A runtime theme a user picks or edits, applied as CSS custom properties on
+`<html>` (clj + cljs; not squint):
+
+- **`ui.theme-model`** — pure: theme parameters (gray/accent hue + chroma,
+  the two page colors, status colors, size/type/radius scales, `:font-body`
+  / `:font-mono` family lists) plus optional exact per-mode palettes under
+  `:light` / `:dark` (`palette-keys`: text, surface, border, sidebar,
+  accent, status, code highlighting). `(css-vars params)` → `{"--gray-500"
+  "oklch(…)" …}`; set each on `document.documentElement.style`, remove the
+  rest of `var-names`. The default parameters reproduce `tokens.edn`.
+- **Per-mode hook.** Inline properties can't differ by mode, so per-mode
+  colors go out as `--theme-<token>-<mode>` (`mode-vars`). The generated
+  CSS reads them first for every token in `themable-tokens`
+  (`ui.css.gen/themable`): `--accent: var(--theme-accent-light,
+  var(--accent-500))`. Unset, the token falls back to its normal mapping.
+- **`ui.themes`** — the built-in catalog, light + dark pairs (Tokyo
+  Night, Catppuccin, Gruvbox, Nord, Rosé Pine, Nezumi).
+  `(themes/params :gruvbox)` → full parameters, scales filled from the
+  palette (`params-from-palette`). A new entry needs every palette key in
+  both modes; `theme-model-test` checks that and the text contrast.
+- A consumer with its own parameters passes them to `normalize-params` as
+  `{:ranges … :color-keys …}` (Xi's `xi.web.theme` adds sidebar, syntax and
+  diff tokens this way).
 
 ## Utility Classes
 
