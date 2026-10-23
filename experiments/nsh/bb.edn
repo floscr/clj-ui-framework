@@ -1,0 +1,32 @@
+{:tasks
+ {:init (def nsh (or (System/getenv "NSH") "nsh"))
+
+  compile
+  {:doc "clojurific: ClojureScript -> ES modules in out/, then guard cljs.core's Date extension for NSH's frozen prototypes"
+   :task (do (shell "clojure" "-M" "-m" "cljf.esm" "build" "{:main spike.app :output-dir \"out\"}")
+             (load-file "scripts/guard_date.clj"))}
+
+  build
+  {:doc "nsh build: bundle + QuickJS bytecode into app/.nsh/out"
+   :depends [compile]
+   :task (shell nsh "build" "app/App.tsx" "-o" "app/.nsh/out")}
+
+  release
+  {:doc "nsh build --release (minified) into app/.nsh/out-release"
+   :depends [compile]
+   :task (shell nsh "build" "app/App.tsx" "--release" "-o" "app/.nsh/out-release")}
+
+  trace
+  {:doc "Headless run under the hardened engine; taps the real ui.button twice and resets"
+   :depends [compile]
+   :task (shell nsh "trace" "app/App.tsx" "--tap" "text:Add one" "--tap" "text:Add one" "--tap" "text:Reset")}
+
+  web
+  {:doc "Dev host in the browser: http://127.0.0.1:8790/ (re-run `bb compile` after edits; nsh re-bundles on save)"
+   :depends [compile]
+   :task (shell nsh "run" "app/App.tsx" "--target" "web" "--port" "8790")}
+
+  linux
+  {:doc "Dev host in a GTK 4 window (needs GTK 4.14+ on the host)"
+   :depends [compile]
+   :task (shell nsh "run" "app/App.tsx" "--target" "linux")}}}
