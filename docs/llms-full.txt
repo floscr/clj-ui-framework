@@ -2068,6 +2068,7 @@ SVG child elements for an icon name, for the runtime to draw without the icon mo
 
 - Items are real buttons or links inside the runtime menu; disabled items use aria-disabled.
 - Long-press on touch is handled globally by the gestures runtime; the pressed element shows press feedback.
+- While the menu is open, text selection is off for the whole page (.clj-ui-menu-open on html) and any further right-click only closes the menu; neither another menu nor the browser menu opens.
 
 ## Motion
 
@@ -2086,6 +2087,7 @@ SVG child elements for an icon name, for the runtime to draw without the icon mo
 ## Notes for AI
 
 - Add :data-long-press to any element with a custom contextmenu handler so touch users get the same menu.
+- Do not add your own selection or right-click guards while the menu is open; the runtime toggles .clj-ui-menu-open on html and swallows contextmenu events itself.
 - Destructive items: :variant :danger plus :confirm; label with verb and object.
 
 ## Related

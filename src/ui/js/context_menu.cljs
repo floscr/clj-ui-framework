@@ -14,6 +14,10 @@
         (aset js/window "__uiCtxState" s)
         s)))
 
+;; on <html> while a menu is open — context_menu.css turns off text
+;; selection for the whole page under it
+(def ^:private open-class "clj-ui-menu-open")
+
 ;; ── SVG Icon Creation ───────────────────────────────────────────────
 
 (defn- create-icon [elements]
@@ -245,6 +249,13 @@
     (set! (.-menu state) menu)
     (position-menu! menu (.-clientX event) (.-clientY event))
     (focus-first-item! menu)
+    ;; While open: no text selection anywhere (CSS on .clj-ui-menu-open,
+    ;; see context_menu.css) and no further right-click — a contextmenu
+    ;; anywhere only closes this menu, it neither opens another runtime
+    ;; menu nor the browser's. Registered on document capture AFTER the
+    ;; opening contextmenu event has passed the document, so it never
+    ;; sees the event that opened us.
+    (.add (.-classList js/document.documentElement) open-class)
     ;; Dismiss listeners
     (let [on-click  (fn [e]
                       (when (not (.contains menu (.-target e)))
@@ -253,6 +264,10 @@
                         (.preventDefault e)
                         (.stopPropagation e)
                         (dismiss!)))
+          on-ctx    (fn [e]
+                      (.preventDefault e)
+                      (.stopImmediatePropagation e)
+                      (dismiss!))
           on-key    (fn [e]
                       (let [key (.-key e)]
                         (cond
@@ -265,11 +280,14 @@
           on-scroll (fn [e] (when (moves-trigger? trigger e) (dismiss!)))
           on-resize (fn [_] (dismiss!))
           cleanup   (fn []
+                      (.remove (.-classList js/document.documentElement) open-class)
                       (.removeEventListener js/document "click" on-click true)
+                      (.removeEventListener js/document "contextmenu" on-ctx true)
                       (.removeEventListener js/document "keydown" on-key true)
                       (.removeEventListener js/window "scroll" on-scroll true)
                       (.removeEventListener js/window "resize" on-resize))]
       (.addEventListener js/document "click" on-click true)
+      (.addEventListener js/document "contextmenu" on-ctx true)
       (.addEventListener js/document "keydown" on-key true)
       (.addEventListener js/window "scroll" on-scroll true)
       (.addEventListener js/window "resize" on-resize)

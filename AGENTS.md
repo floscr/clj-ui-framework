@@ -1014,6 +1014,10 @@ works on touch with zero changes.
   document event; next-pointerdown is the fallback for custom handlers)
 - `.clj-ui-touch` CSS disables the iOS press callout / text selection on
   the opt-in surface (ui/context_menu.css)
+- while a runtime menu is open, `<html>` carries `.clj-ui-menu-open`: text
+  selection is off for the whole page, and any further `contextmenu`
+  (right-click, Shift+F10, long-press) is swallowed and only closes the
+  menu — no second menu, no browser menu (ui/js/context_menu)
 
 **Rule: never hand-roll long-press recognizers in apps** (touchstart
 timers, click-suppression atoms, etc.) — add `data-long-press` (or use the
