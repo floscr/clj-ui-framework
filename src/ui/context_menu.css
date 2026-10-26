@@ -128,7 +128,7 @@
 
 .context-menu-separator {
   height: 1px;
-  margin: var(--size-1) 0;
+  margin: 0;
   background: var(--gray-200);
 }
 
