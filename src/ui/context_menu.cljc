@@ -9,8 +9,12 @@
                  :confirm true}]}
        [:div \"Right click me\"])
 
-   :confirm can be true (default message) or a custom string:
-     {:label \"Remove\" :url \"/rm/1\" :confirm \"Delete this permanently?\"}
+   :confirm asks before running. By default the row arms in place
+   (\"Tap again to remove\") and the second activation runs it.
+   :confirm-style :panel drills into a confirm page instead; there the
+   :confirm string is the message and :confirm-title names the object:
+     {:label \"Remove\" :url \"/rm/1\" :confirm \"This can't be undone.\"
+      :confirm-style :panel :confirm-title \"report.pdf\"}
    Hiccup: items are serialized as a data attribute; a tiny JS runtime
    (ui-runtime.js, compiled from squint) handles DOM creation.
 
@@ -55,12 +59,14 @@
     {:type "separator"}
     (let [icon-name (:icon item)]
       (cond-> {:label (:label item)}
-        (:url item)      (assoc :url (:url item))
-        (:variant item)  (assoc :variant (util/kw-name (:variant item)))
-        (:on-click item) (assoc :on-click (:on-click item))
-        (:confirm item)  (assoc :confirm (let [c (:confirm item)]
-                                            (if (string? c) c true)))
-        icon-name        (assoc :icon-paths (icon-paths-for icon-name))))))
+        (:url item)           (assoc :url (:url item))
+        (:variant item)       (assoc :variant (util/kw-name (:variant item)))
+        (:on-click item)      (assoc :on-click (:on-click item))
+        (:confirm item)       (assoc :confirm (let [c (:confirm item)]
+                                                 (if (string? c) c true)))
+        (:confirm-style item) (assoc :confirm-style (util/kw-name (:confirm-style item)))
+        (:confirm-title item) (assoc :confirm-title (:confirm-title item))
+        icon-name             (assoc :icon-paths (icon-paths-for icon-name))))))
 
 ;; ── JSON serialization (hiccup/clj only) ────────────────────────────
 
@@ -103,7 +109,9 @@
      :items - vector of menu item maps:
               {:label \"Edit\" :url \"/edit/123\" :icon :edit}
               {:type :separator}
-              {:label \"Delete\" :url \"/del/123\" :icon :trash :variant :danger}
+              {:label \"Delete\" :url \"/del/123\" :icon :trash :variant :danger
+               :confirm true}
+              :confirm-style :panel / :confirm-title pick the panel confirm.
               Squint/Replicant items may have :on-click instead of :url.
      :class - additional CSS classes
      :attrs - additional HTML attributes"

@@ -10,7 +10,8 @@
 
 (defn- get-state []
   (or (aget js/window "__uiCtxState")
-      (let [s #js {:menu nil :cleanup nil :growthObserver nil}]
+      (let [s #js {:menu nil :cleanup nil :growthObserver nil
+                   :armed nil :back nil}]
         (aset js/window "__uiCtxState" s)
         s)))
 
@@ -44,10 +45,48 @@
           (.appendChild svg node))))
     svg))
 
+;; ── Confirm: tap again (default) ───────────────────────────────────
+;; First activation arms the row in place: it fills with the danger color,
+;; reads "Tap again to …" and a bar drains over `arm-ms`. A second
+;; activation runs it; the timeout, Escape or closing the menu disarms.
+
+(def ^:private arm-ms 3000)
+
+(defn- disarm!
+  "Restore the armed row, if any. Returns true when one was armed."
+  []
+  (let [state (get-state)
+        armed (.-armed state)]
+    (when armed
+      (js/clearTimeout (.-timer armed))
+      (.remove (.. armed -el -classList) "context-menu-item--armed")
+      (.remove (.. armed -menu -classList) "context-menu--armed")
+      (set! (.. armed -labelEl -textContent) (.-label armed))
+      (set! (.-armed state) nil)
+      true)))
+
+(defn- again-label [label]
+  (let [verb (if (.contains (.. js/document -documentElement -classList) "clj-ui-touch")
+               "Tap" "Click")]
+    (str verb " again to " (.toLowerCase (.charAt label 0)) (.slice label 1))))
+
+(defn- arm! [menu el label-el item]
+  (disarm!)
+  (let [label (aget item "label")]
+    (.setProperty (.-style el) "--context-menu-arm-duration" (str arm-ms "ms"))
+    (.add (.-classList el) "context-menu-item--armed")
+    (.add (.-classList menu) "context-menu--armed")
+    (set! (.-textContent label-el) (again-label label))
+    (set! (.-armed (get-state))
+          #js {:el el :menu menu :labelEl label-el :label label
+               :timer (js/setTimeout disarm! arm-ms)})))
+
 ;; ── Dismiss ─────────────────────────────────────────────────────────
 
 (defn- dismiss! []
+  (disarm!)
   (let [state (get-state)]
+    (set! (.-back state) nil)
     (when (.-menu state)
       (.remove (.-menu state))
       (set! (.-menu state) nil)
@@ -60,8 +99,6 @@
       ((.-cleanup state))
       (set! (.-cleanup state) nil))))
 
-;; ── Confirm View ────────────────────────────────────────────────────
-
 (defn- execute-item! [item]
   (let [on-click (aget item "on-click")
         url      (aget item "url")]
@@ -70,72 +107,123 @@
       (when url
         (set! (.-location js/window) url)))))
 
-(defn- show-confirm! [menu item]
-  (let [confirm-val (aget item "confirm")
-        message     (if (= confirm-val true) "Are you sure?" confirm-val)
-        ;; Clear existing content
-        _           (set! (.-innerHTML menu) "")
-        ;; Message
-        msg-el      (.createElement js/document "div")]
-    (set! (.-className msg-el) "context-menu-confirm-message")
-    (set! (.-textContent msg-el) message)
-    (.appendChild menu msg-el)
-    ;; Buttons
-    (let [actions (.createElement js/document "div")]
-      (set! (.-className actions) "context-menu-confirm-actions")
-      ;; Cancel
-      (let [cancel-btn (.createElement js/document "button")]
-        (set! (.-className cancel-btn) "context-menu-item")
-        (set! (.-textContent cancel-btn) "Cancel")
-        (.setAttribute cancel-btn "tabindex" "-1")
-        (.addEventListener cancel-btn "click"
-          (fn [e]
-            (.preventDefault e)
-            (.stopPropagation e)
-            (dismiss!)))
-        (.appendChild actions cancel-btn))
-      ;; Confirm
-      (let [danger      (= (aget item "variant") "danger")
-            confirm-btn (.createElement js/document "button")]
-        (set! (.-className confirm-btn)
-              (if danger
-                "context-menu-item context-menu-item--danger"
-                "context-menu-item"))
-        (set! (.-textContent confirm-btn) "Confirm")
-        (.setAttribute confirm-btn "tabindex" "-1")
-        (.addEventListener confirm-btn "click"
-          (fn [e]
-            (.preventDefault e)
-            (.stopPropagation e)
-            (dismiss!)
-            (execute-item! item)))
-        (.appendChild actions confirm-btn))
-      (.appendChild menu actions))
-    ;; Focus the cancel button
-    (let [cancel (.querySelector menu ".context-menu-item")]
-      (when cancel (.focus cancel)))))
+;; ── Confirm: panel (:confirm-style :panel) ──────────────────────────
+;; The menu drills into a second page: back header, what is affected, a
+;; full-width action button and Cancel. Back, Cancel and Escape return to
+;; the menu instead of closing it.
+
+;; matches --duration-standard / --ease-standard (WAAPI can't read tokens)
+(def ^:private resize-ms 240)
+(def ^:private resize-easing "cubic-bezier(0.2, 0, 0, 1)")
+
+(defn- reduced-motion? []
+  (.-matches (js/window.matchMedia "(prefers-reduced-motion: reduce)")))
+
+(defn- animate-height!
+  "Animate `menu` from height `h0` to its current height."
+  [menu h0]
+  (let [h1 (.-offsetHeight menu)]
+    (when (and (not= h0 h1) (.-animate menu) (not (reduced-motion?)))
+      (.animate menu #js {:height #js [(str h0 "px") (str h1 "px")]}
+                #js {:duration resize-ms :easing resize-easing}))))
+
+(defn- make-el [tag class-name]
+  (let [el (.createElement js/document tag)]
+    (set! (.-className el) class-name)
+    el))
+
+(defn- make-button [class-name text on-click]
+  (let [btn (make-el "button" class-name)]
+    (.setAttribute btn "type" "button")
+    (.setAttribute btn "tabindex" "-1")
+    (when text (.appendChild btn (.createTextNode js/document text)))
+    (.addEventListener btn "click"
+      (fn [e]
+        (.preventDefault e)
+        (.stopPropagation e)
+        (on-click)))
+    btn))
+
+(def ^:private chevron-left #js [#js ["path" #js [#js ["d" "m15 18-6-6 6-6"]]]])
+
+(defn- show-panel!
+  "Swap the menu's items for the confirm page of `item`. `on-back` restores
+   the item list."
+  [menu item on-back]
+  (let [h0      (.-offsetHeight menu)
+        w0      (.-offsetWidth menu)
+        label   (aget item "label")
+        confirm (aget item "confirm")
+        title   (aget item "confirm-title")
+        message (if (string? confirm) confirm "This can't be undone.")
+        danger  (= (aget item "variant") "danger")
+        panel   (make-el "div" "context-menu-panel")
+        head    (make-el "div" "context-menu-panel-head")
+        back    (make-button "context-menu-panel-back context-menu-action" nil on-back)
+        body    (make-el "div" "context-menu-panel-body")
+        actions (make-el "div" "context-menu-panel-actions")
+        run     (make-button (str "btn btn-sm context-menu-action "
+                                  (if danger "btn-danger" "btn-primary"))
+                             nil
+                             (fn [] (dismiss!) (execute-item! item)))
+        cancel  (make-button "btn btn-sm btn-ghost context-menu-action" "Cancel" on-back)]
+    (disarm!)
+    (.setAttribute back "aria-label" "Back")
+    (.appendChild back (create-icon chevron-left))
+    (.appendChild head back)
+    (let [span (make-el "span" "")]
+      (set! (.-textContent span) label)
+      (.appendChild head span))
+    (when title
+      (let [t (make-el "p" "context-menu-panel-title")]
+        (set! (.-textContent t) title)
+        (.appendChild body t)))
+    (let [m (make-el "p" "context-menu-panel-message")]
+      (set! (.-textContent m) message)
+      (.appendChild body m))
+    (let [paths (aget item "icon-paths")]
+      (when (and paths (> (.-length paths) 0))
+        (.appendChild run (create-icon paths))))
+    (.appendChild run (.createTextNode js/document label))
+    (.appendChild actions run)
+    (.appendChild actions cancel)
+    (.appendChild panel head)
+    (.appendChild panel body)
+    (.appendChild panel actions)
+    (set! (.-innerHTML menu) "")
+    (set! (.. menu -style -minWidth) (str w0 "px"))
+    (.add (.-classList menu) "context-menu--panel")
+    (.appendChild menu panel)
+    (set! (.-back (get-state)) on-back)
+    (animate-height! menu h0)
+    ;; Cancel first: a stray Enter never runs the action
+    (.focus cancel)))
 
 ;; ── Menu DOM Creation ───────────────────────────────────────────────
 
-(defn- create-menu [items]
-  (let [menu (.createElement js/document "div")]
-    (set! (.-className menu) "context-menu")
-    (.setAttribute menu "role" "menu")
+(defn- fill-menu!
+  "Render `items` into `menu`, replacing its content. Focuses the item at
+   index `focus-idx` when given (returning from a confirm panel)."
+  [menu items focus-idx]
+  (let [h0 (.-offsetHeight menu)]
+    (set! (.-innerHTML menu) "")
+    (.remove (.-classList menu) "context-menu--panel")
+    (set! (.. menu -style -minWidth) "")
+    (set! (.-back (get-state)) nil)
     (.forEach items
-      (fn [item]
+      (fn [item idx]
         (if (= (aget item "type") "separator")
           ;; Separator
-          (let [sep (.createElement js/document "div")]
-            (set! (.-className sep) "context-menu-separator")
+          (let [sep (make-el "div" "context-menu-separator")]
             (.setAttribute sep "role" "separator")
             (.appendChild menu sep))
           ;; Item
           (let [url    (aget item "url")
-                tag    (if url "a" "button")
-                el     (.createElement js/document tag)
-                danger (= (aget item "variant") "danger")]
-            (set! (.-className el)
-                  (if danger "context-menu-item context-menu-item--danger" "context-menu-item"))
+                el     (make-el (if url "a" "button")
+                                (if (= (aget item "variant") "danger")
+                                  "context-menu-item context-menu-item--danger"
+                                  "context-menu-item"))
+                span   (.createElement js/document "span")]
             (.setAttribute el "role" "menuitem")
             (.setAttribute el "tabindex" "-1")
             (when url (.setAttribute el "href" url))
@@ -144,19 +232,33 @@
               (when (and paths (> (.-length paths) 0))
                 (.appendChild el (create-icon paths))))
             ;; Label
-            (let [span (.createElement js/document "span")]
-              (set! (.-textContent span) (aget item "label"))
-              (.appendChild el span))
+            (set! (.-textContent span) (aget item "label"))
+            (.appendChild el span)
             ;; Click handler
             (.addEventListener el "click"
               (fn [e]
                 (.preventDefault e)
                 (.stopPropagation e)
-                (if (aget item "confirm")
-                  (show-confirm! (.closest el ".context-menu") item)
-                  (do (dismiss!)
-                      (execute-item! item)))))
-            (.appendChild menu el)))))
+                (cond
+                  (not (aget item "confirm"))
+                  (do (dismiss!) (execute-item! item))
+
+                  (= (aget item "confirm-style") "panel")
+                  (show-panel! menu item (fn [] (fill-menu! menu items idx)))
+
+                  (.contains (.-classList el) "context-menu-item--armed")
+                  (do (dismiss!) (execute-item! item))
+
+                  :else
+                  (arm! menu el span item))))
+            (.appendChild menu el)
+            (when (= idx focus-idx) (.focus el))))))
+    (when (some? focus-idx) (animate-height! menu h0))))
+
+(defn- create-menu [items]
+  (let [menu (make-el "div" "context-menu")]
+    (.setAttribute menu "role" "menu")
+    (fill-menu! menu items nil)
     menu))
 
 ;; ── Positioning ─────────────────────────────────────────────────────
@@ -205,12 +307,15 @@
 
 ;; ── Keyboard Navigation ─────────────────────────────────────────────
 
+;; menu items, or the buttons of a confirm panel
+(def ^:private focusable ".context-menu-item, .context-menu-action")
+
 (defn- focus-first-item! [menu]
-  (let [first-item (.querySelector menu ".context-menu-item")]
+  (let [first-item (.querySelector menu focusable)]
     (when first-item (.focus first-item))))
 
 (defn- focus-next! [menu direction]
-  (let [items  (.querySelectorAll menu ".context-menu-item")
+  (let [items  (.querySelectorAll menu focusable)
         active (.-activeElement js/document)
         len    (.-length items)]
     (when (> len 0)
@@ -271,8 +376,14 @@
           on-key    (fn [e]
                       (let [key (.-key e)]
                         (cond
+                          ;; Escape steps back: armed row → disarm, confirm
+                          ;; panel → item list, otherwise close
                           (= key "Escape")
-                          (do (.preventDefault e) (dismiss!))
+                          (do (.preventDefault e)
+                              (cond
+                                (disarm!) nil
+                                (.-back state) ((.-back state))
+                                :else (dismiss!)))
                           (= key "ArrowDown")
                           (do (.preventDefault e) (focus-next! menu "down"))
                           (= key "ArrowUp")

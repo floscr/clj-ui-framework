@@ -26,4 +26,23 @@
            {:items [{:label "View profile" :url "#profile" :icon :user}
                     {:label "Send message" :url "#message" :icon :mail}
                     {:label "Share"        :url "#share"   :icon :link}]}
-           (target "Person actions" true)))]]))])
+           (target "Person actions" true)))]]))
+   (example :confirm "Confirm destructive items"
+     (fn []
+       [:div {}
+        (note "By default a :confirm item arms on the first click and runs on the second. :confirm-style :panel drills into a confirm page instead.")
+        [:div {:style (sx {:margin-top "0.75rem"})}
+         (row
+          (context-menu/context-menu-trigger
+           {:items [{:label "Rename" :url "#rename" :icon :edit}
+                    {:type :separator}
+                    {:label "Delete session" :url "#delete" :icon :trash
+                     :variant :danger :confirm true}]}
+           (target "Tap again (default)"))
+          (context-menu/context-menu-trigger
+           {:items [{:label "Rename" :url "#rename" :icon :edit}
+                    {:type :separator}
+                    {:label "Delete session" :url "#delete" :icon :trash
+                     :variant :danger :confirm "The conversation and its file records are removed. This can't be undone."
+                     :confirm-style :panel :confirm-title "Credit Card Format"}]}
+           (target "Panel" true)))]]))])

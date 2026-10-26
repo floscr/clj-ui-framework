@@ -54,7 +54,7 @@ Children: The element that owns the actions.
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `:items` | `vector of item maps` | – | {:label :url :icon :variant :confirm :on-click} or {:type :separator}. :variant :danger tints the row; :confirm true (or a string) asks before running. |
+| `:items` | `vector of item maps` | – | {:label :url :icon :variant :confirm :confirm-style :confirm-title :on-click} or {:type :separator}. :variant :danger tints the row. :confirm true (or a string) asks before running: by default the row arms in place ("Tap again to delete", 3s countdown) and the second activation runs it. :confirm-style :panel drills into a confirm page instead, showing :confirm-title, the :confirm string as the message, the action and Cancel. |
 | `:class` | `string` | – |  |
 | `:attrs` | `map` | – |  |
 
@@ -72,8 +72,8 @@ SVG child elements for an icon name, for the runtime to draw without the icon mo
 | --- | --- |
 | Shift+F10 / Menu key | Opens the menu on the focused trigger (native contextmenu). |
 | ArrowUp / ArrowDown | Move between items. |
-| Enter | Runs the item. |
-| Escape | Closes. |
+| Enter | Runs the item; on a :confirm item the first press arms it, the second runs it. |
+| Escape | Disarms an armed item, steps back from a confirm panel, otherwise closes. |
 
 ## Accessibility
 
@@ -84,6 +84,7 @@ SVG child elements for an icon name, for the runtime to draw without the icon mo
 ## Motion
 
 - The menu scales in from its corner over --duration-fast with --ease-enter and is clamped to the viewport.
+- An armed row pops in with --ease-spring and drains a countdown bar; the confirm panel slides in while the menu height animates (skipped under reduced motion).
 
 ## Responsive behavior
 
@@ -99,7 +100,8 @@ SVG child elements for an icon name, for the runtime to draw without the icon mo
 
 - Add :data-long-press to any element with a custom contextmenu handler so touch users get the same menu.
 - Do not add your own selection or right-click guards while the menu is open; the runtime toggles .clj-ui-menu-open on html and swallows contextmenu events itself.
-- Destructive items: :variant :danger plus :confirm; label with verb and object.
+- Destructive items: :variant :danger plus :confirm; label with verb and object (the armed row reads "Tap again to <label>").
+- Use :confirm-style :panel when the user should see what is affected (pass :confirm-title and a :confirm message); keep the default for quick, low-stakes deletes.
 
 ## Related
 
