@@ -13,11 +13,15 @@
                 boolean                        -> toggle
                 \"#hex\" / rgb()/oklch()...      -> color
                 other string                   -> text
-                {type: \"text\"|\"select\"|\"color\"|\"image\"|\"pad\"
-                       |\"spring\"|\"easing\"|\"action\", ...}
-                nested object (no :type)       -> folder
+                {type: \"slider\"|\"toggle\"|\"text\"|\"select\"|\"color\"
+                       |\"image\"|\"pad\"|\"spring\"|\"easing\"|\"action\",
+                 label?, ...}                  (slider: default min max step;
+                                                toggle: default)
+                nested object (no :type)       -> folder (_label, _collapsed)
        opts   : {id, persist, onChange, onAction, defaultCollapsed,
                  enabled, shortcuts,
+                 container: an element to mount the controls into, inline
+                            (no floating head; the host frames them),
                  position: \"top-right\"|\"top-left\"|\"bottom-right\"|\"bottom-left\",
                  icon: char shown when minimized (default \"⚙\")}
        controller: {values, getValues, setValue, setValues, resetValues,
@@ -131,6 +135,21 @@
     (= (tof v) "object")
     (let [t (aget v "type")]
       (cond
+        ;; object forms of the primitives, for a label of their own
+        (= t "slider")
+        (let [d  (or (aget v "default") 0)
+              r  (infer-range d)
+              mx (if (some? (aget v "max")) (aget v "max") (aget r "max"))]
+          {:ctype "slider" :key k :path path :label (or (aget v "label") (humanize k))
+           :default d
+           :min (if (some? (aget v "min")) (aget v "min") (aget r "min"))
+           :max mx
+           :step (if (some? (aget v "step")) (aget v "step") (infer-step mx))})
+
+        (= t "toggle")
+        {:ctype "toggle" :key k :path path :label (or (aget v "label") (humanize k))
+         :default (boolean (aget v "default"))}
+
         (= t "text")
         {:ctype "text" :key k :path path :label (or (aget v "label") (humanize k))
          :default (or (aget v "default") "") :placeholder (or (aget v "placeholder") "")}
@@ -177,7 +196,7 @@
         {:ctype "action" :key k :path path :label (or (aget v "label") (humanize k))}
 
         :else
-        {:ctype "folder" :key k :path path :label (humanize k)
+        {:ctype "folder" :key k :path path :label (or (aget v "_label") (humanize k))
          :collapsed (boolean (aget v "_collapsed"))
          :children (parse-config v path)}))
 
@@ -186,7 +205,7 @@
 (defn- parse-config [config path]
   (let [out #js []]
     (doseq [k (js/Object.keys config)]
-      (when-not (= k "_collapsed")
+      (when-not (or (= k "_collapsed") (= k "_label"))
         (let [node (parse-node k (aget config k) (conj path k))]
           (when node (.push out node)))))
     out))
@@ -795,11 +814,16 @@
     (persist-load! panel)
     panel))
 
-(defn- mount-panel! [panel opts]
-  (let [root   (ensure-root!)
+(defn- mount-panel!
+  "Mount into the floating root, or with opts.container inline into that
+   element: the controls only (no head, not draggable), for a host that
+   frames the panel itself."
+  [panel opts]
+  (let [inline (aget opts "container")
+        root   (or inline (ensure-root!))
         pos    (:position panel)
         side   (if (or (= pos "top-left") (= pos "bottom-left")) "pos-left" "pos-right")
-        card   (mk "div" (str "dial-panel " side))
+        card   (mk "div" (if inline "dial-panel dial-panel--inline" (str "dial-panel " side)))
         head   (mk "div" "dial-panel-head")
         title  (mk "div" "dial-panel-title")
         tools  (mk "div" "dial-panel-tools")
@@ -810,7 +834,7 @@
         collb  (mk "button" "dial-tool")
         iconb  (mk "button" "dial-panel-icon")
         body   (mk "div" "dial-panel-body")]
-    (apply-root-position! root pos)
+    (when-not inline (apply-root-position! root pos))
     (txt! title (:name panel))
     (aset panel "bodyEl" body)
     (aset panel "versionSel" vsel)
@@ -837,7 +861,9 @@
                                 (start-drag! e))))
     (add! tools vsel addb copyb resetb collb)
     (add! head title tools)
-    (add! card head body iconb)
+    (if inline
+      (add! card body)
+      (add! card head body iconb))
     (add! root card)
     (build-body! panel)
     (render-versions! panel)
