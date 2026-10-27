@@ -35,6 +35,24 @@
   (let [matching (filterv (fn [evt] (= date-str (:date evt))) events)]
     (sort-by (fn [evt] (or (:time-start evt) "")) matching)))
 
+(defn cell-events
+  "The events of a date in the order a day cell lists them: events-for-date
+   with done ones last, so they are the first to move into '+N more'."
+  [events date-str]
+  (let [day   (events-for-date events date-str)
+        done? (fn [evt] (:done? evt))]
+    (into (vec (remove done? day)) (filter done? day))))
+
+(defn- visible-count
+  "How many of a cell's `day-events` show before '+N more'. `max-visible` is
+   a number, or a fn of [date-str day-events] for a host that fits the pills
+   to the cell (default 3)."
+  [max-visible date-str day-events]
+  (cond
+    (number? max-visible) max-visible
+    (some? max-visible) (max-visible date-str day-events)
+    :else 3))
+
 (defn format-time
   "Format a HH:MM time string for display."
   [time-str]
@@ -248,7 +266,9 @@
      :on-more-click   - callback (fn [date-str]) for the '+N more' overflow indicator
      :indicator       - :pills (default) shows in-cell event pills;
                         :dots shows a compact row of coloured dots (mobile-friendly)
-     :max-visible     - max events to show before '+N more' (pills mode, default 3)
+     :max-visible     - max events to show before '+N more' (pills mode, default 3),
+                        or (fn [date-str day-events] n) to size it per cell;
+                        day-events come in cell-events order (done last)
      :pill-layout     - event-pill :layout for pills mode (:inline default, :stacked)
      :max-dots        - max dots to show (dots mode, default 4)
      :week-number     - label shown at the head's start (e.g. \"W41\"), or nil
@@ -261,9 +281,9 @@
         d           (:day day)
         today?      (= date-str today-str)
         selected?   (= date-str selected-date)
-        day-events  (events-for-date events date-str)
+        day-events  (cell-events events date-str)
         dots?       (= indicator :dots)
-        max-vis     (or max-visible 3)
+        max-vis     (visible-count max-visible date-str day-events)
         visible-evts (take max-vis day-events)
         overflow    (- (count day-events) max-vis)
         dot-evts    (take (or max-dots 4) day-events)
@@ -455,7 +475,8 @@
      :selected-date   - YYYY-MM-DD string of the selected date
      :variant         - :full (default) or :compact
      :week-numbers?   - :full only: ISO week label on each Monday
-     :max-visible     - :full only: pills per cell before '+N more' (default 4)
+     :max-visible     - :full only: pills per cell before '+N more' (default 4),
+                        or (fn [date-str day-events] n) (see event-day-cell)
      :highlight-week  - YYYY-MM-DD; every cell in that date's row gets
                         .cal-week-active (the compact variant draws it as a
                         rounded band behind the row)

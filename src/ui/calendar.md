@@ -76,7 +76,9 @@ through the root's variant class:
    :selected-date "2026-10-08"
    :variant :full                    ;; or :compact
    :week-numbers? true               ;; :full only
-   :max-visible 4                    ;; :full only, pills before "+N more"
+   :max-visible 4                    ;; :full only, pills before "+N more"; or
+                                     ;; (fn [date-str day-events] n) to fit each cell
+                                     ;; (done events come last, so they overflow first)
    :highlight-week "2026-10-13"     ;; that date's row gets .cal-week-active
    :class "my-month"                 ;; host class on the root
    :on-select (fn [date-str] ...)

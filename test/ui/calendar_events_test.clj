@@ -207,6 +207,30 @@
             [_ _ _ body] (cal-events/event-day-cell {:day day :events evts :max-visible 4})]
         (is (= [:button {:class "cal-event-more" :type "button"} "+1 more"] (last body)))))))
 
+(deftest cell-events-test
+  (testing "by time, done events last"
+    (let [evts [{:title "done early" :date "2026-10-27" :time-start "08:00" :done? true}
+                {:title "all day" :date "2026-10-27"}
+                {:title "late" :date "2026-10-27" :time-start "18:00"}
+                {:title "done all day" :date "2026-10-27" :done? true}]]
+      (is (= ["all day" "late" "done all day" "done early"]
+             (map :title (cal-events/cell-events evts "2026-10-27")))))))
+
+(deftest event-day-cell-max-visible-fn-test
+  (let [day  {:day 27 :date-str "2026-10-27" :current-month? true}
+        evts [{:title "a" :date "2026-10-27" :done? true}
+              {:title "b" :date "2026-10-27"}
+              {:title "c" :date "2026-10-27"}]
+        seen (atom nil)
+        [_ _ _ body] (cal-events/event-day-cell
+                      {:day day :events evts
+                       :max-visible (fn [ds day-events] (reset! seen [ds (map :title day-events)]) 2)})]
+    (testing "the fn gets the date and the cell's events, done last"
+      (is (= ["2026-10-27" ["b" "c" "a"]] @seen)))
+    (testing "its count decides the pills shown; the done one overflows"
+      (is (= 2 (count (filter #(= :div (first %)) (drop 2 body)))))
+      (is (= [:button {:class "cal-event-more" :type "button"} "+1 more"] (last body))))))
+
 (deftest month-grid-test
   (let [evts [{:title "A" :date "2026-10-12"}]]
     (testing "full variant: long heads with today lit, week numbers on Mondays, month labels on the 1st"
