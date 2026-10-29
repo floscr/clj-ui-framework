@@ -197,11 +197,13 @@ html {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Body copy and control labels sit on sm (13px): the Fluid Functionalism
+   body style. base (14px) is the subtitle, md (16px) the section title. */
 body {
   margin: 0;
   background: var(--bg-0);
   color: var(--fg-0);
-  font-size: var(--font-base);
+  font-size: var(--font-sm);
 }
 
 /* Two weights for UI chrome: regular (400) and medium (500). Hierarchy
@@ -212,18 +214,23 @@ h1, h2, h3, h4, h5, h6, th {
   font-weight: var(--weight-medium);
 }
 
-/* The app type ramp. Headings carry no margin: layouts space them with
-   gap (ui.page, card, section), and prose (ui.markdown) sets its own. An
-   h1 is a page title at 28px, not a hero; apps should not restyle it. */
+/* The app type ramp (display / title / subtitle / body / caption).
+   Headings carry no margin: layouts space them with gap (ui.page, card,
+   section), and prose (ui.markdown) sets its own. An h1 is a page title
+   at 28px, not a hero; apps should not restyle it. */
 h1, h2, h3, h4, h5, h6 {
   margin: 0;
+  text-wrap: balance;
 }
 
 h1 { font-size: var(--font-xl); }
-h2 { font-size: var(--font-lg); }
-h3 { font-size: var(--font-md); }
-h4 { font-size: var(--font-base); }
-h5, h6 { font-size: var(--font-sm); }
+h2 { font-size: var(--font-md); line-height: var(--leading-body); }
+h3 { font-size: var(--font-base); }
+h4, h5, h6 { font-size: var(--font-sm); }
+
+p {
+  text-wrap: pretty;
+}
 
 /* Display type: large headings get the display face, tight tracking and
    a short leading. */

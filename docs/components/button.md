@@ -82,7 +82,7 @@ Children: The label (text, icons, any hiccup).
 | --- | --- | --- | --- |
 | `:variant` | `:primary \| :secondary \| :ghost \| :danger \| :success \| :link` | `:secondary` | Visual weight. :primary is neutral ink on the page color (one per surface); :danger and :success are outlined with a colored label. |
 | `:loud` | `boolean` | `false` | Filled, saturated version of :primary (accent), :danger and :success. For the one action on a screen that has to shout, such as pay or delete account. |
-| `:size` | `:sm \| :md \| :lg` | `:md` | Height (32 / 40 / 48px; 36 / 44 on touch), padding and icon size. |
+| `:size` | `:sm \| :md \| :lg` | `:md` | Height (28 / 36 / 44px; 36 / 44 / 48 on touch), padding and icon size. |
 | `:href` | `string` | – | Render as an anchor pointing at this URL. |
 | `:on-click` | `fn` | – | Click handler on :cljs and :squint. Ignored on :clj (use :attrs). |
 | `:disabled` | `boolean` | – | Disables the control. The attribute is emitted only when true. |

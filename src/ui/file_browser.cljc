@@ -272,7 +272,13 @@
   [{:keys [columns items sort-key sort-dir on-sort on-row-click selected-fn context-menu-items-fn row-attrs-fn class attrs]}]
   (let [cols         (or columns default-columns)
         sortable?    (some? on-sort)
-        gtc          (str/join " " (map (fn [col] (or (:width col) "minmax(150px,1fr)")) cols))]
+        ;; Flexible columns: the first (the name) keeps room to read on a
+        ;; narrow screen and takes twice the share; the rest shrink first.
+        ;; Wider than the wrapper, the table scrolls inside it.
+        gtc          (str/join " " (map-indexed (fn [i col]
+                                                  (or (:width col)
+                                                      (if (zero? i) "minmax(200px,2fr)" "minmax(110px,1fr)")))
+                                                cols))]
     #?(:squint
        [:div (merge {:class (cond-> "fb-table-wrapper"
                               class (str " " class))}

@@ -163,7 +163,7 @@
    still stretches or compresses it: each multiplier is treated as the
    geometric step it would be at the default ratio, so the defaults
    reproduce tokens.edn exactly and the slider stays smooth."
-  [["xs" 0.75] ["sm" 0.875] ["base" 1] ["md" 1.125] ["lg" 1.375] ["xl" 1.75] ["2xl" 2.25] ["3xl" 3]])
+  [["xs" 0.75] ["sm" 0.8125] ["base" 0.875] ["md" 1] ["lg" 1.25] ["xl" 1.75] ["2xl" 2.25] ["3xl" 3]])
 
 (def ^:private default-font-ratio 1.25)
 

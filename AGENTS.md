@@ -648,9 +648,10 @@ Theme-independent, emitted into `:root` only. Override via `build-css {:static {
   Every `transition` in component CSS uses these — no literal `150ms ease`.
   Animate transform, opacity and color; the base styles collapse all motion
   under `prefers-reduced-motion`.
-- **Control heights**: `control-sm` 32px, `control-md` 40px, `control-lg`
-  48px on desktop; `html.clj-ui-touch` (mobile.css) raises sm/md to 36/44px,
-  the phone tap minimum. **Every control pins `min-height` to one of these**
+- **Control heights**: the 8 + 20 + 8 ladder: `control-sm` 28px (compact
+  toolbars), `control-md` 36px, `control-lg` 44px on desktop;
+  `html.clj-ui-touch` (mobile.css) raises them to 36 / 44 / 48px, the phone
+  tap minimum. **Every control pins `min-height` to one of these**
   (`.btn`, `.form-input`, `.form-select`, `.select-trigger`, `.number-field`,
   `.tag-input-area`), so a row of mixed controls lines up. A new control
   must do the same; never size a control by padding alone.
@@ -699,15 +700,19 @@ Produces `--size-1: 0.25rem` through `--size-16: 4rem`. Use for all spacing, pad
 
 ```edn
 :font {:base 1 :unit "rem"
-       :steps [["xs" 0.75] ["sm" 0.875] ["base" 1] ["md" 1.125]
-               ["lg" 1.375] ["xl" 1.75] ["2xl" 2.25] ["3xl" 3]]}
+       :steps [["xs" 0.75] ["sm" 0.8125] ["base" 0.875] ["md" 1]
+               ["lg" 1.25] ["xl" 1.75] ["2xl" 2.25] ["3xl" 3]]}
 ```
 
-Produces 12 / 14 / 16 / 18 / 22 / 28 / 36 / 48px at a 16px base. Controls,
-tables and labels sit on `sm` (14px); `xs` (12px) is the floor for any UI
-text. The geometric form (`[power label]` steps plus `:ratio`) is still
-accepted. The base styles set the ramp on headings (`h1` xl, `h2` lg, `h3`
-md, `h4` base, `h5`/`h6` sm, all with `margin: 0`): an `h1` is a 28px page
+Produces 12 / 13 / 14 / 16 / 20 / 28 / 36 / 48px at a 16px root: the five
+styles of Fluid Functionalism (`skill load fluid-typography`). `xs` is the
+caption (meta rows, descriptions), `sm` the body and every control label
+(the `body` font size), `base` the subtitle (card titles, emphasized rows),
+`md` the section title, `xl` the page title; `lg` and up are display sizes
+for dialogs and marketing. The geometric form (`[power label]` steps plus
+`:ratio`) is still accepted. The base styles set the ramp on headings
+(`h1` xl, `h2` md, `h3` base, `h4` to `h6` sm, all with `margin: 0`,
+`text-wrap: balance`; `p` gets `text-wrap: pretty`): an `h1` is a 28px page
 title, not a hero, and apps must not restyle it. Use the scale for all
 font-size values.
 

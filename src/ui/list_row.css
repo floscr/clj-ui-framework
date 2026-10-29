@@ -1,7 +1,7 @@
 /* ── List rows ──────────────────────────────────────────────────
    Records on one surface: leading icon or thumbnail, title and
-   description, metadata and controls at the end. 48px rows, 56px with a
-   description; hairlines between rows. A row that opens something keeps
+   description, metadata and controls at the end. 36px rows (44px on
+   touch), 48px with a thumbnail or description; hairlines between rows. A row that opens something keeps
    its <div>: the title is the link or button and stretches over the row
    (::after), so trailing controls stay real buttons above it. */
 
@@ -21,7 +21,7 @@
   align-items: center;
   gap: var(--size-3);
   width: 100%;
-  min-height: var(--size-12);
+  min-height: var(--control-md);
   padding: var(--size-2) var(--size-4);
   color: var(--fg-0);
   transition: background-color var(--duration-fast) var(--ease-standard);
@@ -40,19 +40,21 @@
   background: var(--accent-subtle);
 }
 
+/* The icon slot is 24px so a one-line row stays on the control ladder
+   (36px, 44px on touch); a thumbnail is 32px and makes its row 48px. */
 .list-row-leading {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  width: var(--size-10);
-  height: var(--size-10);
+  width: var(--size-6);
+  height: var(--size-6);
   color: var(--fg-1);
 }
 
 .list-row-thumb {
-  width: var(--size-10);
-  height: var(--size-10);
+  width: var(--size-8);
+  height: var(--size-8);
   border-radius: var(--radius-sm);
   object-fit: cover;
   background: var(--bg-2);

@@ -65,7 +65,7 @@ Children: list-row elements.
 
 ### `list-row`
 
-One record, 48px tall (56px with a description). The row is a <div>; with :href the title is an <a>, with :on-click a <button>, stretched over the row so the whole row opens the record while trailing buttons stay separate. Interactive rows fill on hover; the active row is tinted with the accent.
+One record, 36px tall (44px on touch, 48px with a thumbnail or description). The row is a <div>; with :href the title is an <a>, with :on-click a <button>, stretched over the row so the whole row opens the record while trailing buttons stay separate. Interactive rows fill on hover; the active row is tinted with the accent.
 
 Children: Trailing controls: small icon buttons, a badge, a switch.
 
@@ -73,8 +73,8 @@ Children: Trailing controls: small icon buttons, a badge, a switch.
 | --- | --- | --- | --- |
 | `:title` | `string \| hiccup` | – | The name, one line, truncated. |
 | `:description` | `string \| hiccup` | – | Second line, muted, truncated. |
-| `:icon` | `icon keyword` | – | Leading icon in a 40px slot. |
-| `:thumb` | `string` | – | Leading image URL, 40px square with a small radius. Wins over :icon. |
+| `:icon` | `icon keyword` | – | Leading icon in a 24px slot. |
+| `:thumb` | `string` | – | Leading image URL, 32px square with a small radius. Wins over :icon. |
 | `:meta` | `string \| hiccup` | – | Trailing muted text: a count, a size, a date. |
 | `:href` | `string` | – | The row opens this link (the title is the anchor). |
 | `:on-click` | `fn` | – | The row is a button on :cljs and :squint; ignored on :clj. |
@@ -108,7 +108,7 @@ Vector form of list-row-classes.
 
 ## Responsive behavior
 
-- Title and description truncate; trailing controls keep their width. Rows are at least 48px tall, the tap minimum with the row's padding.
+- Title and description truncate; trailing controls keep their width. Rows are 36px tall on desktop and 44px on touch, the tap minimum.
 
 ## Targets
 

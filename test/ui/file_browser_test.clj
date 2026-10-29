@@ -169,4 +169,4 @@
                                                      {:key :size :label "Size" :width "90px"}]})
           grid (nth result 2)
           style (get-in grid [1 :style])]
-      (is (= "grid-template-columns: minmax(150px,1fr) 90px" style))))
+      (is (= "grid-template-columns: minmax(200px,2fr) 90px" style))))

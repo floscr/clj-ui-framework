@@ -30,12 +30,12 @@
    :children "list-row elements."
    :props [{:name :class :type "string"} {:name :attrs :type "map"}]}
   {:fn "list-row"
-   :doc "One record, 48px tall (56px with a description). The row is a <div>; with :href the title is an <a>, with :on-click a <button>, stretched over the row so the whole row opens the record while trailing buttons stay separate. Interactive rows fill on hover; the active row is tinted with the accent."
+   :doc "One record, 36px tall (44px on touch, 48px with a thumbnail or description). The row is a <div>; with :href the title is an <a>, with :on-click a <button>, stretched over the row so the whole row opens the record while trailing buttons stay separate. Interactive rows fill on hover; the active row is tinted with the accent."
    :children "Trailing controls: small icon buttons, a badge, a switch."
    :props [{:name :title :type "string | hiccup" :doc "The name, one line, truncated."}
            {:name :description :type "string | hiccup" :doc "Second line, muted, truncated."}
-           {:name :icon :type "icon keyword" :doc "Leading icon in a 40px slot."}
-           {:name :thumb :type "string" :doc "Leading image URL, 40px square with a small radius. Wins over :icon."}
+           {:name :icon :type "icon keyword" :doc "Leading icon in a 24px slot."}
+           {:name :thumb :type "string" :doc "Leading image URL, 32px square with a small radius. Wins over :icon."}
            {:name :meta :type "string | hiccup" :doc "Trailing muted text: a count, a size, a date."}
            {:name :href :type "string" :doc "The row opens this link (the title is the anchor)."}
            {:name :on-click :type "fn" :doc "The row is a button on :cljs and :squint; ignored on :clj."}
@@ -54,7 +54,7 @@
  :motion ["Hover and press change the fill only, over duration-fast."]
 
  :responsive
- ["Title and description truncate; trailing controls keep their width. Rows are at least 48px tall, the tap minimum with the row's padding."]
+ ["Title and description truncate; trailing controls keep their width. Rows are 36px tall on desktop and 44px on touch, the tap minimum."]
 
  :targets
  {:clj "Static markup; use :href or HTMX attributes in :attrs."

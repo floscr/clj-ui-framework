@@ -37,7 +37,7 @@
    :children "The label (text, icons, any hiccup)."
    :props [{:name :variant :type ":primary | :secondary | :ghost | :danger | :success | :link" :default ":secondary" :doc "Visual weight. :primary is neutral ink on the page color (one per surface); :danger and :success are outlined with a colored label."}
            {:name :loud :type "boolean" :default "false" :doc "Filled, saturated version of :primary (accent), :danger and :success. For the one action on a screen that has to shout, such as pay or delete account."}
-           {:name :size :type ":sm | :md | :lg" :default ":md" :doc "Height (32 / 40 / 48px; 36 / 44 on touch), padding and icon size."}
+           {:name :size :type ":sm | :md | :lg" :default ":md" :doc "Height (28 / 36 / 44px; 36 / 44 / 48 on touch), padding and icon size."}
            {:name :href :type "string" :doc "Render as an anchor pointing at this URL."}
            {:name :on-click :type "fn" :doc "Click handler on :cljs and :squint. Ignored on :clj (use :attrs)."}
            {:name :disabled :type "boolean" :doc "Disables the control. The attribute is emitted only when true."}

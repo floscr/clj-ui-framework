@@ -31,11 +31,13 @@
 
 /* ── Page header ────────────────────────────────────────────── */
 
+/* Title on the left, actions on the right, on one line: the title
+   shrinks and wraps before the actions drop under it. */
 .page-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: var(--size-4);
+  gap: var(--size-3) var(--size-4);
   flex-wrap: wrap;
 }
 
@@ -43,7 +45,7 @@
   display: grid;
   gap: var(--size-1);
   min-width: 0;
-  flex: 1 1 calc(var(--size-4) * 16);
+  flex: 1 1 calc(var(--size-4) * 8);
 }
 
 .page-title {
@@ -62,7 +64,7 @@
   align-items: center;
   gap: var(--size-2);
   flex-shrink: 0;
-  flex-wrap: wrap;
+  margin-left: auto;
 }
 
 /* ── Page section ───────────────────────────────────────────── */
@@ -100,6 +102,7 @@
 
 .page-section-title {
   font-size: var(--font-md);
+  line-height: var(--leading-body);
 }
 
 .page-section-description {
