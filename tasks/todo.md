@@ -1,110 +1,70 @@
-# Arc parity: task tracker
+# Good-by-default apps (no extra instructions)
 
-Full inventory, gap analysis and rationale: `docs/uiarc-parity-plan.md`.
-Nothing below starts until the decisions in that doc's section 6 are made.
+Diagnosis from the five screenshots + their source (streaks, service-theme,
+music-server, share, willhaben-seller), 2026-10-29:
 
-## Decisions (taken 2026-10-09 with the recommended defaults)
+1. Framework defaults are off: `--font-sm` is 12.8px and `--font-xs` 10px
+   (1.25 geometric scale), yet every control (button, input, select, table)
+   uses `font-sm`. Controls have no shared `min-height`, so buttons, inputs
+   and selects in one row end up 36/44/56px tall. Primary/danger/success are
+   solid saturated fills; inputs use `bg-0` so they read as holes inside
+   cards. Headings have no sizes in base CSS.
+2. The framework has no page-level primitives (page container, page header,
+   section, settings row, metric, list row), so every app writes its own
+   shell: own max-width, own Google-Fonts face, h1 at 600/700/800, uppercase
+   eyebrow labels, hex palettes, `.card` overrides. The lint that forbids all
+   of this only runs on the framework.
+3. Consumer AGENTS.md points agents at the contributor guide, not at app
+   composition rules or worked examples.
 
-- [x] Fonts: system stack behind `--font-body` / `--font-display` tokens; a self-hosted face is a one-token swap later
-- [x] Default palette: tinted gray + purple; `data-accent` offers neutral, blue, teal, green, amber, orange, red, pink
-- [x] Radii scale: concentric set, control 9 / panel 14 / surface 18 / pill (started at 12 / 18 / 24, scaled to 75% on review)
-- [x] Metadata: EDN sidecar per component (Phase 1)
-- [x] Blocks live in `ui.blocks.*` in this repo (Phase 5)
+## Plan
 
-## Phase 0: Foundation refresh (done 2026-10-09)
+### Phase A: defaults (framework CSS, no API changes)
+- [ ] Font scale: explicit steps (xs 12, sm 14, base 16, md 18, lg 22,
+      xl 28, 2xl 36, 3xl 48). Add `[label value]` support to
+      `generate-font-scale`, keep ratio form working.
+- [ ] Base type ramp in `base-css`: body 16/1.5, h1 xl 500, h2 lg, h3 md,
+      h4 base, margins 0, `p` margin, `td`/`.metric` tabular-nums.
+- [ ] One control height: `min-height: var(--control-md)` on `.btn`,
+      `.form-input`, `.form-select`, `.select-trigger`, `.number-field`,
+      `.tag-input`, `.chip`-as-control; sm/lg map to `--control-sm/lg`.
+      Desktop md 40px, `.clj-ui-touch` raises md to 44px.
+- [ ] Quieter buttons: primary = fg on bg (neutral, Arc style; accent via
+      `data-accent` stays available), secondary = surface + border,
+      danger = outlined with danger text (solid only `.btn-danger-solid`),
+      drop solid success default. Ghost text `fg-1`.
+- [ ] Inputs on `bg-1`, border `border-0`, focus = accent border (no inset
+      glow). Select trigger same.
+- [ ] Dark palette: lift `bg-0` to ~L .17 and `border-0` so cards and
+      secondary buttons separate on dark surfaces.
+- [ ] Ship one body face (self-hosted Inter Variable via `build-css`
+      `@font-face`, served by server-lib), so apps stop importing fonts.
 
-- [x] tokens.edn: bg-1 is white in light (new gray-0 step), border-subtle, accent-subtle/strong, danger/success-strong, control-track/thumb, series-1..4, shadow-floating, focus-outline
-- [x] tokens.edn: radius-control / panel / surface / pill, control heights (`:static`)
-- [x] tokens.edn: duration-* and ease-* motion tokens, font + weight tokens (`:static`)
-- [x] gen.clj: `:static` emitted into :root; `[data-accent]` blocks from `:accents` (scale remap or token override)
-- [x] base styles: font tokens, two weights (headings/strong/th medium), mono on code/kbd, shared :focus-visible ring, prefers-reduced-motion kill switch; `.tabular-nums` utility
-- [x] CSS sweep (48 files): every transition on motion tokens, no weight > 500, no uppercase labels, cards on a border without shadow, floating layers on bg-1 + shadow-floating + radius-panel/surface, controls on radius-control, concentric boxed groups, press feedback on .btn, accent-strong hovers instead of brightness filters
-- [x] `bb lint-css` (errors: hex, literal durations/easings, weight > 500, uppercase, hand-made outlines; warnings: raw rem) wired into `bb release`
-- [x] theme-test covers new tokens, static block, accents, base styles; `bb test` green, `bb build-theme` ok
-- [ ] `bb check-dev` against running dev servers (servers were not running in this session; Replicant and Squint still need a visual pass)
-- [ ] em-dash lint for UI copy in `.cljc` strings (deferred: docstrings use them legitimately)
+### Phase B: composition primitives (new components with sidecars)
+- [ ] `ui.page`: `page` (:width :narrow 640 | :reading 720 | :wide 1200,
+      fluid gutters, grid gap 24), `page-header` (title, description,
+      actions), `section` (h2, description, children), `actions-row`.
+- [ ] `ui.settings`: `settings-group` + `settings-row` (label, hint, control).
+- [ ] `ui.metric`: `metric` (value, label, delta, optional ring) + `metric-row`.
+- [ ] `ui.list`: `list-row` (leading icon/thumb, title, meta, trailing)
+      on top of `card-list`.
+- [ ] `ui.segmented-control` (mode pickers like service-theme rows).
+- [ ] `empty-state` `:fill true` centers in its region.
+- [ ] server-lib `render/page` uses `ui.page/page` + `page-header`.
 
-## Phase 1: Component metadata and generated docs (done 2026-10-09, except the examples split)
-
-- [x] Sidecar EDN schema + validation in tools.registry (required keys, public fns, destructured or documented props, related ids, categories)
-- [x] `bb gen-docs` emits docs/components/<id>.md, docs/components.md, docs/llms.txt, docs/llms-full.txt
-- [x] ui.registry-test: every component has a valid sidecar; markdown renders; llms.txt has the agent rules
-- [x] Split dev/shared demos.cljc into dev/examples/<component>.cljc (done 2026-10-10; examples are {:id :title :render} maps, source is read from the files by the site instead of a macro)
-- [x] All 46 sidecars written (ui.theme and ui.util are helpers, exempt)
-
-## Phase 2: Demo site rebuild (decisions 2026-10-10: system font, catalogue-first home)
-
-- [x] dev.example helpers + dev.examples.<component> files + dev.examples.registry; the three targets render from the registry
-- [x] dev.site: catalogue home (`/`, grouped by category with cards), sidebar nav grouped by category from the registry, old long page moved to `/all`
-- [x] Component page `/components/<id>`: breadcrumb, title, summary, meta, target switcher, every example with Preview and Code tabs (source read with rewrite-clj), then when to use, usage, API tables, keyboard, accessibility, motion, responsive, targets, notes for AI, related
-- [ ] Component page extras: Copy page (markdown to clipboard), width presets, props tab per example
-- [ ] Appearance popover in the shell (theme + accent); top nav
-- [ ] Replicant + Squint SPAs: `#/<id>` example host routes so the switcher lands on the component; keep `#/all`
-- [ ] Docs pages: introduction, installation, theming, motion, agents, changelog
-- [x] Routes: /components/<id>/markdown, /llms.txt, /llms-full.txt
-- [ ] /catalog.edn and /catalog.json
-- [x] ⌘K search via ui.command (home page trigger + palette over every component)
-- [ ] Site-driven components: segmented-control, code-block, kbd, avatar, dropdown-menu, scroll-area, announcement-bar
-- [x] Every component has a shared example set (17 added 2026-10-13); ui.registry-test enforces coverage and that every example renders on :clj
-- [x] Site polish: /components/markdown route clash fixed, header link uses the accent, target switcher hugs its buttons, API and keyboard tables scroll inside a wrapper on phones, Code tab keeps relative indentation
-- [x] Hiccup live reload watches dev/shared and scripts and reloads changed files explicitly (bb's :reload-all skips loaded deps)
-- [ ] check-dev: every registry id has a page and renders in all three targets (pages verified by a crawl, not yet part of check-dev)
-
-## Phase 3: Tier 1 components
-
-- [ ] dropdown-menu
-- [ ] segmented-control
-- [ ] avatar, avatar-group
-- [ ] kbd, code-block, copy-button
-- [ ] metric-card
-- [ ] date-picker, date-range-picker
-- [ ] stepper
-- [ ] drawer, bottom-sheet
-- [ ] hover-card
-- [ ] toast-stack
-- [ ] table sorting, filter-toolbar
-- [ ] chip-group, radio-cards
-- [ ] scroll-area
-- [ ] usage-meter, announcement-bar
-- [ ] inline-edit, password-field + strength
-- [ ] activity-feed
-- [ ] tree-view
-- [ ] user-menu
-
-## Phase 4: Tier 2 components
-
-- [ ] charts: sparkline, line, bar, donut, gauge, activity-heatmap (+ ui.js.charts)
-- [ ] animated-counter, slot-text
-- [ ] text-morph, text-shimmer, text-reveal, in-view-title
-- [ ] slider (single + range)
-- [ ] combobox, multi-select
-- [ ] confirm-morph, hold-to-confirm
-- [ ] swipe-actions
-- [ ] carousel, image-compare
-- [ ] expandable-card, countdown, json-viewer, comment-thread
-- [ ] theme-switch transition variants
-
-## Phase 5: Blocks
-
-- [ ] From existing: app-shell sidebar, file-upload, command-palette, media-player, week-calendar, empty-states, page-header
-- [ ] Product: settings-page, login + signup, otp-input, notification-center, team-members, invite-people, api-keys, metrics-dashboard, project-board, inbox-triage, agent-run, ai-chat, release-readiness
-- [ ] Marketing: site-header, site-footer, hero-section, stats-band, plan-comparison, comparison-table, faq-section, cta-section, changelog-feed, logo-marquee, newsletter-signup
-
-## Phase 6: Skill package and rollout
-
-- [ ] docs/skill/: SKILL.md, INSTRUCTIONS.md, design.md, copy.md, motion.md, composition.md, accessibility.md, responsive.md, checklist.md, components.md, examples
-- [ ] sync-consumer-agents links skill + llms.txt + site
-- [ ] Optional: MCP server over the registry
-- [ ] bb release, consumer bumps, deploy (only when asked)
+### Phase C: enforcement and agent docs
+- [ ] `lint-css` runs on consumer CSS in server-lib's frontend pipeline
+      and `bb check`: fail on font imports, `font-family` on html/body,
+      weights > 500, uppercase, raw hex, raw px font-size, overriding
+      `.card`/`.btn`/`.form-*` internals, a second page container.
+- [ ] `docs/skill/`: INSTRUCTIONS.md (short always-on app rules),
+      composition.md (one container, 16/24/32 rhythm, settings rows,
+      states), worked examples: settings page, list page, dashboard card,
+      form page, all as `.cljc` using `ui.page`.
+- [ ] `sync-consumer-agents` section → app rules + link to llms.txt and
+      skill, not the contributor AGENTS.md.
+- [ ] Rebuild demo site pages to use `ui.page` (dogfood), screenshot
+      before/after of the five apps.
 
 ## Review
-
-### Phase 0 (2026-10-09)
-
-Verified by rendering the hiccup components page to static HTML and
-screenshotting it in Chrome, light and dark: buttons, cards, card lists,
-accordion, table, popover (white, floating shadow, panel radius), button
-groups (concentric), header patterns, forms. No console errors. Not yet
-verified: Replicant and Squint targets, consumer apps (bg-1 turning white
-in light mode and the larger radii are the visible changes they will pick
-up on the next sha bump).
+(filled in after implementation)

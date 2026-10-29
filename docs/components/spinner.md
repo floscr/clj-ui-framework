@@ -73,7 +73,7 @@ Vector form.
 
 - [Skeleton](skeleton.md): Reserves space with a pulsing placeholder while content loads.
 - [Progress](progress.md): Shows how much of a known task is complete as a filled track.
-- [Button](button.md): A single action with quiet secondary states, press feedback and a loading spinner.
+- [Button](button.md): A single action: neutral primary, quiet outlined states, a loud filled option, press feedback and a loading spinner.
 
 ## Guidance for AI tools
 

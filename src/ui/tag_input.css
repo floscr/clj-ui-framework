@@ -11,16 +11,15 @@
   flex-wrap: wrap;
   gap: var(--size-2);
   padding: var(--size-1) var(--size-2);
-  border: var(--border-0);
+  border: var(--border-1);
   border-radius: var(--radius-control);
-  background: var(--bg-0);
+  background: var(--bg-1);
   cursor: text;
-  min-height: calc(var(--size-10) + var(--size-1));
+  min-height: var(--control-md);
 }
 
 .tag-input-focused .tag-input-area {
   border-color: var(--accent);
-  box-shadow: 0 0 0 2px color-mix(in oklch, var(--accent), transparent 80%);
 }
 
 .tag-input-disabled .tag-input-area {

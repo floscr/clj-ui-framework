@@ -9,6 +9,14 @@ html {
   text-size-adjust: 100%;
 }
 
+/* Touch devices: controls grow to the phone tap minimum (sm 36px, md
+   44px). Every control reads its height from these tokens, so a whole
+   app gets taller buttons, inputs and selects from this one rule. */
+html.clj-ui-touch {
+  --control-sm: var(--size-9);
+  --control-md: var(--size-11);
+}
+
 /* Remove the gray/blue tap flash on iOS and Android */
 * {
   -webkit-tap-highlight-color: transparent;

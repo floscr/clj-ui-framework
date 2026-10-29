@@ -27,7 +27,7 @@
  [{:fn "badge"
    :doc "Renders an inline <span> pill."
    :children "The label text."
-   :props [{:name :variant :type ":primary | :secondary | :outline | :success | :warning | :danger" :default ":primary" :doc "Tone. :primary uses the accent and is for emphasis; the status tones are for real status."}
+   :props [{:name :variant :type ":primary | :secondary | :outline | :success | :warning | :danger" :default ":primary" :doc "Tone. :primary is an accent tint for emphasis (Recommended, New); the status tones are for real status. All tones are tinted, never solid."}
            {:name :icon-name :type "icon keyword" :doc "Optional leading icon at the small size."}
            {:name :size :type ":sm" :doc "Compact variant."}
            {:name :class :type "string" :doc "Extra classes."}

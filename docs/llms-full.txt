@@ -30,6 +30,8 @@ Dark mode: `data-theme="dark"` on `<html>` (auto via prefers-color-scheme otherw
 - Components are `.cljc`: one call renders to Hiccup (`:clj`), Replicant (`:cljs`) and Squint. Mind the target table in each page (events, `:class` vector vs string, `:style` shape).
 - Use the semantic tokens (`--bg-0/1/2`, `--fg-0/1/2`, `--accent`, `--accent-subtle`, `--danger`, `--success`, `--warning`, `--border-0`, `--border-subtle`, `--radius-control/panel/surface`, `--size-N`, `--font-*`) instead of raw colors or rem values, and check light and dark themes.
 - Motion: `--duration-fast/standard/considered` with `--ease-standard`; animate transform, opacity and color only. Reduced motion is handled globally.
+- Buttons: the one main action is `:variant :primary` (neutral ink, not the accent); the rest are `:secondary` or `:ghost`; destructive is `:danger` (outlined). `:loud true` is for the single action on a screen that must dominate.
+- Type: body 16px, controls 14px, headings from the base styles (h1 28px). Never set a font-family, a font-weight above 500, or a raw px font-size in app CSS; never import a web font.
 - Copy: sentence case, verbs with objects on buttons, no eyebrow labels, no uppercase transforms, weights 400 and 500 only.
 - Interactive behavior that hiccup cannot express lives in the JS runtime (ui-runtime.js); load it once per page.
 
@@ -43,7 +45,7 @@ Dark mode: `data-theme="dark"` on `<html>` (auto via prefers-color-scheme otherw
 
 ### Actions
 
-- [Button](components/button.md): A single action with quiet secondary states, press feedback and a loading spinner.
+- [Button](components/button.md): A single action: neutral primary, quiet outlined states, a loud filled option, press feedback and a loading spinner.
 - [Button group](components/button-group.md): Related actions as one segmented control: ghost or boxed, with icon items, counts and separators.
 - [Command palette](components/command.md): A searchable command menu in a native dialog with groups, icons, shortcut hints, a global hotkey and Alt quick-select.
 - [Context menu](components/context-menu.md): Secondary actions close to the object: a right-click (or long-press on touch) menu for any wrapped element.
@@ -376,7 +378,7 @@ Children: The label text.
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `:variant` | `:primary \| :secondary \| :outline \| :success \| :warning \| :danger` | `:primary` | Tone. :primary uses the accent and is for emphasis; the status tones are for real status. |
+| `:variant` | `:primary \| :secondary \| :outline \| :success \| :warning \| :danger` | `:primary` | Tone. :primary is an accent tint for emphasis (Recommended, New); the status tones are for real status. All tones are tinted, never solid. |
 | `:icon-name` | `icon keyword` | – | Optional leading icon at the small size. |
 | `:size` | `:sm` | – | Compact variant. |
 | `:class` | `string` | – | Extra classes. |
@@ -518,7 +520,7 @@ Full library index: docs/llms.txt
 
 # Button
 
-> A single action with quiet secondary states, press feedback and a loading spinner.
+> A single action: neutral primary, quiet outlined states, a loud filled option, press feedback and a loading spinner.
 
 - Type: Component (actions, Buttons)
 - Namespace: `ui.button`
@@ -555,6 +557,19 @@ Full library index: docs/llms.txt
 (button/button {:variant :primary :loading saving?} "Save changes")
 ```
 
+### Loud: the accent-filled primary for the one action that must stand out
+
+```clojure
+(button/button {:variant :primary :loud true :icon-left :credit-card} "Pay 24 EUR")
+```
+
+### Destructive: outlined by default, filled when loud
+
+```clojure
+(button/button {:variant :danger} "Remove photo")
+(button/button {:variant :danger :loud true} "Delete account")
+```
+
 ### Icon-only, round
 
 ```clojure
@@ -585,8 +600,9 @@ Children: The label (text, icons, any hiccup).
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `:variant` | `:primary \| :secondary \| :ghost \| :danger \| :success \| :link` | `:secondary` | Visual weight. One :primary action per surface. |
-| `:size` | `:sm \| :md \| :lg` | `:md` | Height, padding and icon size. |
+| `:variant` | `:primary \| :secondary \| :ghost \| :danger \| :success \| :link` | `:secondary` | Visual weight. :primary is neutral ink on the page color (one per surface); :danger and :success are outlined with a colored label. |
+| `:loud` | `boolean` | `false` | Filled, saturated version of :primary (accent), :danger and :success. For the one action on a screen that has to shout, such as pay or delete account. |
+| `:size` | `:sm \| :md \| :lg` | `:md` | Height (32 / 40 / 48px; 36 / 44 on touch), padding and icon size. |
 | `:href` | `string` | – | Render as an anchor pointing at this URL. |
 | `:on-click` | `fn` | – | Click handler on :cljs and :squint. Ignored on :clj (use :attrs). |
 | `:disabled` | `boolean` | – | Disables the control. The attribute is emitted only when true. |
@@ -636,10 +652,12 @@ Same as button-classes but returns a vector of class tokens (what Replicant need
 
 ## Notes for AI
 
-- The default variant is :secondary. Set :variant :primary on the one main action of a surface.
+- The default variant is :secondary. Set :variant :primary on the one main action of a surface; it is neutral (black on light, white on dark), not the accent.
+- Reach for :loud true only when a screen's main action must dominate (checkout, publish). Most pages have no loud button.
+- Destructive actions are :variant :danger (outlined, red label). Add :loud true only on the final confirm of an irreversible action.
 - Pass a changing label as children (Save, then Saved) instead of swapping two buttons.
 - Never hand-write <button class="btn">; call the component so loading, icons and disabled stay consistent.
-- Destructive actions use :variant :danger with a verb plus object label (Delete project).
+- Destructive actions use a verb plus object label (Delete project).
 
 ## Related
 
@@ -650,7 +668,7 @@ Same as button-classes but returns a vector of class tokens (what Replicant need
 
 ## Guidance for AI tools
 
-Button: A single action with quiet secondary states, press feedback and a loading spinner. Use only the documented props; `:class` and `:attrs` are for layout and extra attributes, never for restyling internals. The same call renders on all three targets; see Targets for the per-target event and class conventions. Keep keyboard access and both themes intact.
+Button: A single action: neutral primary, quiet outlined states, a loud filled option, press feedback and a loading spinner. Use only the documented props; `:class` and `:attrs` are for layout and extra attributes, never for restyling internals. The same call renders on all three targets; see Targets for the per-target event and class conventions. Keep keyboard access and both themes intact.
 
 Full library index: docs/llms.txt
 
@@ -791,7 +809,7 @@ Class string for {:active :icon-only}.
 
 - [Tabs](tabs.md): Switch between peer panels of one object, with no JS: hidden radios drive the panels.
 - [Toolbar](toolbar.md): A pill-shaped container that groups icon buttons with separators, horizontal or vertical, optionally floating in a popover.
-- [Button](button.md): A single action with quiet secondary states, press feedback and a loading spinner.
+- [Button](button.md): A single action: neutral primary, quiet outlined states, a loud filled option, press feedback and a loading spinner.
 - [Chip](chip.md): A small selectable pill for filters, tags and presets, with an optional color dot.
 
 ## Guidance for AI tools
@@ -974,7 +992,7 @@ Full library index: docs/llms.txt
 - Type: Component (data, Dates)
 - Namespace: `ui.calendar-events`
 - Source: `src/ui/calendar_events.cljc`
-- Public fns: `event-color-class`, `events-for-date`, `format-time`, `event-time-display`, `parse-int*`, `round*`, `hhmm->minutes`, `event-duration-minutes`, `format-duration`, `format-hour-label`, `event-pill-class-list`, `event-pill-classes`, `ticker-day-class-list`, `ticker-day-classes`, `agenda-event-class-list`, `agenda-event-classes`, `task-check`, `event-pill`, `event-day-cell`, `calendar-event-grid`, `month-grid`, `ticker-dot`, `ticker-day-item`, `ticker-strip`, `agenda-event-row`, `agenda-day-group-class-list`, `agenda-day-empty`, `agenda-day-group`, `agenda-list`, `day-timeline`, `week-timeline`
+- Public fns: `event-color-class`, `events-for-date`, `cell-events`, `format-time`, `event-time-display`, `parse-int*`, `round*`, `hhmm->minutes`, `event-duration-minutes`, `format-duration`, `format-hour-label`, `event-pill-class-list`, `event-pill-classes`, `ticker-day-class-list`, `ticker-day-classes`, `agenda-event-class-list`, `agenda-event-classes`, `task-check`, `event-pill`, `event-day-cell`, `calendar-event-grid`, `month-grid`, `ticker-dot`, `ticker-day-item`, `ticker-strip`, `agenda-event-row`, `agenda-day-group-class-list`, `agenda-day-empty`, `agenda-day-group`, `agenda-list`, `day-timeline`, `week-timeline`
 - Keywords: calendar, events, agenda, week view, day view, month view, event pills
 
 ## When to use
@@ -1028,7 +1046,7 @@ Frameless month view (the host brings the toolbar). :full is the roomy desktop m
 | `:selected-date` | `string` | – |  |
 | `:variant` | `:full \| :compact` | `:full` |  |
 | `:week-numbers?` | `boolean` | – | :full only. |
-| `:max-visible` | `int` | – | Pills before a +N more button (:full). |
+| `:max-visible` | `int \| fn [date-str day-events]` | – | Pills before a +N more button (:full); a fn sizes it per cell, e.g. to what fits. |
 | `:highlight-week` | `date string` | – | That date's row gets the active week band (:compact). |
 | `:on-select` | `fn [date-str]` | – |  |
 | `:on-double-click` | `fn [date-str]` | – |  |
@@ -1137,6 +1155,10 @@ Seven day columns on a shared hour axis.
 ### `events-for-date`
 
 Events whose :date matches.
+
+### `cell-events`
+
+A date's events in day-cell order: by time, done ones last (first into +N more).
 
 ### `event-duration-minutes`
 
@@ -2096,7 +2118,7 @@ SVG child elements for an icon name, for the runtime to draw without the icon mo
 
 - [Command palette](command.md): A searchable command menu in a native dialog with groups, icons, shortcut hints, a global hotkey and Alt quick-select.
 - [Popover](popover.md): A small anchored panel for contextual controls, built on the native Popover API so it works without app state.
-- [Button](button.md): A single action with quiet secondary states, press feedback and a loading spinner.
+- [Button](button.md): A single action: neutral primary, quiet outlined states, a loud filled option, press feedback and a loading spinner.
 
 ## Guidance for AI tools
 
@@ -2492,7 +2514,7 @@ Vector form.
 
 - [Skeleton](skeleton.md): Reserves space with a pulsing placeholder while content loads.
 - [Alert](alert.md): A persistent inline message with a tone, icon and optional title that helps people recover or continue.
-- [Button](button.md): A single action with quiet secondary states, press feedback and a loading spinner.
+- [Button](button.md): A single action: neutral primary, quiet outlined states, a loud filled option, press feedback and a loading spinner.
 
 ## Guidance for AI tools
 
@@ -3038,7 +3060,7 @@ Preset: icon input joined to a primary button; wrapped in a GET <form> when :act
 - [Switch](switch.md): A toggle for a setting that takes effect immediately.
 - [Number field](number-field.md): A bounded numeric input with increment and decrement steppers and scroll-wheel support.
 - [Tag input](tag-input.md): Turns short text into removable tags with a filtered suggestion dropdown; fully controlled by the host.
-- [Button](button.md): A single action with quiet secondary states, press feedback and a loading spinner.
+- [Button](button.md): A single action: neutral primary, quiet outlined states, a loud filled option, press feedback and a loading spinner.
 
 ## Guidance for AI tools
 
@@ -3259,7 +3281,7 @@ Vector form.
 
 ## Related
 
-- [Button](button.md): A single action with quiet secondary states, press feedback and a loading spinner.
+- [Button](button.md): A single action: neutral primary, quiet outlined states, a loud filled option, press feedback and a loading spinner.
 - [Empty state](empty-state.md): A centered placeholder with an optional icon for lists and views that have nothing to show yet.
 - [Badge](badge.md): A small pill for status, category or a count, with an optional leading icon.
 
@@ -3877,7 +3899,7 @@ Class string for the container.
 
 - [Editing timeline](timeline.md): A media editing timeline: a scrubbable ruler, labeled tracks with draggable and trimmable segments, a playhead and a floating transport.
 - [Progress](progress.md): Shows how much of a known task is complete as a filled track.
-- [Button](button.md): A single action with quiet secondary states, press feedback and a loading spinner.
+- [Button](button.md): A single action: neutral primary, quiet outlined states, a loud filled option, press feedback and a loading spinner.
 
 ## Guidance for AI tools
 
@@ -4858,7 +4880,7 @@ Vector form.
 
 - [Skeleton](skeleton.md): Reserves space with a pulsing placeholder while content loads.
 - [Progress](progress.md): Shows how much of a known task is complete as a filled track.
-- [Button](button.md): A single action with quiet secondary states, press feedback and a loading spinner.
+- [Button](button.md): A single action: neutral primary, quiet outlined states, a loud filled option, press feedback and a loading spinner.
 
 ## Guidance for AI tools
 
@@ -5785,7 +5807,7 @@ Vector form.
 
 ## Related
 
-- [Button](button.md): A single action with quiet secondary states, press feedback and a loading spinner.
+- [Button](button.md): A single action: neutral primary, quiet outlined states, a loud filled option, press feedback and a loading spinner.
 - [Button group](button-group.md): Related actions as one segmented control: ghost or boxed, with icon items, counts and separators.
 - [Popover](popover.md): A small anchored panel for contextual controls, built on the native Popover API so it works without app state.
 - [Separator](separator.md): A hairline divider, horizontal or vertical, for grouping content.
@@ -5876,7 +5898,7 @@ Children: The control the hint belongs to.
 ## Related
 
 - [Popover](popover.md): A small anchored panel for contextual controls, built on the native Popover API so it works without app state.
-- [Button](button.md): A single action with quiet secondary states, press feedback and a loading spinner.
+- [Button](button.md): A single action: neutral primary, quiet outlined states, a loud filled option, press feedback and a loading spinner.
 - [Icon](icon.md): Inline Lucide-style SVG icons in four sizes, outlined by default with filled variants for media controls.
 
 ## Guidance for AI tools

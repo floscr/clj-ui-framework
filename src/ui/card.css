@@ -56,13 +56,6 @@
   gap: var(--size-2);
 }
 
-.card-footer .btn,
-.dialog-footer .btn {
-  padding: var(--size-2) var(--size-4);
-  font-size: var(--font-base);
-  line-height: var(--size-5);
-}
-
 /* ─── Card List ───────────────────────────────────────────────── */
 
 .card-list {

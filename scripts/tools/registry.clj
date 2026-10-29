@@ -257,6 +257,8 @@
 - Components are `.cljc`: one call renders to Hiccup (`:clj`), Replicant (`:cljs`) and Squint. Mind the target table in each page (events, `:class` vector vs string, `:style` shape).
 - Use the semantic tokens (`--bg-0/1/2`, `--fg-0/1/2`, `--accent`, `--accent-subtle`, `--danger`, `--success`, `--warning`, `--border-0`, `--border-subtle`, `--radius-control/panel/surface`, `--size-N`, `--font-*`) instead of raw colors or rem values, and check light and dark themes.
 - Motion: `--duration-fast/standard/considered` with `--ease-standard`; animate transform, opacity and color only. Reduced motion is handled globally.
+- Buttons: the one main action is `:variant :primary` (neutral ink, not the accent); the rest are `:secondary` or `:ghost`; destructive is `:danger` (outlined). `:loud true` is for the single action on a screen that must dominate.
+- Type: body 16px, controls 14px, headings from the base styles (h1 28px). Never set a font-family, a font-weight above 500, or a raw px font-size in app CSS; never import a web font.
 - Copy: sentence case, verbs with objects on buttons, no eyebrow labels, no uppercase transforms, weights 400 and 500 only.
 - Interactive behavior that hiccup cannot express lives in the JS runtime (ui-runtime.js); load it once per page.")
 

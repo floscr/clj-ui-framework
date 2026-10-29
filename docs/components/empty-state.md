@@ -78,7 +78,7 @@ Vector form.
 
 - [Skeleton](skeleton.md): Reserves space with a pulsing placeholder while content loads.
 - [Alert](alert.md): A persistent inline message with a tone, icon and optional title that helps people recover or continue.
-- [Button](button.md): A single action with quiet secondary states, press feedback and a loading spinner.
+- [Button](button.md): A single action: neutral primary, quiet outlined states, a loud filled option, press feedback and a loading spinner.
 
 ## Guidance for AI tools
 

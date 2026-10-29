@@ -13,12 +13,13 @@
   display: flex;
   align-items: center;
   width: 100%;
+  min-height: var(--control-md);
   padding: var(--size-2) var(--size-8) var(--size-2) var(--size-3);
   font-size: var(--font-sm);
   font-family: inherit;
-  line-height: 1.5;
+  line-height: var(--leading-body);
   text-align: left;
-  background-color: var(--bg-0);
+  background-color: var(--bg-1);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2371717a' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right var(--size-2) center;
@@ -31,7 +32,6 @@
 .select-trigger:focus-visible {
   border-color: var(--accent);
   outline: none;
-  box-shadow: inset 0 0 6px color-mix(in srgb, var(--accent) 35%, transparent);
 }
 
 .select-trigger:disabled {

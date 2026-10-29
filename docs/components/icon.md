@@ -74,7 +74,7 @@ Vector form.
 
 ## Related
 
-- [Button](button.md): A single action with quiet secondary states, press feedback and a loading spinner.
+- [Button](button.md): A single action: neutral primary, quiet outlined states, a loud filled option, press feedback and a loading spinner.
 - [Empty state](empty-state.md): A centered placeholder with an optional icon for lists and views that have nothing to show yet.
 - [Badge](badge.md): A small pill for status, category or a count, with an optional leading icon.
 

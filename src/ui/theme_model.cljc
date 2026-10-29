@@ -17,6 +17,7 @@
 ;; ── Numbers (both targets) ───────────────────────────────────────────────────
 
 (defn- pow [x y] #?(:clj (Math/pow x y) :cljs (js/Math.pow x y)))
+(defn- log [x] #?(:clj (Math/log x) :cljs (js/Math.log x)))
 (defn- cbrt [x] #?(:clj (Math/cbrt x) :cljs (js/Math.cbrt x)))
 (defn- sqrt [x] #?(:clj (Math/sqrt x) :cljs (js/Math.sqrt x)))
 (defn- cos [x] #?(:clj (Math/cos x) :cljs (js/Math.cos x)))
@@ -158,7 +159,13 @@
 (def ^:private size-steps 16)
 
 (def ^:private font-steps
-  [[-2 "xs"] [-1 "sm"] [0 "base"] [1 "md"] [2 "lg"] [3 "xl"] [4 "2xl"] [5 "3xl"]])
+  "tokens.edn's hand-tuned ramp as multipliers of the base. `:font-ratio`
+   still stretches or compresses it: each multiplier is treated as the
+   geometric step it would be at the default ratio, so the defaults
+   reproduce tokens.edn exactly and the slider stays smooth."
+  [["xs" 0.75] ["sm" 0.875] ["base" 1] ["md" 1.125] ["lg" 1.375] ["xl" 1.75] ["2xl" 2.25] ["3xl" 3]])
+
+(def ^:private default-font-ratio 1.25)
 
 (def ^:private radius-px
   [["xs" 3] ["sm" 5] ["md" 8] ["lg" 12] ["control" 9] ["panel" 14] ["surface" 18]])
@@ -309,9 +316,10 @@
                  status-scales)
            (into {} (map (fn [n] [(str "--size-" n) (rem-value (* (:size-base p) n))]))
                  (range 1 (inc size-steps)))
-           (into {} (map (fn [[power label]]
-                           [(str "--font-" label)
-                            (rem-value (* (:font-base p) (pow (:font-ratio p) power)))]))
+           (into {} (map (fn [[label m]]
+                           (let [power (/ (log m) (log default-font-ratio))]
+                             [(str "--font-" label)
+                              (rem-value (* (:font-base p) (pow (:font-ratio p) power)))])))
                  font-steps)
            (into {} (map (fn [[label px]]
                            [(str "--radius-" label) (str (round (* px (:radius-scale p))) "px")]))

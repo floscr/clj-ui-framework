@@ -1,13 +1,25 @@
+/* ── Button ─────────────────────────────────────────────────────
+   Quiet by default: the primary action is neutral ink on the page color,
+   secondary is a bordered surface, danger and success are outlined and
+   colored only in their label. `.btn-loud` on primary / danger / success
+   swaps in the filled, saturated version for the one action on a screen
+   that has to shout (a checkout, a destructive confirm).
+
+   Every button pins its height to a control token so a row of buttons,
+   inputs and selects lines up. */
+
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5em;
-  padding: var(--size-2) var(--size-4);
+  gap: var(--size-2);
+  min-height: var(--control-md);
+  padding: 0 var(--size-4);
   font-size: var(--font-sm);
   font-weight: 500;
-  line-height: var(--size-5);
-  border: none;
+  line-height: var(--leading-body);
+  white-space: nowrap;
+  border: 1px solid transparent;
   border-radius: var(--radius-control);
   cursor: pointer;
   font-family: inherit;
@@ -17,6 +29,7 @@
     background-color var(--duration-fast) var(--ease-standard),
     color var(--duration-fast) var(--ease-standard),
     border-color var(--duration-fast) var(--ease-standard),
+    opacity var(--duration-fast) var(--ease-standard),
     transform var(--duration-fast) var(--ease-standard);
 }
 
@@ -26,13 +39,31 @@
   transform: scale(0.97);
 }
 
+/* ── Primary ─────────────────────────────────────────────────── */
+
 .btn-primary {
-  background: var(--accent);
-  color: var(--fg-on-accent);
+  background: var(--fg-0);
+  color: var(--bg-0);
+  border-color: var(--fg-0);
 }
 .btn-primary:hover:not(:disabled) {
-  background: var(--accent-strong);
+  opacity: 0.9;
 }
+.btn-primary:active:not(:disabled) {
+  opacity: 0.84;
+}
+
+.btn-primary.btn-loud {
+  background: var(--accent);
+  color: var(--fg-on-accent);
+  border-color: transparent;
+}
+.btn-primary.btn-loud:hover:not(:disabled) {
+  background: var(--accent-strong);
+  opacity: 1;
+}
+
+/* ── Secondary ───────────────────────────────────────────────── */
 
 .btn-secondary {
   background: var(--bg-1);
@@ -43,12 +74,15 @@
   background: var(--bg-2);
 }
 
+/* ── Ghost ───────────────────────────────────────────────────── */
+
 .btn-ghost {
   background: transparent;
-  color: var(--fg-0);
+  color: var(--fg-1);
 }
 .btn-ghost:hover:not(:disabled) {
   background: var(--bg-2);
+  color: var(--fg-0);
 }
 
 /* Pressed state for segmented toggles (e.g. ui.grid layout-toggle). */
@@ -57,23 +91,52 @@
   color: var(--fg-0);
 }
 
+/* ── Danger ──────────────────────────────────────────────────── */
+
 .btn-danger {
-  background: var(--danger);
-  color: var(--fg-on-danger);
+  background: var(--bg-1);
+  color: var(--danger);
+  border: var(--border-0);
 }
 .btn-danger:hover:not(:disabled) {
+  background: var(--bg-2);
+  border-color: var(--danger);
+}
+
+.btn-danger.btn-loud {
+  background: var(--danger);
+  color: var(--fg-on-danger);
+  border-color: transparent;
+}
+.btn-danger.btn-loud:hover:not(:disabled) {
   background: var(--danger-strong);
 }
 
+/* ── Success ─────────────────────────────────────────────────── */
+
 .btn-success {
-  background: var(--success);
-  color: var(--fg-on-success);
+  background: var(--bg-1);
+  color: var(--success);
+  border: var(--border-0);
 }
 .btn-success:hover:not(:disabled) {
+  background: var(--bg-2);
+  border-color: var(--success);
+}
+
+.btn-success.btn-loud {
+  background: var(--success);
+  color: var(--fg-on-success);
+  border-color: transparent;
+}
+.btn-success.btn-loud:hover:not(:disabled) {
   background: var(--success-strong);
 }
 
+/* ── Link ────────────────────────────────────────────────────── */
+
 .btn-link {
+  min-height: 0;
   background: transparent;
   color: var(--accent);
   text-decoration: underline;
@@ -93,26 +156,29 @@ a.btn-link {
   text-decoration: underline;
 }
 
-/* The radius steps with the size, by the same size-1 the vertical padding
-   steps, so a small button isn't a pill and a large one isn't boxy. */
+/* ── Sizes ───────────────────────────────────────────────────── */
+/* The radius steps with the size, by the same size-1 the height steps,
+   so a small button isn't a pill and a large one isn't boxy. */
+
 .btn-sm {
-  padding: var(--size-1) var(--size-2);
-  font-size: var(--font-xs);
-  line-height: var(--size-4);
+  min-height: var(--control-sm);
+  padding: 0 var(--size-3);
   border-radius: calc(var(--radius-control) - var(--size-1));
 }
 
 .btn-lg {
-  padding: var(--size-3) var(--size-6);
+  min-height: var(--control-lg);
+  padding: 0 var(--size-5);
   font-size: var(--font-base);
-  line-height: var(--size-6);
   border-radius: calc(var(--radius-control) + var(--size-1));
 }
 
 /* ── Icon-only button ────────────────────────────────────────── */
+/* A square the height of its size; the icon sits in the middle. */
 
 .btn-icon {
-  padding: var(--size-2);
+  padding: 0;
+  width: var(--control-md);
   line-height: 1;
   aspect-ratio: 1;
 }
@@ -122,11 +188,11 @@ a.btn-link {
 }
 
 .btn-icon.btn-sm {
-  padding: var(--size-1);
+  width: var(--control-sm);
 }
 
 .btn-icon.btn-lg {
-  padding: var(--size-3);
+  width: var(--control-lg);
 }
 
 .btn-icon-round {
@@ -143,8 +209,25 @@ a.btn-link {
 }
 
 /* ── Disabled ────────────────────────────────────────────────── */
+/* A filled button fades as a whole. Outlined buttons keep their shape
+   and only mute their fill and label, so an unavailable action still
+   reads as a button that is off, not as plain text. */
 
 .btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.btn-secondary:disabled,
+.btn-danger:disabled,
+.btn-success:disabled {
+  opacity: 1;
+  background: var(--bg-2);
+  color: var(--fg-2);
+  border: var(--border-0);
+}
+
+.btn-ghost:disabled {
+  opacity: 1;
+  color: var(--fg-2);
 }

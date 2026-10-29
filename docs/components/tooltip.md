@@ -75,7 +75,7 @@ Children: The control the hint belongs to.
 ## Related
 
 - [Popover](popover.md): A small anchored panel for contextual controls, built on the native Popover API so it works without app state.
-- [Button](button.md): A single action with quiet secondary states, press feedback and a loading spinner.
+- [Button](button.md): A single action: neutral primary, quiet outlined states, a loud filled option, press feedback and a loading spinner.
 - [Icon](icon.md): Inline Lucide-style SVG icons in four sizes, outlined by default with filled variants for media controls.
 
 ## Guidance for AI tools

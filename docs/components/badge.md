@@ -52,7 +52,7 @@ Children: The label text.
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `:variant` | `:primary \| :secondary \| :outline \| :success \| :warning \| :danger` | `:primary` | Tone. :primary uses the accent and is for emphasis; the status tones are for real status. |
+| `:variant` | `:primary \| :secondary \| :outline \| :success \| :warning \| :danger` | `:primary` | Tone. :primary is an accent tint for emphasis (Recommended, New); the status tones are for real status. All tones are tinted, never solid. |
 | `:icon-name` | `icon keyword` | – | Optional leading icon at the small size. |
 | `:size` | `:sm` | – | Compact variant. |
 | `:class` | `string` | – | Extra classes. |

@@ -22,10 +22,12 @@
   background: var(--bg-2);
 }
 
+/* Selected: an accent tint and border, the label in accent. Reads as
+   chosen without a solid block of color per chip. */
 .chip-active {
-  background: var(--accent);
+  background: var(--accent-subtle);
   border-color: var(--accent);
-  color: var(--fg-on-accent);
+  color: var(--accent);
 }
 
 .chip-dot {

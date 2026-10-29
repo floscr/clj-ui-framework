@@ -1,5 +1,5 @@
 (ns dev.examples.button
-  (:require [dev.example :refer [example row log-click]]
+  (:require [dev.example :refer [example row log-click sx]]
             [ui.util :as util]
             [ui.button :as button]))
 
@@ -13,6 +13,22 @@
               (map (fn [v]
                      (button/button {:variant v :on-click (log-click (util/kw-name v))} (util/kw-name v)))
                    variants))))
+
+   (example :loud "Loud"
+     (fn []
+       (row
+        (button/button {:variant :primary :loud true :icon-left :credit-card} "Pay 24 EUR")
+        (button/button {:variant :danger :loud true} "Delete account")
+        (button/button {:variant :success :loud true :icon-left :check} "Publish")
+        (button/button {:variant :primary :loud true :disabled true} "Loud disabled"))))
+
+   (example :mixed-row "Lines up with fields"
+     (fn []
+       (row
+        [:input {:class "form-input" :placeholder "Search" :style (sx {:width "12rem"})}]
+        (button/button {:variant :primary} "Search")
+        (button/button {:variant :secondary :icon :filter :attrs {:aria-label "Filter"}})
+        (button/button {:variant :ghost :size :sm} "Clear"))))
 
    (example :sizes "Sizes"
      (fn []

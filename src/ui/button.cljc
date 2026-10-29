@@ -10,13 +10,16 @@
 (defn button-class-list
   "Generate a vector of CSS class strings for a button given variant, size, and icon mode.
    Returns e.g. [\"btn\" \"btn-primary\" \"btn-lg\"].
+   When :loud is true, adds \"btn-loud\" (the filled, saturated version of
+   primary, danger and success).
    When :icon is provided (icon-only mode), adds \"btn-icon\".
    When :round is true and :icon is set, adds \"btn-icon-round\".
    When :loading is true, adds \"btn-loading\"."
-  [{:keys [variant size icon round loading]}]
+  [{:keys [variant size loud icon round loading]}]
   (let [v (or (some-> variant util/kw-name) default-variant)
         s (or (some-> size util/kw-name) default-size)]
     (cond-> ["btn" (str "btn-" v)]
+      loud              (conj "btn-loud")
       (not= s "md")    (conj (str "btn-" s))
       icon              (conj "btn-icon")
       (and icon round)  (conj "btn-icon-round")
@@ -33,6 +36,8 @@
 
    Props:
      :variant    - :primary, :secondary, :ghost, :danger, :success, :link
+     :loud       - boolean; the filled, saturated version of :primary (accent),
+                   :danger and :success for the one action that has to shout
      :size       - :sm, :md, :lg
      :href       - URL string; when set, renders as <a> tag
      :on-click   - click handler (ignored in :clj target)
@@ -43,7 +48,7 @@
      :icon       - icon name keyword for icon-only button (no text children)
      :class      - additional CSS classes (string or vector)
      :attrs      - additional HTML attributes map"
-  [{:keys [variant size href on-click disabled loading icon-left icon-right icon round class attrs] :as _props} & children]
+  [{:keys [variant size loud href on-click disabled loading icon-left icon-right icon round class attrs] :as _props} & children]
   (let [icon-size (case (util/kw-name (or size default-size))
                     "sm" :sm
                     "lg" :md
@@ -53,7 +58,7 @@
                      (spinner/spinner {:size (if (= "sm" (util/kw-name (or size default-size))) :xs :sm)}))]
     #?(:squint
        (let [tag    (if href :a :button)
-             classes (cond-> (button-classes {:variant variant :size size :icon icon :round round :loading loading})
+             classes (cond-> (button-classes {:variant variant :size size :loud loud :icon icon :round round :loading loading})
                        class (str " " class))
              base-attrs (cond-> (merge {:class classes} attrs)
                           href     (assoc :href href)
@@ -71,7 +76,7 @@
 
        :cljs
        (let [tag    (if href :a :button)
-             cls    (button-class-list {:variant variant :size size :icon icon :round round :loading loading})
+             cls    (button-class-list {:variant variant :size size :loud loud :icon icon :round round :loading loading})
              classes (cond-> cls
                        class (conj class))
              base-attrs (cond-> (merge {:class classes} attrs)
@@ -90,7 +95,7 @@
 
        :clj
        (let [tag    (if href :a :button)
-             classes (cond-> (button-classes {:variant variant :size size :icon icon :round round :loading loading})
+             classes (cond-> (button-classes {:variant variant :size size :loud loud :icon icon :round round :loading loading})
                        class (str " " class))
              base-attrs (cond-> (merge {:class classes} attrs)
                           href     (assoc :href href)

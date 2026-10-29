@@ -7,15 +7,20 @@
  :scales
  {:size {:base 0.25 :unit "rem" :steps 16}
 
-  :font {:base 1 :unit "rem" :ratio 1.25
-         :steps [[-2 "xs"]
-                 [-1 "sm"]
-                 [0  "base"]
-                 [1  "md"]
-                 [2  "lg"]
-                 [3  "xl"]
-                 [4  "2xl"]
-                 [5  "3xl"]]}
+  ;; Font — a hand-tuned ramp (12 / 14 / 16 / 18 / 22 / 28 / 36 / 48px at a
+  ;; 16px base) rather than a geometric one: controls, tables and labels
+  ;; all sit on sm (14px), xs (12px) stays readable, and the headline
+  ;; steps stay apart. Each step is [label multiplier-of-base]; the
+  ;; geometric form [power label] with :ratio is still accepted.
+  :font {:base 1 :unit "rem"
+         :steps [["xs"   0.75]
+                 ["sm"   0.875]
+                 ["base" 1]
+                 ["md"   1.125]
+                 ["lg"   1.375]
+                 ["xl"   1.75]
+                 ["2xl"  2.25]
+                 ["3xl"  3]]}
 
   :color
   {;; Gray — purplish tint (hue 285 in OKLCH). Change hue for warm/cool grays.
@@ -173,9 +178,12 @@
   :ease-enter    "cubic-bezier(0.16, 1, 0.3, 1)"
   :ease-exit     "cubic-bezier(0.4, 0, 1, 1)"
   :ease-spring   "cubic-bezier(0.34, 1.4, 0.64, 1)"
-  ;; Control heights (sm 36px · md 44px, the phone tap minimum · lg 48px)
-  :control-sm "var(--size-9)"
-  :control-md "var(--size-11)"
+  ;; Control heights: every control (button, input, select, number field,
+  ;; tag input) pins min-height to one of these so a row of mixed controls
+  ;; lines up. sm 32px · md 40px · lg 48px on desktop; mobile.css raises
+  ;; sm/md to 36/44px (the phone tap minimum) under html.clj-ui-touch.
+  :control-sm "var(--size-8)"
+  :control-md "var(--size-10)"
   :control-lg "var(--size-12)"}
 
  ;; ─── Accents ──────────────────────────────────────────────────────

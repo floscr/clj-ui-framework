@@ -642,8 +642,19 @@ Theme-independent, emitted into `:root` only. Override via `build-css {:static {
   Every `transition` in component CSS uses these — no literal `150ms ease`.
   Animate transform, opacity and color; the base styles collapse all motion
   under `prefers-reduced-motion`.
-- **Control heights**: `control-sm` 36px, `control-md` 44px (phone tap
-  minimum), `control-lg` 48px.
+- **Control heights**: `control-sm` 32px, `control-md` 40px, `control-lg`
+  48px on desktop; `html.clj-ui-touch` (mobile.css) raises sm/md to 36/44px,
+  the phone tap minimum. **Every control pins `min-height` to one of these**
+  (`.btn`, `.form-input`, `.form-select`, `.select-trigger`, `.number-field`,
+  `.tag-input-area`), so a row of mixed controls lines up. A new control
+  must do the same; never size a control by padding alone.
+- **Buttons are quiet by default**: `:primary` is neutral ink on the page
+  color (`fg-0` on `bg-0`), `:secondary` a bordered surface, `:danger` and
+  `:success` outlined with a colored label. `:loud true` swaps in the filled,
+  saturated version (accent / red / green) for the one action on a screen
+  that has to dominate. Fields (`.form-input`, select, number field, tag
+  input) sit on `bg-1`, never `bg-0`, so they read as controls inside a
+  card instead of holes; focus is the border turning accent, no glow.
 
 ### Accents (`:accents` in tokens.edn)
 
@@ -678,14 +689,21 @@ Defined in `:scales` in `tokens.edn`. Generated into `:root` only (not duplicate
 
 Produces `--size-1: 0.25rem` through `--size-16: 4rem`. Use for all spacing, padding, gap, and line-height values.
 
-**Font scale** — geometric: `--font-{label} = base × ratio^power`
+**Font scale** — a hand-tuned ramp: `--font-{label} = base × multiplier`
 
 ```edn
-:font {:base 1 :unit "rem" :ratio 1.25
-       :steps [[-2 "xs"] [-1 "sm"] [0 "base"] [1 "md"] [2 "lg"] [3 "xl"] [4 "2xl"] [5 "3xl"]]}
+:font {:base 1 :unit "rem"
+       :steps [["xs" 0.75] ["sm" 0.875] ["base" 1] ["md" 1.125]
+               ["lg" 1.375] ["xl" 1.75] ["2xl" 2.25] ["3xl" 3]]}
 ```
 
-Produces `--font-xs: 0.64rem` through `--font-3xl: 3.052rem`. Use for all font-size values.
+Produces 12 / 14 / 16 / 18 / 22 / 28 / 36 / 48px at a 16px base. Controls,
+tables and labels sit on `sm` (14px); `xs` (12px) is the floor for any UI
+text. The geometric form (`[power label]` steps plus `:ratio`) is still
+accepted. The base styles set the ramp on headings (`h1` xl, `h2` lg, `h3`
+md, `h4` base, `h5`/`h6` sm, all with `margin: 0`): an `h1` is a 28px page
+title, not a hero, and apps must not restyle it. Use the scale for all
+font-size values.
 
 **Color scales** — OKLCH-based for perceptual uniformity, via `jon.color-tools`:
 

@@ -27,7 +27,6 @@
 .form-field--error .form-textarea:focus-visible,
 .form-field--error .form-select:focus-visible {
   border-color: var(--danger);
-  box-shadow: inset 0 0 6px color-mix(in srgb, var(--danger) 35%, transparent);
 }
 
 /* ── Label ─────────────────────────────────────────────────────── */
@@ -41,18 +40,23 @@
 
 /* ── Inputs (text, email, password, date, etc.) ────────────────── */
 
+/* Fields sit on the surface color (not the page color) so they read as
+   controls inside a card instead of holes in it, and share the control
+   height with buttons and selects so mixed rows line up. */
 .form-input,
 .form-textarea,
 .form-select {
   width: 100%;
+  min-height: var(--control-md);
   padding: var(--size-2) var(--size-3);
   font-size: var(--font-sm);
   font-family: inherit;
-  line-height: 1.5;
-  background: var(--bg-0);
+  line-height: var(--leading-body);
+  background: var(--bg-1);
   color: var(--fg-0);
   border: var(--border-1);
   border-radius: var(--radius-control);
+  transition: border-color var(--duration-fast) var(--ease-standard);
 }
 
 .form-input::placeholder,
@@ -60,12 +64,12 @@
   color: var(--fg-2);
 }
 
+/* Focus is the border turning accent plus the caret: no ring, no glow. */
 .form-input:focus-visible,
 .form-textarea:focus-visible,
 .form-select:focus-visible {
   border-color: var(--accent);
   outline: none;
-  box-shadow: inset 0 0 6px color-mix(in srgb, var(--accent) 35%, transparent);
   position: relative;
   z-index: 1;
 }

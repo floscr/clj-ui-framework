@@ -107,7 +107,7 @@ SVG child elements for an icon name, for the runtime to draw without the icon mo
 
 - [Command palette](command.md): A searchable command menu in a native dialog with groups, icons, shortcut hints, a global hotkey and Alt quick-select.
 - [Popover](popover.md): A small anchored panel for contextual controls, built on the native Popover API so it works without app state.
-- [Button](button.md): A single action with quiet secondary states, press feedback and a loading spinner.
+- [Button](button.md): A single action: neutral primary, quiet outlined states, a loud filled option, press feedback and a loading spinner.
 
 ## Guidance for AI tools
 

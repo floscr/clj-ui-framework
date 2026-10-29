@@ -5,7 +5,7 @@
 - Type: Component (data, Dates)
 - Namespace: `ui.calendar-events`
 - Source: `src/ui/calendar_events.cljc`
-- Public fns: `event-color-class`, `events-for-date`, `format-time`, `event-time-display`, `parse-int*`, `round*`, `hhmm->minutes`, `event-duration-minutes`, `format-duration`, `format-hour-label`, `event-pill-class-list`, `event-pill-classes`, `ticker-day-class-list`, `ticker-day-classes`, `agenda-event-class-list`, `agenda-event-classes`, `task-check`, `event-pill`, `event-day-cell`, `calendar-event-grid`, `month-grid`, `ticker-dot`, `ticker-day-item`, `ticker-strip`, `agenda-event-row`, `agenda-day-group-class-list`, `agenda-day-empty`, `agenda-day-group`, `agenda-list`, `day-timeline`, `week-timeline`
+- Public fns: `event-color-class`, `events-for-date`, `cell-events`, `format-time`, `event-time-display`, `parse-int*`, `round*`, `hhmm->minutes`, `event-duration-minutes`, `format-duration`, `format-hour-label`, `event-pill-class-list`, `event-pill-classes`, `ticker-day-class-list`, `ticker-day-classes`, `agenda-event-class-list`, `agenda-event-classes`, `task-check`, `event-pill`, `event-day-cell`, `calendar-event-grid`, `month-grid`, `ticker-dot`, `ticker-day-item`, `ticker-strip`, `agenda-event-row`, `agenda-day-group-class-list`, `agenda-day-empty`, `agenda-day-group`, `agenda-list`, `day-timeline`, `week-timeline`
 - Keywords: calendar, events, agenda, week view, day view, month view, event pills
 
 ## When to use
@@ -59,7 +59,7 @@ Frameless month view (the host brings the toolbar). :full is the roomy desktop m
 | `:selected-date` | `string` | – |  |
 | `:variant` | `:full \| :compact` | `:full` |  |
 | `:week-numbers?` | `boolean` | – | :full only. |
-| `:max-visible` | `int` | – | Pills before a +N more button (:full). |
+| `:max-visible` | `int \| fn [date-str day-events]` | – | Pills before a +N more button (:full); a fn sizes it per cell, e.g. to what fits. |
 | `:highlight-week` | `date string` | – | That date's row gets the active week band (:compact). |
 | `:on-select` | `fn [date-str]` | – |  |
 | `:on-double-click` | `fn [date-str]` | – |  |
@@ -168,6 +168,10 @@ Seven day columns on a shared hour axis.
 ### `events-for-date`
 
 Events whose :date matches.
+
+### `cell-events`
+
+A date's events in day-cell order: by time, done ones last (first into +N more).
 
 ### `event-duration-minutes`
 

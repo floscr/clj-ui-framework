@@ -20,7 +20,12 @@
     (is (= ["btn" "btn-secondary" "btn-lg"] (button/button-class-list {:size :lg}))))
 
   (testing "variant + size combined"
-    (is (= ["btn" "btn-primary" "btn-lg"] (button/button-class-list {:variant :primary :size :lg})))))
+    (is (= ["btn" "btn-primary" "btn-lg"] (button/button-class-list {:variant :primary :size :lg}))))
+
+  (testing "loud adds the filled modifier right after the variant"
+    (is (= ["btn" "btn-primary" "btn-loud"] (button/button-class-list {:variant :primary :loud true})))
+    (is (= ["btn" "btn-danger" "btn-loud" "btn-sm"] (button/button-class-list {:variant :danger :loud true :size :sm})))
+    (is (= ["btn" "btn-secondary"] (button/button-class-list {:loud false})))))
 
 (deftest button-classes-test
   (testing "default variant and size"

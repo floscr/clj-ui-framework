@@ -94,7 +94,7 @@ Class string for the container.
 
 - [Editing timeline](timeline.md): A media editing timeline: a scrubbable ruler, labeled tracks with draggable and trimmable segments, a playhead and a floating transport.
 - [Progress](progress.md): Shows how much of a known task is complete as a filled track.
-- [Button](button.md): A single action with quiet secondary states, press feedback and a loading spinner.
+- [Button](button.md): A single action: neutral primary, quiet outlined states, a loud filled option, press feedback and a loading spinner.
 
 ## Guidance for AI tools
 

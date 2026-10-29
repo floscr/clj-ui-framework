@@ -103,7 +103,7 @@ Vector form.
 
 ## Related
 
-- [Button](button.md): A single action with quiet secondary states, press feedback and a loading spinner.
+- [Button](button.md): A single action: neutral primary, quiet outlined states, a loud filled option, press feedback and a loading spinner.
 - [Button group](button-group.md): Related actions as one segmented control: ghost or boxed, with icon items, counts and separators.
 - [Popover](popover.md): A small anchored panel for contextual controls, built on the native Popover API so it works without app state.
 - [Separator](separator.md): A hairline divider, horizontal or vertical, for grouping content.

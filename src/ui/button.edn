@@ -1,6 +1,6 @@
 {:id :button
  :title "Button"
- :summary "A single action with quiet secondary states, press feedback and a loading spinner."
+ :summary "A single action: neutral primary, quiet outlined states, a loud filled option, press feedback and a loading spinner."
  :category :actions
  :group "Buttons"
  :keywords ["action" "submit" "loading button" "icon button" "link button" "press feedback"]
@@ -20,6 +20,10 @@
  :examples
  [{:title "Loading state"
    :code "(button/button {:variant :primary :loading saving?} \"Save changes\")"}
+  {:title "Loud: the accent-filled primary for the one action that must stand out"
+   :code "(button/button {:variant :primary :loud true :icon-left :credit-card} \"Pay 24 EUR\")"}
+  {:title "Destructive: outlined by default, filled when loud"
+   :code "(button/button {:variant :danger} \"Remove photo\")\n(button/button {:variant :danger :loud true} \"Delete account\")"}
   {:title "Icon-only, round"
    :code "(button/button {:icon :x :round true :variant :ghost\n                :attrs {:aria-label \"Close\"}})"}
   {:title "Link styled as a button"
@@ -31,8 +35,9 @@
  [{:fn "button"
    :doc "Renders a <button>, or an <a> when :href is set."
    :children "The label (text, icons, any hiccup)."
-   :props [{:name :variant :type ":primary | :secondary | :ghost | :danger | :success | :link" :default ":secondary" :doc "Visual weight. One :primary action per surface."}
-           {:name :size :type ":sm | :md | :lg" :default ":md" :doc "Height, padding and icon size."}
+   :props [{:name :variant :type ":primary | :secondary | :ghost | :danger | :success | :link" :default ":secondary" :doc "Visual weight. :primary is neutral ink on the page color (one per surface); :danger and :success are outlined with a colored label."}
+           {:name :loud :type "boolean" :default "false" :doc "Filled, saturated version of :primary (accent), :danger and :success. For the one action on a screen that has to shout, such as pay or delete account."}
+           {:name :size :type ":sm | :md | :lg" :default ":md" :doc "Height (32 / 40 / 48px; 36 / 44 on touch), padding and icon size."}
            {:name :href :type "string" :doc "Render as an anchor pointing at this URL."}
            {:name :on-click :type "fn" :doc "Click handler on :cljs and :squint. Ignored on :clj (use :attrs)."}
            {:name :disabled :type "boolean" :doc "Disables the control. The attribute is emitted only when true."}
@@ -69,9 +74,11 @@
   :squint ":on-click is passed as a flat attribute; keywords are strings at runtime."}
 
  :notes-for-ai
- ["The default variant is :secondary. Set :variant :primary on the one main action of a surface."
+ ["The default variant is :secondary. Set :variant :primary on the one main action of a surface; it is neutral (black on light, white on dark), not the accent."
+  "Reach for :loud true only when a screen's main action must dominate (checkout, publish). Most pages have no loud button."
+  "Destructive actions are :variant :danger (outlined, red label). Add :loud true only on the final confirm of an irreversible action."
   "Pass a changing label as children (Save, then Saved) instead of swapping two buttons."
   "Never hand-write <button class=\"btn\">; call the component so loading, icons and disabled stay consistent."
-  "Destructive actions use :variant :danger with a verb plus object label (Delete project)."]
+  "Destructive actions use a verb plus object label (Delete project)."]
 
  :related [:button-group :toolbar :spinner :icon]}

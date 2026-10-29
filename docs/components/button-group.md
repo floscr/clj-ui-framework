@@ -132,7 +132,7 @@ Class string for {:active :icon-only}.
 
 - [Tabs](tabs.md): Switch between peer panels of one object, with no JS: hidden radios drive the panels.
 - [Toolbar](toolbar.md): A pill-shaped container that groups icon buttons with separators, horizontal or vertical, optionally floating in a popover.
-- [Button](button.md): A single action with quiet secondary states, press feedback and a loading spinner.
+- [Button](button.md): A single action: neutral primary, quiet outlined states, a loud filled option, press feedback and a loading spinner.
 - [Chip](chip.md): A small selectable pill for filters, tags and presets, with an optional color dot.
 
 ## Guidance for AI tools

@@ -7,8 +7,10 @@
   font-weight: 500;
   line-height: var(--size-5);
   border-radius: var(--radius-pill);
-  background: var(--accent);
-  color: var(--fg-on-accent);
+  /* Emphasis without shouting: a faint accent tint behind accent text,
+     the same treatment the status tones get. */
+  background: var(--accent-subtle);
+  color: var(--accent);
 }
 
 .badge-icon {
