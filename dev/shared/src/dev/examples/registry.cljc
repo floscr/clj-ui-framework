@@ -53,7 +53,11 @@
             [dev.examples.sidebar :as sidebar]
             [dev.examples.tag-input :as tag-input]
             [dev.examples.theme-toggle :as theme-toggle]
-            [dev.examples.timeline :as timeline]))
+            [dev.examples.timeline :as timeline]
+            [dev.examples.page :as page]
+            [dev.examples.settings :as settings]
+            [dev.examples.metric :as metric]
+            [dev.examples.list-row :as list-row]))
 
 (def entries
   [{:id :button          :title "Button"          :examples button/examples}
@@ -102,7 +106,11 @@
    {:id :sidebar         :title "Sidebar"         :examples sidebar/examples}
    {:id :tag-input       :title "Tag input"       :examples tag-input/examples}
    {:id :theme-toggle    :title "Theme toggle"    :examples theme-toggle/examples}
-   {:id :timeline        :title "Timeline"        :examples timeline/examples}])
+   {:id :timeline        :title "Timeline"        :examples timeline/examples}
+   {:id :page            :title "Page"            :examples page/examples}
+   {:id :settings        :title "Settings rows"   :examples settings/examples}
+   {:id :metric          :title "Metric"          :examples metric/examples}
+   {:id :list-row        :title "List row"        :examples list-row/examples}])
 
 (defn entry
   "The registry entry for a component id (keyword or string)."

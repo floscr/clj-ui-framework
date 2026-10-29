@@ -13,13 +13,18 @@
  ["Use skeleton while content is still loading."
   "Use alert for an error that prevented loading."]
 
- :usage "(require '[ui.empty-state :as empty-state])\n\n(empty-state/empty-state {:icon :inbox}\n  [:p \"No projects yet\"]\n  [:p.text-muted \"Projects you create or join appear here.\"]\n  (button/button {:variant :primary :icon-left :plus} \"Create project\"))"
+ :usage "(require '[ui.empty-state :as empty-state])\n\n(empty-state/empty-state {:icon :inbox}\n  [:p.empty-state-title \"No projects yet\"]\n  [:p \"Projects you create or join appear here.\"]\n  (button/button {:variant :primary :icon-left :plus} \"Create project\"))"
+
+ :examples
+ [{:title "A whole view that is empty: fill the region and center"
+   :code "(empty-state/empty-state {:icon :users :fill true}\n  [:p.empty-state-title \"No devices online\"]\n  [:p \"Open this page on another device on the same Wi-Fi.\"])"}]
 
  :api
  [{:fn "empty-state"
    :doc "A centered column with muted text and an optional large icon above."
    :children "Title, description and at most one action."
    :props [{:name :icon :type "icon keyword" :doc "Rendered at :xl above the content."}
+           {:name :fill :type "boolean" :default "false" :doc "Grow to the region (flex child) or at least 320px, and center vertically. For a view whose only content is the empty state."}
            {:name :class :type "string"} {:name :attrs :type "map"}]}
   {:fn "empty-state-classes" :doc "Class string."}
   {:fn "empty-state-class-list" :doc "Vector form."}]
@@ -31,7 +36,8 @@
  :targets {:clj "Static markup." :cljs ":class may be a vector." :squint "Static markup."}
 
  :notes-for-ai
- ["Title: No projects yet. Description: why and when something appears. Action: a verb plus object."
+ ["Title: No projects yet (class empty-state-title). Description: why and when something appears. Action: a verb plus object."
+  "When the empty state is the whole view, pass :fill true so it sits in the middle of the region instead of at the top or glued to the bottom."
   "No results from a search gets a Clear filters action, not a Create action."]
 
  :related [:skeleton :alert :button]}

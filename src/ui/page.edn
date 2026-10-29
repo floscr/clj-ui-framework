@@ -1,0 +1,78 @@
+{:id :page
+ :title "Page"
+ :summary "The one page container with its title row, titled sections and action rows: column width, gutters and vertical rhythm set once for the whole app."
+ :category :layout
+ :group "Page"
+ :keywords ["page" "container" "layout" "max-width" "gutter" "page header" "section" "title" "actions" "shell"]
+
+ :when-to-use
+ ["Every screen of an app: wrap the whole content in one page, give it one page-header, and split the rest into page-sections."
+  "A settings, list or form page (the default :reading width, 720px)."
+  "A dashboard or a table-heavy page (:wide, 1200px)."]
+
+ :when-not-to-use
+ ["Use sidebar for an app shell with navigation; put a page inside its main area."
+  "Use card for a boundary inside a page, never as a second container around the page."
+  "Use dialog for a focused task that interrupts the page."]
+
+ :usage "(require '[ui.page :as page])\n\n(page/page {}\n  (page/page-header {:title \"Projects\" :description \"Everything your team is working on.\"}\n    (button/button {:variant :primary :icon-left :plus} \"New project\"))\n  (page/page-section {:title \"Active\"}\n    (list-row/list-rows {} ...))\n  (page/page-section {:title \"Archived\"}\n    (table/table {} ...)))"
+
+ :examples
+ [{:title "Settings page: reading width, sections of settings rows"
+   :code "(page/page {}\n  (page/page-header {:title \"Settings\"})\n  (page/page-section {:title \"Notifications\" :description \"What we email you about.\"}\n    (settings/settings-group {}\n      (settings/settings-row {:label \"Mentions\"} (switch/switch-toggle {:checked true}))\n      (settings/settings-row {:label \"Weekly summary\"} (switch/switch-toggle {}))))\n  (page/action-row {}\n    (button/button {} \"Cancel\")\n    (button/button {:variant :primary} \"Save changes\")))"}
+  {:title "Dashboard: wide, a metric row then a table"
+   :code "(page/page {:width :wide}\n  (page/page-header {:title \"Overview\"}\n    (button-group/button-group {:variant :boxed} ...))\n  (metric/metric-row {}\n    (metric/metric {:label \"Revenue\" :value \"48.2k\" :unit \"EUR\" :delta \"+12%\" :trend :up})\n    (metric/metric {:label \"Orders\" :value \"1,204\"}))\n  (page/page-section {:title \"Recent orders\"}\n    (table/table {} ...)))"}]
+
+ :api
+ [{:fn "page"
+   :doc "The container: max width by :width, fluid gutters (16 to 32px), regions stacked 24px apart. Renders a <main> unless :tag says otherwise. Children never add their own gutter or max width."
+   :children "page-header, page-sections, cards, tables, action-row."
+   :props [{:name :width :type ":narrow | :reading | :wide | :full" :default ":reading" :doc "640px for a single form or flow, 720px for settings, lists and forms, 1200px for dashboards and tables, :full for no max width."}
+           {:name :tag :type "keyword" :default ":main" :doc "Element to render; :div when the page sits inside another main."}
+           {:name :class :type "string" :doc "Extra classes."}
+           {:name :attrs :type "map" :doc "Extra HTML attributes."}]}
+  {:fn "page-header"
+   :doc "The title row: the page's only h1 (28px, medium weight) with an optional one-line description, and the page actions on the right. The one :primary button of the page goes here."
+   :children "The actions: buttons, a search field."
+   :props [{:name :title :type "string | hiccup" :doc "The h1."}
+           {:name :description :type "string | hiccup" :doc "One sentence under the title, muted."}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "page-section"
+   :doc "A titled region: h2 (18px) with optional description and actions, then the content 16px apart. Consecutive sections sit 32px apart."
+   :children "The content: a settings-group, list-rows, a table, a card, fields."
+   :props [{:name :title :type "string | hiccup" :doc "The h2. Omit for an untitled region."}
+           {:name :description :type "string | hiccup" :doc "One sentence under the heading."}
+           {:name :actions :type "hiccup" :doc "Rendered at the right of the heading (a small button or link)."}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "action-row"
+   :doc "A row of buttons 8px apart, right-aligned so the primary action ends the row. Use it for a form's submit row at the bottom of a page or card."
+   :children "Buttons."
+   :props [{:name :align :type ":end | :start | :between" :default ":end" :doc "Where the buttons sit."}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "page-classes" :doc "Class string for {:width}."}
+  {:fn "page-class-list" :doc "Vector form of page-classes."}
+  {:fn "action-row-class-list" :doc "Vector of classes for {:align}."}]
+
+ :accessibility
+ ["page renders a <main>; keep one per document (pass :tag :div for a nested one)."
+  "page-header holds the page's single h1; page-section headings are h2, so the outline reads as a document."]
+
+ :motion ["None."]
+
+ :responsive
+ ["Gutters shrink to 16px on phones, the vertical rhythm to 20px; header actions wrap under the title."
+  "Children get min-width 0, so long titles and wide tables cannot push the page sideways; wide tables scroll inside their card."]
+
+ :targets
+ {:clj "Static markup."
+  :cljs ":class may be a vector."
+  :squint "Static markup."}
+
+ :notes-for-ai
+ ["Start every screen with (page/page {} (page/page-header {:title ...} actions) ...). Do not write a .container, .app-shell or .app class with your own max-width, padding or font."
+  "One h1 per page (the page-header title), one :primary button per page (in the header or the final action-row)."
+  "Rhythm comes from the components: 24px between regions, 16px inside a section, 32px between sections. Do not add margins to children."
+  "Pick :reading unless the page is a dashboard or a wide table (:wide). Never narrow a page with padding; use :narrow."
+  "Headings are the base ramp: do not restyle h1 or h2, and do not add eyebrow labels above them."]
+
+ :related [:sidebar :card :settings :metric :list-row :table]}

@@ -62,6 +62,6 @@
 
  :notes-for-ai
  ["Nested radii are concentric: inner = outer minus padding. Use calc(var(--radius-surface) - var(--size-6)) for media inside a padded card."
-  "Settings pages are one card-list per section with label-plus-control rows, not one card per row."]
+  "Settings pages use settings rows (ui.settings), record lists use list rows (ui.list-row); card-list is the generic divided surface under both."]
 
- :related [:dialog :popover :table :accordion]}
+ :related [:page :settings :list-row :dialog :popover :table :accordion]}

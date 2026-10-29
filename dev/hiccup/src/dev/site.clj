@@ -111,10 +111,12 @@
 .site-targets a { padding: var(--size-1) var(--size-3); border-radius: calc(var(--radius-control) - var(--size-1)); color: var(--fg-1); text-decoration: none; font-size: var(--font-sm); }
 .site-targets a.is-active { background: var(--bg-1); color: var(--fg-0); box-shadow: var(--shadow-0); }
 .site-section { margin-bottom: var(--size-10); }
-.site-section h2 { font-size: var(--font-lg); margin: 0 0 var(--size-4); }
-.site-section h3 { font-size: var(--font-base); margin: var(--size-6) 0 var(--size-2); }
-.site-section ul { margin: 0; padding-left: var(--size-5); color: var(--fg-1); display: flex; flex-direction: column; gap: var(--size-1); }
-.site-section p { color: var(--fg-1); margin: 0; }
+/* :where() keeps these at element specificity so component rules inside a
+   preview (.page-section-title, .page-description, ...) still win. */
+:where(.site-section) h2 { font-size: var(--font-lg); margin: 0 0 var(--size-4); }
+:where(.site-section) h3 { font-size: var(--font-base); margin: var(--size-6) 0 var(--size-2); }
+:where(.site-section) ul { margin: 0; padding-left: var(--size-5); color: var(--fg-1); display: flex; flex-direction: column; gap: var(--size-1); }
+:where(.site-section) p { color: var(--fg-1); margin: 0; }
 .site-example { margin-bottom: var(--size-6); }
 .site-example-title { font-size: var(--font-sm); color: var(--fg-1); margin: 0 0 var(--size-2); font-weight: var(--weight-medium); }
 .site-preview { padding: var(--size-6); background: var(--bg-1); border: var(--border-0); border-radius: var(--radius-surface); overflow-x: auto; }

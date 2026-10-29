@@ -1,0 +1,69 @@
+{:id :list-row
+ :title "List row"
+ :summary "Records as rows on one surface: a leading icon or thumbnail, title and description, metadata and controls at the end, with hover for rows that lead somewhere."
+ :category :data
+ :group "Lists"
+ :keywords ["list" "row" "item" "record" "playlist" "inbox" "thumbnail" "navigation list" "saved items"]
+
+ :when-to-use
+ ["A list of records with a name and one line of detail that open a detail view (playlists, documents, devices)."
+  "Saved items with a thumbnail, a price or date, and one or two actions per row."
+  "A short navigation list inside a page (categories, folders)."]
+
+ :when-not-to-use
+ ["Use table for records with several columns to compare or sort."
+  "Use settings rows when every row is a label with a control and nothing opens."
+  "Use file-browser for files and folders with selection and context menus."
+  "Use tile grid for images that should be seen, not read."]
+
+ :usage "(require '[ui.list-row :as list-row])\n\n(list-row/list-rows {}\n  (list-row/list-row {:icon :music :title \"Favorites\" :meta \"21\" :href \"/playlists/favorites\"})\n  (list-row/list-row {:icon :music :title \"Recently played\" :meta \"50\" :href \"/playlists/recent\"})\n  (list-row/list-row {:icon :folder :title \"All music\" :meta \"1262\" :href \"/library\"}))"
+
+ :examples
+ [{:title "Saved items with a thumbnail and actions"
+   :code "(list-row/list-row {:thumb \"/img/switch.jpg\"\n                    :title \"Super Mario Bros. Wonder\"\n                    :description \"38 EUR · Like new · 15 Sep\"}\n  (button/button {:variant :ghost :size :sm :icon :edit :attrs {:aria-label \"Edit\"}})\n  (button/button {:variant :primary :size :sm} \"Publish\"))"}
+  {:title "Selected row"
+   :code "(list-row/list-row {:title \"Night drive\" :description \"Deep house\" :active true :on-click select!})"}]
+
+ :api
+ [{:fn "list-rows"
+   :doc "The surface (bg-1, border-0, radius-surface) that holds rows and divides them with hairlines; role list."
+   :children "list-row elements."
+   :props [{:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "list-row"
+   :doc "One record, 48px tall (56px with a description). An <a> with :href, a <button> with :on-click, otherwise a <div>. Interactive rows fill on hover; the active row is tinted with the accent."
+   :children "Trailing controls: small icon buttons, a badge, a switch."
+   :props [{:name :title :type "string | hiccup" :doc "The name, one line, truncated."}
+           {:name :description :type "string | hiccup" :doc "Second line, muted, truncated."}
+           {:name :icon :type "icon keyword" :doc "Leading icon in a 40px slot."}
+           {:name :thumb :type "string" :doc "Leading image URL, 40px square with a small radius. Wins over :icon."}
+           {:name :meta :type "string | hiccup" :doc "Trailing muted text: a count, a size, a date."}
+           {:name :href :type "string" :doc "Renders the row as a link."}
+           {:name :on-click :type "fn" :doc "Renders the row as a button on :cljs and :squint; ignored on :clj."}
+           {:name :active :type "boolean" :doc "The selected row (aria-current)."}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "list-row-classes" :doc "Class string for {:interactive :active}."}
+  {:fn "list-row-class-list" :doc "Vector form of list-row-classes."}]
+
+ :keyboard [["Tab" "Moves between interactive rows and their trailing controls."]
+            ["Enter / Space" "Opens a row that is a link or a button."]]
+
+ :accessibility
+ ["Rows that lead somewhere are real links or buttons, so they are focusable and announced."
+  "Trailing controls inside a link row must not be links themselves; use buttons with aria-labels. Thumbnails are decorative (empty alt)."]
+
+ :motion ["Hover and press change the fill only, over duration-fast."]
+
+ :responsive
+ ["Title and description truncate; trailing controls keep their width. Rows are at least 48px tall, the tap minimum with the row's padding."]
+
+ :targets
+ {:clj "Static markup; use :href or HTMX attributes in :attrs."
+  :cljs ":on-click becomes {:on {:click f}}; :class may be a vector."
+  :squint ":on-click is a flat attribute."}
+
+ :notes-for-ai
+ ["A list page is page-header, then list-rows inside a page-section; one list-rows per group, not a card per row."
+  "Keep the row's actions to one or two small ghost buttons; the primary action of the page lives in the page-header."
+  "Put counts and dates in :meta, not in the title."]
+
+ :related [:page :card :table :file-browser :settings :badge]}

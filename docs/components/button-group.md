@@ -6,7 +6,7 @@
 - Namespace: `ui.button-group`
 - Source: `src/ui/button_group.cljc`
 - Public fns: `button-group-class-list`, `button-group-classes`, `button-group-item-class-list`, `button-group-item-classes`, `button-group`, `button-group-item`, `button-group-separator`
-- Keywords: button group, segmented control, view switcher, filter, toggle group
+- Keywords: button group, segmented control, view switcher, filter, toggle group, mode picker, auto light dark
 
 ## When to use
 
@@ -126,6 +126,7 @@ Class string for {:active :icon-only}.
 ## Notes for AI
 
 - Exactly one item is :active at a time.
+- Three to five mutually exclusive modes (Auto, Light, Dark; All, Mine) are one :boxed button-group, never a row of separate buttons with one :primary.
 - For a settings-style on or off, use switch instead.
 
 ## Related

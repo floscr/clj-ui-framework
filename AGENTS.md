@@ -182,6 +182,10 @@ src/
     themes.cljc              # Built-in theme catalog (light + dark pairs)
     button.cljc              # Button component (reference implementation)
     button.css               # Button component styles (read by gen.clj)
+    page.cljc / settings.cljc / metric.cljc / list_row.cljc
+                             # The page layer: container, header, sections,
+                             # settings rows, metrics, record rows (see
+                             # § Composing a Screen)
     css/gen.clj              # EDN → CSS generator (babashka)
     js/                      # Shared JS runtime (squint source → compiled IIFE)
       squint.edn             # Squint compiler config for this directory
@@ -787,6 +791,28 @@ A runtime theme a user picks or edits, applied as CSS custom properties on
 - A consumer with its own parameters passes them to `normalize-params` as
   `{:ranges … :color-keys …}` (Xi's `xi.web.theme` adds sidebar, syntax and
   diff tokens this way).
+
+## Composing a Screen — the page layer
+
+Apps must not hand-roll a page shell (a `.container` / `.app-shell` with
+its own max-width, padding, font or heading sizes): that is where every
+ugly first draft came from. The framework owns that layer:
+
+| Need | Component |
+|------|-----------|
+| The one container, title row, titled sections, a submit row | `ui.page`: `page` (:width :narrow 640 / :reading 720 / :wide 1200 / :full), `page-header` (h1 + description + actions), `page-section` (h2 + description + content), `action-row` |
+| Preferences: label + hint on the left, control on the right | `ui.settings`: `settings-group`, `settings-row` |
+| Headline numbers (KPI row, record stats) | `ui.metric`: `metric` (label, value, unit, delta, trend, hint, :flush), `metric-row` |
+| Records as rows (playlists, saved items, devices) | `ui.list-row`: `list-rows`, `list-row` (icon or thumb, title, description, meta, trailing controls, :href / :on-click / :active) |
+| Three to five exclusive modes (Auto / Light / Dark) | `ui.button-group` with `:variant :boxed`, one `:active` item |
+| A view with nothing in it | `ui.empty-state` with `:fill true`, a `.empty-state-title` line and one action |
+
+Rhythm comes from these components (24px between regions, 16px inside a
+section, 32px between sections, 8px between buttons); children never add
+margins. One h1 per page (the page-header title), one `:primary` button
+per page, `:loud` only when that action must dominate. New cross-target
+components build their attribute map with `util/class-attrs` instead of
+three reader-conditional branches (see `ui.page` for the pattern).
 
 ## Utility Classes
 

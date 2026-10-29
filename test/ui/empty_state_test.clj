@@ -5,7 +5,10 @@
 (deftest empty-state-class-list-test
   (testing "base class"
     (is (= ["empty-state"] (empty-state/empty-state-class-list {})))
-    (is (= "empty-state" (empty-state/empty-state-classes {})))))
+    (is (= "empty-state" (empty-state/empty-state-classes {}))))
+  (testing "fill"
+    (is (= ["empty-state" "empty-state-fill"] (empty-state/empty-state-class-list {:fill true})))
+    (is (= "empty-state empty-state-fill" (get-in (empty-state/empty-state {:fill true} "x") [1 :class])))))
 
 (deftest empty-state-component-test
   (testing "renders a div with text children"

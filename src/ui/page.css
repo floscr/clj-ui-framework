@@ -1,0 +1,124 @@
+/* ── Page ───────────────────────────────────────────────────────
+   One container per app: it sets the column width and the gutters, and
+   stacks its regions on a 24px grid. Nothing inside adds its own gutter
+   or max width. The widths are 640 / 720 / 1200px at a 16px base. */
+
+.page {
+  width: 100%;
+  max-width: calc(var(--size-4) * 45);
+  margin-inline: auto;
+  padding: var(--size-8) clamp(var(--size-4), 4vw, var(--size-8));
+  display: grid;
+  gap: var(--size-6);
+  --body-padding-inline: clamp(var(--size-4), 4vw, var(--size-8));
+}
+
+/* Long content never pushes the page sideways. */
+.page > * {
+  min-width: 0;
+}
+
+.page-narrow { max-width: calc(var(--size-4) * 40); }
+.page-wide   { max-width: calc(var(--size-4) * 75); }
+.page-full   { max-width: none; }
+
+@media (max-width: 560px) {
+  .page {
+    padding-block: var(--size-5);
+    gap: var(--size-5);
+  }
+}
+
+/* ── Page header ────────────────────────────────────────────── */
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--size-4);
+  flex-wrap: wrap;
+}
+
+.page-header-text {
+  display: grid;
+  gap: var(--size-1);
+  min-width: 0;
+  flex: 1 1 calc(var(--size-4) * 16);
+}
+
+.page-title {
+  overflow-wrap: anywhere;
+}
+
+.page-description {
+  margin: 0;
+  max-width: 60ch;
+  font-size: var(--font-sm);
+  color: var(--fg-1);
+}
+
+.page-header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--size-2);
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+/* ── Page section ───────────────────────────────────────────── */
+
+.page-section {
+  display: grid;
+  gap: var(--size-4);
+  min-width: 0;
+}
+
+/* Sections of a long page sit 32px apart (the page gap plus this). */
+.page-section + .page-section {
+  margin-top: var(--size-2);
+}
+
+.page-section-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--size-4);
+  flex-wrap: wrap;
+}
+
+.page-section-text {
+  display: grid;
+  gap: var(--size-1);
+  min-width: 0;
+}
+
+.page-section-title {
+  font-size: var(--font-md);
+}
+
+.page-section-description {
+  margin: 0;
+  max-width: 60ch;
+  font-size: var(--font-sm);
+  color: var(--fg-1);
+}
+
+.page-section-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--size-2);
+  flex-shrink: 0;
+}
+
+/* ── Action row ─────────────────────────────────────────────── */
+
+.action-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--size-2);
+  flex-wrap: wrap;
+}
+
+.action-row-start   { justify-content: flex-start; }
+.action-row-between { justify-content: space-between; }

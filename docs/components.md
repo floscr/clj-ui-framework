@@ -4,7 +4,7 @@
 > See `AGENTS.md` for conventions, per-target pitfalls, and how to
 > add new components and icons. Agents: start at `docs/llms.txt`.
 
-## Components (46)
+## Components (50)
 
 ### Actions
 
@@ -64,6 +64,8 @@
 | [Chat](components/chat.md) | `ui.chat` | Conversation building blocks: a message log, user and assistant bubbles, a thinking indicator, a toolbar and an auto-growing composer. | `chat-bubble-class-list`, `chat-bubble-classes`, `chat-log`, `chat-bubble`, `chat-thinking`, `chat-toolbar`, `chat-input` |
 | [File browser](components/file-browser.md) | `ui.file-browser` | Grid tiles and a sortable list or table of files and folders with type icons, selection and per-item context menus. | `file-type->icon`, `file-type-icon`, `file-view-toggle`, `file-item-grid`, `col-name`, `col-size`, `col-modified`, `col-type`, `file-table`, `file-list-header`, `file-item-list` |
 | [Icon](components/icon.md) | `ui.icon` | Inline Lucide-style SVG icons in four sizes, outlined by default with filled variants for media controls. | `icon-class-list`, `icon-classes`, `icon` |
+| [List row](components/list-row.md) | `ui.list-row` | Records as rows on one surface: a leading icon or thumbnail, title and description, metadata and controls at the end, with hover for rows that lead somewhere. | `list-row-class-list`, `list-row-classes`, `list-rows`, `list-row` |
+| [Metric](components/metric.md) | `ui.metric` | A number with its label, unit, change and hint, as a bordered tile or a row of equal columns: the KPI row of a dashboard, the stats of a record. | `metric-class-list`, `metric-classes`, `metric`, `metric-row` |
 | [Pagination](components/pagination.md) | `ui.pagination` | Move through a long collection with numbered pages and previous and next links. | `pagination-item-class-list`, `pagination-item-classes`, `pagination` |
 | [Table](components/table.md) | `ui.table` | Records in columns from a headers vector and row vectors, with striped and bordered variants. | `table-class-list`, `table-classes`, `table` |
 
@@ -72,8 +74,10 @@
 | Component | Namespace | Description | Public API |
 |-----------|-----------|-------------|------------|
 | [Tile grid](components/grid.md) | `ui.grid` | A responsive auto-fill grid of square or masonry tiles with size presets, plus a layout toggle and size stepper for toolbars. | `grid-class-list`, `grid-classes`, `grid`, `layout-toggle`, `step-size`, `size-stepper` |
+| [Page](components/page.md) | `ui.page` | The one page container with its title row, titled sections and action rows: column width, gutters and vertical rhythm set once for the whole app. | `page-class-list`, `page-classes`, `page`, `page-header`, `page-section`, `action-row-class-list`, `action-row` |
 | [Resizable panels](components/panels.md) | `ui.panels` | Panel groups whose panes trade space by dragging a separator, with collapse, keyboard resizing and persisted sizes. | `size-str`, `group-attrs`, `panel-attrs`, `group`, `separator`, `panel` |
 | [Separator](components/separator.md) | `ui.separator` | A hairline divider, horizontal or vertical, for grouping content. | `separator-class-list`, `separator-classes`, `separator` |
+| [Settings rows](components/settings.md) | `ui.settings` | Label-and-control rows on one bordered surface with hairline dividers: the shape of every preferences screen. | `settings-group`, `settings-row` |
 | [Sidebar](components/sidebar.md) | `ui.sidebar` | An app shell: a sticky sidebar with brand, search, grouped menus, collapsible sections, user footer and a mobile drawer, next to the main area. | `sidebar-layout-class-list`, `sidebar-layout-classes`, `sidebar-layout`, `sidebar-layout-main`, `sidebar-class-list`, `sidebar-classes`, `sidebar`, `sidebar-header`, `sidebar-brand-class-list`, `sidebar-brand-classes`, `sidebar-brand`, `sidebar-search-class-list`, `sidebar-search-classes`, `sidebar-search`, `sidebar-content`, `sidebar-group-class-list`, `sidebar-group-classes`, `sidebar-group`, `sidebar-menu`, `sidebar-menu-item-class-list`, `sidebar-menu-item-classes`, `sidebar-menu-item`, `sidebar-collapsible`, `sidebar-mobile-toggle-class-list`, `sidebar-mobile-toggle-classes`, `sidebar-mobile-toggle`, `sidebar-overlay`, `sidebar-separator`, `sidebar-footer`, `sidebar-user` |
 | [Toolbar](components/toolbar.md) | `ui.toolbar` | A pill-shaped container that groups icon buttons with separators, horizontal or vertical, optionally floating in a popover. | `toolbar-class-list`, `toolbar-classes`, `toolbar`, `toolbar-separator` |
 

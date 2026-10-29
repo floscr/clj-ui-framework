@@ -1,0 +1,57 @@
+{:id :settings
+ :title "Settings rows"
+ :summary "Label-and-control rows on one bordered surface with hairline dividers: the shape of every preferences screen."
+ :category :layout
+ :group "Page"
+ :keywords ["settings" "preferences" "options" "row" "switch row" "label and control" "form rows"]
+
+ :when-to-use
+ ["A preferences or settings screen: each setting is one row with its name, an optional hint and its control."
+  "A list of toggles, selects or small actions that belong to one topic (notifications, appearance, account)."
+  "Per-item controls in an admin list where every item gets the same choice (theme per service, access per member)."]
+
+ :when-not-to-use
+ ["Use form fields for a form that is submitted as a whole with validation; settings rows apply each change on its own."
+  "Use list-row for records with a title, description and metadata that lead somewhere."
+  "Use table when there are several columns to compare."]
+
+ :usage "(require '[ui.settings :as settings])\n\n(settings/settings-group {}\n  (settings/settings-row {:label \"Mentions\" :hint \"When someone mentions you in a comment.\"}\n    (switch/switch-toggle {:checked true :on-change toggle-mentions!}))\n  (settings/settings-row {:label \"Weekly summary\"}\n    (switch/switch-toggle {:on-change toggle-summary!}))\n  (settings/settings-row {:label \"Time zone\"}\n    (select/select {:value \"Europe/Vienna\" :options zones})))"
+
+ :examples
+ [{:title "A choice per row with a segmented control"
+   :code "(settings/settings-row {:label \"Photos\" :hint \"Follows the system theme\"}\n  (button-group/button-group {:variant :boxed}\n    (button-group/button-group-item {:active true} \"Auto\")\n    (button-group/button-group-item {} \"Light\")\n    (button-group/button-group-item {} \"Dark\")))"}
+  {:title "A destructive action as a row"
+   :code "(settings/settings-group {}\n  (settings/settings-row {:label \"Delete account\" :hint \"Removes your profile and projects. This cannot be undone.\"}\n    (button/button {:variant :danger} \"Delete account\")))"}]
+
+ :api
+ [{:fn "settings-group"
+   :doc "The bordered surface (bg-1, border-0, radius-surface) that holds the rows and divides them with border-subtle."
+   :children "settings-row elements."
+   :props [{:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "settings-row"
+   :doc "One setting: label and hint on the left, the control on the right, 64px minimum height. On narrow screens the control wraps under the text."
+   :children "The control: a switch, select, button group, button or short input. Several children sit 8px apart."
+   :props [{:name :label :type "string | hiccup" :doc "The setting's name, medium weight."}
+           {:name :hint :type "string | hiccup" :doc "One line under the label explaining the effect."}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}]
+
+ :accessibility
+ ["The label is visual: name the control itself (a switch's :label, an aria-label on a button group) so assistive tech reads it."
+  "Give the surrounding page-section a heading so the group has a name."]
+
+ :motion ["None."]
+
+ :responsive
+ ["Rows wrap: on a narrow screen a wide control (a select, a button group) drops under the label, right-aligned; a switch stays beside it."]
+
+ :targets
+ {:clj "Static markup; controls carry HTMX attributes in their :attrs."
+  :cljs ":class may be a vector."
+  :squint "Static markup."}
+
+ :notes-for-ai
+ ["Put a settings-group inside a page-section with the topic as the section title. Do not add an uppercase label above the group and do not wrap each row in its own card."
+  "A settings row applies its change at once; it has no save button. For a form that saves as a whole use form fields plus an action-row."
+  "Keep hints to one line that states the effect, not the mechanism."]
+
+ :related [:page :switch :select :button-group :card :form]}

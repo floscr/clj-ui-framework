@@ -253,6 +253,7 @@
 
 (def ^:private agent-rules
   "- Prefer an existing clj-ui component over new markup; compose components, never restyle their internals.
+- Every screen starts with `ui.page`: `(page/page {} (page/page-header {:title ...} actions) (page/page-section {:title ...} ...))`. Never write your own container, app shell, max-width, gutters or font. Settings are `ui.settings` rows, record lists are `ui.list-row`, headline numbers are `ui.metric`, modes are a boxed `ui.button-group`.
 - Read the component's markdown before using it and use only documented props. Follow its \"When not to use\".
 - Components are `.cljc`: one call renders to Hiccup (`:clj`), Replicant (`:cljs`) and Squint. Mind the target table in each page (events, `:class` vector vs string, `:style` shape).
 - Use the semantic tokens (`--bg-0/1/2`, `--fg-0/1/2`, `--accent`, `--accent-subtle`, `--danger`, `--success`, `--warning`, `--border-0`, `--border-subtle`, `--radius-control/panel/surface`, `--size-N`, `--font-*`) instead of raw colors or rem values, and check light and dark themes.

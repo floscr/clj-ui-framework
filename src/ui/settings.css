@@ -1,0 +1,55 @@
+/* ── Settings rows ───────────────────────────────────────────────
+   One bordered group per section, rows divided by hairlines, label on
+   the left and the control on the right. Never a card per row. */
+
+.settings-group {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-1);
+  color: var(--fg-0);
+  border: var(--border-0);
+  border-radius: var(--radius-surface);
+  overflow: hidden;
+}
+
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--size-2) var(--size-4);
+  min-height: var(--size-16);
+  padding: var(--size-3) var(--size-5);
+}
+
+.settings-row + .settings-row {
+  border-top: var(--border-subtle);
+}
+
+.settings-row-text {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  flex: 1 1 calc(var(--size-4) * 12);
+}
+
+.settings-row-label {
+  font-size: var(--font-sm);
+  font-weight: 500;
+  color: var(--fg-0);
+}
+
+.settings-row-hint {
+  font-size: var(--font-sm);
+  color: var(--fg-1);
+}
+
+.settings-row-control {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--size-2);
+  margin-left: auto;
+  flex-shrink: 0;
+  max-width: 100%;
+}

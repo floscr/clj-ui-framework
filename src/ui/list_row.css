@@ -1,0 +1,104 @@
+/* ── List rows ──────────────────────────────────────────────────
+   Records on one surface: leading icon or thumbnail, title and
+   description, metadata and controls at the end. 48px rows, 56px with a
+   description; hairlines between rows, a fill on hover for rows that go
+   somewhere. */
+
+.list-rows {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-1);
+  color: var(--fg-0);
+  border: var(--border-0);
+  border-radius: var(--radius-surface);
+  overflow: hidden;
+}
+
+.list-row {
+  display: flex;
+  align-items: center;
+  gap: var(--size-3);
+  width: 100%;
+  min-height: var(--size-12);
+  padding: var(--size-2) var(--size-4);
+  font: inherit;
+  text-align: left;
+  text-decoration: none;
+  color: var(--fg-0);
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+.list-row + .list-row {
+  border-top: var(--border-subtle);
+}
+
+.list-row-interactive {
+  cursor: pointer;
+}
+
+.list-row-interactive:hover {
+  background: var(--bg-2);
+}
+
+.list-row-interactive:active {
+  background: var(--bg-2);
+}
+
+.list-row-active,
+.list-row-active:hover {
+  background: var(--accent-subtle);
+}
+
+.list-row-leading {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: var(--size-10);
+  height: var(--size-10);
+  color: var(--fg-1);
+}
+
+.list-row-thumb {
+  width: var(--size-10);
+  height: var(--size-10);
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  background: var(--bg-2);
+}
+
+.list-row-text {
+  display: grid;
+  gap: 2px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.list-row-title {
+  font-size: var(--font-sm);
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.list-row-description {
+  font-size: var(--font-xs);
+  color: var(--fg-1);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.list-row-trailing {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--size-2);
+  flex-shrink: 0;
+  font-size: var(--font-sm);
+  color: var(--fg-2);
+  font-variant-numeric: tabular-nums;
+}

@@ -1,0 +1,60 @@
+{:id :metric
+ :title "Metric"
+ :summary "A number with its label, unit, change and hint, as a bordered tile or a row of equal columns: the KPI row of a dashboard, the stats of a record."
+ :category :data
+ :group "Numbers"
+ :keywords ["metric" "kpi" "stat" "statistic" "number" "counter" "dashboard" "stats row" "delta" "trend"]
+
+ :when-to-use
+ ["The headline numbers of a dashboard, two to five of them in a metric-row above the detail."
+  "The stats of one record: days in a row, best streak, total spent."
+  "A number that needs context: what it is, its unit, how it changed."]
+
+ :when-not-to-use
+ ["Use badge for a count inside a list row or next to a label."
+  "Use progress when the number is a share of a known total."
+  "Use table when the numbers belong to many records."]
+
+ :usage "(require '[ui.metric :as metric])\n\n(metric/metric-row {}\n  (metric/metric {:label \"Revenue\" :value \"48.2k\" :unit \"EUR\" :delta \"+12%\" :trend :up :hint \"vs last month\"})\n  (metric/metric {:label \"Orders\" :value \"1,204\" :delta \"-3%\" :trend :down :hint \"vs last month\"})\n  (metric/metric {:label \"Refunds\" :value \"18\"}))"
+
+ :examples
+ [{:title "Record stats, flush inside a card"
+   :code "(card/card {}\n  (card/card-header {} [:h3 \"Walk\"] [:p \"Mon to Fri\"])\n  (metric/metric-row {}\n    (metric/metric {:flush true :label \"Current streak\" :value \"0\" :unit \"days\"})\n    (metric/metric {:flush true :label \"Best streak\" :value \"4\" :unit \"days\"})))"}]
+
+ :api
+ [{:fn "metric"
+   :doc "One labeled number: label above, the value at 28px with an optional unit beside it, then an optional delta and hint line."
+   :props [{:name :label :type "string | hiccup" :doc "What the number is."}
+           {:name :value :type "string | hiccup" :doc "The number, already formatted."}
+           {:name :unit :type "string" :doc "Unit or suffix beside the value, muted."}
+           {:name :delta :type "string" :doc "The change, for example +12%."}
+           {:name :trend :type ":up | :down | :flat" :doc "Colors the delta: success for up, danger for down, muted otherwise. Only set it when the direction has a meaning."}
+           {:name :hint :type "string" :doc "Short context beside the delta (vs last month, today)."}
+           {:name :flush :type "boolean" :default "false" :doc "No border or padding, for a metric inside a card or list."}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "metric-row"
+   :doc "Equal-width columns at least 160px wide, 16px apart, that wrap on narrow screens. Tiles stretch to the same height."
+   :children "metric elements."
+   :props [{:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "metric-classes" :doc "Class string for {:flush}."}
+  {:fn "metric-class-list" :doc "Vector form of metric-classes."}]
+
+ :accessibility
+ ["The label and value are plain text in reading order; the delta color is backed by its sign and the hint."]
+
+ :motion ["None. Numbers use tabular figures so a changing value does not shift its neighbours."]
+
+ :responsive
+ ["A metric-row of four becomes two columns around 700px and one column on phones."]
+
+ :targets
+ {:clj "Static markup."
+  :cljs ":class may be a vector."
+  :squint "Static markup."}
+
+ :notes-for-ai
+ ["Format the value before passing it (thousands separators, one decimal); the component does not format."
+  "A metric-row belongs directly under the page-header of a dashboard, before the chart or table."
+  "Do not color the value itself and do not make it larger than the h1; the 28px number is the emphasis."]
+
+ :related [:page :card :badge :progress :table]}

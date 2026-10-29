@@ -1,0 +1,75 @@
+/* ── Metric ─────────────────────────────────────────────────────
+   A number with its label, unit, change and hint. One tile is a bordered
+   surface at the panel radius; a metric-row lays tiles out as equal
+   columns. The number is the only large type on the tile. */
+
+.metric {
+  display: grid;
+  gap: var(--size-1);
+  align-content: start;
+  min-width: 0;
+  padding: var(--size-4) var(--size-5);
+  background: var(--bg-1);
+  color: var(--fg-0);
+  border: var(--border-0);
+  border-radius: var(--radius-panel);
+}
+
+/* Inside a card or a list: no surface of its own. */
+.metric-flush {
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+}
+
+.metric-label {
+  font-size: var(--font-sm);
+  color: var(--fg-1);
+}
+
+.metric-value {
+  display: flex;
+  align-items: baseline;
+  gap: var(--size-1);
+  font-variant-numeric: tabular-nums;
+}
+
+.metric-number {
+  font-size: var(--font-xl);
+  font-weight: 500;
+  letter-spacing: var(--tracking-display);
+  line-height: var(--leading-display);
+  color: var(--fg-0);
+}
+
+.metric-unit {
+  font-size: var(--font-sm);
+  color: var(--fg-1);
+}
+
+.metric-foot {
+  display: flex;
+  align-items: center;
+  gap: var(--size-2);
+  font-size: var(--font-xs);
+  color: var(--fg-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.metric-delta {
+  font-weight: 500;
+  color: var(--fg-1);
+}
+
+.metric-delta-up   { color: var(--success); }
+.metric-delta-down { color: var(--danger); }
+
+/* ── Metric row ─────────────────────────────────────────────── */
+
+.metric-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(calc(var(--size-4) * 10), 1fr));
+  gap: var(--size-4);
+  align-items: stretch;
+}

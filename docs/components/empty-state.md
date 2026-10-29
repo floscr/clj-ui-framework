@@ -24,9 +24,19 @@
 (require '[ui.empty-state :as empty-state])
 
 (empty-state/empty-state {:icon :inbox}
-  [:p "No projects yet"]
-  [:p.text-muted "Projects you create or join appear here."]
+  [:p.empty-state-title "No projects yet"]
+  [:p "Projects you create or join appear here."]
   (button/button {:variant :primary :icon-left :plus} "Create project"))
+```
+
+## Examples
+
+### A whole view that is empty: fill the region and center
+
+```clojure
+(empty-state/empty-state {:icon :users :fill true}
+  [:p.empty-state-title "No devices online"]
+  [:p "Open this page on another device on the same Wi-Fi."])
 ```
 
 ## API reference
@@ -40,6 +50,7 @@ Children: Title, description and at most one action.
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `:icon` | `icon keyword` | – | Rendered at :xl above the content. |
+| `:fill` | `boolean` | `false` | Grow to the region (flex child) or at least 320px, and center vertically. For a view whose only content is the empty state. |
 | `:class` | `string` | – |  |
 | `:attrs` | `map` | – |  |
 
@@ -71,7 +82,8 @@ Vector form.
 
 ## Notes for AI
 
-- Title: No projects yet. Description: why and when something appears. Action: a verb plus object.
+- Title: No projects yet (class empty-state-title). Description: why and when something appears. Action: a verb plus object.
+- When the empty state is the whole view, pass :fill true so it sits in the middle of the region instead of at the top or glued to the bottom.
 - No results from a search gets a Clear filters action, not a Create action.
 
 ## Related

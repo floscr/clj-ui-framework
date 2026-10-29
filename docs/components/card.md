@@ -144,10 +144,13 @@ Class string for {:divider}.
 ## Notes for AI
 
 - Nested radii are concentric: inner = outer minus padding. Use calc(var(--radius-surface) - var(--size-6)) for media inside a padded card.
-- Settings pages are one card-list per section with label-plus-control rows, not one card per row.
+- Settings pages use settings rows (ui.settings), record lists use list rows (ui.list-row); card-list is the generic divided surface under both.
 
 ## Related
 
+- [Page](page.md): The one page container with its title row, titled sections and action rows: column width, gutters and vertical rhythm set once for the whole app.
+- [Settings rows](settings.md): Label-and-control rows on one bordered surface with hairline dividers: the shape of every preferences screen.
+- [List row](list-row.md): Records as rows on one surface: a leading icon or thumbnail, title and description, metadata and controls at the end, with hover for rows that lead somewhere.
 - [Dialog](dialog.md): A focused modal surface for decisions that need attention, as a native <dialog> or an overlay for reactive apps.
 - [Popover](popover.md): A small anchored panel for contextual controls, built on the native Popover API so it works without app state.
 - [Table](table.md): Records in columns from a headers vector and row vectors, with striped and bordered variants.

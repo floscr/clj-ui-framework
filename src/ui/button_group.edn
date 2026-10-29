@@ -3,7 +3,7 @@
  :summary "Related actions as one segmented control: ghost or boxed, with icon items, counts and separators."
  :category :actions
  :group "Buttons"
- :keywords ["button group" "segmented control" "view switcher" "filter" "toggle group"]
+ :keywords ["button group" "segmented control" "view switcher" "filter" "toggle group" "mode picker" "auto light dark"]
 
  :when-to-use
  ["Two to five views of the same data: a range (7d, 30d, 90d), a layout (grid, list), a filter with counts."
@@ -59,6 +59,7 @@
 
  :notes-for-ai
  ["Exactly one item is :active at a time."
+  "Three to five mutually exclusive modes (Auto, Light, Dark; All, Mine) are one :boxed button-group, never a row of separate buttons with one :primary."
   "For a settings-style on or off, use switch instead."]
 
  :related [:tabs :toolbar :button :chip]}
