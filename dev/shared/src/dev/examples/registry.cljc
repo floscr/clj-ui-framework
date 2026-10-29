@@ -57,6 +57,7 @@
             [dev.examples.page :as page]
             [dev.examples.settings :as settings]
             [dev.examples.metric :as metric]
+            [dev.examples.day-grid :as day-grid]
             [dev.examples.list-row :as list-row]))
 
 (def entries
@@ -110,6 +111,7 @@
    {:id :page            :title "Page"            :examples page/examples}
    {:id :settings        :title "Settings rows"   :examples settings/examples}
    {:id :metric          :title "Metric"          :examples metric/examples}
+   {:id :day-grid        :title "Day grid"        :examples day-grid/examples}
    {:id :list-row        :title "List row"        :examples list-row/examples}])
 
 (defn entry

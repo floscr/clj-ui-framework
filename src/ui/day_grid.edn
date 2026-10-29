@@ -1,0 +1,54 @@
+{:id :day-grid
+ :title "Day grid"
+ :summary "One square per day in rows of seven under a weekday header, colored by what happened: the record of a habit or a countdown under its streak numbers."
+ :category :data
+ :group "Numbers"
+ :keywords ["day grid" "habit" "streak" "heatmap" "contribution graph" "tracker" "weeks" "calendar strip"]
+
+ :when-to-use
+ ["The last few weeks of a habit: which days were done, missed, excused or rest days."
+  "A countdown or challenge shown day by day, with the days still to come faded."
+  "Any per-day yes or no record that reads better as a pattern than as a list."]
+
+ :when-not-to-use
+ ["Use calendar to pick a date, and calendar-events for days that hold events."
+  "Use progress when only the share of a total matters, not which days."
+  "Use metric for the streak numbers themselves; put the day grid under them."]
+
+ :usage "(require '[ui.day-grid :as day-grid])\n\n(day-grid/day-grid\n  {:color :teal\n   :days [{:date \"Mon 26 Oct\" :state :missed}\n          {:date \"Tue 27 Oct\" :state :done}\n          {:date \"Wed 28 Oct\" :state :missed}\n          {:date \"Thu 29 Oct\" :state :done :today true}\n          {:date \"Fri 30 Oct\" :state :future}\n          {:date \"Sat 31 Oct\" :state :rest}\n          {:date \"Sun 1 Nov\" :state :rest}]})"
+
+ :examples
+ [{:title "Under the streak numbers of a habit card"
+   :code "(card/card {}\n  (metric/metric-row {}\n    (metric/metric {:flush true :label \"Current streak\" :value \"1\" :unit \"day\"})\n    (metric/metric {:flush true :label \"Best streak\" :value \"4\" :unit \"days\"}))\n  (day-grid/day-grid {:color :teal :days weeks}))"}]
+
+ :api
+ [{:fn "day-grid"
+   :doc "Days in rows of seven, Monday first, under a header of weekday initials. Squares keep their aspect ratio and the grid is at most 320px wide. Done days fill with the color, missed days get a light orange tint, rest and excused days are outlined (excused darker), future days are faded, and today is ringed."
+   :props [{:name :days :type "vector of day maps" :doc "In order, the first on the Monday column; pad the first week yourself. Each map: :date (tooltip fallback), :state (:done :missed :excused :rest :today :future, or nil for a plain empty day; other states get a day-grid-<state> class), :today (boolean, rings the day), :title (tooltip and accessible name)."}
+           {:name :color :type ":success | :accent | :teal | :blue | :orange | :pink" :default ":success" :doc "Fill of done days and the today ring."}
+           {:name :labels :type "vector of strings | false" :default "M T W T F S S" :doc "Header labels, false for none."}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "day-grid-classes" :doc "Class string for {:color}."}
+  {:fn "day-grid-class-list" :doc "Vector form of day-grid-classes."}
+  {:fn "day-cell-classes" :doc "Class string for one day map ({:state :today})."}
+  {:fn "day-cell-class-list" :doc "Vector form of day-cell-classes."}]
+
+ :accessibility
+ ["Each day with a :title or :date is an image with that text as its name and tooltip, so put the state in the title (Tue 27 Oct, done)."
+  "The header initials are hidden from screen readers. The grid is a visual summary; keep the numbers that matter in text next to it (a metric)."]
+
+ :motion ["None."]
+
+ :responsive ["The grid fills its container up to 320px; squares shrink with it."]
+
+ :targets
+ {:clj "Static markup."
+  :cljs ":class may be a vector."
+  :squint "Static markup."}
+
+ :notes-for-ai
+ ["Build the day maps in the app: the component does no date math. Start the first row on a Monday and end the last on a Sunday."
+  "Use states for meaning, not color: :done, :missed, :excused, :rest, :future. Days before the habit started are :rest."
+  "Pick :color to match the ring or chart of the same goal; status colors keep their meaning."]
+
+ :related [:metric :progress :calendar :card]}
