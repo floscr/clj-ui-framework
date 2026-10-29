@@ -30,15 +30,15 @@
    :children "list-row elements."
    :props [{:name :class :type "string"} {:name :attrs :type "map"}]}
   {:fn "list-row"
-   :doc "One record, 48px tall (56px with a description). An <a> with :href, a <button> with :on-click, otherwise a <div>. Interactive rows fill on hover; the active row is tinted with the accent."
+   :doc "One record, 48px tall (56px with a description). The row is a <div>; with :href the title is an <a>, with :on-click a <button>, stretched over the row so the whole row opens the record while trailing buttons stay separate. Interactive rows fill on hover; the active row is tinted with the accent."
    :children "Trailing controls: small icon buttons, a badge, a switch."
    :props [{:name :title :type "string | hiccup" :doc "The name, one line, truncated."}
            {:name :description :type "string | hiccup" :doc "Second line, muted, truncated."}
            {:name :icon :type "icon keyword" :doc "Leading icon in a 40px slot."}
            {:name :thumb :type "string" :doc "Leading image URL, 40px square with a small radius. Wins over :icon."}
            {:name :meta :type "string | hiccup" :doc "Trailing muted text: a count, a size, a date."}
-           {:name :href :type "string" :doc "Renders the row as a link."}
-           {:name :on-click :type "fn" :doc "Renders the row as a button on :cljs and :squint; ignored on :clj."}
+           {:name :href :type "string" :doc "The row opens this link (the title is the anchor)."}
+           {:name :on-click :type "fn" :doc "The row is a button on :cljs and :squint; ignored on :clj."}
            {:name :active :type "boolean" :doc "The selected row (aria-current)."}
            {:name :class :type "string"} {:name :attrs :type "map"}]}
   {:fn "list-row-classes" :doc "Class string for {:interactive :active}."}
@@ -48,8 +48,8 @@
             ["Enter / Space" "Opens a row that is a link or a button."]]
 
  :accessibility
- ["Rows that lead somewhere are real links or buttons, so they are focusable and announced."
-  "Trailing controls inside a link row must not be links themselves; use buttons with aria-labels. Thumbnails are decorative (empty alt)."]
+ ["The title of a row that leads somewhere is a real link or button, so it is focusable and announced; keyboard focus rings the whole row."
+  "Trailing controls are ordinary buttons above the stretched title, so they are valid HTML and keyboard reachable. Thumbnails are decorative (empty alt)."]
 
  :motion ["Hover and press change the fill only, over duration-fast."]
 

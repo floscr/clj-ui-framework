@@ -7,8 +7,8 @@
             [ui.icon :as icon]))
 
 (defn list-row-class-list
-  "Classes for a row. :interactive marks a row that is a link or a button
-   (hover fill, pointer); :active marks the selected row."
+  "Classes for a row. :interactive marks a row whose title is a link or a
+   button (hover fill, pointer); :active marks the selected row."
   [{:keys [interactive active]}]
   (cond-> ["list-row"]
     interactive (conj "list-row-interactive")
@@ -31,9 +31,24 @@
   (into [:div (util/class-attrs ["list-rows"] class (merge {:role "list"} attrs))]
         rows))
 
+(defn- title-el
+  "The title: an <a> with :href, a <button> with :on-click, else a <span>.
+   The link or button stretches over the whole row (CSS ::after), so the
+   row stays a <div> and its trailing controls remain valid, clickable
+   buttons of their own."
+  [title href on-click]
+  (cond
+    href     [:a {:class "list-row-title" :href href} title]
+    on-click [:button #?(:squint {:class "list-row-title" :type "button" :on-click on-click}
+                         :cljs   {:class ["list-row-title"] :type "button" :on {:click on-click}}
+                         :clj    {:class "list-row-title" :type "button"})
+              title]
+    :else    [:span {:class "list-row-title"} title]))
+
 (defn list-row
-  "One record. Renders an <a> with :href, a <button> with :on-click, else a
-   <div>.
+  "One record. The row is a <div>; with :href the title is a link and with
+   :on-click a button, either stretched over the row, so the whole row
+   opens the record while trailing controls stay separate buttons.
 
    Props:
      :title       - the record's name (string or hiccup), one line, truncated
@@ -41,8 +56,8 @@
      :icon        - optional leading icon keyword (:folder, :music)
      :thumb       - optional leading image URL (40px square) instead of :icon
      :meta        - optional trailing text, muted (a count, a date)
-     :href        - URL; renders the row as a link
-     :on-click    - click handler; renders the row as a button (:cljs and :squint)
+     :href        - URL; the row opens this link
+     :on-click    - click handler; the row is a button (:cljs and :squint)
      :active      - boolean; the selected row
      :class       - additional CSS classes
      :attrs       - additional HTML attributes map
@@ -51,25 +66,18 @@
   [{:keys [title description icon thumb meta href on-click active class attrs] :as _props} & trailing]
   (let [trailing    (remove nil? trailing)
         interactive (boolean (or href on-click))
-        tag         (cond href :a on-click :button :else :div)
         base        (util/class-attrs (list-row-class-list {:interactive interactive :active active})
                                       class
                                       (merge {:role "listitem"} attrs))
-        base        (cond-> base
-                      href                   (assoc :href href)
-                      (= tag :button)        (assoc :type "button")
-                      active                 (assoc :aria-current "true"))
-        base        #?(:squint (cond-> base on-click (assoc :on-click on-click))
-                       :cljs   (cond-> base on-click (assoc-in [:on :click] on-click))
-                       :clj    base)
+        base        (cond-> base active (assoc :aria-current "true"))
         leading     (cond
                       thumb [:img {:class "list-row-thumb" :src thumb :alt ""}]
                       icon  (icon/icon {:icon-name icon :size :md})
                       :else nil)]
-    (cond-> [tag base]
+    (cond-> [:div base]
       leading (conj [:span {:class "list-row-leading"} leading])
       true    (conj (cond-> [:span {:class "list-row-text"}
-                             [:span {:class "list-row-title"} title]]
+                             (title-el title href on-click)]
                       description (conj [:span {:class "list-row-description"} description])))
       (or meta (seq trailing))
       (conj (into (cond-> [:span {:class "list-row-trailing"}]

@@ -65,7 +65,7 @@ Children: list-row elements.
 
 ### `list-row`
 
-One record, 48px tall (56px with a description). An <a> with :href, a <button> with :on-click, otherwise a <div>. Interactive rows fill on hover; the active row is tinted with the accent.
+One record, 48px tall (56px with a description). The row is a <div>; with :href the title is an <a>, with :on-click a <button>, stretched over the row so the whole row opens the record while trailing buttons stay separate. Interactive rows fill on hover; the active row is tinted with the accent.
 
 Children: Trailing controls: small icon buttons, a badge, a switch.
 
@@ -76,8 +76,8 @@ Children: Trailing controls: small icon buttons, a badge, a switch.
 | `:icon` | `icon keyword` | – | Leading icon in a 40px slot. |
 | `:thumb` | `string` | – | Leading image URL, 40px square with a small radius. Wins over :icon. |
 | `:meta` | `string \| hiccup` | – | Trailing muted text: a count, a size, a date. |
-| `:href` | `string` | – | Renders the row as a link. |
-| `:on-click` | `fn` | – | Renders the row as a button on :cljs and :squint; ignored on :clj. |
+| `:href` | `string` | – | The row opens this link (the title is the anchor). |
+| `:on-click` | `fn` | – | The row is a button on :cljs and :squint; ignored on :clj. |
 | `:active` | `boolean` | – | The selected row (aria-current). |
 | `:class` | `string` | – |  |
 | `:attrs` | `map` | – |  |
@@ -99,8 +99,8 @@ Vector form of list-row-classes.
 
 ## Accessibility
 
-- Rows that lead somewhere are real links or buttons, so they are focusable and announced.
-- Trailing controls inside a link row must not be links themselves; use buttons with aria-labels. Thumbnails are decorative (empty alt).
+- The title of a row that leads somewhere is a real link or button, so it is focusable and announced; keyboard focus rings the whole row.
+- Trailing controls are ordinary buttons above the stretched title, so they are valid HTML and keyboard reachable. Thumbnails are decorative (empty alt).
 
 ## Motion
 

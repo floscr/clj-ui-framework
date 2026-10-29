@@ -1,8 +1,9 @@
 /* ── List rows ──────────────────────────────────────────────────
    Records on one surface: leading icon or thumbnail, title and
    description, metadata and controls at the end. 48px rows, 56px with a
-   description; hairlines between rows, a fill on hover for rows that go
-   somewhere. */
+   description; hairlines between rows. A row that opens something keeps
+   its <div>: the title is the link or button and stretches over the row
+   (::after), so trailing controls stay real buttons above it. */
 
 .list-rows {
   display: flex;
@@ -15,19 +16,14 @@
 }
 
 .list-row {
+  position: relative;
   display: flex;
   align-items: center;
   gap: var(--size-3);
   width: 100%;
   min-height: var(--size-12);
   padding: var(--size-2) var(--size-4);
-  font: inherit;
-  text-align: left;
-  text-decoration: none;
   color: var(--fg-0);
-  background: transparent;
-  border: none;
-  border-radius: 0;
   transition: background-color var(--duration-fast) var(--ease-standard);
 }
 
@@ -35,15 +31,7 @@
   border-top: var(--border-subtle);
 }
 
-.list-row-interactive {
-  cursor: pointer;
-}
-
 .list-row-interactive:hover {
-  background: var(--bg-2);
-}
-
-.list-row-interactive:active {
   background: var(--bg-2);
 }
 
@@ -78,11 +66,44 @@
 }
 
 .list-row-title {
+  display: block;
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: none;
+  font: inherit;
   font-size: var(--font-sm);
   font-weight: 500;
+  text-align: left;
+  text-decoration: none;
+  color: inherit;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* The link or button covers the whole row. */
+a.list-row-title,
+button.list-row-title {
+  cursor: pointer;
+}
+
+a.list-row-title::after,
+button.list-row-title::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+/* Keyboard focus rings the row, not the title text. */
+a.list-row-title:focus-visible,
+button.list-row-title:focus-visible {
+  outline: none;
+}
+
+.list-row:has(> .list-row-text > .list-row-title:focus-visible) {
+  outline: var(--focus-outline);
+  outline-offset: -2px;
 }
 
 .list-row-description {
@@ -93,7 +114,10 @@
   white-space: nowrap;
 }
 
+/* Above the stretched title, so trailing buttons get the click. */
 .list-row-trailing {
+  position: relative;
+  z-index: 1;
   display: inline-flex;
   align-items: center;
   gap: var(--size-2);
