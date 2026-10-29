@@ -73,6 +73,12 @@
   min-width: 0;
 }
 
+/* A wide child (a select with a long option, a table) wraps or scrolls
+   inside its region instead of widening the column. */
+.page-section > * {
+  min-width: 0;
+}
+
 /* Sections of a long page sit 32px apart (the page gap plus this). */
 .page-section + .page-section {
   margin-top: var(--size-2);
