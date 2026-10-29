@@ -59,6 +59,28 @@
   transition: border-color var(--duration-fast) var(--ease-standard);
 }
 
+/* iOS Safari draws date and time inputs natively: a fixed intrinsic width
+   that overflows a narrow grid column, a shorter box than the text
+   fields beside it, and a centered value. Drop the native look so they
+   take the field styles, may shrink, and align their value left. */
+.form-input {
+  min-width: 0;
+}
+
+.form-input[type="date"],
+.form-input[type="time"],
+.form-input[type="datetime-local"],
+.form-input[type="month"],
+.form-input[type="week"] {
+  -webkit-appearance: none;
+  appearance: none;
+  text-align: left;
+}
+
+.form-input::-webkit-date-and-time-value {
+  text-align: left;
+}
+
 .form-input::placeholder,
 .form-textarea::placeholder {
   color: var(--fg-2);
