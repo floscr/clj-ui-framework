@@ -31,7 +31,10 @@
   gap: var(--size-1);
 }
 
-/* Boxed variant — a segmented control in a visible track (matches .tabs-boxed). */
+/* Boxed variant — a segmented control in a visible track (matches .tabs-boxed).
+   Concentric on the control ladder: the buttons inside are control-sm, so
+   the track (sm + 2 × size-1 padding) is exactly control-md and lines up
+   with the md buttons and fields beside it. */
 .toolbar-group-boxed {
   background: var(--bg-2);
   border-radius: var(--radius-control);
@@ -39,8 +42,8 @@
 }
 
 .toolbar-group-boxed > .btn {
-  width: var(--size-8);
-  height: var(--size-8);
+  width: var(--control-sm);
+  min-height: var(--control-sm);
   padding: 0;
   border-radius: calc(var(--radius-control) - var(--size-1));
 }

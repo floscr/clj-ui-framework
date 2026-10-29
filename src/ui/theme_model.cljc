@@ -168,7 +168,7 @@
 (def ^:private default-font-ratio 1.25)
 
 (def ^:private radius-px
-  [["xs" 3] ["sm" 5] ["md" 8] ["lg" 12] ["control" 9] ["panel" 14] ["surface" 18]])
+  [["xs" 3] ["sm" 5] ["md" 8] ["lg" 12] ["control" 9] ["panel" 14] ["surface" 11]])
 
 (def ^:private accent-500-chroma 0.23)
 (def ^:private gray-950-chroma 0.011)

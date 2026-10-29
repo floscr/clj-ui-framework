@@ -264,7 +264,7 @@
   ;; Concentric radii: inner = outer - padding (see AGENTS.md)
   :radius-control "9px"
   :radius-panel   "14px"
-  :radius-surface "18px"
+  :radius-surface "11px"
   :radius-pill    "9999px"}
 
  ;; ─── Dark theme overrides ─────────────────────────────────────────
@@ -316,5 +316,5 @@
    :radius-lg "12px"
    :radius-control "9px"
    :radius-panel   "14px"
-   :radius-surface "18px"
+   :radius-surface "11px"
    :radius-pill    "9999px"}}}
