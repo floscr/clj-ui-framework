@@ -3,68 +3,68 @@
 Diagnosis from the five screenshots + their source (streaks, service-theme,
 music-server, share, willhaben-seller), 2026-10-29:
 
-1. Framework defaults are off: `--font-sm` is 12.8px and `--font-xs` 10px
-   (1.25 geometric scale), yet every control (button, input, select, table)
-   uses `font-sm`. Controls have no shared `min-height`, so buttons, inputs
-   and selects in one row end up 36/44/56px tall. Primary/danger/success are
-   solid saturated fills; inputs use `bg-0` so they read as holes inside
-   cards. Headings have no sizes in base CSS.
-2. The framework has no page-level primitives (page container, page header,
-   section, settings row, metric, list row), so every app writes its own
-   shell: own max-width, own Google-Fonts face, h1 at 600/700/800, uppercase
-   eyebrow labels, hex palettes, `.card` overrides. The lint that forbids all
-   of this only runs on the framework.
-3. Consumer AGENTS.md points agents at the contributor guide, not at app
-   composition rules or worked examples.
+1. Framework defaults were off: `--font-sm` 12.8px / `--font-xs` 10px
+   (1.25 geometric scale) on every control; no shared control height;
+   solid primary/danger/success fills; inputs on `bg-0` read as holes in
+   cards; no heading ramp in the base CSS.
+2. No page-level primitives, so every app hand-rolled its shell: own
+   max-width, Google-Fonts face, h1 at 600 to 800, uppercase eyebrows, hex
+   palettes, `.card` overrides. The lint only ran on the framework.
+3. Consumer AGENTS.md pointed agents at the contributor guide, not at
+   composition rules.
 
-## Plan
+## Done (commits 2711345, ce137a8, + follow-up)
 
-### Phase A: defaults (framework CSS, no API changes)
-- [ ] Font scale: explicit steps (xs 12, sm 14, base 16, md 18, lg 22,
-      xl 28, 2xl 36, 3xl 48). Add `[label value]` support to
-      `generate-font-scale`, keep ratio form working.
-- [ ] Base type ramp in `base-css`: body 16/1.5, h1 xl 500, h2 lg, h3 md,
-      h4 base, margins 0, `p` margin, `td`/`.metric` tabular-nums.
-- [ ] One control height: `min-height: var(--control-md)` on `.btn`,
-      `.form-input`, `.form-select`, `.select-trigger`, `.number-field`,
-      `.tag-input`, `.chip`-as-control; sm/lg map to `--control-sm/lg`.
-      Desktop md 40px, `.clj-ui-touch` raises md to 44px.
-- [ ] Quieter buttons: primary = fg on bg (neutral, Arc style; accent via
-      `data-accent` stays available), secondary = surface + border,
-      danger = outlined with danger text (solid only `.btn-danger-solid`),
-      drop solid success default. Ghost text `fg-1`.
-- [ ] Inputs on `bg-1`, border `border-0`, focus = accent border (no inset
-      glow). Select trigger same.
-- [ ] Dark palette: lift `bg-0` to ~L .17 and `border-0` so cards and
-      secondary buttons separate on dark surfaces.
-- [ ] Ship one body face (self-hosted Inter Variable via `build-css`
-      `@font-face`, served by server-lib), so apps stop importing fonts.
+### Phase A: defaults
+- [x] Font scale: explicit ramp 12/14/16/18/22/28/36/48px (`[label mult]`
+      steps; geometric form still accepted). Theme model reproduces it at
+      the default ratio, sliders still work.
+- [x] Base type ramp: body 16px, h1 xl … h6 sm with margin 0, tabular
+      numbers in tables.
+- [x] One control height: `--control-sm/md/lg` 32/40/48 (36/44 under
+      `html.clj-ui-touch`) pinned on .btn, inputs, select, number field,
+      tag input. Card/dialog footer button override removed.
+- [x] Quiet buttons: neutral primary, outlined danger/success, `:loud true`
+      for the filled version; outlined disabled keeps its shape. Badge and
+      chip-active use the accent tint.
+- [x] Inputs on `bg-1`, focus = accent border, no glow.
+- [ ] Dark palette lift (bg-0 ~L .17): skipped for now, revisit if dark
+      cards still look too black on real apps.
+- [ ] Ship one body face (self-hosted Inter): not decided, system stack
+      stays; the agent rules forbid font imports instead.
 
-### Phase B: composition primitives (new components with sidecars)
-- [ ] `ui.page`: `page` (:width :narrow 640 | :reading 720 | :wide 1200,
-      fluid gutters, grid gap 24), `page-header` (title, description,
-      actions), `section` (h2, description, children), `actions-row`.
-- [ ] `ui.settings`: `settings-group` + `settings-row` (label, hint, control).
-- [ ] `ui.metric`: `metric` (value, label, delta, optional ring) + `metric-row`.
-- [ ] `ui.list`: `list-row` (leading icon/thumb, title, meta, trailing)
-      on top of `card-list`.
-- [ ] `ui.segmented-control` (mode pickers like service-theme rows).
-- [ ] `empty-state` `:fill true` centers in its region.
-- [ ] server-lib `render/page` uses `ui.page/page` + `page-header`.
+### Phase B: composition primitives
+- [x] `ui.page`: page (:narrow/:reading/:wide/:full, :tag), page-header,
+      page-section, action-row.
+- [x] `ui.settings`: settings-group, settings-row.
+- [x] `ui.metric`: metric (:flush), metric-row.
+- [x] `ui.list-row`: list-rows, list-row (icon/thumb, meta, href/on-click,
+      active).
+- [x] empty-state `:fill`, `.empty-state-title`.
+- [x] `util/class-attrs` shared helper; sidecars, tests, examples in all
+      three targets, docs regenerated, AGENTS.md "Composing a Screen".
+- [ ] Segmented control: covered by boxed button-group (keywords + note
+      added); no separate component.
+- [ ] server-lib `render/page` uses `ui.page` (consumer repo, rollout).
 
-### Phase C: enforcement and agent docs
-- [ ] `lint-css` runs on consumer CSS in server-lib's frontend pipeline
-      and `bb check`: fail on font imports, `font-family` on html/body,
-      weights > 500, uppercase, raw hex, raw px font-size, overriding
-      `.card`/`.btn`/`.form-*` internals, a second page container.
+## Next: Phase C (enforcement and consumer docs)
+- [ ] `lint-css` on consumer CSS in server-lib's frontend pipeline and
+      `bb check`: fail on font imports, font-family on html/body, weights
+      > 500, uppercase, raw hex, raw px font-size, overrides of
+      `.card`/`.btn`/`.form-*`, a second page container.
 - [ ] `docs/skill/`: INSTRUCTIONS.md (short always-on app rules),
-      composition.md (one container, 16/24/32 rhythm, settings rows,
-      states), worked examples: settings page, list page, dashboard card,
-      form page, all as `.cljc` using `ui.page`.
-- [ ] `sync-consumer-agents` section → app rules + link to llms.txt and
-      skill, not the contributor AGENTS.md.
-- [ ] Rebuild demo site pages to use `ui.page` (dogfood), screenshot
-      before/after of the five apps.
+      composition.md, worked `.cljc` examples (settings page, list page,
+      dashboard, form page) built on `ui.page`.
+- [ ] `sync-consumer-agents` section: app rules + llms.txt + skill link
+      instead of the contributor AGENTS.md.
+- [ ] Release (`bb release`), bump server-lib + xi, rebuild the five apps
+      on `ui.page` and compare screenshots before/after.
 
 ## Review
-(filled in after implementation)
+- Verified in the browser on all three targets (hiccup site pages for
+  button, form, page, settings, metric, list-row; squint and replicant
+  long pages). `bb test` 273 tests green, `bb lint-css` ok, `bb check-dev`
+  green.
+- The hiccup hot-reloader can wedge on a batch of new interdependent
+  files (SciUnbound); touching the files again in dependency order
+  recovers it without a restart.

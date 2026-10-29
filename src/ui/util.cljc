@@ -32,19 +32,6 @@
      :cljs   (if (keyword? s) (name s) (str s))
      :clj    (if (keyword? s) (name s) (str s))))
 
-(defn class-attrs
-  "The attribute map for an element with the component's class tokens
-   `class-list` (a vector of strings), the caller's extra `class` (a string,
-   or on :cljs also a vector) and extra `attrs` merged on top, in the
-   target's :class shape: a space-joined string on :clj and :squint, a
-   token vector on :cljs.
-
-     (util/class-attrs [\"page\" \"page-wide\"] class attrs)"
-  [class-list class attrs]
-  #?(:squint (merge {:class (cond-> (str/join " " class-list) class (str " " class))} attrs)
-     :cljs   (merge {:class (conj-classes class-list class)} attrs)
-     :clj    (merge {:class (cond-> (str/join " " class-list) class (str " " class))} attrs)))
-
 ;; Replicant treats each element of a :class vector as a single DOMTokenList
 ;; token, so a space-joined string (e.g. from button-classes) must be split
 ;; into individual tokens first before conj-ing onto the class vector.
@@ -63,3 +50,16 @@
        (string? class) (into base (remove str/blank? (str/split class #"\s+")))
        (coll? class)   (into base class)
        :else           (conj base class))))
+
+(defn class-attrs
+  "The attribute map for an element with the component's class tokens
+   `class-list` (a vector of strings), the caller's extra `class` (a string,
+   or on :cljs also a vector) and extra `attrs` merged on top, in the
+   target's :class shape: a space-joined string on :clj and :squint, a
+   token vector on :cljs.
+
+     (util/class-attrs [\"page\" \"page-wide\"] class attrs)"
+  [class-list class attrs]
+  #?(:squint (merge {:class (cond-> (str/join " " class-list) class (str " " class))} attrs)
+     :cljs   (merge {:class (conj-classes class-list class)} attrs)
+     :clj    (merge {:class (cond-> (str/join " " class-list) class (str " " class))} attrs)))
