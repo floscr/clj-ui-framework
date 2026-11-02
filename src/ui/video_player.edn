@@ -1,0 +1,82 @@
+{:id :video-player
+ :title "Video player"
+ :summary "A video player with glass controls over the picture, HLS through hls.js, built-in subtitles, quality and speed menus, autoplay next, and custom buttons with their own popovers."
+ :category :media
+ :group "Media"
+ :keywords ["video" "player" "hls" "hls.js" "m3u8" "subtitles" "captions" "quality" "playback speed" "autoplay next" "up next" "fullscreen" "picture in picture"]
+
+ :when-to-use
+ ["Playing a film, an episode or a clip, from a file or an HLS stream."
+  "A player that needs app-specific controls next to the built-ins: a sleep timer, an audio switch, a share action."
+  "Series playback with an up-next countdown into the next episode."]
+
+ :when-not-to-use
+ ["Use player-bar for audio: a persistent bar with artwork and transport."
+  "Use timeline to edit or trim media."
+  "Use a plain <video> for a muted, looping background clip without controls."]
+
+ :usage "(require '[ui.video-player :as vp])\n\n(vp/video-player\n  {:src \"/hls/abc/index.m3u8\" :title \"Episode 1\" :start-at 62\n   :tracks [{:src \"/subs/en.vtt\" :label \"English\" :lang \"en\"}]\n   :next {:title \"Episode 2\" :thumb \"/thumbs/2.jpg\"}\n   :buttons [{:id :sleep :icon :moon :label \"Sleep timer\"\n              :options [{:value 0 :label \"Off\"} {:value 30 :label \"30 minutes\"}]\n              :value 0}]\n   :on-select (fn [id value] ...)\n   :on-next next-episode!})"
+
+ :examples
+ [{:title "Hiccup page: load hls.js, then listen for the runtime's change event"
+   :code "[:head [:script {:src vp/hls-script-url}]]\n...\n(vp/video-player {:src src :title title :next {:title \"Episode 2\" :href \"/watch/2\"}})\n[:script \"document.querySelector('[data-video-player]').addEventListener('change', e => console.log(e.detail))\"]"}
+  {:title "Replace a built-in: the host's own quality list"
+   :code "(vp/video-player {:src src\n                  :buttons [{:id :quality :label \"Quality\" :show-value? true\n                             :options [{:value \"1080\" :label \"1080p\"} {:value \"720\" :label \"720p\" :default? true}]\n                             :value \"720\"}]\n                  :on-select (fn [id v] (when (= id \"quality\") (reload-at! v))))"}]
+
+ :api
+ [{:fn "video-player"
+   :doc "The player. Render it once; the ui.js.video-player runtime owns playback state. Changing :src (the root's data-src) loads the new source."
+   :props [{:name :src :type "url" :doc "Media URL. A .m3u8 plays through window.Hls when loaded, natively on Safari."}
+           {:name :hls? :type "boolean" :doc "Treat :src as HLS even without .m3u8 in it."}
+           {:name :poster :type "url"}
+           {:name :title :type "string" :doc "Top chip and the label next to the transport."}
+           {:name :back :type "{:href :label}" :doc "A back link in the top chip."}
+           {:name :start-at :type "seconds" :doc "Start position, e.g. a resume point."}
+           {:name :autoplay? :type "boolean" :doc "Try to play at once; stays paused when the browser refuses."}
+           {:name :tracks :type "[{:src :label :lang :default?}]" :doc "WebVTT subtitle tracks. HLS subtitle renditions appear on their own."}
+           {:name :next :type "{:title :thumb :href}" :doc "The next item: a Next button, the up-next card, the autonext toggle. :href navigates; else only :on-next fires."}
+           {:name :autonext? :type "boolean" :default "true" :doc "Initial state of autoplay next."}
+           {:name :controls :type "vector of ids" :doc "Right capsule in order. Built-ins: :subtitles :quality :speed :autonext :pip :fullscreen."}
+           {:name :buttons :type "vector of maps" :doc "Custom controls: menus {:id :icon :label :options :value :show-value?}, {:type :toggle :pressed?} or {:type :action}."}
+           {:name :fit :type ":contain | :fill" :default ":contain" :doc ":fill fills the parent (full-page players) instead of 16:9."}
+           {:name :variant :type ":glass | :plain" :default ":glass" :doc ":glass floats the controls in blurred capsules; :plain sets them straight on a gradient with solid popovers and no blur (cheaper on TVs and old phones)."}
+           {:name :on-select :type "fn [id value]" :doc "A menu option was picked. Custom menus get the option's original value."}
+           {:name :on-toggle :type "fn [id on?]" :doc "A toggle flipped, :autonext included."}
+           {:name :on-action :type "fn [id]" :doc "An action button was pressed."}
+           {:name :on-next :type "fn []" :doc "Next pressed or the up-next countdown ran out."}
+           {:name :class :type "string"}
+           {:name :attrs :type "map"}]}
+  {:fn "video-player-classes" :doc "Class string for the root."}]
+
+ :keyboard [["Space / k" "Play or pause."]
+            ["Left / Right" "Seek 5 seconds."]
+            ["Up / Down" "Volume."]
+            ["m" "Mute."]
+            ["c" "Subtitles on or off."]
+            ["f" "Fullscreen."]
+            ["n" "Next, when there is one."]
+            ["Escape" "Closes an open popover."]]
+
+ :accessibility ["The root is a labelled region; keys work while focus is inside it, or anywhere when it is the only player on the page."
+                 "The seek bar and volume are sliders with values; options are menuitemradio with aria-checked; triggers carry aria-expanded and aria-pressed."
+                 "Captions are drawn from the video's text tracks into the page, so they can sit above the controls."]
+
+ :motion ["Controls fade after 2.6 s without input while playing; popovers pop in over --duration-fast; the scrub track grows on hover with --ease-spring."
+          "prefers-reduced-motion drops the transitions."]
+
+ :responsive ["Below 600px the title, volume slider and pill labels hide and the controls shrink; below 420px the dock moves closer to the edges."
+              "Container queries, so the player adapts to its own width, not the viewport."]
+
+ :targets
+ {:clj "Load hls.js (hls-script-url) and ui-runtime.js; listen for the root's change event yourself."
+  :cljs "Callbacks via :on-select, :on-toggle, :on-action, :on-next. Require ui.js.video-player when the page doesn't load ui-runtime.js."
+  :squint "Same as Replicant."}
+
+ :runtime ["ui.js.video-player"]
+
+ :notes-for-ai ["Don't re-render the player on every timeupdate: the runtime owns time, play state and the open popover. Re-render only when :src, :next or a custom button's :value changes."
+                "Custom option values travel through the DOM as strings; on-select maps them back to the original value."
+                "A button with a built-in id (e.g. :quality) replaces the built-in."
+                "window.__uiVideoPlayer(root) returns {video play pause seek toast load} for host scripts (progress saving, resume)."]
+
+ :related [:player-bar :timeline :popover]}

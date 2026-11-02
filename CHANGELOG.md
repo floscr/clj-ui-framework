@@ -9,6 +9,23 @@ clj-ui-framework/clj-ui-framework
  :git/sha "<sha the tag points at>"}
 ```
 
+## Unreleased
+
+### New
+
+- **Video player** (`ui.video-player` + the `ui.js.video-player` runtime):
+  glass capsules over the picture, HLS through hls.js (`hls-script-url`),
+  subtitles drawn from the video's text tracks, quality and speed menus,
+  autoplay next with an up-next countdown, fullscreen, picture in picture
+  and keyboard control. Custom controls are data (`:buttons`): menus with
+  their own popover, toggles and actions, reported through `:on-select`,
+  `:on-toggle`, `:on-action` and `:on-next` (a `change` event on the root
+  for hiccup pages). `:variant :plain` drops the glass: controls on a
+  gradient, solid popovers, no backdrop blur.
+- Icons: `volume-1`, `volume-x`, `captions`, `gauge`, `maximize`,
+  `minimize`, `picture-in-picture-2`, `rotate-ccw`, `rotate-cw`,
+  `list-video`.
+
 ## v2.0.0 — 2026-10-29
 
 Good-looking apps by default: quieter controls, a smaller type scale, one

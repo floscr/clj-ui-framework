@@ -143,6 +143,7 @@
               [ui.metric-test]
               [ui.day-grid-test]
               [ui.list-row-test]
+              [ui.video-player-test]
               [ui.registry-test])
    :task (let [{:keys [fail error]} (t/run-tests
                                       'ui.button-test
@@ -196,6 +197,7 @@
                                       'ui.metric-test
                                       'ui.day-grid-test
                                       'ui.list-row-test
+                                      'ui.video-player-test
                                       'ui.registry-test)]
            (when (pos? (+ fail error))
              (System/exit 1)))}

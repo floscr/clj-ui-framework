@@ -58,7 +58,8 @@
             [dev.examples.settings :as settings]
             [dev.examples.metric :as metric]
             [dev.examples.day-grid :as day-grid]
-            [dev.examples.list-row :as list-row]))
+            [dev.examples.list-row :as list-row]
+            [dev.examples.video-player :as video-player]))
 
 (def entries
   [{:id :button          :title "Button"          :examples button/examples}
@@ -112,7 +113,8 @@
    {:id :settings        :title "Settings rows"   :examples settings/examples}
    {:id :metric          :title "Metric"          :examples metric/examples}
    {:id :day-grid        :title "Day grid"        :examples day-grid/examples}
-   {:id :list-row        :title "List row"        :examples list-row/examples}])
+   {:id :list-row        :title "List row"        :examples list-row/examples}
+   {:id :video-player    :title "Video player"    :examples video-player/examples}])
 
 (defn entry
   "The registry entry for a component id (keyword or string)."

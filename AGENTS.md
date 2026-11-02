@@ -1106,6 +1106,38 @@ hands the gestures to the runtime (the page-level pinch block from
 `ui.js.touch` stays in place). **Don't hand-roll zoom in apps.**
 Squint/Replicant SPAs without ui-runtime.js add `(:require [ui.js.lightbox])`.
 
+## Video Player (`ui.js.video-player`) — runtime-owned state
+
+`ui.video-player/video-player` renders the markup once; the
+`ui.js.video-player` runtime (in ui-runtime.js) finds every
+`[data-video-player]` (MutationObserver) and owns playback: hls.js when the
+page loaded it (`window.Hls`, `ui.video-player/hls-script-url`) and the
+source is a .m3u8, scrubbing, volume (persisted in localStorage), captions
+drawn from the video's text tracks, idle hiding, fullscreen, the up-next
+countdown and the popovers.
+
+- **State lives in attributes the render never changes** (`data-paused`,
+  `data-idle`, `data-muted`, `data-fullscreen`, … on the root; aria-checked
+  of built-in options; CSS variables), so a Replicant/Squint re-render
+  doesn't fight the runtime (vdom diffs only patch what the render
+  changed). Don't re-render on timeupdate.
+- **Changing `:src`** (the root's `data-src`) loads the new source;
+  removing the root destroys its hls.js instance.
+- **Controls are data**: built-ins `:subtitles :quality :speed :autonext
+  :pip :fullscreen`, custom `:buttons` (menus with their own panel,
+  `:type :toggle`, `:type :action`). A custom button with a built-in id
+  replaces the built-in.
+- **Reporting**: a non-bubbling `change` CustomEvent on the root, detail
+  `{kind id value on}`. The component wires it to `:on-select :on-toggle
+  :on-action :on-next` (eucalypt sets `:on-*` as element properties, so
+  only standard event names like `change` work there). Hiccup pages listen
+  themselves. Custom option values travel as strings; the component maps
+  them back to the original value.
+- `window.__uiVideoPlayer(root)` → `{video play pause seek toast load}` for
+  host scripts (progress saving, resume).
+- Squint/Replicant SPAs without ui-runtime.js add
+  `(:require [ui.js.video-player])` and load hls.js themselves.
+
 ## Icons (`ui.icon`)
 
 Inline SVG icons using Lucide-compatible 24×24 paths. All icons are defined in `src/ui/icon.cljc`.

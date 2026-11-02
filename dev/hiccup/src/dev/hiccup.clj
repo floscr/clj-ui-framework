@@ -736,6 +736,7 @@
           [:script (h/raw theme-persistence-script)]
           (when live-reload? [:script (h/raw live-reload-script)])]
          [:body
+          [:script {:src "https://cdn.jsdelivr.net/npm/hls.js@1"}]
           [:script {:src "/ui-runtime.js"}]
           [:script (h/raw theme-toggle-script)]
           (when live-reload? [:script {:src "/theme-adapter.js" :defer true}])

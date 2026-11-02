@@ -14,4 +14,5 @@
             [select]
             [theme]
             [toast]
-            [touch]))
+            [touch]
+            [video-player]))
