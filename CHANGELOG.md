@@ -9,6 +9,16 @@ clj-ui-framework/clj-ui-framework
  :git/sha "<sha the tag points at>"}
 ```
 
+## v2.2.1 — 2026-11-02
+
+### Fixed
+
+- The done tick in `task-check` is centred (a mask glyph like the states,
+  so it scales with the box), and a task's check in an agenda row is
+  centred on the row's first line instead of sitting above it.
+- Tasks within one time slot are ordered by `:state` (active first, done
+  last); a day cell moves cancelled tasks to the end along with done ones.
+
 ## v2.2.0 — 2026-11-02
 
 ### New

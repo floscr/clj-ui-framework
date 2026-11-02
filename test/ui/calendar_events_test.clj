@@ -285,3 +285,18 @@
   (testing "event-pill draws the event's state"
     (let [html (str (cal-events/event-pill {:event {:title "Write" :task? true :state :active}}))]
       (is (re-find #"cal-task-check cal-task-check-active" html)))))
+
+(deftest task-state-order-test
+  (let [evts [{:title "todo" :date "2026-03-29" :task? true}
+              {:title "done" :date "2026-03-29" :task? true :done? true}
+              {:title "waiting" :date "2026-03-29" :task? true :state :waiting}
+              {:title "cancelled" :date "2026-03-29" :task? true :state "CANCELLED"}
+              {:title "timed" :date "2026-03-29" :time-start "09:00" :task? true :state :active}
+              {:title "active" :date "2026-03-29" :task? true :state :active}
+              {:title "event" :date "2026-03-29"}]]
+    (testing "within a time slot tasks go by state, all-day still first"
+      (is (= ["active" "todo" "event" "waiting" "cancelled" "done" "timed"]
+             (map :title (cal-events/events-for-date evts "2026-03-29")))))
+    (testing "a cell lists done and cancelled last"
+      (is (= ["active" "todo" "event" "waiting" "timed" "cancelled" "done"]
+             (map :title (cal-events/cell-events evts "2026-03-29")))))))

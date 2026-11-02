@@ -28,20 +28,34 @@
       (str "cal-event-" c)
       "cal-event-default")))
 
+(def ^:private state-ranks
+  "Order of task states within one time slot; no state sits with todo."
+  {"active" 0 "next" 1 "waiting" 3 "hold" 4 "cancelled" 5})
+
+(defn- state-rank [evt]
+  (if (:done? evt)
+    6
+    (get state-ranks (some-> (:state evt) util/kw-name str/lower-case) 2)))
+
+(defn- closed? [evt]
+  (>= (state-rank evt) 5))
+
 (defn events-for-date
   "Filter events matching a date string, sorted by time-start. Untimed
-   all-day events sort first (empty string precedes any 'HH:MM')."
+   all-day events sort first (empty string precedes any 'HH:MM'); within a
+   time, tasks go by :state (active, next, the rest, waiting, hold,
+   cancelled), done ones last."
   [events date-str]
   (let [matching (filterv (fn [evt] (= date-str (:date evt))) events)]
-    (sort-by (fn [evt] (or (:time-start evt) "")) matching)))
+    (sort-by (fn [evt] (or (:time-start evt) "")) (sort-by state-rank matching))))
 
 (defn cell-events
   "The events of a date in the order a day cell lists them: events-for-date
-   with done ones last, so they are the first to move into '+N more'."
+   with done and cancelled ones last, so they are the first to move into
+   '+N more'."
   [events date-str]
-  (let [day   (events-for-date events date-str)
-        done? (fn [evt] (:done? evt))]
-    (into (vec (remove done? day)) (filter done? day))))
+  (let [day (events-for-date events date-str)]
+    (into (vec (remove closed? day)) (filter closed? day))))
 
 (defn- visible-count
   "How many of a cell's `day-events` show before '+N more'. `max-visible` is

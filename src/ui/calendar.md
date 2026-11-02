@@ -183,6 +183,10 @@ The pills, agenda rows and week all-day rows read it from the event map;
 hosts drawing their own rows call `(task-check done? on-toggle state)` or
 `(event-task-check event on-toggle)`.
 
+The state also orders a day: within one time slot `events-for-date` lists
+active, next, the rest, waiting, hold, cancelled, then done, and
+`cell-events` moves cancelled and done to the end of the cell.
+
 ## Event Colors
 
 Eight named colors, all with automatic dark-mode variants. Pass `nil` for the default gray.
