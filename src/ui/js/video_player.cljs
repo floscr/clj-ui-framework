@@ -12,7 +12,10 @@
    doesn't fight it. State flags on the root:
 
      data-paused data-idle data-loading data-muted data-fullscreen
-     data-panel-open data-upnext data-error
+     data-panel-open data-upnext data-error data-autoplay-muted
+
+   Autoplay (data-autoplay, or the controller's play) falls back to muted
+   playback when the browser refuses sound, with a Tap to unmute pill.
 
    Sources: a .m3u8 (or data-hls) goes through window.Hls when the page
    loaded hls.js, else through native HLS (Safari); anything else is set
@@ -308,6 +311,7 @@
         muted? (or (.-muted v) (zero? (.-volume v)))]
     (flag! root "data-paused" (.-paused v))
     (flag! root "data-muted" muted?)
+    (when-not muted? (flag! root "data-autoplay-muted" false))
     (flag! root "data-fullscreen" (identical? (.-fullscreenElement js/document) root))
     (.forEach (qa root "[data-vp-act=play]")
               (fn [b] (let [l (if (.-paused v) "Play" "Pause")]
@@ -354,6 +358,29 @@
       (let [r (.play v)] (when (and r (.-catch r)) (.catch r (fn [_]))))
       (.pause v))))
 
+(defn- autoplay!
+  "Play. When the browser refuses sound without a gesture in this document
+   (a stream that starts long after the click that opened the page), play
+   muted instead, which is always allowed, and show the unmute pill: the
+   next tap on the player brings the sound back instead of pausing."
+  [p]
+  (let [v (.-video p)
+        r (.play v)]
+    (when (and r (.-catch r))
+      (.catch r (fn [e]
+                  (when (= "NotAllowedError" (.-name e))
+                    (set! (.-muted v) true)
+                    (flag! (.-root p) "data-autoplay-muted" true)
+                    (let [r2 (.play v)] (when (and r2 (.-catch r2)) (.catch r2 (fn [_]))))))))))
+
+(defn- unmute! [p]
+  (let [v (.-video p)]
+    (set! (.-muted v) false)
+    (when (zero? (.-volume v)) (set! (.-volume v) 1))
+    (flag! (.-root p) "data-autoplay-muted" false)))
+
+(defn- auto-muted? [p] (.hasAttribute (.-root p) "data-autoplay-muted"))
+
 (defn- seek-by! [p s]
   (let [v (.-video p)]
     (set! (.-currentTime v) (clamp (+ (.-currentTime v) s) 0 (or (.-duration v) 0)))))
@@ -378,8 +405,9 @@
       "back" (do (seek-by! p -10) (toast! p "−10 s"))
       "forward" (do (seek-by! p 10) (toast! p "+10 s"))
       "mute" (if (or (.-muted v) (zero? (.-volume v)))
-               (do (set! (.-muted v) false) (when (zero? (.-volume v)) (set! (.-volume v) 1)))
+               (unmute! p)
                (set! (.-muted v) true))
+      "unmute" (unmute! p)
       "next" (go-next! p)
       "upnext-cancel" (do (set! (.-dismissed p) true) (upnext! p))
       "pip" (if (.-pictureInPictureElement js/document)
@@ -513,13 +541,22 @@
         hls? (or (= "true" (.. root -dataset -hls)) (.test (js/RegExp. "\\.m3u8($|[?#])" "i") src))
         Hls (.-Hls js/window)
         autoplay? (= "true" (.. root -dataset -autoplay))
-        play! (fn [] (when autoplay?
-                       (let [r (.play v)] (when (and r (.-catch r)) (.catch r (fn [_]))))))]
+        play! (fn [] (when autoplay? (autoplay! p)))]
     (set! (.-src p) src)
     (set! (.-dismissed p) false)
     (set! (.-sub p) -1)
     (flag! root "data-error" false)
+    ;; An autoplaying source shows the spinner from the start, not the big
+    ;; play button; playing/canplay clear it.
+    (flag! root "data-loading" (and autoplay? (not= "" src)))
     (cond
+      ;; No source yet (a host still waiting for its stream) or cleared:
+      ;; empty the video. Setting src to "" would load the page itself.
+      (= "" src)
+      (do (when-let [b (q root "[data-vp-builtin=quality]")] (set! (.-hidden b) true))
+          (.removeAttribute v "src")
+          (.load v))
+
       (and hls? Hls (.isSupported Hls))
       (let [h (Hls. #js {:startPosition (if (pos? start) start -1) :maxBufferLength 30})]
         (set! (.-hls p) h)
@@ -575,7 +612,9 @@
                            (cond
                              (not t)
                              (cond (.-open p) (close-panel! p)
-                                   (.closest (.-target e) "[data-vp=surface]") (toggle-play! p))
+                                   (not (.closest (.-target e) "[data-vp=surface]")) nil
+                                   (auto-muted? p) (unmute! p)
+                                   :else (toggle-play! p))
 
                              (.hasAttribute t "data-vp-open")
                              (open-panel! p (.getAttribute t "data-vp-open") t)
@@ -658,7 +697,7 @@
       (fn [root]
         (when-let [p (.get players root)]
           #js {:video (.-video p)
-               :play (fn [] (.play (.-video p)))
+               :play (fn [] (autoplay! p))
                :pause (fn [] (.pause (.-video p)))
                :seek (fn [t] (set! (.. p -video -currentTime) t))
                :toast (fn [msg] (toast! p msg))

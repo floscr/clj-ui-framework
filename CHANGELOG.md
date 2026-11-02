@@ -9,6 +9,20 @@ clj-ui-framework/clj-ui-framework
  :git/sha "<sha the tag points at>"}
 ```
 
+## v2.1.1 — 2026-11-02
+
+### Fixed
+
+- **Video player autoplay** falls back to muted playback when the browser
+  refuses sound (a stream that starts long after the click that opened the
+  page) and shows a "Tap to unmute" pill; the next tap on the video
+  unmutes instead of pausing. The controller's `play` does the same.
+- An autoplaying source shows the spinner from the start instead of the
+  big play button.
+- An empty `:src` loads nothing (it used to make the browser load the page
+  itself as media), so a host can render the player before its stream is
+  ready.
+
 ## v2.1.0 — 2026-11-02
 
 ### New

@@ -62,7 +62,7 @@
 
 ### `video-player`
 
-The player. Render it once; the ui.js.video-player runtime owns playback state. Changing :src (the root's data-src) loads the new source.
+The player. Render it once; the ui.js.video-player runtime owns playback state. Changing :src (the root's data-src) loads the new source; an empty :src renders the player without loading anything (a host still waiting for its stream).
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
