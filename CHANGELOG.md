@@ -9,6 +9,26 @@ clj-ui-framework/clj-ui-framework
  :git/sha "<sha the tag points at>"}
 ```
 
+## v2.3.0 — 2026-11-02
+
+### New
+
+- **`file-table` multi-column sort**: `:sorts` (ordered `[{:key :dir}]`)
+  marks every sorted header with its chevron and, past one key, its rank.
+  `:on-sort` gets the click event as a second argument, so a host can add a
+  key on Alt/Shift+click. A column's `:sortable false` opts out.
+- **Resizable columns**: with `:on-resize (fn [col-key px])` each header
+  gets a grip on its right edge. Dragging moves the grid's tracks directly
+  (no re-render) and reports the width on release; double-clicking fits
+  the column to its widest rendered content. The host keeps the widths and
+  passes them back as `:width`; `:resizable false` opts a column out.
+  Squint / Replicant only.
+- **Header hooks**: `:header-attrs-fn` (merged onto a header cell, class
+  appended, e.g. drag handlers to reorder columns, marked by
+  `fb-table-th-drop-before` / `-after`) and
+  `:header-context-menu-items-fn` (a right-click menu per header).
+- Icons `grip-vertical` and `sliders-horizontal`.
+
 ## v2.2.1 — 2026-11-02
 
 ### Fixed

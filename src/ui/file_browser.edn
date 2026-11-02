@@ -31,9 +31,14 @@
   {:fn "file-list-header" :doc "Column headers for the list view with sort indicators."
    :props [{:name :sort-key :type ":name | :size | :modified | :type"} {:name :sort-dir :type ":asc | :desc"} {:name :on-sort :type "fn [col-key]"} {:name :class :type "string"} {:name :attrs :type "map"}]}
   {:fn "file-table" :doc "Configurable CSS-grid table with sortable headers, row click, selection and per-row context menus."
-   :props [{:name :columns :type "vector of {:key :label :width :render :class}" :default "default-columns"} {:name :items :type "vector"}
-           {:name :sort-key :type "keyword"} {:name :sort-dir :type ":asc | :desc"} {:name :on-sort :type "fn [col-key]"} {:name :on-row-click :type "fn [item]"}
+   :props [{:name :columns :type "vector of {:key :label :width :render :class :sortable :resizable}" :default "default-columns"} {:name :items :type "vector"}
+           {:name :sort-key :type "keyword"} {:name :sort-dir :type ":asc | :desc"}
+           {:name :sorts :type "vector of {:key :dir}" :doc "Multi-column sort in priority order; headers show their rank. Takes over :sort-key / :sort-dir."}
+           {:name :on-sort :type "fn [col-key event]" :doc "The event lets the host tell an Alt+click (add a sort key) from a plain click."} {:name :on-row-click :type "fn [item]"}
            {:name :selected-fn :type "fn [item] -> boolean"} {:name :context-menu-items-fn :type "fn [item] -> items"} {:name :row-attrs-fn :type "fn [item] -> map"}
+           {:name :on-resize :type "fn [col-key width-px]" :doc "Gives each header a grip on its right edge; called with the new width when dragged, or with the widest content's width on a double-click. The host keeps widths and passes them back as :width. Squint / Replicant only."}
+           {:name :header-attrs-fn :type "fn [col] -> map" :doc "Merged onto a header cell, :class appended: draggable + drag handlers to reorder columns (fb-table-th-drop-before / -after mark the drop), a title."}
+           {:name :header-context-menu-items-fn :type "fn [col] -> items" :doc "Right-click menu per header (hide / remove the column)."}
            {:name :class :type "string"} {:name :attrs :type "map"}]}
   {:fn "file-view-toggle" :doc "Grid and list toggle buttons."
    :props [{:name :view :type ":grid | :list"} {:name :on-grid-click :type "fn"} {:name :on-list-click :type "fn"}]}
@@ -52,6 +57,7 @@
   :cljs "All callbacks available."
   :squint "Same as Replicant; file-type->icon returns strings."}
 
- :notes-for-ai ["Sort in the host and pass the sorted :items; the component only renders indicators."]
+ :notes-for-ai ["Sort in the host and pass the sorted :items; the component only renders indicators."
+                "Column reordering and hiding are host state: pass the visible columns in order, wire drag handlers through :header-attrs-fn."]
 
  :related [:table :grid :context-menu :drop-zone]}

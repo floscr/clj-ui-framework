@@ -93,15 +93,19 @@ Configurable CSS-grid table with sortable headers, row click, selection and per-
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `:columns` | `vector of {:key :label :width :render :class}` | `default-columns` |  |
+| `:columns` | `vector of {:key :label :width :render :class :sortable :resizable}` | `default-columns` |  |
 | `:items` | `vector` | – |  |
 | `:sort-key` | `keyword` | – |  |
 | `:sort-dir` | `:asc \| :desc` | – |  |
-| `:on-sort` | `fn [col-key]` | – |  |
+| `:sorts` | `vector of {:key :dir}` | – | Multi-column sort in priority order; headers show their rank. Takes over :sort-key / :sort-dir. |
+| `:on-sort` | `fn [col-key event]` | – | The event lets the host tell an Alt+click (add a sort key) from a plain click. |
 | `:on-row-click` | `fn [item]` | – |  |
 | `:selected-fn` | `fn [item] -> boolean` | – |  |
 | `:context-menu-items-fn` | `fn [item] -> items` | – |  |
 | `:row-attrs-fn` | `fn [item] -> map` | – |  |
+| `:on-resize` | `fn [col-key width-px]` | – | Gives each header a grip on its right edge; called with the new width when dragged, nil on double-click. The host keeps widths and passes them back as :width. Squint / Replicant only. |
+| `:header-attrs-fn` | `fn [col] -> map` | – | Merged onto a header cell, :class appended: draggable + drag handlers to reorder columns (fb-table-th-drop-before / -after mark the drop), a title. |
+| `:header-context-menu-items-fn` | `fn [col] -> items` | – | Right-click menu per header (hide / remove the column). |
 | `:class` | `string` | – |  |
 | `:attrs` | `map` | – |  |
 
@@ -156,6 +160,7 @@ Icon name for a file type.
 ## Notes for AI
 
 - Sort in the host and pass the sorted :items; the component only renders indicators.
+- Column reordering and hiding are host state: pass the visible columns in order, wire drag handlers through :header-attrs-fn.
 
 ## Related
 

@@ -231,6 +231,118 @@
                      :clj    (if (= (util/kw-name dir) "asc") :chevron-up :chevron-down))]
     (icon/icon {:icon-name icon-name :size #?(:squint "sm" :cljs :sm :clj :sm)})))
 
+(defn- sort-rank
+  "Position of column `k` in `sorts` (ordered [{:key :dir}]), nil when the
+   table isn't sorted by it."
+  [sorts k]
+  (some (fn [[i s]] (when (= (util/kw-name (:key s)) (util/kw-name k)) i))
+        (map-indexed vector sorts)))
+
+;; Squint matches :cljs too, so this one body serves both browser targets.
+#?(:cljs
+   (defn- start-resize!
+     "Drag the right edge of header `th` (column `i`): the grid's columns
+      follow the pointer, set on the element directly so nothing re-renders,
+      and `on-resize` gets the final width in px on release."
+     [e th i k on-resize]
+     (.preventDefault e)
+     (.stopPropagation e)
+     (let [grid      (.closest th ".fb-table")
+           original  (.-gridTemplateColumns (.-style grid))
+           tracks    (.split (.-gridTemplateColumns (js/getComputedStyle grid)) " ")
+           start-x   (.-clientX e)
+           start-w   (js/Math.round (js/parseFloat (aget tracks i)))
+           width     (atom start-w)
+           draggable (.getAttribute th "draggable")
+           move      (fn [ev]
+                       (reset! width (max 40 (js/Math.round (+ start-w (- (.-clientX ev) start-x)))))
+                       (set! (.-gridTemplateColumns (.-style grid))
+                             (.join (.map tracks (fn [t j] (if (= j i) (str @width "px") t))) " ")))
+           up        (atom nil)]
+       ;; A draggable header (column reordering) would start a drag instead.
+       (when draggable (.removeAttribute th "draggable"))
+       (.add (.-classList grid) "fb-table-resizing")
+       (reset! up (fn [_]
+                    (.removeEventListener js/window "pointermove" move)
+                    (.removeEventListener js/window "pointerup" @up)
+                    (.removeEventListener js/window "pointercancel" @up)
+                    (.remove (.-classList grid) "fb-table-resizing")
+                    (when draggable (.setAttribute th "draggable" draggable))
+                    (set! (.-gridTemplateColumns (.-style grid)) original)
+                    (when (not= @width start-w)
+                      ;; The click ending the drag must not sort the column.
+                      (let [swallow (fn [ev] (.stopPropagation ev) (.preventDefault ev))]
+                        (.addEventListener js/window "click" swallow #js {:capture true :once true})
+                        (js/setTimeout (fn [] (.removeEventListener js/window "click" swallow #js {:capture true})) 0))
+                      (on-resize k @width))))
+       (.addEventListener js/window "pointermove" move)
+       (.addEventListener js/window "pointerup" @up)
+       (.addEventListener js/window "pointercancel" @up))))
+
+#?(:cljs
+   (defn- fit-column!
+     "Size column `i` to its widest content: the grid lays the track out as
+      max-content for a moment (the full text of an ellipsized cell counts,
+      as far as the rendered rows go), and `on-resize` gets that width."
+     [th i k on-resize]
+     (let [grid     (.closest th ".fb-table")
+           style    (.-style grid)
+           original (.-gridTemplateColumns style)
+           tracks   (.split (.-gridTemplateColumns (js/getComputedStyle grid)) " ")
+           _        (set! (.-gridTemplateColumns style)
+                          (.join (.map tracks (fn [t j] (if (= j i) "max-content" t))) " "))
+           fitted   (aget (.split (.-gridTemplateColumns (js/getComputedStyle grid)) " ") i)]
+       (set! (.-gridTemplateColumns style) original)
+       (on-resize k (max 40 (js/Math.ceil (js/parseFloat fitted)))))))
+
+(defn- resize-handle
+  "The grip on a header's right edge: drag to resize the column, double-click
+   to fit it to its widest content."
+  [i k on-resize]
+  (let [th   (fn [e] (.closest (.-currentTarget e) ".fb-table-th"))
+        down (fn [e] #?(:cljs (start-resize! e (th e) i k on-resize) :clj nil))
+        fit  (fn [e] (.stopPropagation e) #?(:cljs (fit-column! (th e) i k on-resize) :clj nil))
+        stop (fn [e] (.stopPropagation e))]
+    #?(:squint [:span {:class "fb-table-col-resize" :aria-hidden "true"
+                       :on-pointer-down down :on-dblclick fit :on-click stop}]
+       :cljs   [:span {:class ["fb-table-col-resize"] :aria-hidden "true"
+                       :on {:pointerdown down :dblclick fit :click stop}}]
+       :clj    nil)))
+
+(defn- table-th
+  "One header cell: the label, the sort chevron and, when the table sorts by
+   more than one column, the column's place in that order; with `on-resize`
+   a grip on its right edge. Wrapped in a context-menu-trigger when
+   `header-context-menu-items-fn` has items for it."
+  [i col {:keys [sorts on-sort on-resize header-attrs-fn header-context-menu-items-fn]}]
+  (let [k         (:key col)
+        sortable? (and (some? on-sort) (not (false? (:sortable col))))
+        grip      (when (and (some? on-resize) (not (false? (:resizable col))))
+                    (resize-handle i k on-resize))
+        rank      (sort-rank sorts k)
+        active    (some? rank)
+        extra     (or (when header-attrs-fn (header-attrs-fn col)) {})
+        click     (when sortable? (fn [e] (on-sort k e)))
+        attrs     #?(:squint (merge {:on-click click} (dissoc extra :class))
+                     :cljs   (cond-> (dissoc extra :class)
+                               click (update :on (fn [on] (merge {:click click} on))))
+                     :clj    (dissoc extra :class))
+        th        (cond-> [:div (util/class-attrs (cond-> ["fb-table-th"]
+                                                    active      (conj "fb-table-th-active")
+                                                    sortable?   (conj "fb-table-th-sortable")
+                                                    (:class col) (conj (:class col)))
+                                                  (:class extra)
+                                                  attrs)
+                             [:span (:label col)]]
+                    active (conj (table-sort-indicator (:dir (nth sorts rank))))
+                    (and active (> (count sorts) 1))
+                    (conj [:span (util/class-attrs ["fb-table-sort-rank"] nil nil) (str (inc rank))])
+                    grip (conj grip))
+        cm-items  (when header-context-menu-items-fn (header-context-menu-items-fn col))]
+    (if (seq cm-items)
+      (context-menu/context-menu-trigger {:items cm-items} th)
+      th)))
+
 (defn- render-cell
   "Renders a table cell value. Uses column :render fn if present,
    otherwise gets :key from item."
@@ -255,7 +367,19 @@
      :items        - vector of item maps
      :sort-key     - current sort column key
      :sort-dir     - current direction (:asc or :desc)
-     :on-sort      - (fn [col-key]) called when a header is clicked
+     :sorts        - ordered sort keys [{:key :dir}], for a table sorted by
+                     several columns (takes over :sort-key / :sort-dir);
+                     each header shows its chevron and its rank
+     :on-sort      - (fn [col-key event]) called when a header is clicked;
+                     the event tells e.g. an Alt+click (add a sort key)
+                     from a plain one
+     :on-resize    - (fn [col-key width-px]) when a column's right edge was
+                     dragged, or double-clicked (fit to the widest content).
+                     The host keeps the widths and passes them as :width
+     :header-attrs-fn - (fn [col]) -> attrs merged onto that header cell
+                     (draggable + drag handlers to reorder columns, a title)
+     :header-context-menu-items-fn - (fn [col]) -> items, right-click menu
+                     per header cell (hide / remove the column)
      :on-row-click - (fn [item]) called when a row is clicked
      :selected-fn  - (fn [item]) -> boolean, highlights the row
      :context-menu-items-fn - (fn [item]) -> items vector, right-click menu per row
@@ -268,10 +392,17 @@
      :label  - header text
      :width  - CSS width string (optional, e.g. \"90px\")
      :render - (fn [item]) custom cell renderer (optional)
-     :class  - additional CSS class for this column's cells (optional)"
-  [{:keys [columns items sort-key sort-dir on-sort on-row-click selected-fn context-menu-items-fn row-attrs-fn class attrs]}]
+     :class  - additional CSS class for this column's cells (optional)
+     :sortable - false keeps a column's header from sorting (optional)
+     :resizable - false keeps a column from being resized (optional)"
+  [{:keys [columns items sort-key sort-dir sorts on-sort on-resize on-row-click selected-fn context-menu-items-fn row-attrs-fn
+           header-attrs-fn header-context-menu-items-fn class attrs]}]
   (let [cols         (or columns default-columns)
-        sortable?    (some? on-sort)
+        hopts        {:sorts (or sorts (when sort-key [{:key sort-key :dir sort-dir}]))
+                      :on-sort on-sort
+                      :on-resize on-resize
+                      :header-attrs-fn header-attrs-fn
+                      :header-context-menu-items-fn header-context-menu-items-fn}
         ;; Flexible columns: the first (the name) keeps room to read on a
         ;; narrow screen and takes twice the share; the rest shrink first.
         ;; Wider than the wrapper, the table scrolls inside it.
@@ -286,17 +417,7 @@
         (into [:div {:class "fb-table"
                      :style {"grid-template-columns" gtc}}
                (into [:div {:class "fb-table-header"}]
-                     (map (fn [col]
-                            (let [k     (:key col)
-                                  active (= k (or sort-key ""))]
-                              [:div {:class (cond-> "fb-table-th"
-                                              active    (str " fb-table-th-active")
-                                              sortable? (str " fb-table-th-sortable")
-                                              (:class col) (str " " (:class col)))
-                                     :on-click (when sortable? (fn [_] (on-sort k)))}
-                               [:span (:label col)]
-                               (when active (table-sort-indicator sort-dir))]))
-                          cols))]
+                     (map-indexed (fn [i col] (table-th i col hopts)) cols))]
               (map (fn [item]
                      (let [sel?     (and selected-fn (selected-fn item))
                            cm-items (when context-menu-items-fn (context-menu-items-fn item))
@@ -322,17 +443,7 @@
         (into [:div {:class ["fb-table"]
                      :style {:grid-template-columns gtc}}
                (into [:div {:class ["fb-table-header"]}]
-                     (map (fn [col]
-                            (let [k     (:key col)
-                                  active (= (util/kw-name k) (util/kw-name (or sort-key "")))]
-                              [:div {:class (cond-> ["fb-table-th"]
-                                              active    (conj "fb-table-th-active")
-                                              sortable? (conj "fb-table-th-sortable")
-                                              (:class col) (conj (:class col)))
-                                     :on (when sortable? {:click (fn [_] (on-sort k))})}
-                               [:span (:label col)]
-                               (when active (table-sort-indicator sort-dir))]))
-                          cols))]
+                     (map-indexed (fn [i col] (table-th i col hopts)) cols))]
               (map (fn [item]
                      (let [sel?     (and selected-fn (selected-fn item))
                            cm-items (when context-menu-items-fn (context-menu-items-fn item))
@@ -358,16 +469,7 @@
         (into [:div {:class "fb-table"
                      :style (str "grid-template-columns: " gtc)}
                (into [:div {:class "fb-table-header"}]
-                     (map (fn [col]
-                            (let [k     (:key col)
-                                  active (= (util/kw-name k) (util/kw-name (or sort-key "")))]
-                              [:div {:class (cond-> "fb-table-th"
-                                              active    (str " fb-table-th-active")
-                                              sortable? (str " fb-table-th-sortable")
-                                              (:class col) (str " " (:class col)))}
-                               [:span (:label col)]
-                               (when active (table-sort-indicator sort-dir))]))
-                          cols))]
+                     (map-indexed (fn [i col] (table-th i col hopts)) cols))]
               (map (fn [item]
                      (let [sel?     (and selected-fn (selected-fn item))
                            cm-items (when context-menu-items-fn (context-menu-items-fn item))

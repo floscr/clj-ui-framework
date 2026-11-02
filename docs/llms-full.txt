@@ -1000,7 +1000,7 @@ Full library index: docs/llms.txt
 - Type: Component (data, Dates)
 - Namespace: `ui.calendar-events`
 - Source: `src/ui/calendar_events.cljc`
-- Public fns: `event-color-class`, `events-for-date`, `cell-events`, `format-time`, `event-time-display`, `parse-int*`, `round*`, `hhmm->minutes`, `event-duration-minutes`, `format-duration`, `format-hour-label`, `event-pill-class-list`, `event-pill-classes`, `ticker-day-class-list`, `ticker-day-classes`, `agenda-event-class-list`, `agenda-event-classes`, `task-check`, `event-pill`, `event-day-cell`, `calendar-event-grid`, `month-grid`, `ticker-dot`, `ticker-day-item`, `ticker-strip`, `agenda-event-row`, `agenda-day-group-class-list`, `agenda-day-empty`, `agenda-day-group`, `agenda-list`, `day-timeline`, `week-timeline`
+- Public fns: `event-color-class`, `events-for-date`, `cell-events`, `format-time`, `event-time-display`, `parse-int*`, `round*`, `hhmm->minutes`, `event-duration-minutes`, `format-duration`, `format-hour-label`, `event-pill-class-list`, `event-pill-classes`, `ticker-day-class-list`, `ticker-day-classes`, `agenda-event-class-list`, `agenda-event-classes`, `task-check-class-list`, `task-check`, `event-task-check`, `event-pill`, `event-day-cell`, `calendar-event-grid`, `month-grid`, `ticker-dot`, `ticker-day-item`, `ticker-strip`, `agenda-event-row`, `agenda-day-group-class-list`, `agenda-day-empty`, `agenda-day-group`, `agenda-list`, `day-timeline`, `week-timeline`
 - Keywords: calendar, events, agenda, week view, day view, month view, event pills
 
 ## When to use
@@ -1199,7 +1199,7 @@ Minutes between :time-start and :time-end.
 
 ## Notes for AI
 
-- Event maps: {:title :date :time-start :time-end :color :done? :task?}; colors are :accent :danger :success :warning :blue :teal :pink :orange.
+- Event maps: {:title :date :time-start :time-end :color :done? :task? :state}; :state draws a task's open to-do state (:active :next :waiting :hold :cancelled) in its checkbox; colors are :accent :danger :success :warning :blue :teal :pink :orange.
 - Full documentation with markup contracts lives in src/ui/calendar.md.
 
 ## Related
@@ -2764,15 +2764,19 @@ Configurable CSS-grid table with sortable headers, row click, selection and per-
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `:columns` | `vector of {:key :label :width :render :class}` | `default-columns` |  |
+| `:columns` | `vector of {:key :label :width :render :class :sortable :resizable}` | `default-columns` |  |
 | `:items` | `vector` | – |  |
 | `:sort-key` | `keyword` | – |  |
 | `:sort-dir` | `:asc \| :desc` | – |  |
-| `:on-sort` | `fn [col-key]` | – |  |
+| `:sorts` | `vector of {:key :dir}` | – | Multi-column sort in priority order; headers show their rank. Takes over :sort-key / :sort-dir. |
+| `:on-sort` | `fn [col-key event]` | – | The event lets the host tell an Alt+click (add a sort key) from a plain click. |
 | `:on-row-click` | `fn [item]` | – |  |
 | `:selected-fn` | `fn [item] -> boolean` | – |  |
 | `:context-menu-items-fn` | `fn [item] -> items` | – |  |
 | `:row-attrs-fn` | `fn [item] -> map` | – |  |
+| `:on-resize` | `fn [col-key width-px]` | – | Gives each header a grip on its right edge; called with the new width when dragged, nil on double-click. The host keeps widths and passes them back as :width. Squint / Replicant only. |
+| `:header-attrs-fn` | `fn [col] -> map` | – | Merged onto a header cell, :class appended: draggable + drag handlers to reorder columns (fb-table-th-drop-before / -after mark the drop), a title. |
+| `:header-context-menu-items-fn` | `fn [col] -> items` | – | Right-click menu per header (hide / remove the column). |
 | `:class` | `string` | – |  |
 | `:attrs` | `map` | – |  |
 
@@ -2827,6 +2831,7 @@ Icon name for a file type.
 ## Notes for AI
 
 - Sort in the host and pass the sorted :items; the component only renders indicators.
+- Column reordering and hiding are host state: pass the visible columns in order, wire drag handlers through :header-attrs-fn.
 
 ## Related
 

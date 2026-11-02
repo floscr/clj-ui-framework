@@ -156,6 +156,60 @@
           th1 (nth header 2)] ;; Name column
       (is (re-find #"fb-table-th-active" (get-in th1 [1 :class])))))
 
+  (testing "multi-column sort marks each sorted header with its rank"
+    (let [result (fb/file-table {:items [] :on-sort identity
+                                 :columns [{:key :name :label "Name"}
+                                           {:key :size :label "Size"}
+                                           {:key :type :label "Type"}]
+                                 :sorts [{:key :size :dir :desc} {:key :name :dir :asc}]})
+          header (nth (nth result 2) 2)
+          [name-th size-th type-th] (drop 2 header)]
+      (is (re-find #"fb-table-th-active" (get-in name-th [1 :class])))
+      (is (re-find #"fb-table-th-active" (get-in size-th [1 :class])))
+      (is (not (re-find #"fb-table-th-active" (get-in type-th [1 :class]))))
+      (is (= "2" (last (last name-th))))
+      (is (= "1" (last (last size-th))))))
+
+  (testing "a single sort shows no rank"
+    (let [result (fb/file-table {:items [] :on-sort identity :sorts [{:key :name :dir :asc}]})
+          th (nth (nth (nth result 2) 2) 2)]
+      (is (= 4 (count th)))))
+
+  (testing ":sortable false keeps a header from sorting"
+    (let [result (fb/file-table {:items [] :on-sort identity
+                                 :columns [{:key :name :label "Name"}
+                                           {:key :fav :label "♥" :sortable false}]})
+          header (nth (nth result 2) 2)]
+      (is (re-find #"fb-table-th-sortable" (get-in (nth header 2) [1 :class])))
+      (is (not (re-find #"fb-table-th-sortable" (get-in (nth header 3) [1 :class]))))))
+
+  (testing "header attrs merge onto the cell, classes appended"
+    (let [result (fb/file-table {:items []
+                                 :columns [{:key :name :label "Name"}]
+                                 :header-attrs-fn (fn [col] {:class "fb-table-th-drop-before"
+                                                             :draggable "true"
+                                                             :data-col (name (:key col))})})
+          th (nth (nth (nth result 2) 2) 2)]
+      (is (re-find #"fb-table-th fb-table-th-drop-before" (get-in th [1 :class])))
+      (is (= "true" (get-in th [1 :draggable])))
+      (is (= "name" (get-in th [1 :data-col])))))
+
+  (testing "hiccup has no resize grip: dragging it needs the browser targets"
+    (let [result (fb/file-table {:items [] :on-resize (fn [_ _])
+                                 :columns [{:key :name :label "Name"}]})
+          th (nth (nth (nth result 2) 2) 2)]
+      (is (= 3 (count th)))))
+
+  (testing "header context menu wraps the cell in a trigger"
+    (let [result (fb/file-table {:items []
+                                 :columns [{:key :name :label "Name"} {:key :size :label "Size"}]
+                                 :header-context-menu-items-fn (fn [col]
+                                                                 (when (= :size (:key col))
+                                                                   [{:label "Hide column"}]))})
+          header (nth (nth result 2) 2)]
+      (is (re-find #"fb-table-th" (get-in (nth header 2) [1 :class])))
+      (is (re-find #"context-menu-trigger" (get-in (nth header 3) [1 :class])))))
+
   (testing "selected row gets class"
     (let [items [{:name "a.txt" :file-type :file}]
           result (fb/file-table {:items items :selected-fn (constantly true)})

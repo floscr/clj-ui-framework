@@ -206,6 +206,25 @@
     [:path {:d "M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"}]
     [:path {:d "m2 2 20 20"}]]
 
+   :grip-vertical
+   [[:circle {:cx "9" :cy "12" :r "1"}]
+    [:circle {:cx "9" :cy "5" :r "1"}]
+    [:circle {:cx "9" :cy "19" :r "1"}]
+    [:circle {:cx "15" :cy "12" :r "1"}]
+    [:circle {:cx "15" :cy "5" :r "1"}]
+    [:circle {:cx "15" :cy "19" :r "1"}]]
+
+   :sliders-horizontal
+   [[:path {:d "M21 4h-7"}]
+    [:path {:d "M10 4H3"}]
+    [:path {:d "M21 12h-9"}]
+    [:path {:d "M8 12H3"}]
+    [:path {:d "M21 20h-5"}]
+    [:path {:d "M12 20H3"}]
+    [:path {:d "M14 2v4"}]
+    [:path {:d "M8 10v4"}]
+    [:path {:d "M16 18v4"}]]
+
    :lock
    [[:rect {:width "18" :height "11" :x "3" :y "11" :rx "2" :ry "2"}]
     [:path {:d "M7 11V7a5 5 0 0 1 10 0v4"}]]

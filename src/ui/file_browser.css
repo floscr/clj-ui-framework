@@ -259,6 +259,71 @@
   color: var(--fg-0);
 }
 
+/* Header cells with a right-click menu stay direct grid items */
+.fb-table-header > .context-menu-trigger {
+  display: contents;
+}
+
+/* A column's place in a multi-column sort */
+.fb-table-th > .fb-table-sort-rank {
+  font-variant-numeric: tabular-nums;
+  color: var(--fg-2);
+}
+
+/* Resizing: a grip on each header's right edge (on-resize) */
+.fb-table-th {
+  position: relative;
+}
+
+.fb-table-th > .fb-table-col-resize {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: var(--size-2);
+  cursor: col-resize;
+  touch-action: none;
+}
+
+.fb-table-th > .fb-table-col-resize::after {
+  content: "";
+  position: absolute;
+  top: 25%;
+  bottom: 25%;
+  right: 2px;
+  width: 2px;
+  border-radius: 1px;
+  background: transparent;
+}
+
+.fb-table-th:hover > .fb-table-col-resize::after {
+  background: var(--fg-2);
+}
+
+.fb-table-th > .fb-table-col-resize:hover::after,
+.fb-table-resizing .fb-table-col-resize:active::after {
+  background: var(--accent);
+}
+
+.fb-table-resizing,
+.fb-table-resizing * {
+  cursor: col-resize;
+  user-select: none;
+}
+
+/* Reordering columns by dragging a header: where the drop lands */
+.fb-table-th[draggable="true"] {
+  cursor: grab;
+}
+
+.fb-table-th-drop-before {
+  box-shadow: inset 2px 0 0 var(--accent);
+}
+
+.fb-table-th-drop-after {
+  box-shadow: inset -2px 0 0 var(--accent);
+}
+
 /* Row: display:contents so cells participate in the parent grid */
 .fb-table-row {
   display: contents;
