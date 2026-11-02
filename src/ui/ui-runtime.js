@@ -1,5 +1,5 @@
 (() => {
-  // ../../../../../home/floscr/Code/Projects/clj-ui-framework/dev/squint/node_modules/squint-cljs/src/squint/core.js
+  // ../../../dev/squint/node_modules/squint-cljs/src/squint/core.js
   function toFn(x) {
     if (x == null) return x;
     if (x instanceof Function) {
@@ -2811,7 +2811,7 @@
   })();
   window["__uiContextMenu"] = open_context_menu;
 
-  // ../../../../../home/floscr/Code/Projects/clj-ui-framework/dev/squint/node_modules/squint-cljs/src/squint/string.js
+  // ../../../dev/squint/node_modules/squint-cljs/src/squint/string.js
   function join(sep, coll) {
     if (coll === void 0) {
       coll = sep;
