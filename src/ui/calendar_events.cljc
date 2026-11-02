@@ -67,6 +67,16 @@
     (some? max-visible) (max-visible date-str day-events)
     :else 3))
 
+(defn more-label
+  "The overflow button's text for the events a cell hides, nil when none:
+   '+N more' counts only open ones, so done and cancelled tasks don't swell
+   it; when only those are hidden it reads '+N done'."
+  [hidden-events]
+  (let [n-open (count (remove closed? hidden-events))]
+    (cond
+      (pos? n-open)       (str "+" n-open " more")
+      (seq hidden-events) (str "+" (count hidden-events) " done"))))
+
 (defn format-time
   "Format a HH:MM time string for display."
   [time-str]
@@ -322,7 +332,7 @@
         dots?       (= indicator :dots)
         max-vis     (visible-count max-visible date-str day-events)
         visible-evts (take max-vis day-events)
-        overflow    (- (count day-events) max-vis)
+        more        (more-label (drop max-vis day-events))
         dot-evts    (take (or max-dots 4) day-events)
         cls-opts    {:today? today?
                      :selected? selected?
@@ -352,11 +362,11 @@
                                              :on-context-menu on-event-context-menu
                                              :layout pill-layout}))
                       visible-evts)
-                 (when (pos? overflow)
+                 (when more
                    [[:button {:class "cal-event-more" :type "button"
                               :on-click (when on-more-click
                                           (fn [e] (.stopPropagation e) (on-more-click date-str)))}
-                     (str "+" overflow " more")]]))))]
+                     more]]))))]
 
        :cljs
        [:div {:class (cond-> (conj (cal/day-cell-class-list cls-opts) "cal-event-day")
@@ -382,11 +392,11 @@
                                              :on-context-menu on-event-context-menu
                                              :layout pill-layout}))
                       visible-evts)
-                 (when (pos? overflow)
+                 (when more
                    [[:button {:class ["cal-event-more"] :type "button"
                               :on (when on-more-click
                                     {:click (fn [e] (.stopPropagation e) (on-more-click date-str))})}
-                     (str "+" overflow " more")]]))))]
+                     more]]))))]
 
        :clj
        [:div {:class (str (cal/day-cell-classes cls-opts) " cal-event-day"
@@ -407,9 +417,9 @@
                 (concat
                  (map (fn [evt] (event-pill {:event evt :layout pill-layout}))
                       visible-evts)
-                 (when (pos? overflow)
+                 (when more
                    [[:button {:class "cal-event-more" :type "button"}
-                     (str "+" overflow " more")]]))))])))
+                     more]]))))])))
 
 (defn calendar-event-grid
   "Render a month grid calendar with events displayed in day cells.

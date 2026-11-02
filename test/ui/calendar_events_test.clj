@@ -229,7 +229,17 @@
       (is (= ["2026-10-27" ["b" "c" "a"]] @seen)))
     (testing "its count decides the pills shown; the done one overflows"
       (is (= 2 (count (filter #(= :div (first %)) (drop 2 body)))))
-      (is (= [:button {:class "cal-event-more" :type "button"} "+1 more"] (last body))))))
+      (is (= [:button {:class "cal-event-more" :type "button"} "+1 done"] (last body))))))
+
+(deftest more-label-test
+  (testing "only open events count"
+    (is (= "+1 more" (cal-events/more-label [{:title "Praxis"}
+                                             {:title "Walk" :done? true}
+                                             {:title "Gone" :state "cancelled"}]))))
+  (testing "only done ones hidden"
+    (is (= "+2 done" (cal-events/more-label [{:done? true} {:state "CANCELLED"}]))))
+  (testing "nothing hidden"
+    (is (nil? (cal-events/more-label [])))))
 
 (deftest month-grid-test
   (let [evts [{:title "A" :date "2026-10-12"}]]
