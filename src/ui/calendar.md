@@ -159,8 +159,29 @@ Events are plain maps:
  :time-start "09:00"          ;; HH:MM or nil
  :time-end   "09:30"          ;; HH:MM or nil
  :color      :accent          ;; see Event Colors below, or nil
- :done?      false}
+ :done?      false
+ :task?      false            ;; render as a checkbox row, not a pill
+ :state      nil}             ;; optional open to-do state, see Task States
 ```
+
+## Task States
+
+A task's checkbox is unchecked, or checked when `:done?`. An optional
+`:state` (keyword or string, any case) draws the open states in between:
+
+| `:state`     | Box                           |
+|--------------|-------------------------------|
+| `:active`    | amber, filled tint, bolt      |
+| `:next`      | accent, play triangle         |
+| `:waiting`   | muted, pause bars             |
+| `:hold`      | muted, dashed, pause bars     |
+| `:cancelled` | muted, cross                  |
+
+`:done?` wins over `:state`, and any other state ("todo") is the plain box,
+so a host can pass its raw keyword (`(some-> todo str/lower-case)` for org).
+The pills, agenda rows and week all-day rows read it from the event map;
+hosts drawing their own rows call `(task-check done? on-toggle state)` or
+`(event-task-check event on-toggle)`.
 
 ## Event Colors
 

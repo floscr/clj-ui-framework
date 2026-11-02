@@ -170,18 +170,36 @@
 
 ;; ── Components ──────────────────────────────────────────────────────
 
+(def task-states
+  "Open to-do states task-check draws a glyph for, between unchecked and done:
+   active (amber box, bolt), next (accent box, play), waiting / hold (muted
+   box, pause), cancelled (muted box, cross). Any other state, or none, is the
+   plain unchecked box."
+  #{"active" "next" "waiting" "hold" "cancelled"})
+
+(defn task-check-class-list
+  "Classes for a task-check glyph. `state` (keyword or string, any case) is
+   one of task-states; done? wins over it."
+  [{:keys [done? state clickable?]}]
+  (let [s (some-> state util/kw-name str/lower-case)]
+    (cond-> ["cal-task-check"]
+      done? (conj "cal-task-check-done")
+      (and (not done?) (contains? task-states s)) (conj (str "cal-task-check-" s))
+      clickable? (conj "cal-task-check-clickable"))))
+
 (defn task-check
-  "A checkbox glyph for to-do (repeating) calendar items. Checked when done?.
-   Pure markup + CSS, so it renders identically across clj/cljs/squint.
+  "A checkbox glyph for to-do (repeating) calendar items. Checked when done?;
+   otherwise an optional `state` (see task-states) draws its own glyph, e.g.
+   an amber box with a bolt for active. Pure markup + CSS, so it renders
+   identically across clj/cljs/squint.
 
    With an optional on-toggle handler the glyph becomes clickable: the click is
    stopped from propagating (so it won't also open the event) and on-toggle is
    called with the DOM event."
-  ([done?] (task-check done? nil))
-  ([done? on-toggle]
-   (let [classes (cond-> ["cal-task-check"]
-                   done? (conj "cal-task-check-done")
-                   on-toggle (conj "cal-task-check-clickable"))
+  ([done?] (task-check done? nil nil))
+  ([done? on-toggle] (task-check done? on-toggle nil))
+  ([done? on-toggle state]
+   (let [classes (task-check-class-list {:done? done? :state state :clickable? (some? on-toggle)})
          click (when on-toggle
                  (fn [e]
                    (.stopPropagation e)
@@ -191,6 +209,11 @@
         :cljs [:span (cond-> {:class classes}
                        click (assoc :on-click click))]
         :clj [:span {:class (str/join " " classes)}]))))
+
+(defn event-task-check
+  "task-check for an event map: its :done? and :state."
+  ([event] (event-task-check event nil))
+  ([event on-toggle] (task-check (:done? event) on-toggle (:state event))))
 
 (defn event-pill
   "Render a small event chip for use inside calendar day cells.
@@ -218,7 +241,7 @@
                                   (.preventDefault e)
                                   (.stopPropagation e)
                                   (on-context-menu event e)))}
-        (when task? (task-check done?))
+        (when task? (event-task-check event))
         (when time-str
           [:span {:class "cal-event-time"} time-str])
         [:span {:class "cal-event-title"} title]]
@@ -234,14 +257,14 @@
                                              (.preventDefault e)
                                              (.stopPropagation e)
                                              (on-context-menu event e))))}
-        (when task? (task-check done?))
+        (when task? (event-task-check event))
         (when time-str
           [:span {:class ["cal-event-time"]} time-str])
         [:span {:class ["cal-event-title"]} title]]
 
        :clj
        [:div {:class (event-pill-classes {:color color :done? done? :task? task? :layout layout})}
-        (when task? (task-check done?))
+        (when task? (event-task-check event))
         (when time-str
           [:span {:class "cal-event-time"} time-str])
         [:span {:class "cal-event-title"} title]])))
@@ -679,7 +702,7 @@
                                   (.preventDefault e)
                                   (on-context-menu event e)))}
         (if task?
-          (task-check done? toggle)
+          (event-task-check event toggle)
           [:div {:class (str "cal-agenda-dot " (event-color-class color))}])
         [:div {:class "cal-agenda-event-body"}
          (when time-str
@@ -695,7 +718,7 @@
                                              (.preventDefault e)
                                              (on-context-menu event e))))}
         (if task?
-          (task-check done? toggle)
+          (event-task-check event toggle)
           [:div {:class ["cal-agenda-dot" (event-color-class color)]}])
         [:div {:class ["cal-agenda-event-body"]}
          (when time-str
@@ -705,7 +728,7 @@
        :clj
        [:div {:class (agenda-event-classes {:done? done?})}
         (if task?
-          (task-check done? toggle)
+          (event-task-check event toggle)
           [:div {:class (str "cal-agenda-dot " (event-color-class color))}])
         [:div {:class "cal-agenda-event-body"}
          (when time-str
@@ -1079,7 +1102,7 @@
                                                                          (.stopPropagation e)
                                                                          (on-event-context-menu evt e)))}
                                                (if (:task? evt)
-                                                 (task-check (:done? evt))
+                                                 (event-task-check evt)
                                                  [:span {:class "cal-week-alldayevent-dot"}])
                                                [:span {:class "cal-week-alldayevent-title"} (:title evt)]])
                                             (events-for-date all-day (:date d)))))
@@ -1155,7 +1178,7 @@
                                                                                           (.stopPropagation e)
                                                                                           (on-event-context-menu evt e))))}
                                                (if (:task? evt)
-                                                 (task-check (:done? evt))
+                                                 (event-task-check evt)
                                                  [:span {:class ["cal-week-alldayevent-dot"]}])
                                                [:span {:class ["cal-week-alldayevent-title"]} (:title evt)]])
                                             (events-for-date all-day (:date d)))))
@@ -1226,7 +1249,7 @@
                                                                  (when (:task? evt) " cal-week-alldayevent-task")
                                                                  (when (:done? evt) " cal-event-done"))}
                                                (if (:task? evt)
-                                                 (task-check (:done? evt))
+                                                 (event-task-check evt)
                                                  [:span {:class "cal-week-alldayevent-dot"}])
                                                [:span {:class "cal-week-alldayevent-title"} (:title evt)]])
                                             (events-for-date all-day (:date d)))))

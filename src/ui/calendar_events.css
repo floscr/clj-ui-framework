@@ -307,6 +307,56 @@
   transform: rotate(45deg);
 }
 
+/* Open to-do states between unchecked and done (task-check's `state`): the
+   box takes the state's colour and a glyph inside, drawn as a mask in
+   currentColor. */
+.cal-task-check-active,
+.cal-task-check-next,
+.cal-task-check-waiting,
+.cal-task-check-hold,
+.cal-task-check-cancelled {
+  border-color: currentColor;
+}
+
+.cal-task-check-active::after,
+.cal-task-check-next::after,
+.cal-task-check-waiting::after,
+.cal-task-check-hold::after,
+.cal-task-check-cancelled::after {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  background: currentColor;
+  -webkit-mask: var(--cal-task-glyph) center / contain no-repeat;
+  mask: var(--cal-task-glyph) center / contain no-repeat;
+}
+
+.cal-task-check-active {
+  color: var(--warning);
+  background: color-mix(in oklch, var(--warning) 18%, transparent);
+  --cal-task-glyph: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M13.5 1.5 3.5 14h7.5l-1.5 8.5 10-12.5H12l1.5-8.5z'/%3E%3C/svg%3E");
+}
+
+.cal-task-check-next {
+  color: var(--accent);
+  --cal-task-glyph: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 4.5v15l12.5-7.5z'/%3E%3C/svg%3E");
+}
+
+.cal-task-check-waiting,
+.cal-task-check-hold {
+  color: var(--fg-2);
+  --cal-task-glyph: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 4h4.5v16H6zM13.5 4H18v16h-4.5z'/%3E%3C/svg%3E");
+}
+
+.cal-task-check-hold {
+  border-style: dashed;
+}
+
+.cal-task-check-cancelled {
+  color: var(--fg-2);
+  --cal-task-glyph: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='4' stroke-linecap='round'%3E%3Cpath d='M6 6l12 12M18 6 6 18'/%3E%3C/svg%3E");
+}
+
 /* ── Event Color Variants ────────────────────────────────────────── */
 
 .cal-event-accent {

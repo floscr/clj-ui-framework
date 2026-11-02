@@ -271,3 +271,17 @@
       (is (empty? (active (nth (cal-events/month-grid {:year 2026 :month 10 :events []
                                                        :highlight-week "2026-12-01"}) 3))))
       (is (empty? (active (nth (cal-events/month-grid {:year 2026 :month 10 :events []}) 3)))))))
+
+(deftest task-check-states-test
+  (testing "no state is the plain box, done? the checked one"
+    (is (= ["cal-task-check"] (cal-events/task-check-class-list {})))
+    (is (= ["cal-task-check" "cal-task-check-done"] (cal-events/task-check-class-list {:done? true}))))
+  (testing "a known state adds its class, from a keyword or any-case string"
+    (is (= ["cal-task-check" "cal-task-check-active"] (cal-events/task-check-class-list {:state :active})))
+    (is (= ["cal-task-check" "cal-task-check-waiting"] (cal-events/task-check-class-list {:state "WAITING"}))))
+  (testing "done? wins over the state, an unknown state falls back to the box"
+    (is (= ["cal-task-check" "cal-task-check-done"] (cal-events/task-check-class-list {:done? true :state :active})))
+    (is (= ["cal-task-check"] (cal-events/task-check-class-list {:state "TODO"}))))
+  (testing "event-pill draws the event's state"
+    (let [html (str (cal-events/event-pill {:event {:title "Write" :task? true :state :active}}))]
+      (is (re-find #"cal-task-check cal-task-check-active" html)))))

@@ -9,6 +9,16 @@ clj-ui-framework/clj-ui-framework
  :git/sha "<sha the tag points at>"}
 ```
 
+## Unreleased
+
+### New
+
+- **Task states in calendar checkboxes**: an event's optional `:state`
+  (`:active`, `:next`, `:waiting`, `:hold`, `:cancelled`) draws its own box
+  between unchecked and done, e.g. an amber box with a bolt for active.
+  Events without one look as before. `task-check` takes the state as a
+  third argument; `event-task-check` reads it from an event map.
+
 ## v2.1.1 — 2026-11-02
 
 ### Fixed

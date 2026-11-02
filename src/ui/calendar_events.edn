@@ -69,7 +69,7 @@
   :squint "Same as Replicant; keep event keys as strings or keywords consistently."}
 
  :notes-for-ai
- ["Event maps: {:title :date :time-start :time-end :color :done? :task?}; colors are :accent :danger :success :warning :blue :teal :pink :orange."
+ ["Event maps: {:title :date :time-start :time-end :color :done? :task? :state}; :state draws a task's open to-do state (:active :next :waiting :hold :cancelled) in its checkbox; colors are :accent :danger :success :warning :blue :teal :pink :orange."
   "Full documentation with markup contracts lives in src/ui/calendar.md."]
 
  :related [:calendar :table :context-menu]}

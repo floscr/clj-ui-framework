@@ -38,6 +38,18 @@
           (into [:div {:style (sx {:display "flex" :flex-direction "column" :gap "3px"})}]
                 (map (fn [e] (cal-events/event-pill {:event e :layout :stacked})) evts))])))
 
+   (example :task-states "Task states"
+     (fn []
+       (let [evts [{:title "Plan the trip" :task? true}
+                   {:title "Write the report" :task? true :state :active}
+                   {:title "Call the plumber" :task? true :state :next}
+                   {:title "Hear back from Anna" :task? true :state :waiting}
+                   {:title "Renovate the attic" :task? true :state :hold}
+                   {:title "Book the venue" :task? true :state :cancelled}
+                   {:title "Pay rent" :task? true :done? true}]]
+         (into [:div {:style (sx {:display "flex" :flex-direction "column" :gap "3px" :max-width "14rem"})}]
+               (map (fn [e] (cal-events/event-pill {:event e})) evts)))))
+
    (example :ticker "Day ticker"
      (fn []
        (cal-events/ticker-strip {:days week
