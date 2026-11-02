@@ -9,7 +9,7 @@ clj-ui-framework/clj-ui-framework
  :git/sha "<sha the tag points at>"}
 ```
 
-## Unreleased
+## v2.1.0 — 2026-11-02
 
 ### New
 
@@ -22,9 +22,16 @@ clj-ui-framework/clj-ui-framework
   `:on-toggle`, `:on-action` and `:on-next` (a `change` event on the root
   for hiccup pages). `:variant :plain` drops the glass: controls on a
   gradient, solid popovers, no backdrop blur.
+- **Day grid** (`ui.day-grid`): a week-by-week grid of days for habits
+  and countdowns.
 - Icons: `volume-1`, `volume-x`, `captions`, `gauge`, `maximize`,
   `minimize`, `picture-in-picture-2`, `rotate-ccw`, `rotate-cw`,
   `list-video`.
+
+### Fixed
+
+- Date and time inputs on iOS Safari shrink to their column, match the
+  text fields and align left.
 
 ## v2.0.0 — 2026-10-29
 
