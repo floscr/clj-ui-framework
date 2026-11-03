@@ -7,7 +7,9 @@
    or any ancestor, default 500ms; keyboard focus and touch skip it). While
    one is open, and for `skip-ms` after it closed, the next trigger opens
    instantly: the layer jumps and swaps its content with transitions off.
-   Content is cloned from the trigger's `template.tooltip-content`.
+   Content is cloned from the trigger's `template.tooltip-content`; an
+   element with a `data-tooltip` attribute instead (ui.tooltip/tooltip-attrs,
+   no wrapper) shows that text, with `data-tooltip-shortcut` keycaps.
 
    The bubble inverts the page under its trigger (ink on light, white on
    dark) unless `data-tooltip-theme` on it or an ancestor says light or dark.
@@ -34,25 +36,54 @@
 
 (defn- now [] (.now js/performance))
 
-(defn- trigger-of [node]
+(defn- trigger-of
+  "The nearest .tooltip wrapper or element with a non-blank data-tooltip."
+  [node]
   (when (and node (.-closest node))
-    (.closest node ".tooltip")))
+    (let [t (.closest node ".tooltip, [data-tooltip]")]
+      (cond
+        (nil? t) nil
+        (.matches t ".tooltip") t
+        (= "" (.trim (or (.getAttribute t "data-tooltip") ""))) (trigger-of (.-parentElement t))
+        :else t))))
 
 ;; ── Content and placement ───────────────────────────────────────────
 
+(defn- el [tag cls text]
+  (let [e (.createElement js/document tag)]
+    (when cls (set! (.-className e) cls))
+    (when text (set! (.-textContent e) text))
+    e))
+
+(defn- attr-label
+  "The label for an attribute trigger: data-tooltip, then the keycaps of a
+   space-separated data-tooltip-shortcut (the markup ui.tooltip/tooltip-label
+   renders)."
+  [trigger]
+  (let [label (el "span" "tooltip-label" nil)
+        caps  (.filter (.split (or (.getAttribute trigger "data-tooltip-shortcut") "") " ")
+                       (fn [k] (not= k "")))]
+    (.appendChild label (el "span" nil (.getAttribute trigger "data-tooltip")))
+    (when (pos? (.-length caps))
+      (let [row (el "span" "tooltip-keys" nil)]
+        (.forEach caps (fn [k] (.appendChild row (el "kbd" "tooltip-key" k))))
+        (.appendChild label row)))
+    label))
+
 (defn- content-of
-  "A fragment with copies of the trigger's template children. Server-rendered
-   templates keep them in .content, DOM-built ones (Replicant, Eucalypt) as
-   plain children."
+  "A fragment with copies of the trigger's template children, or the label of
+   an attribute trigger. Server-rendered templates keep their children in
+   .content, DOM-built ones (Replicant, Eucalypt) as plain children."
   [trigger]
   (let [frag (.createDocumentFragment js/document)
         tpl  (.querySelector trigger ":scope > template.tooltip-content")]
-    (when tpl
+    (if tpl
       (let [src (if (and (.-content tpl) (.. tpl -content -firstChild))
                   (.-content tpl)
                   tpl)]
         (.forEach (.-childNodes src)
-                  (fn [n] (.appendChild frag (.cloneNode n true))))))
+                  (fn [n] (.appendChild frag (.cloneNode n true)))))
+      (.appendChild frag (attr-label trigger)))
     frag))
 
 (defn- page-dark?

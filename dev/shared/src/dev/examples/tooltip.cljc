@@ -111,6 +111,21 @@
            (icon-button :download "Download" nil nil)
            (icon-button :trash "Moves the file to the trash for everyone in this room" nil :bottom))]]))
 
+   (example :attrs "Without a wrapper"
+     (fn []
+       [:div
+        (note "tooltip-attrs puts a plain tooltip on any element: merge it into a button's attrs.")
+        (toolbar/toolbar {}
+          (button/button {:variant :ghost :icon :search
+                          :attrs (merge {:aria-label "Search"}
+                                        (tooltip/tooltip-attrs {:text "Search" :shortcut ["/"]}))})
+          (button/button {:variant :ghost :icon :settings
+                          :attrs (merge {:aria-label "Settings"}
+                                        (tooltip/tooltip-attrs {:text "Settings" :shortcut ["⌘" ","]}))})
+          (button/button {:variant :ghost :icon :log-out
+                          :attrs (merge {:aria-label "Sign out"}
+                                        (tooltip/tooltip-attrs {:text "Sign out" :side :bottom}))}))]))
+
    (example :delay "Delays"
      (fn []
        [:div

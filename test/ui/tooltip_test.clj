@@ -54,6 +54,15 @@
       (is (= "tooltip extra" (get-in result [1 :class])))
       (is (= 0 (get-in result [1 :tabindex]))))))
 
+(deftest tooltip-attrs-test
+  (testing "text becomes data-tooltip, the shortcut a space-joined attribute"
+    (is (= {:data-tooltip "Copy link" :data-tooltip-shortcut "⌘ C" :data-tooltip-side "bottom"}
+           (tooltip/tooltip-attrs {:text "Copy link" :shortcut ["⌘" "C"] :side :bottom}))))
+
+  (testing "no text, no tooltip"
+    (is (nil? (tooltip/tooltip-attrs {:text nil})))
+    (is (nil? (tooltip/tooltip-attrs {:text ""})))))
+
 (deftest content-nodes-test
   (testing "one node, a string or nil"
     (is (= [[:p "x"]] (tooltip/content-nodes [:p "x"])))

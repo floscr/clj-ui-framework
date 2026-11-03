@@ -39,7 +39,7 @@
 | [Dialog](components/dialog.md) | `ui.dialog` | A focused modal surface for decisions that need attention, as a native <dialog> or an overlay for reactive apps. | `dialog-class-list`, `dialog-classes`, `dialog`, `dialog-overlay`, `dialog-panel`, `dialog-header`, `dialog-body`, `dialog-footer` |
 | [Popover](components/popover.md) | `ui.popover` | A small anchored panel for contextual controls, built on the native Popover API so it works without app state. | `trigger-attrs`, `content-class-list`, `popover-trigger`, `popover-content`, `popover-header`, `popover-title`, `popover-description` |
 | [Tabs](components/tabs.md) | `ui.tabs` | Switch between peer panels of one object, with no JS: hidden radios drive the panels. | `tabs-class-list`, `tabs-classes`, `tabs` |
-| [Tooltip](components/tooltip.md) | `ui.tooltip` | A hint or a rich read-only preview on hover and focus: the first waits for its delay, moving to the next opens it instantly. | `tooltip-data-attrs`, `content-nodes`, `tooltip-label`, `tooltip`, `tooltip-card` |
+| [Tooltip](components/tooltip.md) | `ui.tooltip` | A hint or a rich read-only preview on hover and focus: the first waits for its delay, moving to the next opens it instantly. | `tooltip-data-attrs`, `tooltip-attrs`, `content-nodes`, `tooltip-label`, `tooltip`, `tooltip-card` |
 
 ### Feedback
 

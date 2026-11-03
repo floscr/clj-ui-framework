@@ -18,7 +18,9 @@
  :usage "(require '[ui.tooltip :as tooltip])\n\n(tooltip/tooltip {:text \"Copy link\" :shortcut [\"⌘\" \"C\"]}\n  (button/button {:icon :link :variant :ghost :attrs {:aria-label \"Copy link\"}}))"
 
  :examples
- [{:title "Rich preview"
+ [{:title "Without a wrapper"
+   :code "(button/button {:variant :ghost :icon :copy\n                :attrs (merge {:aria-label \"Copy link\"}\n                              (tooltip/tooltip-attrs {:text \"Copy link\" :shortcut [\"⌘\" \"C\"]}))})"}
+  {:title "Rich preview"
    :code "(tooltip/tooltip {:content (tooltip/tooltip-card {}\n                             (list-row/list-row {:icon :calendar :title \"Design review\"\n                                                 :description \"Wed, 14:00 to 14:45\"}))\n                  :delay 300\n                  :attrs {:tabindex 0}}\n  \"design review\")"}
   {:title "One delay for a group"
    :code "[:div {:data-tooltip-delay \"250\"}\n (toolbar/toolbar {} ...)]"}]
@@ -39,6 +41,11 @@
    :doc "An 18rem column for rich content; list rows inside sit flush."
    :children "Any nodes, seqs of nodes spliced: ui.* components (list-row, metric :flush, progress, day-grid), text, an image."
    :props [{:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "tooltip-attrs"
+   :doc "The wrapper-free form: attributes to merge into any element (a button, an icon) for a plain text tooltip. nil when :text is blank."
+   :props [{:name :text :type "string"} {:name :shortcut :type "vector of strings"}
+           {:name :delay :type "ms"} {:name :side :type "keyword"}
+           {:name :tone :type ":danger"} {:name :theme :type ":light | :dark"}]}
   {:fn "content-nodes"
    :doc "Content as child nodes: a list or lazy seq spliced, anything else one node, nil none."}
   {:fn "tooltip-label"
@@ -72,6 +79,7 @@
 
  :notes-for-ai
  ["Keep :text to a few words, no punctuation at the end."
+  "For a plain label on an existing control, merge tooltip-attrs into its attrs instead of wrapping it; use it in place of a title attribute, which would show the browser's tooltip too."
   "Rich content goes in tooltip-card, built from ui.* components; the layer carries the bubble's data-theme, so they follow it."
   "Prefer a visible label when space allows."]
 

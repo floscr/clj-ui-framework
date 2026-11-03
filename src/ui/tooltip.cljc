@@ -2,8 +2,9 @@
   "Hover and focus hints shown by the ui.js.tooltip runtime: the trigger
    carries its content in a template, the runtime shows it in one shared
    layer, so the first tooltip waits for its delay and the next ones open
-   instantly."
-  (:require [ui.util :as util]))
+   instantly. tooltip-attrs is the wrapper-free form for plain text."
+  (:require [clojure.string :as str]
+            [ui.util :as util]))
 
 (defn tooltip-data-attrs
   "The data attributes ui.js.tooltip reads off the trigger wrapper."
@@ -14,6 +15,16 @@
     side          (assoc :data-tooltip-side (util/kw-name side))
     tone          (assoc :data-tooltip-tone (util/kw-name tone))
     theme         (assoc :data-tooltip-theme (util/kw-name theme))))
+
+(defn tooltip-attrs
+  "Attributes that give any element a plain tooltip, without a wrapper: merge
+   them into a button's or icon's attrs. Takes :text, :shortcut and the
+   :delay :side :tone :theme of tooltip; nil :text gives no tooltip."
+  [{:keys [text shortcut delay side tone theme]}]
+  (when (seq text)
+    (cond-> (assoc (tooltip-data-attrs {:delay delay :side side :tone tone :theme theme})
+                   :data-tooltip text)
+      (seq shortcut) (assoc :data-tooltip-shortcut (str/join " " shortcut)))))
 
 (defn content-nodes
   "Content as a sequence of child nodes: a list or lazy seq is spliced in

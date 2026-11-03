@@ -5,7 +5,7 @@
 - Type: Component (disclosure, Overlays)
 - Namespace: `ui.tooltip`
 - Source: `src/ui/tooltip.cljc`
-- Public fns: `tooltip-data-attrs`, `content-nodes`, `tooltip-label`, `tooltip`, `tooltip-card`
+- Public fns: `tooltip-data-attrs`, `tooltip-attrs`, `content-nodes`, `tooltip-label`, `tooltip`, `tooltip-card`
 - JS runtime: `ui.js.tooltip` (bundled in ui-runtime.js)
 - Keywords: tooltip, hint, hover text, hover card, preview, shortcut, title
 
@@ -31,6 +31,14 @@
 ```
 
 ## Examples
+
+### Without a wrapper
+
+```clojure
+(button/button {:variant :ghost :icon :copy
+                :attrs (merge {:aria-label "Copy link"}
+                              (tooltip/tooltip-attrs {:text "Copy link" :shortcut ["⌘" "C"]}))})
+```
 
 ### Rich preview
 
@@ -81,6 +89,19 @@ Children: Any nodes, seqs of nodes spliced: ui.* components (list-row, metric :f
 | `:class` | `string` | – |  |
 | `:attrs` | `map` | – |  |
 
+### `tooltip-attrs`
+
+The wrapper-free form: attributes to merge into any element (a button, an icon) for a plain text tooltip. nil when :text is blank.
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `:text` | `string` | – |  |
+| `:shortcut` | `vector of strings` | – |  |
+| `:delay` | `ms` | – |  |
+| `:side` | `keyword` | – |  |
+| `:tone` | `:danger` | – |  |
+| `:theme` | `:light \| :dark` | – |  |
+
 ### `content-nodes`
 
 Content as child nodes: a list or lazy seq spliced, anything else one node, nil none.
@@ -126,6 +147,7 @@ The data attributes the runtime reads off the trigger wrapper.
 ## Notes for AI
 
 - Keep :text to a few words, no punctuation at the end.
+- For a plain label on an existing control, merge tooltip-attrs into its attrs instead of wrapping it; use it in place of a title attribute, which would show the browser's tooltip too.
 - Rich content goes in tooltip-card, built from ui.* components; the layer carries the bubble's data-theme, so they follow it.
 - Prefer a visible label when space allows.
 
