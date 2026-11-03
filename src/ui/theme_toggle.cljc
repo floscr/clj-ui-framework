@@ -51,7 +51,7 @@
                                    :role "radio"
                                    :aria-checked (str active)
                                    :aria-label label
-                                   :title label
+                                   :data-tooltip label
                                    :on-click (when on-change (fn [_] (on-change mode)))}
                           (icon/icon {:icon-name icon :size :sm})]))
                      modes))])
@@ -68,7 +68,7 @@
                                           :role "radio"
                                           :aria-checked (str active)
                                           :aria-label label
-                                          :title label}
+                                          :data-tooltip label}
                                    on-change (assoc :on {:click (fn [_] (on-change mode))}))
                          (icon/icon {:icon-name icon :size :sm})]))
                     modes)))
@@ -83,5 +83,5 @@
                         :role "radio"
                         :aria-checked (str active)
                         :aria-label label
-                        :title label}
+                        :data-tooltip label}
                (icon/icon {:icon-name icon :size :sm})]))]))))

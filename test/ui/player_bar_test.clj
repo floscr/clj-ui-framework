@@ -67,14 +67,14 @@
           row (nth result 3)
           center (nth row 3)
           play-btn (nth center 4)]
-      (is (= "Pause" (get-in play-btn [1 :title])))))
+      (is (= "Pause" (get-in play-btn [1 :data-tooltip])))))
 
   (testing "play button shows play icon name when paused"
     (let [result (pb/player-bar {:track-name "Test" :playing false})
           row (nth result 3)
           center (nth row 3)
           play-btn (nth center 4)]
-      (is (= "Play" (get-in play-btn [1 :title])))))
+      (is (= "Play" (get-in play-btn [1 :data-tooltip])))))
 
   (testing "shuffle active adds class"
     (let [result (pb/player-bar {:track-name "Test" :shuffle true})

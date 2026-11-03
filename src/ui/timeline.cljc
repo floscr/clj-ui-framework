@@ -289,7 +289,7 @@
     [[:button {:class          "ui-timeline-bar"
                :style          {:left  (time->pct (:start segment) duration)
                                 :width (span->pct (:start segment) (:end segment) duration)}
-               :title          label
+               :data-tooltip label
                :aria-label     (str "Move " label)
                :on-pointerdown (fn [ev] (start-drag! ev :move track segment p))
                :on-keydown     (bar-keydown track segment p)}
@@ -331,11 +331,11 @@
   [{:keys [current duration playing looping on-play-pause on-skip-start on-loop]}]
   [:div {:class "ui-timeline-transport"}
    [:button (cond-> {:class "ui-timeline-transport-btn"
-                     :title "Skip to start"}
+                     :data-tooltip "Skip to start" :aria-label "Skip to start"}
               on-skip-start (assoc :on-click on-skip-start))
     (icon/icon {:icon-name :skip-back :size :sm})]
    [:button (cond-> {:class "ui-timeline-transport-btn ui-timeline-play"
-                     :title (if playing "Pause" "Play")}
+                     :data-tooltip (if playing "Pause" "Play") :aria-label (if playing "Pause" "Play")}
               on-play-pause (assoc :on-click on-play-pause))
     (icon/icon {:icon-name (if playing :pause :play) :size :sm :filled true})]
    [:output {:class "ui-timeline-time"}
@@ -343,7 +343,7 @@
    (when on-loop
      [:button {:class        (str "ui-timeline-transport-btn"
                                   (when looping " ui-timeline-loop-active"))
-               :title        "Loop"
+               :data-tooltip "Loop" :aria-label "Loop"
                :aria-pressed (if looping "true" "false")
                :on-click     on-loop}
       (icon/icon {:icon-name :repeat :size :sm})])])

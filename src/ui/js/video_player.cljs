@@ -316,7 +316,7 @@
     (.forEach (qa root "[data-vp-act=play]")
               (fn [b] (let [l (if (.-paused v) "Play" "Pause")]
                         (.setAttribute b "aria-label" l)
-                        (.setAttribute b "title" (str l " (space)")))))
+                        (.setAttribute b "data-tooltip" (str l " (space)")))))
     (when-let [b (q root "[data-vp-toggle=autonext]")]
       (.setAttribute b "aria-pressed" (str (.-auto p))))
     (when-let [vol (q root "[data-vp=volume]")]

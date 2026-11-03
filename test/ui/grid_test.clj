@@ -58,7 +58,7 @@
   (testing "labels become title and aria-label"
     (let [[_ _ grid-btn] (grid/layout-toggle {:value :grid})
           attrs (second grid-btn)]
-      (is (= "Square grid" (:title attrs)))
+      (is (= "Square grid" (:data-tooltip attrs)))
       (is (= "Square grid" (:aria-label attrs)))))
   (testing "href mode renders anchors (server-rendered pages)"
     (let [[_ _ a b] (grid/layout-toggle

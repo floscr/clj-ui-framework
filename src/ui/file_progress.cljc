@@ -59,7 +59,7 @@
                     :on-click (fn [e]
                                 (.stopPropagation e)
                                 (on-remove))
-                    :title "Remove"}
+                    :data-tooltip "Remove" :aria-label "Remove"}
            (icon/icon {:icon-name "x" :size "sm"})])]
 
        :cljs
@@ -82,7 +82,7 @@
                     :on {:click (fn [e]
                                   (.stopPropagation e)
                                   (on-remove))}
-                    :title "Remove"}
+                    :data-tooltip "Remove" :aria-label "Remove"}
            (icon/icon {:icon-name :x :size :sm})])]
 
        :clj
@@ -102,7 +102,7 @@
                                :variant (when error? :danger)}))]
         (when on-remove
           [:button {:class "fp-item-remove"
-                    :title "Remove"}
+                    :data-tooltip "Remove" :aria-label "Remove"}
            (icon/icon {:icon-name :x :size :sm})])])))
 
 ;; ── File Progress List ──────────────────────────────────────────────

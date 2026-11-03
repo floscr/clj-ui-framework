@@ -258,11 +258,20 @@
     (.observe (.-observer s) trigger
               #js {:childList true :subtree true :characterData true :attributes true})))
 
+(defn- host!
+  "Keep the layer where it renders: inside the fullscreen element while there
+   is one (the browser draws only that subtree), else in <body>."
+  [layer]
+  (let [host (or (.-fullscreenElement js/document) (.-body js/document))]
+    (when-not (identical? (.-parentNode layer) host)
+      (.appendChild host layer))))
+
 (defn- show! [trigger instant?]
   (let [s     (get-state)
         layer (layer!)
         cl    (.-classList layer)
         prev  (.-open s)]
+    (host! layer)
     (clear-pending!)
     (js/clearTimeout (.-hideTimer s))
     (unwatch!)

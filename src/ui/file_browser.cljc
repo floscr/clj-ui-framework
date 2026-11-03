@@ -79,12 +79,12 @@
         [:button {:class (str "fb-view-toggle-btn"
                               (when grid-active? " fb-view-toggle-btn-active"))
                   :on-click on-grid-click
-                  :title "Grid view"}
+                  :data-tooltip "Grid view" :aria-label "Grid view"}
          (icon/icon {:icon-name "grid" :size "sm"})]
         [:button {:class (str "fb-view-toggle-btn"
                               (when list-active? " fb-view-toggle-btn-active"))
                   :on-click on-list-click
-                  :title "List view"}
+                  :data-tooltip "List view" :aria-label "List view"}
          (icon/icon {:icon-name "list" :size "sm"})]]
 
        :cljs
@@ -92,23 +92,23 @@
         [:button {:class (cond-> ["fb-view-toggle-btn"]
                            grid-active? (conj "fb-view-toggle-btn-active"))
                   :on {:click on-grid-click}
-                  :title "Grid view"}
+                  :data-tooltip "Grid view" :aria-label "Grid view"}
          (icon/icon {:icon-name :grid :size :sm})]
         [:button {:class (cond-> ["fb-view-toggle-btn"]
                            list-active? (conj "fb-view-toggle-btn-active"))
                   :on {:click on-list-click}
-                  :title "List view"}
+                  :data-tooltip "List view" :aria-label "List view"}
          (icon/icon {:icon-name :list :size :sm})]]
 
        :clj
        [:div {:class "fb-view-toggle"}
         [:button {:class (str "fb-view-toggle-btn"
                               (when grid-active? " fb-view-toggle-btn-active"))
-                  :title "Grid view"}
+                  :data-tooltip "Grid view" :aria-label "Grid view"}
          (icon/icon {:icon-name :grid :size :sm})]
         [:button {:class (str "fb-view-toggle-btn"
                               (when list-active? " fb-view-toggle-btn-active"))
-                  :title "List view"}
+                  :data-tooltip "List view" :aria-label "List view"}
          (icon/icon {:icon-name :list :size :sm})]])))
 
 ;; ── Grid Item ───────────────────────────────────────────────────────

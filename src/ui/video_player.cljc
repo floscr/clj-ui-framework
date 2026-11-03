@@ -131,7 +131,7 @@
         btn-class (if show-value? "video-player-pill" "video-player-btn")]
     [[:button {:type "button" :class (cls btn-class) :data-vp-open id
                :aria-haspopup "menu" :aria-expanded "false" :aria-label label
-               :aria-pressed (bool-str (not= picked d)) :title label}
+               :aria-pressed (bool-str (not= picked d)) :data-tooltip label}
       (if show-value?
         [:span {:data-vp-summary id} (:label (nth options picked nil))]
         (ic (or icon :settings)))]
@@ -146,43 +146,43 @@
   (if-let [b (get custom id)]
     (case (some-> (:type b) util/kw-name)
       "toggle" [[:button {:type "button" :class (cls "video-player-btn") :data-vp-toggle id
-                          :aria-pressed (bool-str (:pressed? b)) :aria-label (:label b) :title (:label b)}
+                          :aria-pressed (bool-str (:pressed? b)) :aria-label (:label b) :data-tooltip (:label b)}
                  (ic (or (:icon b) :check))]]
       "action" [[:button {:type "button" :class (cls "video-player-btn") :data-vp-action id
-                          :aria-label (:label b) :title (:label b)}
+                          :aria-label (:label b) :data-tooltip (:label b)}
                  (ic (or (:icon b) :settings))]]
       (menu-button b))
     (let [[label icn] (get builtin-labels id)]
       (case id
         "subtitles" [[:button {:type "button" :class (cls "video-player-btn") :data-vp-open id :data-vp-builtin id
                                :aria-haspopup "menu" :aria-expanded "false" :aria-pressed "false"
-                               :aria-label label :title label :hidden true}
+                               :aria-label label :data-tooltip label :hidden true}
                       (ic icn)]
                      (panel id label)]
         "quality"   [[:button {:type "button" :class (cls "video-player-pill") :data-vp-open id :data-vp-builtin id
-                               :aria-haspopup "menu" :aria-expanded "false" :aria-label label :title label :hidden true}
+                               :aria-haspopup "menu" :aria-expanded "false" :aria-label label :data-tooltip label :hidden true}
                       [:span {:data-vp-summary id} "Auto"]]
                      (panel id label)]
         "speed"     [[:button {:type "button" :class (cls "video-player-btn") :data-vp-open id :data-vp-builtin id
                                :aria-haspopup "menu" :aria-expanded "false" :aria-pressed "false"
-                               :aria-label label :title label}
+                               :aria-label label :data-tooltip label}
                       (ic icn)]
                      (panel id label)]
         "autonext"  (when next
                       [[:button {:type "button" :class (cls "video-player-pill") :data-vp-toggle id
-                                 :aria-pressed (bool-str (not (false? autonext?))) :aria-label label :title label}
+                                 :aria-pressed (bool-str (not (false? autonext?))) :aria-label label :data-tooltip label}
                         (ic icn) [:span {:class (cls "video-player-pill-label")} "Auto"]]])
         "pip"        [[:button {:type "button" :class (cls "video-player-btn") :data-vp-act "pip"
-                                :aria-label label :title label :hidden true}
+                                :aria-label label :data-tooltip label :hidden true}
                        (ic icn)]]
         "fullscreen" [[:button {:type "button" :class (cls "video-player-btn") :data-vp-act "fullscreen"
-                                :aria-label label :title "Fullscreen (f)"}
+                                :aria-label label :data-tooltip "Fullscreen (f)"}
                        (ic :maximize "video-player-i-enter") (ic :minimize "video-player-i-exit")]]
         nil))))
 
 (defn- play-button [extra]
   [:button {:type "button" :class (cls (str "video-player-btn " extra)) :data-vp-act "play"
-            :aria-label "Play" :title "Play (space)"}
+            :aria-label "Play" :data-tooltip "Play (space)"}
    (filled :play "video-player-i-play") (filled :pause "video-player-i-pause")])
 
 (defn- up-next [{:keys [title thumb]}]
@@ -294,11 +294,11 @@
          (when title [:span {:class (cls "video-player-chip-title")} title])]])
      [:div {:class (cls "video-player-center video-player-ctrl")}
       [:button {:type "button" :class (cls "video-player-btn video-player-glass video-player-skip")
-                :data-vp-act "back" :aria-label "Back 10 seconds" :title "Back 10 seconds"}
+                :data-vp-act "back" :aria-label "Back 10 seconds" :data-tooltip "Back 10 seconds"}
        (ic :rotate-ccw)]
       (play-button "video-player-glass video-player-big")
       [:button {:type "button" :class (cls "video-player-btn video-player-glass video-player-skip")
-                :data-vp-act "forward" :aria-label "Forward 10 seconds" :title "Forward 10 seconds"}
+                :data-vp-act "forward" :aria-label "Forward 10 seconds" :data-tooltip "Forward 10 seconds"}
        (ic :rotate-cw)]]
      [:div {:class (cls "video-player-caption") :data-vp "caption"}]
      [:div {:class (cls "video-player-spinner")}]
@@ -321,11 +321,11 @@
               (play-button nil)
               (when next
                 [:button {:type "button" :class (cls "video-player-btn") :data-vp-act "next"
-                          :aria-label "Next" :title "Next (n)"}
+                          :aria-label "Next" :data-tooltip "Next (n)"}
                  (filled :skip-forward "video-player-i-next")])
               [:div {:class (cls "video-player-volume")}
                [:button {:type "button" :class (cls "video-player-btn") :data-vp-act "mute"
-                         :aria-label "Mute" :title "Mute (m)"}
+                         :aria-label "Mute" :data-tooltip "Mute (m)"}
                 (ic :volume-2 "video-player-i-vol") (ic :volume-x "video-player-i-muted")]
                [:div {:class (cls "video-player-volume-track") :data-vp "volume" :role "slider" :tabindex "0"
                       :aria-label "Volume" :aria-valuemin "0" :aria-valuemax "100" :aria-valuenow "100"}

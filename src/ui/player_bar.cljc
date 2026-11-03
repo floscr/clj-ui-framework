@@ -77,31 +77,31 @@
                [:p.player-bar-subtitle subtitle])]
             [:button
              (cond-> {:class (str "player-bar-icon-btn" (when favorited " player-bar-fav-active"))
-                      :title (if favorited "Remove from favorites" "Add to favorites")}
+                      :data-tooltip (if favorited "Remove from favorites" "Add to favorites") :aria-label (if favorited "Remove from favorites" "Add to favorites")}
                on-favorite (assoc :on-click on-favorite))
              (icon/icon {:icon-name :heart :size :sm})]]
            ;; Center: transport controls
            [:div.player-bar-center
             [:button
              (cond-> {:class (str "player-bar-icon-btn player-bar-hide-sm" (when shuffle " active"))
-                      :title "Shuffle"}
+                      :data-tooltip "Shuffle" :aria-label "Shuffle"}
                on-shuffle (assoc :on-click on-shuffle))
              (icon/icon {:icon-name :shuffle :size :sm})]
             [:button.player-bar-icon-btn
-             (cond-> {:title "Previous"}
+             (cond-> {:data-tooltip "Previous" :aria-label "Previous"}
                on-previous (assoc :on-click on-previous))
              (icon/icon {:icon-name :skip-back :size :sm})]
             [:button.player-bar-play-btn
-             (cond-> {:title (if playing "Pause" "Play")}
+             (cond-> {:data-tooltip (if playing "Pause" "Play") :aria-label (if playing "Pause" "Play")}
                on-play-pause (assoc :on-click on-play-pause))
              (icon/icon {:icon-name (if playing :pause :play) :size :sm :filled true})]
             [:button.player-bar-icon-btn
-             (cond-> {:title "Next"}
+             (cond-> {:data-tooltip "Next" :aria-label "Next"}
                on-next (assoc :on-click on-next))
              (icon/icon {:icon-name :skip-forward :size :sm})]
             [:button
              (cond-> {:class (str "player-bar-icon-btn player-bar-hide-sm" (when repeat " active"))
-                      :title "Repeat"}
+                      :data-tooltip "Repeat" :aria-label "Repeat"}
                on-repeat (assoc :on-click on-repeat))
              (icon/icon {:icon-name :repeat :size :sm})]]
            ;; Right: time + volume
@@ -109,7 +109,7 @@
             (when (and current-time duration)
               [:span.player-bar-time (str current-time " / " duration)])
             [:button.player-bar-icon-btn
-             (cond-> {:title "Volume"}
+             (cond-> {:data-tooltip "Volume" :aria-label "Volume"}
                on-volume (assoc :on-click on-volume))
              (icon/icon {:icon-name :volume-2 :size :sm})]]]])
 
@@ -142,31 +142,31 @@
                [:p {:class ["player-bar-subtitle"]} subtitle])]
             [:button (cond-> {:class (cond-> ["player-bar-icon-btn"]
                                       favorited (conj "player-bar-fav-active"))
-                              :title (if favorited "Remove from favorites" "Add to favorites")}
+                              :data-tooltip (if favorited "Remove from favorites" "Add to favorites") :aria-label (if favorited "Remove from favorites" "Add to favorites")}
                        on-favorite (assoc :on {:click on-favorite}))
              (icon/icon {:icon-name :heart :size :sm})]]
            ;; Center: transport controls
            [:div {:class ["player-bar-center"]}
             [:button (cond-> {:class (cond-> ["player-bar-icon-btn" "player-bar-hide-sm"]
                                       shuffle (conj "active"))
-                              :title "Shuffle"}
+                              :data-tooltip "Shuffle" :aria-label "Shuffle"}
                        on-shuffle (assoc :on {:click on-shuffle}))
              (icon/icon {:icon-name :shuffle :size :sm})]
             [:button (cond-> {:class ["player-bar-icon-btn"]
-                              :title "Previous"}
+                              :data-tooltip "Previous" :aria-label "Previous"}
                        on-previous (assoc :on {:click on-previous}))
              (icon/icon {:icon-name :skip-back :size :sm})]
             [:button (cond-> {:class ["player-bar-play-btn"]
-                              :title (if playing "Pause" "Play")}
+                              :data-tooltip (if playing "Pause" "Play") :aria-label (if playing "Pause" "Play")}
                        on-play-pause (assoc :on {:click on-play-pause}))
              (icon/icon {:icon-name (if playing :pause :play) :size :sm :filled true})]
             [:button (cond-> {:class ["player-bar-icon-btn"]
-                              :title "Next"}
+                              :data-tooltip "Next" :aria-label "Next"}
                        on-next (assoc :on {:click on-next}))
              (icon/icon {:icon-name :skip-forward :size :sm})]
             [:button (cond-> {:class (cond-> ["player-bar-icon-btn" "player-bar-hide-sm"]
                                       repeat (conj "active"))
-                              :title "Repeat"}
+                              :data-tooltip "Repeat" :aria-label "Repeat"}
                        on-repeat (assoc :on {:click on-repeat}))
              (icon/icon {:icon-name :repeat :size :sm})]]
            ;; Right: time + volume
@@ -174,7 +174,7 @@
             (when (and current-time duration)
               [:span {:class ["player-bar-time"]} (str current-time " / " duration)])
             [:button (cond-> {:class ["player-bar-icon-btn"]
-                              :title "Volume"}
+                              :data-tooltip "Volume" :aria-label "Volume"}
                        on-volume (assoc :on {:click on-volume}))
              (icon/icon {:icon-name :volume-2 :size :sm})]]]])
 
@@ -201,31 +201,31 @@
                [:p {:class "player-bar-subtitle"} subtitle])]
             [:button {:class (str "player-bar-icon-btn"
                                   (when favorited " player-bar-fav-active"))
-                      :title (if favorited "Remove from favorites" "Add to favorites")}
+                      :data-tooltip (if favorited "Remove from favorites" "Add to favorites") :aria-label (if favorited "Remove from favorites" "Add to favorites")}
              (icon/icon {:icon-name :heart :size :sm})]]
            ;; Center: transport controls
            [:div {:class "player-bar-center"}
             [:button {:class (str "player-bar-icon-btn player-bar-hide-sm"
                                   (when shuffle " active"))
-                      :title "Shuffle"}
+                      :data-tooltip "Shuffle" :aria-label "Shuffle"}
              (icon/icon {:icon-name :shuffle :size :sm})]
             [:button {:class "player-bar-icon-btn"
-                      :title "Previous"}
+                      :data-tooltip "Previous" :aria-label "Previous"}
              (icon/icon {:icon-name :skip-back :size :sm})]
             [:button {:class "player-bar-play-btn"
-                      :title (if playing "Pause" "Play")}
+                      :data-tooltip (if playing "Pause" "Play") :aria-label (if playing "Pause" "Play")}
              (icon/icon {:icon-name (if playing :pause :play) :size :sm :filled true})]
             [:button {:class "player-bar-icon-btn"
-                      :title "Next"}
+                      :data-tooltip "Next" :aria-label "Next"}
              (icon/icon {:icon-name :skip-forward :size :sm})]
             [:button {:class (str "player-bar-icon-btn player-bar-hide-sm"
                                   (when repeat " active"))
-                      :title "Repeat"}
+                      :data-tooltip "Repeat" :aria-label "Repeat"}
              (icon/icon {:icon-name :repeat :size :sm})]]
            ;; Right: time + volume
            [:div {:class "player-bar-right"}
             (when (and current-time duration)
               [:span {:class "player-bar-time"} (str current-time " / " duration)])
             [:button {:class "player-bar-icon-btn"
-                      :title "Volume"}
+                      :data-tooltip "Volume" :aria-label "Volume"}
              (icon/icon {:icon-name :volume-2 :size :sm})]]]]))))

@@ -276,7 +276,7 @@
                    (commit! panel path v)
                    (paint v)))]
     (txt! lab label)
-    (attr! lab "title" label)
+    (attr! lab "data-tooltip" label)
     (set! (.-type num) "text")
     (attr! num "inputmode" "decimal")
     (attr! num "spellcheck" "false")
@@ -447,7 +447,8 @@
         (let [b (mk "button" "dial-image-opt")]
           (attr! b "type" "button")
           (attr! b "data-value" (aget o "value"))
-          (attr! b "title" (aget o "label"))
+          (attr! b "data-tooltip" (aget o "label"))
+          (attr! b "aria-label" (aget o "label"))
           (set! (.. b -style -backgroundImage) (str "url(" (js/JSON.stringify (aget o "value")) ")"))
           (on! b "click" (fn [_] (let [v (aget o "value")] (commit! panel path v) (mark v))))
           (add! grid b))))
@@ -840,12 +841,14 @@
     (aset panel "versionSel" vsel)
     (aset panel "cardEl" card)
     (attr! iconb "type" "button")
-    (attr! iconb "title" (str "Expand " (:name panel)))
+    (attr! iconb "data-tooltip" (str "Expand " (:name panel)))
+    (attr! iconb "aria-label" (str "Expand " (:name panel)))
     (txt! iconb (:icon panel))
     (doseq [spec [#js [addb "+" "Save version"] #js [copyb "⧉" "Copy values"]
                   #js [resetb "↺" "Reset"] #js [collb "–" "Minimize"]]]
       (let [b (aget spec 0)]
-        (attr! b "type" "button") (attr! b "title" (aget spec 2)) (txt! b (aget spec 1))))
+        (attr! b "type" "button") (attr! b "data-tooltip" (aget spec 2))
+        (attr! b "aria-label" (aget spec 2)) (txt! b (aget spec 1))))
     (on! vsel "change" (fn [_] (select-version! panel (let [v (.-value vsel)] (when (seq v) v)))))
     (on! addb "click" (fn [_] (save-version! panel)))
     (on! copyb "click" (fn [_] (copy-config! panel)))

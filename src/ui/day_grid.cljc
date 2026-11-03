@@ -68,5 +68,5 @@
         (into (map (fn [{:keys [date title] :as day}]
                      (let [t (or title date)]
                        [:span (util/class-attrs (day-cell-class-list day) nil
-                                                (when t {:title t :role "img" :aria-label t}))]))
+                                                (when t {:data-tooltip t :role "img" :aria-label t}))]))
                    days)))))

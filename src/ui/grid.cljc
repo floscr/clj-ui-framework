@@ -97,7 +97,7 @@
                         :on-click (when on-change
                                     (fn [_] (on-change value)))
                         :class (when active? "btn-toggled")
-                        :attrs {:title label
+                        :attrs {:data-tooltip label
                                 :aria-label label
                                 :aria-pressed (if active? "true" "false")}})))
                   options)]
@@ -152,14 +152,14 @@
                 :disabled smallest?
                 :on-click (when on-change
                             (fn [_] (on-change (step-size steps value -1))))
-                :attrs {:title "Smaller tiles" :aria-label "Smaller tiles"}})
+                :attrs {:data-tooltip "Smaller tiles" :aria-label "Smaller tiles"}})
               (button/button
                {:variant :ghost
                 :icon :plus
                 :disabled largest?
                 :on-click (when on-change
                             (fn [_] (on-change (step-size steps value 1))))
-                :attrs {:title "Larger tiles" :aria-label "Larger tiles"}})]]
+                :attrs {:data-tooltip "Larger tiles" :aria-label "Larger tiles"}})]]
     #?(:squint
        (into [:div (merge {:class (cond-> "toolbar-group"
                                     class (str " " class))}

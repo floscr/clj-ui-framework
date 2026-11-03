@@ -19,7 +19,7 @@
       (is (= "day-grid" (get-in result [1 :class])))
       (is (= 9 (count (drop 2 result))) "7 labels + 2 days")
       (is (= [:span {:class "day-grid-label" :aria-hidden "true"} "M"] (nth result 2)))
-      (is (= [:span {:class "day-grid-cell day-grid-done" :title "Mon" :role "img" :aria-label "Mon"}]
+      (is (= [:span {:class "day-grid-cell day-grid-done" :data-tooltip "Mon" :role "img" :aria-label "Mon"}]
              (nth result 9)))
       (is (= [:span {:class "day-grid-cell day-grid-future"}] (nth result 10)))))
   (testing "no header, class and attrs"
