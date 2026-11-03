@@ -15,6 +15,17 @@
     tone          (assoc :data-tooltip-tone (util/kw-name tone))
     theme         (assoc :data-tooltip-theme (util/kw-name theme))))
 
+(defn content-nodes
+  "Content as a sequence of child nodes: a list or lazy seq is spliced in
+   (squint does not flatten seqs in hiccup), anything else (a hiccup vector,
+   a string, a number) is one node, nil none. On squint strings and vectors
+   are seq? too, hence the extra checks."
+  [content]
+  (cond
+    (nil? content) []
+    (and (seq? content) (not (vector? content)) (not (string? content))) content
+    :else [content]))
+
 (defn tooltip-label
   "The plain body: the hint text, then its shortcut as keycaps."
   [text shortcut]
@@ -29,7 +40,9 @@
    Props:
      :text     - the hint, a few words
      :shortcut - keycaps after the text, e.g. [\"⌘\" \"K\"]
-     :content  - rich hiccup instead of :text (see tooltip-card)
+     :content  - rich content instead of :text: a hiccup node, a string or a
+                 list/seq of nodes (see tooltip-card). On Replicant and
+                 squint it may change while open; the tooltip follows
      :delay    - ms before the first tooltip opens (default 500); also
                  settable for a whole group as data-tooltip-delay on an ancestor
      :side     - :top (default), :bottom, :left or :right; another side is
@@ -46,9 +59,11 @@
                      attrs)]
     (-> [:span (util/class-attrs ["tooltip"] class attrs)]
         (into children)
-        (conj [:template (util/class-attrs ["tooltip-content"] nil nil) body]))))
+        (conj (into [:template (util/class-attrs ["tooltip-content"] nil nil)]
+                    (content-nodes body))))))
 
 (defn tooltip-card
   "A column layout for rich tooltip content, 18rem wide."
   [{:keys [class attrs]} & children]
-  (into [:div (util/class-attrs ["tooltip-card"] class attrs)] children))
+  (into [:div (util/class-attrs ["tooltip-card"] class attrs)]
+        (mapcat content-nodes children)))

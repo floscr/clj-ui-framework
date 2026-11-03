@@ -5,7 +5,7 @@
 - Type: Component (disclosure, Overlays)
 - Namespace: `ui.tooltip`
 - Source: `src/ui/tooltip.cljc`
-- Public fns: `tooltip-data-attrs`, `tooltip-label`, `tooltip`, `tooltip-card`
+- Public fns: `tooltip-data-attrs`, `content-nodes`, `tooltip-label`, `tooltip`, `tooltip-card`
 - JS runtime: `ui.js.tooltip` (bundled in ui-runtime.js)
 - Keywords: tooltip, hint, hover text, hover card, preview, shortcut, title
 
@@ -62,7 +62,7 @@ Children: The trigger. Non-interactive text needs :attrs {:tabindex 0} to be rea
 | --- | --- | --- | --- |
 | `:text` | `string` | – | The hint, a few words. |
 | `:shortcut` | `vector of strings` | – | Keycaps after the text, e.g. ["⌘" "K"]. |
-| `:content` | `hiccup` | – | Rich read-only content instead of :text, usually a tooltip-card. Cards stay open while the pointer travels into them. |
+| `:content` | `hiccup, string or seq of nodes` | – | Rich read-only content instead of :text, usually a tooltip-card. A list or lazy seq is spliced. On Replicant and squint it may change while open: the tooltip mirrors every re-render. Cards stay open while the pointer travels into them. |
 | `:delay` | `ms` | `500` | Wait before the first tooltip opens. data-tooltip-delay on any ancestor sets it for a group. |
 | `:side` | `:top \| :bottom \| :left \| :right` | `:top` | Preferred side; without room there it takes the opposite, then a perpendicular side, else the roomiest. |
 | `:tone` | `:danger` | – | Red for error hints: a light red tint on light pages, red-tinted ink on dark ones. |
@@ -74,12 +74,16 @@ Children: The trigger. Non-interactive text needs :attrs {:tabindex 0} to be rea
 
 An 18rem column for rich content; list rows inside sit flush.
 
-Children: ui.* components and text: list-row, metric :flush, progress, day-grid, an image.
+Children: Any nodes, seqs of nodes spliced: ui.* components (list-row, metric :flush, progress, day-grid), text, an image.
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `:class` | `string` | – |  |
 | `:attrs` | `map` | – |  |
+
+### `content-nodes`
+
+Content as child nodes: a list or lazy seq spliced, anything else one node, nil none.
 
 ### `tooltip-label`
 
@@ -100,7 +104,7 @@ The data attributes the runtime reads off the trigger wrapper.
 
 - The shared layer has role="tooltip" and the trigger's control gets aria-describedby while it is open.
 - Icon-only controls still need an aria-label; the tooltip describes, it does not name.
-- Content is cloned, so keep it read only: focus never moves into the tooltip.
+- Content is a mirror of the trigger's template, so keep it read only: handlers inside do not fire and focus never moves into the tooltip.
 
 ## Motion
 

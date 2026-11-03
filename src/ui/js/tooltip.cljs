@@ -28,7 +28,7 @@
   (or (aget js/window "__uiTooltipState")
       (let [s #js {:layer nil :bubble nil :open nil :pending nil
                    :showTimer nil :hideTimer nil :lastClose -100000
-                   :suppressed nil :pointer "mouse"}]
+                   :suppressed nil :pointer "mouse" :observer nil}]
         (aset js/window "__uiTooltipState" s)
         s)))
 
@@ -153,11 +153,15 @@
     (js/clearTimeout (.-showTimer s))
     (set! (.-pending s) nil)))
 
+(defn- unwatch! []
+  (some-> (.-observer (get-state)) (.disconnect)))
+
 (defn- hide! []
   (let [s (get-state)]
     (clear-pending!)
     (js/clearTimeout (.-hideTimer s))
     (when-let [t (.-open s)]
+      (unwatch!)
       (describe! t false)
       (set! (.-open s) nil)
       (set! (.-lastClose s) (now))
@@ -191,25 +195,52 @@
           (set! (.-bubble s) bubble)
           layer))))
 
-(defn- show! [trigger instant?]
-  (let [s     (get-state)
-        layer (layer!)
-        cl    (.-classList layer)
-        prev  (.-open s)
-        tone  (.. trigger -dataset -tooltipTone)]
-    (clear-pending!)
-    (js/clearTimeout (.-hideTimer s))
-    (when (and prev (not (identical? prev trigger)))
-      (describe! prev false))
-    (set! (.-open s) trigger)
-    (describe! trigger true)
-    (.replaceChildren (.-bubble s) (content-of trigger))
+(defn- render! [layer trigger]
+  (let [tone (.. trigger -dataset -tooltipTone)]
+    (.replaceChildren (.-bubble (get-state)) (content-of trigger))
     (.setAttribute layer "data-kind" (if (= (.. trigger -dataset -tooltipKind) "card") "card" "label"))
     ;; the layer's own theme tokens, so composed ui.* content follows it
     (.setAttribute layer "data-theme" (bubble-theme trigger))
     (if tone
       (.setAttribute layer "data-tone" tone)
-      (.removeAttribute layer "data-tone"))
+      (.removeAttribute layer "data-tone"))))
+
+(defn- refresh!
+  "Mirror the open trigger again after the app re-rendered it (Replicant,
+   Eucalypt): the content is a copy, so it follows changes only this way."
+  []
+  (let [s (get-state)
+        t (.-open s)]
+    (when t
+      (if (.-isConnected t)
+        (do (render! (.-layer s) t)
+            (position! (.-layer s) t))
+        (hide!)))))
+
+(defn- watch!
+  "Observe the open trigger, template included, for re-renders. Started
+   after describe! so its own aria-describedby write is not reported."
+  [trigger]
+  (let [s (get-state)]
+    (when-not (.-observer s)
+      (set! (.-observer s) (js/MutationObserver. (fn [_] (refresh!)))))
+    (.observe (.-observer s) trigger
+              #js {:childList true :subtree true :characterData true :attributes true})))
+
+(defn- show! [trigger instant?]
+  (let [s     (get-state)
+        layer (layer!)
+        cl    (.-classList layer)
+        prev  (.-open s)]
+    (clear-pending!)
+    (js/clearTimeout (.-hideTimer s))
+    (unwatch!)
+    (when (and prev (not (identical? prev trigger)))
+      (describe! prev false))
+    (set! (.-open s) trigger)
+    (describe! trigger true)
+    (render! layer trigger)
+    (watch! trigger)
     (.toggle cl "tooltip-layer--instant" instant?)
     (position! layer trigger)
     (when-not instant?

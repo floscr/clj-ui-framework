@@ -60,16 +60,18 @@
                  :vector-effect "non-scaling-stroke" :stroke-linejoin "round"}]]))
 
 (defn- deploy-card []
-  (let [step (fn [icon-name label] [:p {:style muted} (icon/icon {:icon-name icon-name :size :sm}) label])]
-    (tooltip/tooltip-card {}
-      [:div {:style (sx {:display "flex" :justify-content "space-between"})}
-       [:strong {:style (sx {:font-weight "500"})} "Deploy hetzner--xi"]
-       [:span {:style (sx {:color "var(--fg-1)"})} "72%"]]
-      (progress/progress {:value 72 :attrs {:aria-label "Deploy progress"}})
-      (step :circle-check "Build, 38 s")
-      (step :circle-check "Push closure, 12 s")
-      (step :refresh "Restart service")
-      (step :clock "Health check"))))
+  (tooltip/tooltip-card {}
+    [:div {:style (sx {:display "flex" :justify-content "space-between"})}
+     [:strong {:style (sx {:font-weight "500"})} "Deploy hetzner--xi"]
+     [:span {:style (sx {:color "var(--fg-1)"})} "72%"]]
+    (progress/progress {:value 72 :attrs {:aria-label "Deploy progress"}})
+    ;; a lazy seq as a child: tooltip-card splices it on every target
+    (map (fn [[icon-name label]]
+           [:p {:style muted} (icon/icon {:icon-name icon-name :size :sm}) label])
+         [[:circle-check "Build, 38 s"]
+          [:circle-check "Push closure, 12 s"]
+          [:refresh "Restart service"]
+          [:clock "Health check"]])))
 
 (defn- streak-card []
   (tooltip/tooltip-card {}

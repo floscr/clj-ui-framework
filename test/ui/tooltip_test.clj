@@ -45,11 +45,29 @@
       (is (= "600" (get-in result [1 :data-tooltip-delay])))
       (is (= [:div "Card"] (get-in result [3 2])))))
 
+  (testing "a seq of nodes lands as separate template children"
+    (let [result (tooltip/tooltip {:content (list [:p "a"] [:p "b"])} "x")]
+      (is (= [:template {:class "tooltip-content"} [:p "a"] [:p "b"]] (last result)))))
+
   (testing "extra class and attrs merge"
     (let [result (tooltip/tooltip {:text "Tip" :class "extra" :attrs {:tabindex 0}} "X")]
       (is (= "tooltip extra" (get-in result [1 :class])))
       (is (= 0 (get-in result [1 :tabindex]))))))
 
+(deftest content-nodes-test
+  (testing "one node, a string or nil"
+    (is (= [[:p "x"]] (tooltip/content-nodes [:p "x"])))
+    (is (= ["x"] (tooltip/content-nodes "x")))
+    (is (= [] (tooltip/content-nodes nil))))
+
+  (testing "a list or lazy seq is spliced"
+    (is (= [[:p 1] [:p 2]] (tooltip/content-nodes (map (fn [i] [:p i]) [1 2]))))
+    (is (= [[:p "a"] "b"] (tooltip/content-nodes (list [:p "a"] "b"))))))
+
 (deftest tooltip-card-test
   (is (= [:div {:class "tooltip-card"} "a" "b"]
-         (tooltip/tooltip-card {} "a" "b"))))
+         (tooltip/tooltip-card {} "a" "b")))
+
+  (testing "seq children are flattened, nil dropped"
+    (is (= [:div {:class "tooltip-card"} [:p 1] [:p 2] "end"]
+           (tooltip/tooltip-card {} (map (fn [i] [:p i]) [1 2]) nil "end")))))

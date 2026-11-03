@@ -1,5 +1,5 @@
 (() => {
-  // ../../../dev/squint/node_modules/squint-cljs/src/squint/core.js
+  // ../../../../../home/floscr/Code/Projects/clj-ui-framework/dev/squint/node_modules/squint-cljs/src/squint/core.js
   function toFn(x) {
     if (x == null) return x;
     if (x instanceof Function) {
@@ -2939,7 +2939,7 @@
   })();
   window["__uiContextMenu"] = open_context_menu;
 
-  // ../../../dev/squint/node_modules/squint-cljs/src/squint/string.js
+  // ../../../../../home/floscr/Code/Projects/clj-ui-framework/dev/squint/node_modules/squint-cljs/src/squint/string.js
   function join(sep, coll) {
     if (coll === void 0) {
       coll = sep;
@@ -7376,7 +7376,7 @@
     if (truth_(or__23426__auto__1)) {
       return or__23426__auto__1;
     } else {
-      const s2 = { "open": null, "lastClose": -1e5, "pending": null, "bubble": null, "layer": null, "pointer": "mouse", "hideTimer": null, "showTimer": null, "suppressed": null };
+      const s2 = { "open": null, "lastClose": -1e5, "pending": null, "bubble": null, "layer": null, "pointer": "mouse", "hideTimer": null, "showTimer": null, "suppressed": null, "observer": null };
       window["__uiTooltipState"] = s2;
       return s2;
     }
@@ -7647,6 +7647,15 @@
     clearTimeout(s1.showTimer);
     return s1.pending = null;
   };
+  var unwatch_BANG_ = function() {
+    const G__351 = get_state3().observer;
+    if (G__351 == null) {
+      return null;
+    } else {
+      return G__351.disconnect();
+    }
+    ;
+  };
   var hide_BANG_ = function() {
     const s1 = get_state3();
     clear_pending_BANG_();
@@ -7654,6 +7663,7 @@
     const temp__23062__auto__2 = s1.open;
     if (truth_(temp__23062__auto__2)) {
       const t3 = temp__23062__auto__2;
+      unwatch_BANG_();
       describe_BANG_(t3, false);
       s1.open = null;
       s1.lastClose = now();
@@ -7698,20 +7708,57 @@
     }
     ;
   };
+  var render_BANG_ = function(layer, trigger) {
+    const tone1 = trigger.dataset.tooltipTone;
+    get_state3().bubble.replaceChildren(content_of(trigger));
+    layer.setAttribute("data-kind", trigger.dataset.tooltipKind === "card" ? "card" : "label");
+    layer.setAttribute("data-theme", bubble_theme(trigger));
+    if (truth_(tone1)) {
+      return layer.setAttribute("data-tone", tone1);
+    } else {
+      return layer.removeAttribute("data-tone");
+    }
+    ;
+  };
+  var refresh_BANG_ = function() {
+    const s1 = get_state3();
+    const t2 = s1.open;
+    if (truth_(t2)) {
+      if (truth_(t2.isConnected)) {
+        render_BANG_(s1.layer, t2);
+        return position_BANG_2(s1.layer, t2);
+      } else {
+        return hide_BANG_();
+      }
+      ;
+    }
+    ;
+  };
+  var watch_BANG_ = function(trigger) {
+    const s1 = get_state3();
+    if (truth_(s1.observer)) {
+    } else {
+      s1.observer = new MutationObserver((function(_) {
+        return refresh_BANG_();
+      }));
+    }
+    ;
+    return s1.observer.observe(trigger, { "childList": true, "subtree": true, "characterData": true, "attributes": true });
+  };
   var show_BANG_2 = function(trigger, instant_QMARK_) {
     const s1 = get_state3();
     const layer2 = layer_BANG_();
     const cl3 = layer2.classList;
     const prev4 = s1.open;
-    const tone5 = trigger.dataset.tooltipTone;
     clear_pending_BANG_();
     clearTimeout(s1.hideTimer);
+    unwatch_BANG_();
     if (truth_((() => {
-      const and__23442__auto__6 = prev4;
-      if (truth_(and__23442__auto__6)) {
+      const and__23442__auto__5 = prev4;
+      if (truth_(and__23442__auto__5)) {
         return !(prev4 === trigger);
       } else {
-        return and__23442__auto__6;
+        return and__23442__auto__5;
       }
       ;
     })())) {
@@ -7720,15 +7767,8 @@
     ;
     s1.open = trigger;
     describe_BANG_(trigger, true);
-    s1.bubble.replaceChildren(content_of(trigger));
-    layer2.setAttribute("data-kind", trigger.dataset.tooltipKind === "card" ? "card" : "label");
-    layer2.setAttribute("data-theme", bubble_theme(trigger));
-    if (truth_(tone5)) {
-      layer2.setAttribute("data-tone", tone5);
-    } else {
-      layer2.removeAttribute("data-tone");
-    }
-    ;
+    render_BANG_(layer2, trigger);
+    watch_BANG_(trigger);
     cl3.toggle("tooltip-layer--instant", instant_QMARK_);
     position_BANG_2(layer2, trigger);
     if (truth_(instant_QMARK_)) {
@@ -8028,14 +8068,14 @@
       ;
     })().split(","))));
     const override_keys4 = set(map(first, viewport_overrides));
-    const kept5 = remove((function(p__35) {
-      const vec__69 = p__35;
+    const kept5 = remove((function(p__36) {
+      const vec__69 = p__36;
       const k10 = nth(vec__69, 0, null);
       const _11 = nth(vec__69, 1, null);
       return contains_QMARK_(override_keys4, k10);
     }), entries1);
-    return join(", ", map((function(p__36) {
-      const vec__1215 = p__36;
+    return join(", ", map((function(p__37) {
+      const vec__1215 = p__37;
       const k16 = nth(vec__1215, 0, null);
       const v17 = nth(vec__1215, 1, null);
       if (v17 == null) {
@@ -8185,8 +8225,8 @@
     ;
   };
   var builtin_options = function(p, id) {
-    const G__371 = id;
-    switch (G__371) {
+    const G__381 = id;
+    switch (G__381) {
       case "quality":
         const lv3 = levels(p);
         const h4 = p.hls;
@@ -8247,8 +8287,8 @@
     ;
   };
   var builtin_value = function(p, id) {
-    const G__381 = id;
-    switch (G__381) {
+    const G__391 = id;
+    switch (G__391) {
       case "quality":
         const h3 = p.hls;
         if (truth_((() => {
@@ -8276,8 +8316,8 @@
     ;
   };
   var builtin_summary = function(p, id) {
-    const G__391 = id;
-    switch (G__391) {
+    const G__401 = id;
+    switch (G__401) {
       case "quality":
         const h3 = p.hls;
         const cur4 = truth_(h3) ? levels(p)[h3.currentLevel] : null;
@@ -8316,8 +8356,8 @@
     ;
   };
   var builtin_select_BANG_ = function(p, id, v) {
-    const G__401 = id;
-    switch (G__401) {
+    const G__411 = id;
+    switch (G__411) {
       case "quality":
         const temp__23062__auto__3 = p.hls;
         if (truth_(temp__23062__auto__3)) {
@@ -8737,9 +8777,9 @@
       scrub5.setAttribute("aria-valuenow", Math.round(t4));
       scrub5.setAttribute("aria-valuetext", `${fmt(t4) ?? ""}${" of "}${fmt(d3) ?? ""}`);
       const b11 = v2.buffered;
-      const n4112 = b11.length;
+      const n4212 = b11.length;
       let i13 = 0;
-      for (; i13 < n4112; i13++) {
+      for (; i13 < n4212; i13++) {
         b11.start(i13) <= t4 + 0.5 ? scrub5.style.setProperty("--vp-buffered", b11.end(i13) / d3) : null;
       }
       ;
@@ -8864,8 +8904,8 @@
   };
   var act_BANG_ = function(p, a) {
     const v1 = p.video;
-    const G__422 = a;
-    switch (G__422) {
+    const G__432 = a;
+    switch (G__432) {
       case "play":
         toggle_play_BANG_(p);
         break;
@@ -8985,8 +9025,8 @@
     scrub.addEventListener("pointerup", end5);
     scrub.addEventListener("pointercancel", end5);
     return scrub.addEventListener("keydown", (function(e) {
-      const G__437 = e.key;
-      switch (G__437) {
+      const G__447 = e.key;
+      switch (G__447) {
         case "ArrowLeft":
           e.preventDefault();
           e.stopPropagation();
@@ -9611,9 +9651,9 @@
     return obs2.observe(document.body, { "childList": true, "subtree": true, "attributes": true, "attributeFilter": ["data-src"] });
   };
   window["__uiVideoPlayer"] = (function(root) {
-    let temp__23062__auto__44 = players.get(root);
-    if (truth_(temp__23062__auto__44)) {
-      const p1 = temp__23062__auto__44;
+    let temp__23062__auto__45 = players.get(root);
+    if (truth_(temp__23062__auto__45)) {
+      const p1 = temp__23062__auto__45;
       return { "video": p1.video, "play": (function() {
         return autoplay_BANG_(p1);
       }), "pause": (function() {

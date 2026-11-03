@@ -29,7 +29,7 @@
    :children "The trigger. Non-interactive text needs :attrs {:tabindex 0} to be reachable by keyboard."
    :props [{:name :text :type "string" :doc "The hint, a few words."}
            {:name :shortcut :type "vector of strings" :doc "Keycaps after the text, e.g. [\"⌘\" \"K\"]."}
-           {:name :content :type "hiccup" :doc "Rich read-only content instead of :text, usually a tooltip-card. Cards stay open while the pointer travels into them."}
+           {:name :content :type "hiccup, string or seq of nodes" :doc "Rich read-only content instead of :text, usually a tooltip-card. A list or lazy seq is spliced. On Replicant and squint it may change while open: the tooltip mirrors every re-render. Cards stay open while the pointer travels into them."}
            {:name :delay :type "ms" :default "500" :doc "Wait before the first tooltip opens. data-tooltip-delay on any ancestor sets it for a group."}
            {:name :side :type ":top | :bottom | :left | :right" :default ":top" :doc "Preferred side; without room there it takes the opposite, then a perpendicular side, else the roomiest."}
            {:name :tone :type ":danger" :doc "Red for error hints: a light red tint on light pages, red-tinted ink on dark ones."}
@@ -37,8 +37,10 @@
            {:name :class :type "string"} {:name :attrs :type "map"}]}
   {:fn "tooltip-card"
    :doc "An 18rem column for rich content; list rows inside sit flush."
-   :children "ui.* components and text: list-row, metric :flush, progress, day-grid, an image."
+   :children "Any nodes, seqs of nodes spliced: ui.* components (list-row, metric :flush, progress, day-grid), text, an image."
    :props [{:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "content-nodes"
+   :doc "Content as child nodes: a list or lazy seq spliced, anything else one node, nil none."}
   {:fn "tooltip-label"
    :doc "The plain body tooltip renders for :text and :shortcut."}
   {:fn "tooltip-data-attrs"
@@ -50,7 +52,7 @@
  :accessibility
  ["The shared layer has role=\"tooltip\" and the trigger's control gets aria-describedby while it is open."
   "Icon-only controls still need an aria-label; the tooltip describes, it does not name."
-  "Content is cloned, so keep it read only: focus never moves into the tooltip."]
+  "Content is a mirror of the trigger's template, so keep it read only: handlers inside do not fire and focus never moves into the tooltip."]
 
  :motion
  ["The first tooltip rises 4px from 0.97 scale over --duration-fast, from the point nearest its trigger."
