@@ -32,7 +32,7 @@
            {:name :content :type "hiccup" :doc "Rich read-only content instead of :text, usually a tooltip-card. Cards stay open while the pointer travels into them."}
            {:name :delay :type "ms" :default "500" :doc "Wait before the first tooltip opens. data-tooltip-delay on any ancestor sets it for a group."}
            {:name :side :type ":top | :bottom | :left | :right" :default ":top" :doc "Preferred side; flips when there is no room."}
-           {:name :tone :type ":danger" :doc "A solid red bubble for error hints."}
+           {:name :tone :type ":danger" :doc "Red for error hints: a light red tint on light pages, red-tinted ink on dark ones."}
            {:name :class :type "string"} {:name :attrs :type "map"}]}
   {:fn "tooltip-card"
    :doc "An 18rem column for rich content; list rows inside sit flush."

@@ -81,16 +81,42 @@
   line-height: var(--leading-body);
 }
 
-/* a solid red bubble: a tint of the ink reads as brown on light pages */
+/* Danger follows the page, not the layer's dark tokens: a light red tint on
+   light pages (tinted ink reads as brown there), tinted ink on dark ones. */
 .tooltip-layer[data-tone="danger"] .tooltip-bubble {
-  background: var(--danger-600);
-  border-color: var(--danger-700);
-  color: var(--fg-on-danger);
+  background: var(--danger-50);
+  border-color: var(--danger-200);
+  color: var(--danger-800);
 }
 
 .tooltip-layer[data-tone="danger"] .tooltip-key {
-  background: color-mix(in srgb, var(--fg-on-danger) 18%, transparent);
-  color: var(--fg-on-danger);
+  background: var(--danger-100);
+  color: var(--danger-700);
+}
+
+/* srgb: oklch would sweep the hue from red through the gray's purple */
+[data-theme="dark"] .tooltip-layer[data-tone="danger"] .tooltip-bubble {
+  background: color-mix(in srgb, var(--danger) 24%, var(--bg-1));
+  border-color: color-mix(in srgb, var(--danger) 45%, transparent);
+  color: var(--fg-0);
+}
+
+[data-theme="dark"] .tooltip-layer[data-tone="danger"] .tooltip-key {
+  background: var(--bg-2);
+  color: var(--fg-1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .tooltip-layer[data-tone="danger"] .tooltip-bubble {
+    background: color-mix(in srgb, var(--danger) 24%, var(--bg-1));
+    border-color: color-mix(in srgb, var(--danger) 45%, transparent);
+    color: var(--fg-0);
+  }
+
+  :root:not([data-theme="light"]) .tooltip-layer[data-tone="danger"] .tooltip-key {
+    background: var(--bg-2);
+    color: var(--fg-1);
+  }
 }
 
 /* ── Content ── */
