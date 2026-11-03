@@ -5,7 +5,7 @@
 - Type: Component (data, Dates)
 - Namespace: `ui.calendar-events`
 - Source: `src/ui/calendar_events.cljc`
-- Public fns: `event-color-class`, `events-for-date`, `cell-events`, `format-time`, `event-time-display`, `parse-int*`, `round*`, `hhmm->minutes`, `event-duration-minutes`, `format-duration`, `format-hour-label`, `event-pill-class-list`, `event-pill-classes`, `ticker-day-class-list`, `ticker-day-classes`, `agenda-event-class-list`, `agenda-event-classes`, `task-check-class-list`, `task-check`, `event-task-check`, `event-pill`, `event-day-cell`, `calendar-event-grid`, `month-grid`, `ticker-dot`, `ticker-day-item`, `ticker-strip`, `agenda-event-row`, `agenda-day-group-class-list`, `agenda-day-empty`, `agenda-day-group`, `agenda-list`, `day-timeline`, `week-timeline`
+- Public fns: `event-color-class`, `events-for-date`, `cell-events`, `more-label`, `format-time`, `event-time-display`, `parse-int*`, `round*`, `hhmm->minutes`, `event-duration-minutes`, `format-duration`, `format-hour-label`, `event-pill-class-list`, `event-pill-classes`, `ticker-day-class-list`, `ticker-day-classes`, `agenda-event-class-list`, `agenda-event-classes`, `task-check-class-list`, `task-check`, `event-task-check`, `event-pill`, `event-day-cell`, `calendar-event-grid`, `month-grid`, `ticker-dot`, `ticker-day-item`, `ticker-strip`, `agenda-event-row`, `agenda-day-group-class-list`, `agenda-day-empty`, `agenda-day-group`, `agenda-list`, `day-timeline`, `week-timeline`
 - Keywords: calendar, events, agenda, week view, day view, month view, event pills
 
 ## When to use

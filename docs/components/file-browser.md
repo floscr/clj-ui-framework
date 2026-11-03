@@ -103,7 +103,7 @@ Configurable CSS-grid table with sortable headers, row click, selection and per-
 | `:selected-fn` | `fn [item] -> boolean` | – |  |
 | `:context-menu-items-fn` | `fn [item] -> items` | – |  |
 | `:row-attrs-fn` | `fn [item] -> map` | – |  |
-| `:on-resize` | `fn [col-key width-px]` | – | Gives each header a grip on its right edge; called with the new width when dragged, nil on double-click. The host keeps widths and passes them back as :width. Squint / Replicant only. |
+| `:on-resize` | `fn [col-key width-px]` | – | Gives each header a grip on its right edge; called with the new width when dragged, or with the widest content's width on a double-click. The host keeps widths and passes them back as :width. Squint / Replicant only. |
 | `:header-attrs-fn` | `fn [col] -> map` | – | Merged onto a header cell, :class appended: draggable + drag handlers to reorder columns (fb-table-th-drop-before / -after mark the drop), a title. |
 | `:header-context-menu-items-fn` | `fn [col] -> items` | – | Right-click menu per header (hide / remove the column). |
 | `:class` | `string` | – |  |
