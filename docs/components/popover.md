@@ -142,7 +142,7 @@ Class vector for {:side}.
 
 - [Dialog](dialog.md): A focused modal surface for decisions that need attention, as a native <dialog> or an overlay for reactive apps.
 - [Context menu](context-menu.md): Secondary actions close to the object: a right-click (or long-press on touch) menu for any wrapped element.
-- [Tooltip](tooltip.md): Short supporting text for an unfamiliar control, shown on hover and focus with pure CSS.
+- [Tooltip](tooltip.md): A hint or a rich read-only preview on hover and focus: the first waits for its delay, moving to the next opens it instantly.
 - [Select](select.md): A compact choice field with a framework-drawn listbox, keyboard navigation and form support.
 
 ## Guidance for AI tools

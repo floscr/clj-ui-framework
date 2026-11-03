@@ -71,7 +71,7 @@ Dark mode: `data-theme="dark"` on `<html>` (auto via prefers-color-scheme otherw
 - [Dialog](components/dialog.md): A focused modal surface for decisions that need attention, as a native <dialog> or an overlay for reactive apps.
 - [Popover](components/popover.md): A small anchored panel for contextual controls, built on the native Popover API so it works without app state.
 - [Tabs](components/tabs.md): Switch between peer panels of one object, with no JS: hidden radios drive the panels.
-- [Tooltip](components/tooltip.md): Short supporting text for an unfamiliar control, shown on hover and focus with pure CSS.
+- [Tooltip](components/tooltip.md): A hint or a rich read-only preview on hover and focus: the first waits for its delay, moving to the next opens it instantly.
 
 ### Feedback
 

@@ -22,7 +22,7 @@
 (defn- error-icon
   "Render a circle-x icon wrapped in a tooltip showing the error text."
   [error]
-  (tooltip/tooltip {:text error :class "form-error-icon"}
+  (tooltip/tooltip {:text error :tone :danger :delay 0 :class "form-error-icon"}
     (icon/icon {:icon-name :circle-x :size :sm})))
 
 (defn form-field

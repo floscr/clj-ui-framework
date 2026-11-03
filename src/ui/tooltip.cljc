@@ -1,25 +1,49 @@
 (ns ui.tooltip
-  (:require [clojure.string :as str]))
+  "Hover and focus hints shown by the ui.js.tooltip runtime: the trigger
+   carries its content in a template, the runtime shows it in one shared
+   layer, so the first tooltip waits for its delay and the next ones open
+   instantly."
+  (:require [ui.util :as util]))
+
+(defn tooltip-data-attrs
+  "The data attributes ui.js.tooltip reads off the trigger wrapper."
+  [{:keys [content delay side tone]}]
+  (cond-> {}
+    content       (assoc :data-tooltip-kind "card")
+    (some? delay) (assoc :data-tooltip-delay (str delay))
+    side          (assoc :data-tooltip-side (util/kw-name side))
+    tone          (assoc :data-tooltip-tone (util/kw-name tone))))
+
+(defn tooltip-label
+  "The plain body: the hint text, then its shortcut as keycaps."
+  [text shortcut]
+  (cond-> [:span (util/class-attrs ["tooltip-label"] nil nil) [:span text]]
+    (seq shortcut)
+    (conj (into [:span (util/class-attrs ["tooltip-keys"] nil nil)]
+                (map (fn [k] [:kbd (util/class-attrs ["tooltip-key"] nil nil) k]) shortcut)))))
 
 (defn tooltip
-  "Render a tooltip wrapper. Shows tooltip text on hover.
+  "Wrap a trigger in a tooltip.
 
    Props:
-     :text  - tooltip text to display
-     :class - additional CSS classes
-     :attrs - additional HTML attributes"
-  [{:keys [text class attrs] :as _props} & children]
-  #?(:squint
-     (let [classes (cond-> "tooltip" class (str " " class))
-           base-attrs (merge {:class classes :data-tooltip text} attrs)]
-       (into [:span base-attrs] children))
+     :text     - the hint, a few words
+     :shortcut - keycaps after the text, e.g. [\"⌘\" \"K\"]
+     :content  - rich hiccup instead of :text (see tooltip-card)
+     :delay    - ms before the first tooltip opens (default 500); also
+                 settable for a whole group as data-tooltip-delay on an ancestor
+     :side     - :top (default), :bottom, :left or :right; flips when cramped
+     :tone     - :danger for error hints
+     :class    - additional CSS classes
+     :attrs    - additional HTML attributes"
+  [{:keys [text shortcut content delay side tone class attrs]} & children]
+  (let [body  (or content (tooltip-label text shortcut))
+        attrs (merge (tooltip-data-attrs {:content content :delay delay :side side :tone tone})
+                     attrs)]
+    (-> [:span (util/class-attrs ["tooltip"] class attrs)]
+        (into children)
+        (conj [:template (util/class-attrs ["tooltip-content"] nil nil) body]))))
 
-     :cljs
-     (let [cls (cond-> ["tooltip"] class (conj class))
-           base-attrs (merge {:class cls :data-tooltip text} attrs)]
-       (into [:span base-attrs] children))
-
-     :clj
-     (let [classes (cond-> "tooltip" class (str " " class))
-           base-attrs (merge {:class classes :data-tooltip text} attrs)]
-       (into [:span base-attrs] children))))
+(defn tooltip-card
+  "A column layout for rich tooltip content, 18rem wide."
+  [{:keys [class attrs]} & children]
+  (into [:div (util/class-attrs ["tooltip-card"] class attrs)] children))

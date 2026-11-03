@@ -2465,7 +2465,7 @@
     el1.className = class_name;
     return el1;
   };
-  var make_button = function(class_name, text, on_click4) {
+  var make_button = function(class_name, text, on_click5) {
     const btn1 = make_el("button", class_name);
     btn1.setAttribute("type", "button");
     btn1.setAttribute("tabindex", "-1");
@@ -2476,7 +2476,7 @@
     btn1.addEventListener("click", (function(e) {
       e.preventDefault();
       e.stopPropagation();
-      return on_click4();
+      return on_click5();
     }));
     return btn1;
   };
@@ -6458,14 +6458,14 @@
   };
   var create_panel_BANG_ = function(group, el) {
     const content1 = el.querySelector(":scope > .ui-panels-content");
-    const edge2 = el.querySelector(":scope > .ui-panels-edge");
+    const edge22 = el.querySelector(":scope > .ui-panels-edge");
     const parsed3 = parse_size(el.getAttribute("data-size"));
     const persist_key4 = el.getAttribute("data-persist-key");
     const saved5 = !(persist_key4 == null) ? restore_persisted(persist_key4) : null;
     const saved_size6 = !(saved5 == null) ? parse_size(`${saved5.size ?? ""}`) : null;
     const active7 = !(saved_size6 == null) ? saved_size6 : parsed3;
     const collapsed8 = !(saved5 == null) ? truth_(saved5.collapsed) ? true : false : el.hasAttribute("data-collapsed");
-    const panel9 = { "folding": false, "edge": edge2, "el": el, "group": group, "collapsed": collapsed8, "content": content1, "collapsible": el.hasAttribute("data-collapsible"), "value": !(active7 == null) ? active7.value : 0, "grips": [], "persist": persist_key4, "dragging": false, "minSize": parse_size(el.getAttribute("data-min-size")), "pct": !(active7 == null) ? active7.pct : false, "anim": null, "initial": parsed3, "unlock": null, "defaultSize": parse_size(el.getAttribute("data-default-size")), "target": 0, "end": false, "maxSize": parse_size(el.getAttribute("data-max-size")), "session": {} };
+    const panel9 = { "folding": false, "edge": edge22, "el": el, "group": group, "collapsed": collapsed8, "content": content1, "collapsible": el.hasAttribute("data-collapsible"), "value": !(active7 == null) ? active7.value : 0, "grips": [], "persist": persist_key4, "dragging": false, "minSize": parse_size(el.getAttribute("data-min-size")), "pct": !(active7 == null) ? active7.pct : false, "anim": null, "initial": parsed3, "unlock": null, "defaultSize": parse_size(el.getAttribute("data-default-size")), "target": 0, "end": false, "maxSize": parse_size(el.getAttribute("data-max-size")), "session": {} };
     el["__uiPanel"] = panel9;
     group.panels.push(panel9);
     const m10 = measure(panel9);
@@ -6474,9 +6474,9 @@
     reflect_collapsed_BANG_(panel9);
     jump_size_BANG_(panel9, t11);
     jump_content_BANG_(panel9, m10);
-    if (!(edge2 == null)) {
-      edge2.setAttribute("aria-orientation", group.axes["sepOrient"]);
-      attach_grip_BANG_(edge2, (function() {
+    if (!(edge22 == null)) {
+      edge22.setAttribute("aria-orientation", group.axes["sepOrient"]);
+      attach_grip_BANG_(edge22, (function() {
         return panel9;
       }));
     }
@@ -7234,6 +7234,544 @@
     init_BANG_8();
   }
 
+  // .compiled/tooltip.mjs
+  var default_delay = 500;
+  var skip_ms = 400;
+  var close_ms = 80;
+  var card_close_ms = 160;
+  var gap2 = 6;
+  var edge2 = 8;
+  var focusable2 = "a[href],button,input,select,textarea,summary,[tabindex]";
+  var interactive = "a[href],button,input,select,textarea,summary,label";
+  var get_state3 = function() {
+    const or__23426__auto__1 = window["__uiTooltipState"];
+    if (truth_(or__23426__auto__1)) {
+      return or__23426__auto__1;
+    } else {
+      const s2 = { "open": null, "lastClose": -1e5, "pending": null, "bubble": null, "layer": null, "pointer": "mouse", "hideTimer": null, "showTimer": null, "suppressed": null };
+      window["__uiTooltipState"] = s2;
+      return s2;
+    }
+    ;
+  };
+  var now = function() {
+    return performance.now();
+  };
+  var trigger_of = function(node) {
+    if (truth_((() => {
+      const and__23442__auto__1 = node;
+      if (truth_(and__23442__auto__1)) {
+        return node.closest;
+      } else {
+        return and__23442__auto__1;
+      }
+      ;
+    })())) {
+      return node.closest(".tooltip");
+    }
+    ;
+  };
+  var content_of = function(trigger) {
+    const frag1 = document.createDocumentFragment();
+    const tpl2 = trigger.querySelector(":scope > template.tooltip-content");
+    if (truth_(tpl2)) {
+      const src3 = truth_((() => {
+        const and__23442__auto__4 = tpl2.content;
+        if (truth_(and__23442__auto__4)) {
+          return tpl2.content.firstChild;
+        } else {
+          return and__23442__auto__4;
+        }
+        ;
+      })()) ? tpl2.content : tpl2;
+      src3.childNodes.forEach((function(n) {
+        return frag1.appendChild(n.cloneNode(true));
+      }));
+    }
+    ;
+    return frag1;
+  };
+  var opposite = function(side) {
+    const G__311 = side;
+    switch (G__311) {
+      case "top":
+        return "bottom";
+        break;
+      case "bottom":
+        return "top";
+        break;
+      case "left":
+        return "right";
+        break;
+      case "right":
+        return "left";
+        break;
+      default:
+        return "top";
+    }
+    ;
+  };
+  var fits_QMARK_ = function(side, tr, w, h, vw, vh) {
+    const G__321 = side;
+    switch (G__321) {
+      case "bottom":
+        return tr.bottom + gap2 + h <= vh - edge2;
+        break;
+      case "left":
+        return tr.left - gap2 - w >= edge2;
+        break;
+      case "right":
+        return tr.right + gap2 + w <= vw - edge2;
+        break;
+      default:
+        return tr.top - gap2 - h >= edge2;
+    }
+    ;
+  };
+  var clamp6 = function(v, lo, hi) {
+    return Math.max(lo, Math.min(v, hi));
+  };
+  var position_BANG_2 = function(layer, trigger) {
+    layer.style.left = "0px";
+    layer.style.top = "0px";
+    const tr1 = trigger.getBoundingClientRect();
+    const w2 = layer.offsetWidth;
+    const h3 = layer.offsetHeight;
+    const vw4 = window.innerWidth;
+    const vh5 = window.innerHeight;
+    const pref6 = (() => {
+      const or__23426__auto__7 = trigger.dataset.tooltipSide;
+      if (truth_(or__23426__auto__7)) {
+        return or__23426__auto__7;
+      } else {
+        return "top";
+      }
+      ;
+    })();
+    const side8 = truth_((() => {
+      const or__23426__auto__9 = fits_QMARK_(pref6, tr1, w2, h3, vw4, vh5);
+      if (truth_(or__23426__auto__9)) {
+        return or__23426__auto__9;
+      } else {
+        return not(fits_QMARK_(opposite(pref6), tr1, w2, h3, vw4, vh5));
+      }
+      ;
+    })()) ? pref6 : opposite(pref6);
+    const cx10 = tr1.left + tr1.width / 2;
+    const cy11 = tr1.top + tr1.height / 2;
+    const left12 = clamp6((() => {
+      const G__3313 = side8;
+      switch (G__3313) {
+        case "left":
+          return tr1.left - gap2 - w2;
+          break;
+        case "right":
+          return tr1.right + gap2;
+          break;
+        default:
+          return cx10 - w2 / 2;
+      }
+      ;
+    })(), edge2, vw4 - w2 - edge2);
+    const top15 = clamp6((() => {
+      const G__3416 = side8;
+      switch (G__3416) {
+        case "top":
+          return tr1.top - gap2 - h3;
+          break;
+        case "bottom":
+          return tr1.bottom + gap2;
+          break;
+        default:
+          return cy11 - h3 / 2;
+      }
+      ;
+    })(), edge2, vh5 - h3 - edge2);
+    layer.style.left = `${left12 ?? ""}px`;
+    layer.style.top = `${top15 ?? ""}px`;
+    layer.setAttribute("data-side", side8);
+    layer.style.setProperty("--tooltip-origin-x", `${clamp6(cx10 - left12, 0, w2) ?? ""}px`);
+    return layer.style.setProperty("--tooltip-origin-y", `${clamp6(cy11 - top15, 0, h3) ?? ""}px`);
+  };
+  var describe_BANG_ = function(trigger, on_QMARK_) {
+    const target1 = (() => {
+      const or__23426__auto__2 = trigger.querySelector(focusable2);
+      if (truth_(or__23426__auto__2)) {
+        return or__23426__auto__2;
+      } else {
+        return trigger;
+      }
+      ;
+    })();
+    if (truth_(on_QMARK_)) {
+      return target1.setAttribute("aria-describedby", "ui-tooltip");
+    } else {
+      if (target1.getAttribute("aria-describedby") === "ui-tooltip") {
+        return target1.removeAttribute("aria-describedby");
+      }
+    }
+    ;
+  };
+  var clear_pending_BANG_ = function() {
+    const s1 = get_state3();
+    clearTimeout(s1.showTimer);
+    return s1.pending = null;
+  };
+  var hide_BANG_ = function() {
+    const s1 = get_state3();
+    clear_pending_BANG_();
+    clearTimeout(s1.hideTimer);
+    const temp__23062__auto__2 = s1.open;
+    if (truth_(temp__23062__auto__2)) {
+      const t3 = temp__23062__auto__2;
+      describe_BANG_(t3, false);
+      s1.open = null;
+      s1.lastClose = now();
+      return s1.layer.classList.remove("tooltip-layer--open", "tooltip-layer--instant");
+    }
+    ;
+  };
+  var schedule_hide_BANG_ = function() {
+    const s1 = get_state3();
+    clearTimeout(s1.hideTimer);
+    if (truth_(s1.open)) {
+      return s1.hideTimer = setTimeout(hide_BANG_, s1.layer.getAttribute("data-kind") === "card" ? card_close_ms : close_ms);
+    }
+    ;
+  };
+  var layer_BANG_ = function() {
+    const s1 = get_state3();
+    const or__23426__auto__2 = s1.layer;
+    if (truth_(or__23426__auto__2)) {
+      return or__23426__auto__2;
+    } else {
+      const layer3 = document.createElement("div");
+      const bubble4 = document.createElement("div");
+      layer3.id = "ui-tooltip";
+      layer3.className = "tooltip-layer";
+      layer3.setAttribute("role", "tooltip");
+      layer3.setAttribute("data-theme", "dark");
+      bubble4.className = "tooltip-bubble";
+      layer3.appendChild(bubble4);
+      document.body.appendChild(layer3);
+      layer3.addEventListener("pointerenter", (function(_) {
+        return clearTimeout(get_state3().hideTimer);
+      }));
+      layer3.addEventListener("pointerleave", (function(e) {
+        if (!(e.pointerType === "touch")) {
+          return schedule_hide_BANG_();
+        }
+        ;
+      }));
+      s1.layer = layer3;
+      s1.bubble = bubble4;
+      return layer3;
+    }
+    ;
+  };
+  var show_BANG_2 = function(trigger, instant_QMARK_) {
+    const s1 = get_state3();
+    const layer2 = layer_BANG_();
+    const cl3 = layer2.classList;
+    const prev4 = s1.open;
+    const tone5 = trigger.dataset.tooltipTone;
+    clear_pending_BANG_();
+    clearTimeout(s1.hideTimer);
+    if (truth_((() => {
+      const and__23442__auto__6 = prev4;
+      if (truth_(and__23442__auto__6)) {
+        return !(prev4 === trigger);
+      } else {
+        return and__23442__auto__6;
+      }
+      ;
+    })())) {
+      describe_BANG_(prev4, false);
+    }
+    ;
+    s1.open = trigger;
+    describe_BANG_(trigger, true);
+    s1.bubble.replaceChildren(content_of(trigger));
+    layer2.setAttribute("data-kind", trigger.dataset.tooltipKind === "card" ? "card" : "label");
+    if (truth_(tone5)) {
+      layer2.setAttribute("data-tone", tone5);
+    } else {
+      layer2.removeAttribute("data-tone");
+    }
+    ;
+    cl3.toggle("tooltip-layer--instant", instant_QMARK_);
+    position_BANG_2(layer2, trigger);
+    if (truth_(instant_QMARK_)) {
+    } else {
+      cl3.remove("tooltip-layer--open");
+      layer2.getBoundingClientRect();
+    }
+    ;
+    cl3.add("tooltip-layer--open");
+    if (truth_(instant_QMARK_)) {
+      return requestAnimationFrame((function() {
+        return requestAnimationFrame((function() {
+          return cl3.remove("tooltip-layer--instant");
+        }));
+      }));
+    }
+    ;
+  };
+  var delay_of = function(trigger) {
+    const host1 = trigger.closest("[data-tooltip-delay]");
+    const v2 = truth_(host1) ? parseFloat(host1.dataset.tooltipDelay) : null;
+    if (truth_(!(v2 == null) && not(isNaN(v2)))) {
+      return v2;
+    } else {
+      return default_delay;
+    }
+    ;
+  };
+  var warm_QMARK_ = function(s) {
+    const or__23426__auto__1 = s.open;
+    if (truth_(or__23426__auto__1)) {
+      return or__23426__auto__1;
+    } else {
+      return now() - s.lastClose < skip_ms;
+    }
+    ;
+  };
+  var enter_BANG_ = function(trigger, immediate_QMARK_) {
+    const s1 = get_state3();
+    clearTimeout(s1.hideTimer);
+    if (truth_((() => {
+      const or__23426__auto__2 = s1.open === trigger;
+      if (or__23426__auto__2) {
+        return or__23426__auto__2;
+      } else {
+        const or__23426__auto__3 = s1.pending === trigger;
+        if (or__23426__auto__3) {
+          return or__23426__auto__3;
+        } else {
+          return s1.suppressed === trigger;
+        }
+        ;
+      }
+      ;
+    })())) {
+      return null;
+    } else {
+      clear_pending_BANG_();
+      const d4 = delay_of(trigger);
+      if (truth_(warm_QMARK_(s1))) {
+        return show_BANG_2(trigger, true);
+      } else {
+        if (truth_((() => {
+          const or__23426__auto__5 = immediate_QMARK_;
+          if (truth_(or__23426__auto__5)) {
+            return or__23426__auto__5;
+          } else {
+            return d4 <= 0;
+          }
+          ;
+        })())) {
+          return show_BANG_2(trigger, false);
+        } else {
+          if ("else") {
+            s1.pending = trigger;
+            return s1.showTimer = setTimeout((function() {
+              return show_BANG_2(trigger, false);
+            }), d4);
+          } else {
+            return null;
+          }
+        }
+      }
+      ;
+    }
+    ;
+  };
+  var leave_BANG_ = function(trigger) {
+    const s1 = get_state3();
+    if (s1.suppressed === trigger) {
+      s1.suppressed = null;
+    }
+    ;
+    if (s1.pending === trigger) {
+      clear_pending_BANG_();
+    }
+    ;
+    if (s1.open === trigger) {
+      return schedule_hide_BANG_();
+    }
+    ;
+  };
+  var reposition_BANG_2 = function() {
+    const s1 = get_state3();
+    const t2 = s1.open;
+    if (truth_(t2)) {
+      if (truth_(t2.isConnected)) {
+        return position_BANG_2(s1.layer, t2);
+      } else {
+        return hide_BANG_();
+      }
+      ;
+    }
+    ;
+  };
+  var left_trigger_QMARK_ = function(trigger, e) {
+    const to1 = e.relatedTarget;
+    return not((() => {
+      const and__23442__auto__2 = to1;
+      if (truth_(and__23442__auto__2)) {
+        return trigger.contains(to1);
+      } else {
+        return and__23442__auto__2;
+      }
+      ;
+    })());
+  };
+  var on_pointer_over = function(e) {
+    if (!(e.pointerType === "touch")) {
+      const temp__23062__auto__1 = trigger_of(e.target);
+      if (truth_(temp__23062__auto__1)) {
+        const t2 = temp__23062__auto__1;
+        return enter_BANG_(t2, false);
+      }
+      ;
+    }
+    ;
+  };
+  var on_pointer_out = function(e) {
+    if (!(e.pointerType === "touch")) {
+      const temp__23062__auto__1 = trigger_of(e.target);
+      if (truth_(temp__23062__auto__1)) {
+        const t2 = temp__23062__auto__1;
+        if (truth_(left_trigger_QMARK_(t2, e))) {
+          return leave_BANG_(t2);
+        }
+        ;
+      }
+      ;
+    }
+    ;
+  };
+  var on_pointer_down = function(e) {
+    const s1 = get_state3();
+    const t2 = trigger_of(e.target);
+    s1.pointer = e.pointerType;
+    if (truth_((() => {
+      const and__23442__auto__3 = t2;
+      if (truth_(and__23442__auto__3)) {
+        return !(e.pointerType === "touch") && (() => {
+          const or__23426__auto__4 = t2 === s1.open;
+          if (or__23426__auto__4) {
+            return or__23426__auto__4;
+          } else {
+            return t2 === s1.pending;
+          }
+          ;
+        })();
+      } else {
+        return and__23442__auto__3;
+      }
+      ;
+    })())) {
+      hide_BANG_();
+      return s1.suppressed = t2;
+    } else {
+      if (truth_(e.pointerType === "touch" && (not(t2) && not((() => {
+        const and__23442__auto__5 = s1.layer;
+        if (truth_(and__23442__auto__5)) {
+          return s1.layer.contains(e.target);
+        } else {
+          return and__23442__auto__5;
+        }
+        ;
+      })())))) {
+        return hide_BANG_();
+      } else {
+        return null;
+      }
+    }
+    ;
+  };
+  var on_click4 = function(e) {
+    const s1 = get_state3();
+    if (s1.pointer === "touch") {
+      const temp__23062__auto__2 = trigger_of(e.target);
+      if (truth_(temp__23062__auto__2)) {
+        const t3 = temp__23062__auto__2;
+        if (truth_((() => {
+          const or__23426__auto__4 = t3.matches(interactive);
+          if (truth_(or__23426__auto__4)) {
+            return or__23426__auto__4;
+          } else {
+            return t3.querySelector(interactive);
+          }
+          ;
+        })())) {
+          return null;
+        } else {
+          if (s1.open === t3) {
+            return hide_BANG_();
+          } else {
+            return enter_BANG_(t3, true);
+          }
+          ;
+        }
+        ;
+      }
+      ;
+    }
+    ;
+  };
+  var on_focus_in = function(e) {
+    const temp__23062__auto__1 = trigger_of(e.target);
+    if (truth_(temp__23062__auto__1)) {
+      const t2 = temp__23062__auto__1;
+      if (truth_(!(get_state3().pointer === "touch") && e.target.matches(":focus-visible"))) {
+        return enter_BANG_(t2, true);
+      }
+      ;
+    }
+    ;
+  };
+  var on_focus_out = function(e) {
+    const temp__23062__auto__1 = trigger_of(e.target);
+    if (truth_(temp__23062__auto__1)) {
+      const t2 = temp__23062__auto__1;
+      if (truth_(left_trigger_QMARK_(t2, e))) {
+        return leave_BANG_(t2);
+      }
+      ;
+    }
+    ;
+  };
+  var on_key_down = function(e) {
+    const s1 = get_state3();
+    if (truth_(e.key === "Escape" && s1.open)) {
+      const t2 = s1.open;
+      hide_BANG_();
+      return s1.suppressed = t2;
+    }
+    ;
+  };
+  var init_BANG_9 = function() {
+    if (truth_(window["__uiTooltipInit"])) {
+      return null;
+    } else {
+      window["__uiTooltipInit"] = true;
+      document.addEventListener("pointerover", on_pointer_over);
+      document.addEventListener("pointerout", on_pointer_out);
+      document.addEventListener("pointerdown", on_pointer_down, true);
+      document.addEventListener("click", on_click4);
+      document.addEventListener("focusin", on_focus_in);
+      document.addEventListener("focusout", on_focus_out);
+      document.addEventListener("keydown", on_key_down);
+      window.addEventListener("scroll", reposition_BANG_2, { "capture": true, "passive": true });
+      return window.addEventListener("resize", reposition_BANG_2);
+    }
+    ;
+  };
+  init_BANG_9();
+  window["__uiTooltip"] = { "hide": hide_BANG_, "reposition": reposition_BANG_2 };
+
   // .compiled/touch.mjs
   var mq = window.matchMedia("(hover: none)");
   var viewport_overrides = [["width", "device-width"], ["initial-scale", "1.0"], ["maximum-scale", "1.0"], ["user-scalable", "no"]];
@@ -7260,14 +7798,14 @@
       ;
     })().split(","))));
     const override_keys4 = set(map(first, viewport_overrides));
-    const kept5 = remove((function(p__31) {
-      const vec__69 = p__31;
+    const kept5 = remove((function(p__35) {
+      const vec__69 = p__35;
       const k10 = nth(vec__69, 0, null);
       const _11 = nth(vec__69, 1, null);
       return contains_QMARK_(override_keys4, k10);
     }), entries1);
-    return join(", ", map((function(p__32) {
-      const vec__1215 = p__32;
+    return join(", ", map((function(p__36) {
+      const vec__1215 = p__36;
       const k16 = nth(vec__1215, 0, null);
       const v17 = nth(vec__1215, 1, null);
       if (v17 == null) {
@@ -7359,7 +7897,7 @@
     }
     ;
   };
-  var clamp6 = function(v, lo, hi) {
+  var clamp7 = function(v, lo, hi) {
     return Math.max(lo, Math.min(hi, v));
   };
   var emit_BANG_3 = function(p, detail) {
@@ -7417,8 +7955,8 @@
     ;
   };
   var builtin_options = function(p, id) {
-    const G__331 = id;
-    switch (G__331) {
+    const G__371 = id;
+    switch (G__371) {
       case "quality":
         const lv3 = levels(p);
         const h4 = p.hls;
@@ -7479,8 +8017,8 @@
     ;
   };
   var builtin_value = function(p, id) {
-    const G__341 = id;
-    switch (G__341) {
+    const G__381 = id;
+    switch (G__381) {
       case "quality":
         const h3 = p.hls;
         if (truth_((() => {
@@ -7508,8 +8046,8 @@
     ;
   };
   var builtin_summary = function(p, id) {
-    const G__351 = id;
-    switch (G__351) {
+    const G__391 = id;
+    switch (G__391) {
       case "quality":
         const h3 = p.hls;
         const cur4 = truth_(h3) ? levels(p)[h3.currentLevel] : null;
@@ -7548,8 +8086,8 @@
     ;
   };
   var builtin_select_BANG_ = function(p, id, v) {
-    const G__361 = id;
-    switch (G__361) {
+    const G__401 = id;
+    switch (G__401) {
       case "quality":
         const temp__23062__auto__3 = p.hls;
         if (truth_(temp__23062__auto__3)) {
@@ -7588,7 +8126,7 @@
     const w3 = panel.offsetWidth;
     const left4 = b2.left + b2.width / 2 - w3 / 2 - r1.left;
     panel.style.bottom = `${r1.bottom - b2.top + 12}px`;
-    return panel.style.left = `${clamp6(left4, 8, r1.width - w3 - 8) ?? ""}px`;
+    return panel.style.left = `${clamp7(left4, 8, r1.width - w3 - 8) ?? ""}px`;
   };
   var arm_hide_BANG_ = function(p) {
     clearTimeout(p.hideT);
@@ -7969,9 +8507,9 @@
       scrub5.setAttribute("aria-valuenow", Math.round(t4));
       scrub5.setAttribute("aria-valuetext", `${fmt(t4) ?? ""}${" of "}${fmt(d3) ?? ""}`);
       const b11 = v2.buffered;
-      const n3712 = b11.length;
+      const n4112 = b11.length;
       let i13 = 0;
-      for (; i13 < n3712; i13++) {
+      for (; i13 < n4112; i13++) {
         b11.start(i13) <= t4 + 0.5 ? scrub5.style.setProperty("--vp-buffered", b11.end(i13) / d3) : null;
       }
       ;
@@ -8053,7 +8591,7 @@
   };
   var seek_by_BANG_ = function(p, s) {
     const v1 = p.video;
-    return v1.currentTime = clamp6(v1.currentTime + s, 0, (() => {
+    return v1.currentTime = clamp7(v1.currentTime + s, 0, (() => {
       const or__23426__auto__2 = v1.duration;
       if (truth_(or__23426__auto__2)) {
         return or__23426__auto__2;
@@ -8065,7 +8603,7 @@
   };
   var set_volume_BANG_ = function(p, x) {
     const v1 = p.video;
-    const x2 = clamp6(x, 0, 1);
+    const x2 = clamp7(x, 0, 1);
     v1.volume = x2;
     v1.muted = x2 === 0;
     return (() => {
@@ -8096,8 +8634,8 @@
   };
   var act_BANG_ = function(p, a) {
     const v1 = p.video;
-    const G__382 = a;
-    switch (G__382) {
+    const G__422 = a;
+    switch (G__422) {
       case "play":
         toggle_play_BANG_(p);
         break;
@@ -8167,7 +8705,7 @@
   };
   var frac = function(el, e) {
     const r1 = el.getBoundingClientRect();
-    return clamp6((e.clientX - r1.left) / r1.width, 0, 1);
+    return clamp7((e.clientX - r1.left) / r1.width, 0, 1);
   };
   var wire_scrub_BANG_ = function(p, scrub) {
     const v1 = p.video;
@@ -8217,8 +8755,8 @@
     scrub.addEventListener("pointerup", end5);
     scrub.addEventListener("pointercancel", end5);
     return scrub.addEventListener("keydown", (function(e) {
-      const G__397 = e.key;
-      switch (G__397) {
+      const G__437 = e.key;
+      switch (G__437) {
         case "ArrowLeft":
           e.preventDefault();
           e.stopPropagation();
@@ -8606,7 +9144,7 @@
     }
     ;
   };
-  var init_BANG_9 = function(root) {
+  var init_BANG_10 = function(root) {
     const v1 = q2(root, "video");
     const p2 = { "open": null, "video": v1, "hls": null, "dismissed": false, "sub": -1, "volDrag": false, "dragging": false, "root": root, "lastSub": 0, "auto": "true" === root.dataset.autonext };
     players.set(root, p2);
@@ -8806,7 +9344,7 @@
         }
         ;
       } else {
-        return init_BANG_9(root);
+        return init_BANG_10(root);
       }
       ;
     }));
@@ -8843,9 +9381,9 @@
     return obs2.observe(document.body, { "childList": true, "subtree": true, "attributes": true, "attributeFilter": ["data-src"] });
   };
   window["__uiVideoPlayer"] = (function(root) {
-    let temp__23062__auto__40 = players.get(root);
-    if (truth_(temp__23062__auto__40)) {
-      const p1 = temp__23062__auto__40;
+    let temp__23062__auto__44 = players.get(root);
+    if (truth_(temp__23062__auto__44)) {
+      const p1 = temp__23062__auto__44;
       return { "video": p1.video, "play": (function() {
         return autoplay_BANG_(p1);
       }), "pause": (function() {

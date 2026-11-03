@@ -1,49 +1,138 @@
+/* ── Tooltip ────────────────────────────────────────────────────── */
+/* .tooltip wraps the trigger and carries its content in a template;  */
+/* the ui.js.tooltip runtime shows it in the one .tooltip-layer it    */
+/* appends to <body> (data-theme="dark", so the bubble stays ink).    */
+
 .tooltip {
-  position: relative;
   display: inline-block;
 }
 
-.tooltip::before,
-.tooltip::after {
-  position: absolute;
-  left: 50%;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity var(--duration-fast) var(--ease-standard), transform var(--duration-fast) var(--ease-standard), visibility var(--duration-fast) var(--ease-standard);
+.tooltip-layer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 10000;
   pointer-events: none;
-  z-index: 1000;
+  visibility: hidden;
+  /* visibility interpolates as visible, so it stays up for the exit */
+  transition: visibility calc(var(--duration-fast) * 0.6) var(--ease-exit);
+  --tooltip-shift: var(--size-1);
 }
 
-.tooltip::after {
-  content: attr(data-tooltip);
-  bottom: calc(100% + 10px);
-  transform: translateX(-50%) translateY(4px);
-  padding: var(--size-2) var(--size-3);
-  font-size: var(--font-xs);
-  line-height: 1;
-  white-space: nowrap;
-  background: var(--fg-0);
-  color: var(--bg-0);
+.tooltip-layer--open {
+  visibility: visible;
+}
+
+.tooltip-layer--open[data-kind="card"] {
+  pointer-events: auto;
+}
+
+.tooltip-bubble {
+  width: max-content;
+  max-width: min(calc(var(--size-12) * 5), calc(100vw - var(--size-4)));
+  padding: var(--size-1) var(--size-2);
+  background: var(--bg-1);
+  color: var(--fg-0);
+  border: var(--border-0);
   border-radius: var(--radius-md);
+  box-shadow: var(--shadow-2);
+  font-family: var(--font-body);
+  font-size: var(--font-xs);
+  line-height: var(--size-4);
+  opacity: 0;
+  transform: translateY(var(--tooltip-shift)) scale(0.97);
+  transform-origin: var(--tooltip-origin-x, 50%) var(--tooltip-origin-y, 100%);
+  transition:
+    opacity calc(var(--duration-fast) * 0.6) var(--ease-exit),
+    transform calc(var(--duration-fast) * 0.6) var(--ease-exit);
 }
 
-.tooltip::before {
-  content: "";
-  bottom: calc(100% - 1px);
-  transform: translateX(-50%) translateY(4px);
-  border: 6px solid transparent;
-  border-top-color: var(--fg-0);
+.tooltip-layer[data-side="bottom"] { --tooltip-shift: calc(var(--size-1) * -1); }
+
+.tooltip-layer[data-side="left"] .tooltip-bubble {
+  transform: translateX(var(--size-1)) scale(0.97);
 }
 
-/* Reveal on hover — only on devices that actually hover. A bare :hover
-   reveal makes iOS treat the first tap as hover (suppressing that tap's
-   click), so touch devices would need a double-tap. See AGENTS.md
-   "Mobile & Touch Friendliness". */
-@media (hover: hover) {
-  .tooltip:hover::before,
-  .tooltip:hover::after {
-    opacity: 1;
-    visibility: visible;
-    transform: translateX(-50%) translateY(0);
+.tooltip-layer[data-side="right"] .tooltip-bubble {
+  transform: translateX(calc(var(--size-1) * -1)) scale(0.97);
+}
+
+.tooltip-layer--open .tooltip-bubble,
+.tooltip-layer--open[data-side] .tooltip-bubble {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity var(--duration-fast) var(--ease-enter),
+    transform var(--duration-fast) var(--ease-enter);
+}
+
+/* switching between triggers: jump, no motion (outranks the open state) */
+.tooltip-layer.tooltip-layer--instant[data-side],
+.tooltip-layer.tooltip-layer--instant[data-side] .tooltip-bubble {
+  transition: none;
+}
+
+.tooltip-layer[data-kind="card"] .tooltip-bubble {
+  max-width: calc(100vw - var(--size-4));
+  padding: var(--size-3);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-3);
+  font-size: var(--font-sm);
+  line-height: var(--leading-body);
+}
+
+.tooltip-layer[data-tone="danger"] .tooltip-bubble {
+  /* srgb: oklch would sweep the hue from red through the gray's purple */
+  background: color-mix(in srgb, var(--danger) 24%, var(--bg-1));
+  border-color: color-mix(in srgb, var(--danger) 45%, transparent);
+}
+
+/* ── Content ── */
+
+.tooltip-label {
+  display: flex;
+  align-items: center;
+  gap: var(--size-2);
+}
+
+.tooltip-keys {
+  display: inline-flex;
+  gap: 2px;
+  margin-right: calc(var(--size-1) * -0.5);
+}
+
+.tooltip-key {
+  display: inline-grid;
+  place-items: center;
+  min-width: var(--size-5);
+  height: var(--size-5);
+  padding: 0 var(--size-1);
+  border-radius: var(--radius-xs);
+  background: var(--bg-2);
+  color: var(--fg-1);
+  font: inherit;
+  line-height: 1;
+}
+
+.tooltip-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-3);
+  width: calc(var(--size-16) * 4.5);
+  max-width: 100%;
+}
+
+/* rows composed into a card sit flush with its padding */
+.tooltip-card > .list-row {
+  min-height: 0;
+  padding: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tooltip-bubble,
+  .tooltip-layer[data-side] .tooltip-bubble,
+  .tooltip-layer--open .tooltip-bubble,
+  .tooltip-layer--open[data-side] .tooltip-bubble {
+    transform: none;
   }
 }

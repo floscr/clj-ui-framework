@@ -1,45 +1,75 @@
 {:id :tooltip
  :title "Tooltip"
- :summary "Short supporting text for an unfamiliar control, shown on hover and focus with pure CSS."
+ :summary "A hint or a rich read-only preview on hover and focus: the first waits for its delay, moving to the next opens it instantly."
  :category :disclosure
  :group "Overlays"
- :keywords ["tooltip" "hint" "hover text" "title"]
+ :keywords ["tooltip" "hint" "hover text" "hover card" "preview" "shortcut" "title"]
 
  :when-to-use
- ["A one-line hint for an icon-only control or an abbreviation."
-  "Extra context that is helpful but not required to use the control."]
+ ["A one-line label for an icon-only control, with its keyboard shortcut."
+  "Dense toolbars where moving between icons should show labels at once after the first."
+  "A read-only preview behind a mention, link, status or number: a person, a repo, a job's progress, a trend."]
 
  :when-not-to-use
  ["Essential information belongs in visible text; tooltips hide it from touch users."
-  "Use popover for rich content or anything interactive."
+  "Use popover for anything with buttons, links or fields inside."
   "Use form-field :hint for guidance under an input."]
 
- :usage "(require '[ui.tooltip :as tooltip])\n\n(tooltip/tooltip {:text \"Copy link\"}\n  (button/button {:icon :link :variant :ghost :attrs {:aria-label \"Copy link\"}}))"
+ :usage "(require '[ui.tooltip :as tooltip])\n\n(tooltip/tooltip {:text \"Copy link\" :shortcut [\"⌘\" \"C\"]}\n  (button/button {:icon :link :variant :ghost :attrs {:aria-label \"Copy link\"}}))"
+
+ :examples
+ [{:title "Rich preview"
+   :code "(tooltip/tooltip {:content (tooltip/tooltip-card {}\n                             (list-row/list-row {:icon :calendar :title \"Design review\"\n                                                 :description \"Wed, 14:00 to 14:45\"}))\n                  :delay 300\n                  :attrs {:tabindex 0}}\n  \"design review\")"}
+  {:title "One delay for a group"
+   :code "[:div {:data-tooltip-delay \"250\"}\n (toolbar/toolbar {} ...)]"}]
 
  :api
  [{:fn "tooltip"
-   :doc "Wraps children in a span that shows :text above it on hover or focus-within."
-   :children "The control the hint belongs to."
-   :props [{:name :text :type "string" :doc "The hint."}
-           {:name :class :type "string"} {:name :attrs :type "map"}]}]
+   :doc "Wraps the trigger in a span that carries the tooltip in a template; ui.js.tooltip shows it."
+   :children "The trigger. Non-interactive text needs :attrs {:tabindex 0} to be reachable by keyboard."
+   :props [{:name :text :type "string" :doc "The hint, a few words."}
+           {:name :shortcut :type "vector of strings" :doc "Keycaps after the text, e.g. [\"⌘\" \"K\"]."}
+           {:name :content :type "hiccup" :doc "Rich read-only content instead of :text, usually a tooltip-card. Cards stay open while the pointer travels into them."}
+           {:name :delay :type "ms" :default "500" :doc "Wait before the first tooltip opens. data-tooltip-delay on any ancestor sets it for a group."}
+           {:name :side :type ":top | :bottom | :left | :right" :default ":top" :doc "Preferred side; flips when there is no room."}
+           {:name :tone :type ":danger" :doc "Tints the bubble for error hints."}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "tooltip-card"
+   :doc "An 18rem column for rich content; list rows inside sit flush."
+   :children "ui.* components and text: list-row, metric :flush, progress, day-grid, an image."
+   :props [{:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "tooltip-label"
+   :doc "The plain body tooltip renders for :text and :shortcut."}
+  {:fn "tooltip-data-attrs"
+   :doc "The data attributes the runtime reads off the trigger wrapper."}]
 
- :keyboard [["Tab" "Focusing the wrapped control shows the tooltip."]]
+ :keyboard [["Tab" "Keyboard focus opens the tooltip at once, without the delay."]
+            ["Escape" "Closes it until the pointer or focus leaves the trigger."]]
 
  :accessibility
- ["The tooltip is a CSS pseudo-element, so it is not read by screen readers; icon-only controls still need an aria-label."
-  "Hover reveal is gated to hover-capable pointers so touch users do not get a double-tap."]
+ ["The shared layer has role=\"tooltip\" and the trigger's control gets aria-describedby while it is open."
+  "Icon-only controls still need an aria-label; the tooltip describes, it does not name."
+  "Content is cloned, so keep it read only: focus never moves into the tooltip."]
 
- :motion ["Fades and lifts in over --duration-fast."]
+ :motion
+ ["The first tooltip rises 4px from 0.97 scale over --duration-fast, from the point nearest its trigger."
+  "While one is open, and for 400ms after it closes, the next opens instantly: the layer jumps and swaps content with no transition."
+  "Reduced motion keeps only the fade."]
 
- :responsive ["Hidden on touch devices; never place required information in a tooltip."]
+ :responsive
+ ["Labels wrap at 15rem, cards are 18rem, both capped at the viewport; the side flips when cramped and the layer is clamped to the viewport."
+  "On touch, a tap toggles the tooltip of a non-interactive trigger (text, badges); buttons and links keep their tap."]
 
  :targets
- {:clj "Static markup, works without JS."
-  :cljs ":class may be a vector."
-  :squint "Static markup."}
+ {:clj "Static markup; needs ui-runtime.js on the page."
+  :cljs "Needs ui-runtime.js; :content may hold any hiccup."
+  :squint "Needs ui-runtime.js."}
+
+ :runtime ["ui.js.tooltip"]
 
  :notes-for-ai
- ["Keep the text to a few words; no punctuation at the end."
+ ["Keep :text to a few words, no punctuation at the end."
+  "Rich content goes in tooltip-card, built from ui.* components; it renders on dark tokens."
   "Prefer a visible label when space allows."]
 
- :related [:popover :button :icon]}
+ :related [:popover :button :toolbar :list-row]}

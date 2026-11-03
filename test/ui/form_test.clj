@@ -45,7 +45,8 @@
         ;; Contains the tooltip with error text
         (let [tip (nth control 3)]
           (is (= :span (first tip)))
-          (is (= "Invalid email" (get-in tip [1 :data-tooltip])))))))
+          (is (= "danger" (get-in tip [1 :data-tooltip-tone])))
+          (is (= "Invalid email" (get-in (last tip) [2 2 1])))))))
 
   (testing "no label renders without label element"
     (let [result (form/form-field {} [:input])]
