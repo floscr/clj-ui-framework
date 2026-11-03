@@ -31,8 +31,9 @@
            {:name :shortcut :type "vector of strings" :doc "Keycaps after the text, e.g. [\"⌘\" \"K\"]."}
            {:name :content :type "hiccup" :doc "Rich read-only content instead of :text, usually a tooltip-card. Cards stay open while the pointer travels into them."}
            {:name :delay :type "ms" :default "500" :doc "Wait before the first tooltip opens. data-tooltip-delay on any ancestor sets it for a group."}
-           {:name :side :type ":top | :bottom | :left | :right" :default ":top" :doc "Preferred side; flips when there is no room."}
+           {:name :side :type ":top | :bottom | :left | :right" :default ":top" :doc "Preferred side; without room there it takes the opposite, then a perpendicular side, else the roomiest."}
            {:name :tone :type ":danger" :doc "Red for error hints: a light red tint on light pages, red-tinted ink on dark ones."}
+           {:name :theme :type ":light | :dark" :doc "The bubble's appearance. Default: the inverse of the page under the trigger (ink on light, white on dark). data-tooltip-theme on an ancestor sets it for a group."}
            {:name :class :type "string"} {:name :attrs :type "map"}]}
   {:fn "tooltip-card"
    :doc "An 18rem column for rich content; list rows inside sit flush."
@@ -57,7 +58,7 @@
   "Reduced motion keeps only the fade."]
 
  :responsive
- ["Labels wrap at 15rem, cards are 18rem, both capped at the viewport; the side flips when cramped and the layer is clamped to the viewport."
+ ["Labels wrap at 15rem, cards are 18rem, both capped at the viewport width; the layer takes the first side with room and is clamped to the viewport."
   "On touch, a tap toggles the tooltip of a non-interactive trigger (text, badges); buttons and links keep their tap."]
 
  :targets
@@ -69,7 +70,7 @@
 
  :notes-for-ai
  ["Keep :text to a few words, no punctuation at the end."
-  "Rich content goes in tooltip-card, built from ui.* components; it renders on dark tokens."
+  "Rich content goes in tooltip-card, built from ui.* components; the layer carries the bubble's data-theme, so they follow it."
   "Prefer a visible label when space allows."]
 
  :related [:popover :button :toolbar :list-row]}

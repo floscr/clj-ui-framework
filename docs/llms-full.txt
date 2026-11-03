@@ -6603,8 +6603,9 @@ Children: The trigger. Non-interactive text needs :attrs {:tabindex 0} to be rea
 | `:shortcut` | `vector of strings` | – | Keycaps after the text, e.g. ["⌘" "K"]. |
 | `:content` | `hiccup` | – | Rich read-only content instead of :text, usually a tooltip-card. Cards stay open while the pointer travels into them. |
 | `:delay` | `ms` | `500` | Wait before the first tooltip opens. data-tooltip-delay on any ancestor sets it for a group. |
-| `:side` | `:top \| :bottom \| :left \| :right` | `:top` | Preferred side; flips when there is no room. |
+| `:side` | `:top \| :bottom \| :left \| :right` | `:top` | Preferred side; without room there it takes the opposite, then a perpendicular side, else the roomiest. |
 | `:tone` | `:danger` | – | Red for error hints: a light red tint on light pages, red-tinted ink on dark ones. |
+| `:theme` | `:light \| :dark` | – | The bubble's appearance. Default: the inverse of the page under the trigger (ink on light, white on dark). data-tooltip-theme on an ancestor sets it for a group. |
 | `:class` | `string` | – |  |
 | `:attrs` | `map` | – |  |
 
@@ -6648,7 +6649,7 @@ The data attributes the runtime reads off the trigger wrapper.
 
 ## Responsive behavior
 
-- Labels wrap at 15rem, cards are 18rem, both capped at the viewport; the side flips when cramped and the layer is clamped to the viewport.
+- Labels wrap at 15rem, cards are 18rem, both capped at the viewport width; the layer takes the first side with room and is clamped to the viewport.
 - On touch, a tap toggles the tooltip of a non-interactive trigger (text, badges); buttons and links keep their tap.
 
 ## Targets
@@ -6660,7 +6661,7 @@ The data attributes the runtime reads off the trigger wrapper.
 ## Notes for AI
 
 - Keep :text to a few words, no punctuation at the end.
-- Rich content goes in tooltip-card, built from ui.* components; it renders on dark tokens.
+- Rich content goes in tooltip-card, built from ui.* components; the layer carries the bubble's data-theme, so they follow it.
 - Prefer a visible label when space allows.
 
 ## Related

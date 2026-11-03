@@ -123,6 +123,18 @@
          (tooltip/tooltip {:text "Opens after a second" :delay 1000}
            (button/button {:variant :secondary} "1 s")))]))
 
+   (example :theme "Appearance"
+     (fn []
+       [:div
+        (note "By default the bubble inverts the page; :theme pins it.")
+        (row
+         (tooltip/tooltip {:text "Inverts the page" :delay 0}
+           (button/button {:variant :secondary} "Default"))
+         (tooltip/tooltip {:text "Always light" :theme :light :delay 0}
+           (button/button {:variant :secondary} "Light"))
+         (tooltip/tooltip {:text "Always dark" :theme :dark :delay 0}
+           (button/button {:variant :secondary} "Dark")))]))
+
    (example :sides "Sides"
      (fn []
        (row

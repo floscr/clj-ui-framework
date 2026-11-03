@@ -1,7 +1,7 @@
 /* ── Tooltip ────────────────────────────────────────────────────── */
 /* .tooltip wraps the trigger and carries its content in a template;  */
 /* the ui.js.tooltip runtime shows it in the one .tooltip-layer it    */
-/* appends to <body> (data-theme="dark", so the bubble stays ink).    */
+/* appends to <body>, with the data-theme opposite the page's.       */
 
 .tooltip {
   display: inline-block;
@@ -29,13 +29,13 @@
 
 .tooltip-bubble {
   width: max-content;
-  max-width: min(calc(var(--size-12) * 5), calc(100vw - var(--size-4)));
+  max-width: min(calc(var(--size-12) * 5), var(--tooltip-max-width, calc(100vw - var(--size-4))));
   padding: var(--size-1) var(--size-2);
   background: var(--bg-1);
   color: var(--fg-0);
   border: var(--border-0);
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow-2);
+  box-shadow: var(--shadow-0);
   font-family: var(--font-body);
   font-size: var(--font-xs);
   line-height: var(--size-4);
@@ -73,50 +73,31 @@
 }
 
 .tooltip-layer[data-kind="card"] .tooltip-bubble {
-  max-width: calc(100vw - var(--size-4));
+  max-width: var(--tooltip-max-width, calc(100vw - var(--size-4)));
   padding: var(--size-3);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-3);
+  box-shadow: var(--shadow-1);
   font-size: var(--font-sm);
   line-height: var(--leading-body);
 }
 
-/* Danger follows the page, not the layer's dark tokens: a light red tint on
-   light pages (tinted ink reads as brown there), tinted ink on dark ones. */
-.tooltip-layer[data-tone="danger"] .tooltip-bubble {
+/* Danger matches the page (see ui.js.tooltip bubble-theme): a light red
+   tint on light pages, red-tinted ink on dark ones. */
+.tooltip-layer[data-tone="danger"][data-theme="light"] .tooltip-bubble {
   background: var(--danger-50);
   border-color: var(--danger-200);
   color: var(--danger-800);
 }
 
-.tooltip-layer[data-tone="danger"] .tooltip-key {
+.tooltip-layer[data-tone="danger"][data-theme="light"] .tooltip-key {
   background: var(--danger-100);
   color: var(--danger-700);
 }
 
 /* srgb: oklch would sweep the hue from red through the gray's purple */
-[data-theme="dark"] .tooltip-layer[data-tone="danger"] .tooltip-bubble {
+.tooltip-layer[data-tone="danger"][data-theme="dark"] .tooltip-bubble {
   background: color-mix(in srgb, var(--danger) 24%, var(--bg-1));
   border-color: color-mix(in srgb, var(--danger) 45%, transparent);
-  color: var(--fg-0);
-}
-
-[data-theme="dark"] .tooltip-layer[data-tone="danger"] .tooltip-key {
-  background: var(--bg-2);
-  color: var(--fg-1);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .tooltip-layer[data-tone="danger"] .tooltip-bubble {
-    background: color-mix(in srgb, var(--danger) 24%, var(--bg-1));
-    border-color: color-mix(in srgb, var(--danger) 45%, transparent);
-    color: var(--fg-0);
-  }
-
-  :root:not([data-theme="light"]) .tooltip-layer[data-tone="danger"] .tooltip-key {
-    background: var(--bg-2);
-    color: var(--fg-1);
-  }
 }
 
 /* ── Content ── */

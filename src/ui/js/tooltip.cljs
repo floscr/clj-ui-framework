@@ -7,7 +7,11 @@
    or any ancestor, default 500ms; keyboard focus and touch skip it). While
    one is open, and for `skip-ms` after it closed, the next trigger opens
    instantly: the layer jumps and swaps its content with transitions off.
-   Content is cloned from the trigger's `template.tooltip-content`.")
+   Content is cloned from the trigger's `template.tooltip-content`.
+
+   The bubble inverts the page under its trigger (ink on light, white on
+   dark) unless `data-tooltip-theme` on it or an ancestor says light or dark.
+   It takes the first side with room: preferred, opposite, perpendicular.")
 
 (def ^:private default-delay 500)
 (def ^:private skip-ms 400)
@@ -51,50 +55,89 @@
                   (fn [n] (.appendChild frag (.cloneNode n true))))))
     frag))
 
+(defn- page-dark?
+  "Whether the page under the trigger is dark: its nearest data-theme, else
+   the system appearance (ui.js.theme removes the attribute for auto)."
+  [trigger]
+  (let [host  (.closest trigger "[data-theme]")
+        theme (when host (.getAttribute host "data-theme"))]
+    (cond
+      (= theme "dark")  true
+      (= theme "light") false
+      :else (.-matches (js/matchMedia "(prefers-color-scheme: dark)")))))
+
+(defn- bubble-theme
+  "data-tooltip-theme (light or dark) on the trigger or an ancestor, else the
+   inverse of the page; the danger tone matches the page instead."
+  [trigger]
+  (let [host     (.closest trigger "[data-tooltip-theme]")
+        explicit (when host (.. host -dataset -tooltipTheme))
+        dark?    (page-dark? trigger)]
+    (cond
+      (or (= explicit "light") (= explicit "dark")) explicit
+      (.. trigger -dataset -tooltipTone) (if dark? "dark" "light")
+      :else (if dark? "light" "dark"))))
+
 (defn- opposite [side]
   (case side "top" "bottom" "bottom" "top" "left" "right" "right" "left" "top"))
 
-(defn- fits? [side tr w h vw vh]
+(defn- perpendicular [side]
+  (if (or (= side "top") (= side "bottom")) ["right" "left"] ["top" "bottom"]))
+
+(defn- room
+  "Free space beside the trigger on `side`, along the axis the bubble needs."
+  [side tr vw vh]
   (case side
-    "bottom" (<= (+ (.-bottom tr) gap h) (- vh edge))
-    "left"   (>= (- (.-left tr) gap w) edge)
-    "right"  (<= (+ (.-right tr) gap w) (- vw edge))
-    (>= (- (.-top tr) gap h) edge)))
+    "bottom" (- vh (.-bottom tr) gap edge)
+    "left"   (- (.-left tr) gap edge)
+    "right"  (- vw (.-right tr) gap edge)
+    (- (.-top tr) gap edge)))
+
+(defn- need [side w h]
+  (if (or (= side "top") (= side "bottom")) h w))
+
+(defn- pick-side
+  "The preferred side, else its opposite, else a perpendicular one, whichever
+   fits first; when none does, the one with the most room to spare."
+  [pref tr w h vw vh]
+  (let [order (into [pref (opposite pref)] (perpendicular pref))
+        spare (fn [side] (- (room side tr vw vh) (need side w h)))]
+    (or (some (fn [side] (when (>= (spare side) 0) side)) order)
+        (reduce (fn [best side] (if (> (spare side) (spare best)) side best)) order))))
 
 (defn- clamp [v lo hi]
   (Math/max lo (Math/min v hi)))
 
 (defn- position! [layer trigger]
-  (set! (.. layer -style -left) "0px")
-  (set! (.. layer -style -top) "0px")
-  (let [tr   (.getBoundingClientRect trigger)
-        w    (.-offsetWidth layer)
-        h    (.-offsetHeight layer)
-        vw   (.-innerWidth js/window)
-        vh   (.-innerHeight js/window)
-        pref (or (.. trigger -dataset -tooltipSide) "top")
-        side (if (or (fits? pref tr w h vw vh)
-                     (not (fits? (opposite pref) tr w h vw vh)))
-               pref
-               (opposite pref))
-        cx   (+ (.-left tr) (/ (.-width tr) 2))
-        cy   (+ (.-top tr) (/ (.-height tr) 2))
-        left (clamp (case side
-                      "left"  (- (.-left tr) gap w)
-                      "right" (+ (.-right tr) gap)
-                      (- cx (/ w 2)))
-                    edge (- vw w edge))
-        top  (clamp (case side
-                      "top"    (- (.-top tr) gap h)
-                      "bottom" (+ (.-bottom tr) gap)
-                      (- cy (/ h 2)))
-                    edge (- vh h edge))]
-    (set! (.. layer -style -left) (str left "px"))
-    (set! (.. layer -style -top) (str top "px"))
-    (.setAttribute layer "data-side" side)
-    ;; the bubble scales from the point nearest the trigger
-    (.setProperty (.-style layer) "--tooltip-origin-x" (str (clamp (- cx left) 0 w) "px"))
-    (.setProperty (.-style layer) "--tooltip-origin-y" (str (clamp (- cy top) 0 h) "px"))))
+  ;; clientWidth/Height leave out the scrollbars, innerWidth does not
+  (let [vw (.. js/document -documentElement -clientWidth)
+        vh (.. js/document -documentElement -clientHeight)]
+    (set! (.. layer -style -left) "0px")
+    (set! (.. layer -style -top) "0px")
+    ;; caps the bubble before it is measured, so it never outgrows the viewport
+    (.setProperty (.-style layer) "--tooltip-max-width" (str (- vw (* 2 edge)) "px"))
+    (let [tr   (.getBoundingClientRect trigger)
+          w    (.-offsetWidth layer)
+          h    (.-offsetHeight layer)
+          side (pick-side (or (.. trigger -dataset -tooltipSide) "top") tr w h vw vh)
+          cx   (+ (.-left tr) (/ (.-width tr) 2))
+          cy   (+ (.-top tr) (/ (.-height tr) 2))
+          left (clamp (case side
+                        "left"  (- (.-left tr) gap w)
+                        "right" (+ (.-right tr) gap)
+                        (- cx (/ w 2)))
+                      edge (- vw w edge))
+          top  (clamp (case side
+                        "top"    (- (.-top tr) gap h)
+                        "bottom" (+ (.-bottom tr) gap)
+                        (- cy (/ h 2)))
+                      edge (- vh h edge))]
+      (set! (.. layer -style -left) (str left "px"))
+      (set! (.. layer -style -top) (str top "px"))
+      (.setAttribute layer "data-side" side)
+      ;; the bubble scales from the point nearest the trigger
+      (.setProperty (.-style layer) "--tooltip-origin-x" (str (clamp (- cx left) 0 w) "px"))
+      (.setProperty (.-style layer) "--tooltip-origin-y" (str (clamp (- cy top) 0 h) "px")))))
 
 ;; ── Open and close ──────────────────────────────────────────────────
 
@@ -137,9 +180,6 @@
           (set! (.-id layer) "ui-tooltip")
           (set! (.-className layer) "tooltip-layer")
           (.setAttribute layer "role" "tooltip")
-          ;; ink in both appearances: rich content composed from ui.*
-          ;; components picks up the dark tokens
-          (.setAttribute layer "data-theme" "dark")
           (set! (.-className bubble) "tooltip-bubble")
           (.appendChild layer bubble)
           (.appendChild (.-body js/document) layer)
@@ -165,6 +205,8 @@
     (describe! trigger true)
     (.replaceChildren (.-bubble s) (content-of trigger))
     (.setAttribute layer "data-kind" (if (= (.. trigger -dataset -tooltipKind) "card") "card" "label"))
+    ;; the layer's own theme tokens, so composed ui.* content follows it
+    (.setAttribute layer "data-theme" (bubble-theme trigger))
     (if tone
       (.setAttribute layer "data-tone" tone)
       (.removeAttribute layer "data-tone"))

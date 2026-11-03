@@ -10,8 +10,10 @@
     (is (= {:data-tooltip-kind "card"
             :data-tooltip-delay "300"
             :data-tooltip-side "bottom"
-            :data-tooltip-tone "danger"}
-           (tooltip/tooltip-data-attrs {:content [:div] :delay 300 :side :bottom :tone :danger}))))
+            :data-tooltip-tone "danger"
+            :data-tooltip-theme "light"}
+           (tooltip/tooltip-data-attrs {:content [:div] :delay 300 :side :bottom
+                                        :tone :danger :theme :light}))))
 
   (testing "a zero delay is kept"
     (is (= "0" (:data-tooltip-delay (tooltip/tooltip-data-attrs {:delay 0}))))))

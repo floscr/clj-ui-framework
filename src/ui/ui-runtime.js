@@ -228,6 +228,47 @@
     }
     return o;
   }
+  function conj_BANG_(...xs) {
+    if (xs.length === 0) {
+      return vector();
+    }
+    const [_o, ...rest] = xs;
+    let o = _o;
+    if (o === null || o === void 0) {
+      o = [];
+    }
+    switch (typeConst(o)) {
+      case SET_TYPE:
+        conj_BANG_set(o, rest);
+        break;
+      case LIST_TYPE:
+        o.unshift(...rest.reverse());
+        break;
+      case ARRAY_TYPE:
+        o.push(...rest);
+        break;
+      case MAP_TYPE:
+        for (const x of rest) {
+          if (!Array.isArray(x))
+            iterable(x).forEach((kv) => {
+              o.set(kv[0], kv[1]);
+            });
+          else o.set(x[0], x[1]);
+        }
+        break;
+      case OBJECT_TYPE:
+        for (const x of rest) {
+          if (!Array.isArray(x)) Object.assign(o, x);
+          else o[x[0]] = x[1];
+        }
+        break;
+      default:
+        throw new Error(
+          "Illegal argument: conj! expects a Set, Array, List, Map, or Object as the first argument."
+        );
+    }
+    return o;
+  }
   function conj(...xs) {
     if (xs.length === 0) {
       return vector();
@@ -384,6 +425,43 @@
   function second(coll) {
     const [_, v] = iterable(coll);
     return v;
+  }
+  var Reduced = class {
+    value;
+    constructor(x) {
+      this.value = x;
+    }
+    _deref() {
+      return this.value;
+    }
+  };
+  function reduce(f, arg1, arg2) {
+    f = toFn(f);
+    let coll, val;
+    if (arguments.length === 2) {
+      const iter = iterable(arg1)[Symbol.iterator]();
+      const vd = iter.next();
+      if (vd.done) {
+        val = f();
+      } else {
+        val = vd.value;
+      }
+      coll = iter;
+    } else {
+      val = arg1;
+      coll = iterable(arg2);
+    }
+    if (val instanceof Reduced) {
+      return val.value;
+    }
+    for (const x of coll) {
+      val = f(val, x);
+      if (val instanceof Reduced) {
+        val = val.value;
+        break;
+      }
+    }
+    return val;
   }
   var tolr = false;
   var LazyIterable = class {
@@ -606,6 +684,31 @@
       throw new Error(`Can't create empty of ${typeof coll}`);
     }
   }
+  function into(...args) {
+    let to, xform, from, c, rf;
+    switch (args.length) {
+      case 0:
+        return [];
+      case 1:
+        return args[0];
+      case 2:
+        return conj(args[0] ?? [], ...iterable(args[1]));
+      case 3:
+        to = args[0];
+        xform = args[1];
+        from = args[2];
+        c = copy(to);
+        rf = (coll, v) => {
+          if (v === void 0) {
+            return coll;
+          }
+          return conj_BANG_(coll, v);
+        };
+        return transduce(xform, rf, c, from);
+      default:
+        throw TypeError(`Invalid arity call of into: ${args.length}`);
+    }
+  }
   function get_in(coll, path, orElse) {
     let entry = coll;
     for (const item of path) {
@@ -623,6 +726,14 @@
     coll = iterable(coll);
     const clone = [...coll];
     return clone.sort(f || compare);
+  }
+  function some(pred, coll) {
+    pred = toFn(pred);
+    for (const o of iterable(coll)) {
+      const res = pred(o);
+      if (truth_(res)) return res;
+    }
+    return void 0;
   }
   function empty_QMARK_(coll) {
     return seq(coll) ? false : true;
@@ -707,6 +818,23 @@
   var _metaSym = Symbol("meta");
   function mod(x, y) {
     return (x % y + y) % y;
+  }
+  function transduce(xform, ...args) {
+    switch (args.length) {
+      case 2: {
+        const f = args[0];
+        const coll = args[1];
+        return transduce(xform, f, f(), coll);
+      }
+      default: {
+        let f = args[0];
+        const init = args[1];
+        const coll = args[2];
+        f = xform(f);
+        const ret = reduce(f, init, coll);
+        return f(ret);
+      }
+    }
   }
   function not_empty(x) {
     const isSeq = seq(x);
@@ -7291,6 +7419,59 @@
     ;
     return frag1;
   };
+  var page_dark_QMARK_ = function(trigger) {
+    const host1 = trigger.closest("[data-theme]");
+    const theme2 = truth_(host1) ? host1.getAttribute("data-theme") : null;
+    if (theme2 === "dark") {
+      return true;
+    } else {
+      if (theme2 === "light") {
+        return false;
+      } else {
+        if ("else") {
+          return matchMedia("(prefers-color-scheme: dark)").matches;
+        } else {
+          return null;
+        }
+      }
+    }
+    ;
+  };
+  var bubble_theme = function(trigger) {
+    const host1 = trigger.closest("[data-tooltip-theme]");
+    const explicit2 = truth_(host1) ? host1.dataset.tooltipTheme : null;
+    const dark_QMARK_3 = page_dark_QMARK_(trigger);
+    if (truth_((() => {
+      const or__23426__auto__4 = explicit2 === "light";
+      if (or__23426__auto__4) {
+        return or__23426__auto__4;
+      } else {
+        return explicit2 === "dark";
+      }
+      ;
+    })())) {
+      return explicit2;
+    } else {
+      if (truth_(trigger.dataset.tooltipTone)) {
+        if (truth_(dark_QMARK_3)) {
+          return "dark";
+        } else {
+          return "light";
+        }
+      } else {
+        if ("else") {
+          if (truth_(dark_QMARK_3)) {
+            return "light";
+          } else {
+            return "dark";
+          }
+        } else {
+          return null;
+        }
+      }
+    }
+    ;
+  };
   var opposite = function(side) {
     const G__311 = side;
     switch (G__311) {
@@ -7311,20 +7492,77 @@
     }
     ;
   };
-  var fits_QMARK_ = function(side, tr, w, h, vw, vh) {
+  var perpendicular = function(side) {
+    if (truth_((() => {
+      const or__23426__auto__1 = side === "top";
+      if (or__23426__auto__1) {
+        return or__23426__auto__1;
+      } else {
+        return side === "bottom";
+      }
+      ;
+    })())) {
+      return ["right", "left"];
+    } else {
+      return ["top", "bottom"];
+    }
+    ;
+  };
+  var room = function(side, tr, vw, vh) {
     const G__321 = side;
     switch (G__321) {
       case "bottom":
-        return tr.bottom + gap2 + h <= vh - edge2;
+        return vh - tr.bottom - gap2 - edge2;
         break;
       case "left":
-        return tr.left - gap2 - w >= edge2;
+        return tr.left - gap2 - edge2;
         break;
       case "right":
-        return tr.right + gap2 + w <= vw - edge2;
+        return vw - tr.right - gap2 - edge2;
         break;
       default:
-        return tr.top - gap2 - h >= edge2;
+        return tr.top - gap2 - edge2;
+    }
+    ;
+  };
+  var need = function(side, w, h) {
+    if (truth_((() => {
+      const or__23426__auto__1 = side === "top";
+      if (or__23426__auto__1) {
+        return or__23426__auto__1;
+      } else {
+        return side === "bottom";
+      }
+      ;
+    })())) {
+      return h;
+    } else {
+      return w;
+    }
+    ;
+  };
+  var pick_side = function(pref, tr, w, h, vw, vh) {
+    const order1 = into([pref, opposite(pref)], perpendicular(pref));
+    const spare2 = (function(side) {
+      return room(side, tr, vw, vh) - need(side, w, h);
+    });
+    const or__23426__auto__3 = some((function(side) {
+      if (spare2(side) >= 0) {
+        return side;
+      }
+      ;
+    }), order1);
+    if (truth_(or__23426__auto__3)) {
+      return or__23426__auto__3;
+    } else {
+      return reduce((function(best, side) {
+        if (spare2(side) > spare2(best)) {
+          return side;
+        } else {
+          return best;
+        }
+        ;
+      }), order1);
     }
     ;
   };
@@ -7332,14 +7570,15 @@
     return Math.max(lo, Math.min(v, hi));
   };
   var position_BANG_2 = function(layer, trigger) {
+    const vw1 = document.documentElement.clientWidth;
+    const vh2 = document.documentElement.clientHeight;
     layer.style.left = "0px";
     layer.style.top = "0px";
-    const tr1 = trigger.getBoundingClientRect();
-    const w2 = layer.offsetWidth;
-    const h3 = layer.offsetHeight;
-    const vw4 = window.innerWidth;
-    const vh5 = window.innerHeight;
-    const pref6 = (() => {
+    layer.style.setProperty("--tooltip-max-width", `${vw1 - 2 * edge2}px`);
+    const tr3 = trigger.getBoundingClientRect();
+    const w4 = layer.offsetWidth;
+    const h5 = layer.offsetHeight;
+    const side6 = pick_side((() => {
       const or__23426__auto__7 = trigger.dataset.tooltipSide;
       if (truth_(or__23426__auto__7)) {
         return or__23426__auto__7;
@@ -7347,51 +7586,42 @@
         return "top";
       }
       ;
-    })();
-    const side8 = truth_((() => {
-      const or__23426__auto__9 = fits_QMARK_(pref6, tr1, w2, h3, vw4, vh5);
-      if (truth_(or__23426__auto__9)) {
-        return or__23426__auto__9;
-      } else {
-        return not(fits_QMARK_(opposite(pref6), tr1, w2, h3, vw4, vh5));
-      }
-      ;
-    })()) ? pref6 : opposite(pref6);
-    const cx10 = tr1.left + tr1.width / 2;
-    const cy11 = tr1.top + tr1.height / 2;
-    const left12 = clamp6((() => {
-      const G__3313 = side8;
-      switch (G__3313) {
+    })(), tr3, w4, h5, vw1, vh2);
+    const cx8 = tr3.left + tr3.width / 2;
+    const cy9 = tr3.top + tr3.height / 2;
+    const left10 = clamp6((() => {
+      const G__3311 = side6;
+      switch (G__3311) {
         case "left":
-          return tr1.left - gap2 - w2;
+          return tr3.left - gap2 - w4;
           break;
         case "right":
-          return tr1.right + gap2;
+          return tr3.right + gap2;
           break;
         default:
-          return cx10 - w2 / 2;
+          return cx8 - w4 / 2;
       }
       ;
-    })(), edge2, vw4 - w2 - edge2);
-    const top15 = clamp6((() => {
-      const G__3416 = side8;
-      switch (G__3416) {
+    })(), edge2, vw1 - w4 - edge2);
+    const top13 = clamp6((() => {
+      const G__3414 = side6;
+      switch (G__3414) {
         case "top":
-          return tr1.top - gap2 - h3;
+          return tr3.top - gap2 - h5;
           break;
         case "bottom":
-          return tr1.bottom + gap2;
+          return tr3.bottom + gap2;
           break;
         default:
-          return cy11 - h3 / 2;
+          return cy9 - h5 / 2;
       }
       ;
-    })(), edge2, vh5 - h3 - edge2);
-    layer.style.left = `${left12 ?? ""}px`;
-    layer.style.top = `${top15 ?? ""}px`;
-    layer.setAttribute("data-side", side8);
-    layer.style.setProperty("--tooltip-origin-x", `${clamp6(cx10 - left12, 0, w2) ?? ""}px`);
-    return layer.style.setProperty("--tooltip-origin-y", `${clamp6(cy11 - top15, 0, h3) ?? ""}px`);
+    })(), edge2, vh2 - h5 - edge2);
+    layer.style.left = `${left10 ?? ""}px`;
+    layer.style.top = `${top13 ?? ""}px`;
+    layer.setAttribute("data-side", side6);
+    layer.style.setProperty("--tooltip-origin-x", `${clamp6(cx8 - left10, 0, w4) ?? ""}px`);
+    return layer.style.setProperty("--tooltip-origin-y", `${clamp6(cy9 - top13, 0, h5) ?? ""}px`);
   };
   var describe_BANG_ = function(trigger, on_QMARK_) {
     const target1 = (() => {
@@ -7450,7 +7680,6 @@
       layer3.id = "ui-tooltip";
       layer3.className = "tooltip-layer";
       layer3.setAttribute("role", "tooltip");
-      layer3.setAttribute("data-theme", "dark");
       bubble4.className = "tooltip-bubble";
       layer3.appendChild(bubble4);
       document.body.appendChild(layer3);
@@ -7493,6 +7722,7 @@
     describe_BANG_(trigger, true);
     s1.bubble.replaceChildren(content_of(trigger));
     layer2.setAttribute("data-kind", trigger.dataset.tooltipKind === "card" ? "card" : "label");
+    layer2.setAttribute("data-theme", bubble_theme(trigger));
     if (truth_(tone5)) {
       layer2.setAttribute("data-tone", tone5);
     } else {
