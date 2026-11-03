@@ -449,8 +449,9 @@ code, kbd, pre, samp {
    component-dir defaults to \"src/ui\" (for local dev).
 
    Layers, in order: :root (semantic light tokens + :static + scales),
-   [data-theme=dark], the prefers-color-scheme fallback, [data-accent=*]
-   variants, base styles, component CSS."
+   [data-theme=dark], the prefers-color-scheme fallback, [data-theme=light]
+   (so a subtree can be light under a dark root, as dark already can under a
+   light one), [data-accent=*] variants, base styles, component CSS."
   ([token-data] (generate-css token-data "src/ui"))
   ([{:keys [tokens static themes scales accents]} component-dir]
    (let [dark-tokens (themable (get themes :dark) "dark")
@@ -464,11 +465,12 @@ code, kbd, pre, samp {
                           "  :root:not([data-theme=\"light\"]) {\n"
                           (indent-block (tokens->css-block dark-tokens))
                           "\n  }\n}")
+         light-attr  (str "[data-theme=\"light\"] {\n" (tokens->css-block (themable tokens "light")) "\n}")
          accent-css  (when (seq accents) (generate-accents accents (:color scales)))
          base        (base-css)
          components  (collect-component-css component-dir)]
      (wrap-hover-media
-      (str/join "\n\n" (remove nil? [root-block dark-attr dark-media accent-css base components ""]))))))
+      (str/join "\n\n" (remove nil? [root-block dark-attr dark-media light-attr accent-css base components ""]))))))
 
 (defn build-css
   "Generate bundled CSS string with theme tokens and all component styles.
