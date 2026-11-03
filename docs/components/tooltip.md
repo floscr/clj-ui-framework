@@ -65,7 +65,7 @@ Children: The trigger. Non-interactive text needs :attrs {:tabindex 0} to be rea
 | `:content` | `hiccup` | – | Rich read-only content instead of :text, usually a tooltip-card. Cards stay open while the pointer travels into them. |
 | `:delay` | `ms` | `500` | Wait before the first tooltip opens. data-tooltip-delay on any ancestor sets it for a group. |
 | `:side` | `:top \| :bottom \| :left \| :right` | `:top` | Preferred side; flips when there is no room. |
-| `:tone` | `:danger` | – | Tints the bubble for error hints. |
+| `:tone` | `:danger` | – | A solid red bubble for error hints. |
 | `:class` | `string` | – |  |
 | `:attrs` | `map` | – |  |
 

@@ -81,10 +81,16 @@
   line-height: var(--leading-body);
 }
 
+/* a solid red bubble: a tint of the ink reads as brown on light pages */
 .tooltip-layer[data-tone="danger"] .tooltip-bubble {
-  /* srgb: oklch would sweep the hue from red through the gray's purple */
-  background: color-mix(in srgb, var(--danger) 24%, var(--bg-1));
-  border-color: color-mix(in srgb, var(--danger) 45%, transparent);
+  background: var(--danger-600);
+  border-color: var(--danger-700);
+  color: var(--fg-on-danger);
+}
+
+.tooltip-layer[data-tone="danger"] .tooltip-key {
+  background: color-mix(in srgb, var(--fg-on-danger) 18%, transparent);
+  color: var(--fg-on-danger);
 }
 
 /* ── Content ── */
