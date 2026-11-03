@@ -31,6 +31,7 @@
             [ui.file-progress :as fp]
             [ui.theme-toggle :as theme-toggle]
             [dev.example :refer [section page-header]]
+            [dev.route :as route]
             [dev.examples.registry :as examples])
   (:require-macros [ui.macros :refer [inline-file]]))
 
@@ -771,19 +772,40 @@
    {:id :sidebar    :label "Sidebar"     :icon-name :layout-dashboard}
    {:id :files      :label "File Browser" :icon-name :folder}])
 
+(defn- mount-prefix [] (route/mount (.-pathname js/location)))
+
+(defn- location-route []
+  (route/parse (subs (.-pathname js/location) (count (mount-prefix)))))
+
+(defn- push-route!
+  "Put `r` in the address bar, keeping the query (?theme=…)."
+  [r]
+  (let [url (str (mount-prefix) (route/path r) (.-search js/location))]
+    (when (not= url (str (.-pathname js/location) (.-search js/location)))
+      (.pushState js/history nil "" url))))
+
+(defn- scroll-to-section! [anchor behavior]
+  (js/setTimeout
+    (fn []
+      (when-let [el (.getElementById js/document anchor)]
+        (.scrollIntoView el #js {:behavior behavior :block "start"})))
+    50))
+
+(defn- show-route! [{:keys [page anchor]}]
+  (reset! !page page)
+  (when anchor (scroll-to-section! anchor "auto")))
+
 (defn navigate! [page-id]
   (fn [_e]
+    (push-route! {:page page-id})
     (reset! !page page-id)))
 
 (defn navigate-to-section! [anchor]
   (fn [_e]
-    (when (not= @!page :components)
-      (reset! !page :components))
-    (js/setTimeout
-      (fn []
-        (when-let [el (.getElementById js/document anchor)]
-          (.scrollIntoView el #js {:behavior "smooth" :block "start"})))
-      50)))
+    (push-route! {:page :components :anchor anchor})
+    ;; also when already there: re-renders the target links
+    (reset! !page :components)
+    (scroll-to-section! anchor "smooth")))
 
 (defn set-theme! [mode]
   (reset! !theme-mode mode)
@@ -803,17 +825,20 @@
   (let [p (js/parseInt (.-port js/window.location) 10)]
     (if (js/isNaN p) 3001 p)))
 
-(defn make-targets []
-  (if (= "" (.-port js/window.location))
-    ;; portless (production behind a reverse proxy) — path-mounted builds
-    [{:label "Hiccup"    :href "/"}
-     {:label "Replicant" :href "/replicant/" :active true}
-     {:label "Squint"    :href "/squint/"}]
-    (let [base (- (own-port) 1)
-          hostname (.-hostname js/window.location)]
-      [{:label "Hiccup"    :href (str "//" hostname ":" (+ base 3))}
-       {:label "Replicant" :href (str "//" hostname ":" (+ base 1)) :active true}
-       {:label "Squint"    :href (str "//" hostname ":" (+ base 2))}])))
+(defn make-targets
+  "Target-switcher links to the same route on each target."
+  []
+  (let [here (str (route/path (location-route)) (.-search js/location))]
+    (if (= "" (.-port js/window.location))
+      ;; portless (production behind a reverse proxy) — path-mounted builds
+      [{:label "Hiccup"    :href here}
+       {:label "Replicant" :href (str "/replicant" here) :active true}
+       {:label "Squint"    :href (str "/squint" here)}]
+      (let [base (- (own-port) 1)
+            hostname (.-hostname js/window.location)]
+        [{:label "Hiccup"    :href (str "//" hostname ":" (+ base 3) here)}
+         {:label "Replicant" :href (str "//" hostname ":" (+ base 1) here) :active true}
+         {:label "Squint"    :href (str "//" hostname ":" (+ base 2) here)}]))))
 
 (defn app-sidebar [active-page]
   (sidebar/sidebar {}
@@ -893,6 +918,8 @@
     (reset! !theme-mode (.get js/window.__uiTheme))
     (.subscribe js/window.__uiTheme
       (fn [state] (reset! !theme-mode (.-mode state)))))
+  (.addEventListener js/window "popstate" (fn [_] (show-route! (location-route))))
+  (show-route! (location-route))
   (render!))
 
 (defn ^:export reload! []

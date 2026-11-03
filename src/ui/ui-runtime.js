@@ -1,5 +1,5 @@
 (() => {
-  // ../../../../../home/floscr/Code/Projects/clj-ui-framework/dev/squint/node_modules/squint-cljs/src/squint/core.js
+  // ../../../dev/squint/node_modules/squint-cljs/src/squint/core.js
   function toFn(x) {
     if (x == null) return x;
     if (x instanceof Function) {
@@ -2939,7 +2939,7 @@
   })();
   window["__uiContextMenu"] = open_context_menu;
 
-  // ../../../../../home/floscr/Code/Projects/clj-ui-framework/dev/squint/node_modules/squint-cljs/src/squint/string.js
+  // ../../../dev/squint/node_modules/squint-cljs/src/squint/string.js
   function join(sep, coll) {
     if (coll === void 0) {
       coll = sep;
@@ -7196,21 +7196,56 @@
       return f({ "mode": mode, "effective": effective });
     }));
   };
+  var url_mode = function() {
+    const m1 = new URLSearchParams(location.search).get("theme");
+    if (truth_((() => {
+      const or__23426__auto__2 = m1 === "light";
+      if (or__23426__auto__2) {
+        return or__23426__auto__2;
+      } else {
+        return m1 === "dark";
+      }
+      ;
+    })())) {
+      return m1;
+    }
+    ;
+  };
   var get_mode = function() {
-    const or__23426__auto__1 = get_stored();
+    const or__23426__auto__1 = url_mode();
     if (truth_(or__23426__auto__1)) {
       return or__23426__auto__1;
     } else {
-      return "auto";
+      const or__23426__auto__2 = get_stored();
+      if (truth_(or__23426__auto__2)) {
+        return or__23426__auto__2;
+      } else {
+        return "auto";
+      }
+      ;
     }
     ;
   };
   var get_effective = function() {
     return resolve_effective(get_mode());
   };
+  var sync_url_mode_BANG_ = function(mode) {
+    if (truth_(url_mode())) {
+      const url1 = new URL(location.href);
+      if (mode === "auto") {
+        url1.searchParams.delete("theme");
+      } else {
+        url1.searchParams.set("theme", mode);
+      }
+      ;
+      return history.replaceState(null, "", url1);
+    }
+    ;
+  };
   var set_mode_BANG_ = function(mode) {
     const m1 = truth_(get(/* @__PURE__ */ new Set(["auto", "light", "dark"]), mode)) ? mode : "auto";
     store_BANG_(m1);
+    sync_url_mode_BANG_(m1);
     apply_theme_BANG_(m1);
     return notify_BANG_2(m1, resolve_effective(m1));
   };

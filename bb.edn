@@ -145,7 +145,8 @@
               [ui.day-grid-test]
               [ui.list-row-test]
               [ui.video-player-test]
-              [ui.registry-test])
+              [ui.registry-test]
+              [dev.route-test])
    :task (let [{:keys [fail error]} (t/run-tests
                                       'ui.button-test
                                       'ui.button-group-test
@@ -199,7 +200,8 @@
                                       'ui.day-grid-test
                                       'ui.list-row-test
                                       'ui.video-player-test
-                                      'ui.registry-test)]
+                                      'ui.registry-test
+                                      'dev.route-test)]
            (when (pos? (+ fail error))
              (System/exit 1)))}
 

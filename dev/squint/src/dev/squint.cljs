@@ -32,6 +32,7 @@
             [ui.file-progress :as fp]
             [ui.theme-toggle :as theme-toggle]
             [dev.example :refer [section page-header]]
+            [dev.route :as route]
             [dev.examples.registry :as examples]))
 
 ;; ── State ───────────────────────────────────────────────────────────
@@ -948,24 +949,46 @@
    {:id "files"      :label "File Browser" :icon-name "folder"}
    {:id "dial"       :label "DialKit"     :icon-name "settings"}])
 
+(defn- mount-prefix [] (route/mount (.-pathname js/location)))
+
+(defn- location-route []
+  (route/parse (subs (.-pathname js/location) (count (mount-prefix)))))
+
+(defn- push-route!
+  "Put `r` in the address bar, keeping the query (?theme=…)."
+  [r]
+  (let [url (str (mount-prefix) (route/path r) (.-search js/location))]
+    (when (not= url (str (.-pathname js/location) (.-search js/location)))
+      (.pushState js/history nil "" url))))
+
+(defn- scroll-to-section! [anchor behavior]
+  (js/setTimeout
+    (fn []
+      (when-let [el (js/document.getElementById anchor)]
+        (.scrollIntoView el {"behavior" behavior "block" "start"})))
+    50))
+
+(defn- show-page! [page-id]
+  (when (and (= @!page "dial") (not= page-id "dial"))
+    (teardown-dial-demo!))
+  (reset! !page page-id)
+  (render!))
+
+(defn- show-route! [{:keys [page anchor]}]
+  (show-page! page)
+  (when anchor (scroll-to-section! anchor "auto")))
+
 (defn navigate! [page-id]
   (fn [_e]
-    (when (and (= @!page "dial") (not= page-id "dial"))
-      (teardown-dial-demo!))
-    (reset! !page page-id)
-    (render!)))
+    (push-route! {:page page-id})
+    (show-page! page-id)))
 
 (defn navigate-to-section! [anchor]
   (fn [_e]
-    (when (not= @!page "components")
-      (when (= @!page "dial") (teardown-dial-demo!))
-      (reset! !page "components")
-      (render!))
-    (js/setTimeout
-      (fn []
-        (when-let [el (js/document.getElementById anchor)]
-          (.scrollIntoView el {"behavior" "smooth" "block" "start"})))
-      50)))
+    (push-route! {:page "components" :anchor anchor})
+    ;; also when already there: re-renders the target links
+    (show-page! "components")
+    (scroll-to-section! anchor "smooth")))
 
 ;; ── App Shell ───────────────────────────────────────────────────────
 
@@ -973,17 +996,20 @@
   (let [p (js/parseInt (.-port js/window.location) 10)]
     (if (js/isNaN p) 3002 p)))
 
-(defn make-targets []
-  (if (= "" (.-port js/window.location))
-    ;; portless (production behind a reverse proxy) — path-mounted builds
-    [{:label "Hiccup"    :href "/"}
-     {:label "Replicant" :href "/replicant/"}
-     {:label "Squint"    :href "/squint/" :active true}]
-    (let [base (- (own-port) 2)
-          hostname (.-hostname js/window.location)]
-      [{:label "Hiccup"    :href (str "//" hostname ":" (+ base 3))}
-       {:label "Replicant" :href (str "//" hostname ":" (+ base 1))}
-       {:label "Squint"    :href (str "//" hostname ":" (+ base 2)) :active true}])))
+(defn make-targets
+  "Target-switcher links to the same route on each target."
+  []
+  (let [here (str (route/path (location-route)) (.-search js/location))]
+    (if (= "" (.-port js/window.location))
+      ;; portless (production behind a reverse proxy) — path-mounted builds
+      [{:label "Hiccup"    :href here}
+       {:label "Replicant" :href (str "/replicant" here)}
+       {:label "Squint"    :href (str "/squint" here) :active true}]
+      (let [base (- (own-port) 2)
+            hostname (.-hostname js/window.location)]
+        [{:label "Hiccup"    :href (str "//" hostname ":" (+ base 3) here)}
+         {:label "Replicant" :href (str "//" hostname ":" (+ base 1) here)}
+         {:label "Squint"    :href (str "//" hostname ":" (+ base 2) here) :active true}]))))
 
 (defn app-sidebar [active-page]
   (sidebar/sidebar {}
@@ -1059,7 +1085,8 @@
     (reset! !theme-mode (.get js/window.__uiTheme))
     (.subscribe js/window.__uiTheme
       (fn [state] (reset! !theme-mode (.-mode state)) (render!))))
-  (render!))
+  (.addEventListener js/window "popstate" (fn [_] (show-route! (location-route))))
+  (show-route! (location-route)))
 
 (defn reload! []
   (render!))

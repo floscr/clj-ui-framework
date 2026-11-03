@@ -67,21 +67,40 @@
 
 ;; ── Public API ──────────────────────────────────────────────────────
 
+(defn- url-mode
+  "An explicit ?theme=light|dark on the page URL (the demo site's links
+   carry it): wins over the stored preference and is never stored."
+  []
+  (let [m (.get (js/URLSearchParams. (.-search js/location)) "theme")]
+    (when (or (= m "light") (= m "dark")) m)))
+
 (defn get-mode
   "Return the current mode: \"auto\", \"light\", or \"dark\"."
   []
-  (or (get-stored) "auto"))
+  (or (url-mode) (get-stored) "auto"))
 
 (defn get-effective
   "Return the resolved theme: \"light\" or \"dark\"."
   []
   (resolve-effective (get-mode)))
 
+(defn- sync-url-mode!
+  "Keep an explicit ?theme= in step with a newly chosen mode, which it
+   would otherwise override."
+  [mode]
+  (when (url-mode)
+    (let [url (js/URL. (.-href js/location))]
+      (if (= mode "auto")
+        (.delete (.-searchParams url) "theme")
+        (.set (.-searchParams url) "theme" mode))
+      (.replaceState js/history nil "" url))))
+
 (defn set-mode!
   "Set theme mode to \"auto\", \"light\", or \"dark\"."
   [mode]
   (let [m (if (#{"auto" "light" "dark"} mode) mode "auto")]
     (store! m)
+    (sync-url-mode! m)
     (apply-theme! m)
     (notify! m (resolve-effective m))))
 

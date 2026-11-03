@@ -650,22 +650,23 @@
     (or host "localhost")))
 
 (defn make-targets
-  "Target-switcher links. Accessed via an explicit :port (dev servers) →
-   sibling ports on the same host. Accessed portless (production behind
-   a reverse proxy) → the SPA builds served under /replicant/ and
-   /squint/."
-  [own-port host]
+  "Target-switcher links to `uri` (path + query) on each target. Accessed
+   via an explicit :port (dev servers) → sibling ports on the same host.
+   Accessed portless (production behind a reverse proxy) → the SPA builds
+   served under /replicant/ and /squint/, which route the same paths
+   (dev.route)."
+  [own-port host uri]
   (if (and host (not (re-find #":\d+$" host)))
-    [{:label "Hiccup"    :href "/" :active true}
-     {:label "Replicant" :href "/replicant/"}
-     {:label "Squint"    :href "/squint/"}]
+    [{:label "Hiccup"    :href uri :active true}
+     {:label "Replicant" :href (str "/replicant" uri)}
+     {:label "Squint"    :href (str "/squint" uri)}]
     (let [base (- own-port 3)
           hostname (req-hostname host)]
-      [{:label "Hiccup"    :href (str "//" hostname ":" (+ base 3)) :active true}
-       {:label "Replicant" :href (str "//" hostname ":" (+ base 1))}
-       {:label "Squint"    :href (str "//" hostname ":" (+ base 2))}])))
+      [{:label "Hiccup"    :href (str "//" hostname ":" (+ base 3) uri) :active true}
+       {:label "Replicant" :href (str "//" hostname ":" (+ base 1) uri)}
+       {:label "Squint"    :href (str "//" hostname ":" (+ base 2) uri)}])))
 
-(defn app-sidebar [active-page own-port host]
+(defn app-sidebar [active-page own-port targets]
   (sidebar/sidebar {}
     (sidebar/sidebar-header {}
       (sidebar/sidebar-brand {:title "Clojure UI Framework" :subtitle "Hiccup" :icon "U"}))
@@ -686,7 +687,7 @@
       (sidebar/sidebar-separator)
       (sidebar/sidebar-group {:label "Targets"}
         (apply sidebar/sidebar-menu {}
-          (for [{:keys [label href active]} (make-targets own-port host)]
+          (for [{:keys [label href active]} targets]
             (sidebar/sidebar-menu-item
               {:href href
                :icon-name :monitor
@@ -718,6 +719,7 @@
         path       (first (str/split uri #"\?" 2))
         active-page (resolve-page path)
         cid        (component-id path)
+        targets    (make-targets port host uri)
         title      (case active-page
                      :component (str (get-in (site/component cid) [:meta :title] "Not found") " · clj-ui")
                      :home "clj-ui components"
@@ -742,7 +744,7 @@
           (when live-reload? [:script {:src "/theme-adapter.js" :defer true}])
           (when live-reload? [:script {:src "/css-live-reload.js" :defer true}])
           (sidebar/sidebar-layout {}
-            (app-sidebar (if (= active-page :component) path active-page) port host)
+            (app-sidebar (if (= active-page :component) path active-page) port targets)
             (sidebar/sidebar-overlay {})
             (sidebar/sidebar-layout-main {}
               [:div {:style "--body-padding-inline: 2rem; padding: 2rem; max-width: 1100px;"}
@@ -756,7 +758,7 @@
                  deployed-sha]]
                (case active-page
                  :home       (site/home-page)
-                 :component  (site/component-page cid (make-targets port host))
+                 :component  (site/component-page cid targets)
                  :components (components-page)
                  :calendar   (calendar-page)
                  :icons      (icons-page)
@@ -863,31 +865,44 @@
      :headers {"Content-Type" (get content-types ext "application/octet-stream")}
      :body f}))
 
+(defn- spa-file [roots rel]
+  (when-not (str/includes? rel "..")
+    (some (fn [root] (let [f (io/file root rel)] (when (.isFile f) f))) roots)))
+
+(defn with-base
+  "`html` with its <base href> set to `href` (inserted when missing), so an
+   SPA's relative asset URLs resolve from its mount on every route."
+  [html href]
+  (let [tag (str "<base href=\"" href "\" />")]
+    (if (re-find #"<base\s[^>]*>" html)
+      (str/replace-first html #"<base\s[^>]*>" tag)
+      (str/replace-first html #"<head>" (str "<head>\n  " tag)))))
+
 (defn- spa-response
-  "Serve a static SPA build mounted at /<prefix>/. `rel` is the path
-   under the mount; searched across `roots` in order (later roots let
-   generated assets like theme.css come from the dev public dir)."
-  [roots rel]
-  (let [rel (if (str/blank? rel) "index.html" rel)]
-    (when-not (str/includes? rel "..")
-      (some (fn [root]
-              (let [f (io/file root rel)]
-                (when (.isFile f) (serve-file f))))
-            roots))))
+  "Serve a static SPA build mounted at /<mount>/. `rel` is the path under
+   the mount; searched across `roots` in order (later roots let generated
+   assets like theme.css come from the dev public dir). Paths without a file
+   extension are the SPA's own routes (dev.route) and get its index.html."
+  [mount roots rel]
+  (if (or (= rel "index.html") (not (re-find #"\.\w+$" rel)))
+    (when-let [index (spa-file roots "index.html")]
+      {:status 200
+       :headers {"Content-Type" "text/html; charset=utf-8"}
+       :body (with-base (slurp index) (str "/" mount "/"))})
+    (some-> (spa-file roots rel) serve-file)))
 
 (def ^:private spa-mounts
   {"replicant" ["dev/replicant/prod" "dev/replicant/public"]
    "squint" ["dev/squint/dist" "dev/squint/public"]})
 
-(defn handler [{:keys [uri headers]}]
+(defn handler [{:keys [uri query-string headers]}]
   (let [port @!port
         host (get headers "host")
-        path (first (str/split uri #"\?" 2))
+        path uri
+        ;; :uri is the bare path; render-page wants the query too (?theme=)
+        uri  (cond-> uri query-string (str "?" query-string))
         spa (when-let [[_ mount rel] (re-matches #"/(replicant|squint)(?:/(.*))?" path)]
-              (if (nil? rel)
-                ;; no trailing slash — relative asset URLs need one
-                {:status 301 :headers {"Location" (str path "/")}}
-                (spa-response (spa-mounts mount) rel)))]
+              (spa-response mount (spa-mounts mount) (or rel "")))]
     (cond
       (= path "/dev/changes")
       {:status 200
