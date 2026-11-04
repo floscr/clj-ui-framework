@@ -16,7 +16,10 @@
                 {type: \"slider\"|\"toggle\"|\"text\"|\"select\"|\"color\"
                        |\"image\"|\"pad\"|\"spring\"|\"easing\"|\"action\",
                  label?, ...}                  (slider: default min max step;
-                                                toggle: default)
+                                                toggle: default;
+                                                action: variant (ui.button,
+                                                default secondary), loud;
+                                                label: false hides it)
                 nested object (no :type)       -> folder (_label, _collapsed)
        opts   : {id, persist, onChange, onAction, defaultCollapsed,
                  enabled, shortcuts,
@@ -107,6 +110,15 @@
       s
       (str (.toUpperCase (.charAt s 0)) (.slice s 1)))))
 
+(defn- obj-label
+  "An object control's label: its `label`, the humanized key when absent,
+   none for `label: false` or \"\" (a text box can carry it as placeholder)."
+  [v k]
+  (let [l (aget v "label")]
+    (cond (or (false? l) (= l "")) nil
+          (some? l) l
+          :else (humanize k))))
+
 (defn- normalize-options [opts]
   (mapv (fn [o]
           (if (= (tof o) "object")
@@ -146,35 +158,35 @@
         (let [d  (or (aget v "default") 0)
               r  (infer-range d)
               mx (if (some? (aget v "max")) (aget v "max") (aget r "max"))]
-          {:ctype "slider" :key k :path path :label (or (aget v "label") (humanize k))
+          {:ctype "slider" :key k :path path :label (obj-label v k)
            :default d
            :min (if (some? (aget v "min")) (aget v "min") (aget r "min"))
            :max mx
            :step (if (some? (aget v "step")) (aget v "step") (infer-step mx))})
 
         (= t "toggle")
-        {:ctype "toggle" :key k :path path :label (or (aget v "label") (humanize k))
+        {:ctype "toggle" :key k :path path :label (obj-label v k)
          :default (boolean (aget v "default"))}
 
         (= t "text")
-        {:ctype "text" :key k :path path :label (or (aget v "label") (humanize k))
+        {:ctype "text" :key k :path path :label (obj-label v k)
          :default (or (aget v "default") "") :placeholder (or (aget v "placeholder") "")}
 
         (= t "select")
         (let [os (normalize-options (or (aget v "options") #js []))]
-          {:ctype "select" :key k :path path :label (or (aget v "label") (humanize k))
+          {:ctype "select" :key k :path path :label (obj-label v k)
            :options os
            :default (or (aget v "default")
                         (when (seq os) (aget (first os) "value"))
                         "")})
 
         (= t "color")
-        {:ctype "color" :key k :path path :label (or (aget v "label") (humanize k))
+        {:ctype "color" :key k :path path :label (obj-label v k)
          :default (or (aget v "default") "#000000")}
 
         (= t "image")
         (let [os (when (aget v "options") (normalize-options (aget v "options")))]
-          {:ctype "image" :key k :path path :label (or (aget v "label") (humanize k))
+          {:ctype "image" :key k :path path :label (obj-label v k)
            :options os
            :default (or (aget v "default")
                         (when (seq os) (aget (first os) "value"))
@@ -189,17 +201,18 @@
               xa (ax "x" default-axis)
               ya (ax "y" default-axis)
               labels (or (aget v "labels") #js {})]
-          {:ctype "pad" :key k :path path :label (or (aget v "label") (humanize k))
+          {:ctype "pad" :key k :path path :label (obj-label v k)
            :x xa :y ya
            :x-label (or (aget labels "x") "X") :y-label (or (aget labels "y") "Y")
            :default #js {:x (aget xa "default") :y (aget ya "default")}})
 
         (or (= t "spring") (= t "easing"))
-        {:ctype "transition" :key k :path path :label (or (aget v "label") (humanize k))
+        {:ctype "transition" :key k :path path :label (obj-label v k)
          :default (js/JSON.parse (js/JSON.stringify v))}
 
         (= t "action")
-        {:ctype "action" :key k :path path :label (or (aget v "label") (humanize k))}
+        {:ctype "action" :key k :path path :label (obj-label v k)
+         :variant (or (aget v "variant") "secondary") :loud (boolean (aget v "loud"))}
 
         :else
         {:ctype "folder" :key k :path path :label (or (aget v "_label") (humanize k))
@@ -660,19 +673,20 @@
 
 ;; Action ------------------------------------------------------------
 
-(defn- render-action [panel c]
-  (let [{:keys [path label]} c
-        r   (mk "div" "dial-row dial-row--action")
-        btn (mk "button" "dial-action")]
+(defn- render-action
+  "A ui.button (`variant`: primary / secondary / ghost / danger / success,
+   `loud`), small. Consecutive actions share one row, see render-controls!."
+  [panel c]
+  (let [{:keys [path label variant loud]} c
+        btn (mk "button" (str "btn btn-sm btn-" variant (when loud " btn-loud") " dial-action"))]
     (attr! btn "type" "button")
     (txt! btn label)
     (on! btn "click" (fn [_] (when-let [f (:onAction panel)] (f (path-str path)))))
-    (add! r btn)
-    r))
+    btn))
 
 ;; Folder ------------------------------------------------------------
 
-(declare render-control)
+(declare render-controls!)
 
 (defn- render-folder [panel c]
   (let [wrap (mk "div" "dial-folder")
@@ -686,8 +700,7 @@
     (attr! head "type" "button")
     (add! head chev (txt! (mk "span" nil) (:label c)))
     (on! head "click" (fn [_] (swap! open not) (sync)))
-    (doseq [child (:children c)]
-      (add! body (render-control panel child)))
+    (render-controls! panel body (:children c))
     (add! wrap head body)
     (sync)
     wrap))
@@ -708,6 +721,20 @@
       (= t "action")     (render-action panel c)
       (= t "folder")     (render-folder panel c)
       :else (mk "div" nil))))
+
+(defn- render-controls!
+  "Render `controls` into `parent`; a run of actions shares one row of
+   equal-width buttons (Cancel | Apply)."
+  [panel parent controls]
+  (let [actions (atom nil)]
+    (doseq [c controls]
+      (if (= (:ctype c) "action")
+        (do (when-not @actions
+              (reset! actions (mk "div" "dial-row dial-actions"))
+              (add! parent @actions))
+            (add! @actions (render-control panel c)))
+        (do (reset! actions nil)
+            (add! parent (render-control panel c)))))))
 
 ;; ── Persistence ─────────────────────────────────────────────────────
 
@@ -789,8 +816,7 @@
   (let [body (:bodyEl panel)]
     (set! (.-innerHTML body) "")
     (aset panel "updaters" #js {})
-    (doseq [c (:controls panel)]
-      (add! body (render-control panel c)))))
+    (render-controls! panel body (:controls panel))))
 
 (declare render-versions!)
 

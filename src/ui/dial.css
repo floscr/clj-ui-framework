@@ -178,7 +178,6 @@
   min-height: 24px;
 }
 
-.dial-row--action { grid-template-columns: 1fr; }
 .dial-row--slider { grid-template-columns: 1fr; }
 /* label takes the width, the switch sits at the end */
 .dial-row--toggle { grid-template-columns: 1fr auto; }
@@ -442,19 +441,17 @@
 
 /* ── Action ────────────────────────────────────────────────────────── */
 
-.dial-action {
-  width: 100%;
-  font-size: var(--font-xs);
-  font-weight: 500;
-  color: var(--fg-0);
-  background: var(--bg-1);
-  border: var(--border-0);
-  border-radius: var(--radius-sm);
-  padding: 5px 10px;
-  cursor: pointer;
+/* Actions are ui.button (button.css); a run of them shares one row,
+   side by side at equal width. */
+.dial-actions {
+  display: flex;
+  gap: var(--size-2);
 }
 
-.dial-action:hover { background: var(--bg-2); }
+.dial-actions > .dial-action {
+  flex: 1 1 0;
+  min-width: 0;
+}
 
 /* ── Folder ────────────────────────────────────────────────────────── */
 

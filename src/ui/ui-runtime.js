@@ -738,6 +738,9 @@
   function empty_QMARK_(coll) {
     return seq(coll) ? false : true;
   }
+  function false_QMARK_(x) {
+    return x === false;
+  }
   function boolean$(x) {
     return !!x;
   }
@@ -3101,6 +3104,31 @@
     }
     ;
   };
+  var obj_label = function(v, k) {
+    const l1 = v["label"];
+    if (truth_((() => {
+      const or__23426__auto__2 = false_QMARK_(l1);
+      if (truth_(or__23426__auto__2)) {
+        return or__23426__auto__2;
+      } else {
+        return _EQ_(l1, "");
+      }
+      ;
+    })())) {
+      return null;
+    } else {
+      if (!(l1 == null)) {
+        return l1;
+      } else {
+        if ("else") {
+          return humanize(k);
+        } else {
+          return null;
+        }
+      }
+    }
+    ;
+  };
   var normalize_options = function(opts) {
     return mapv((function(o) {
       if (tof(o) === "object") {
@@ -3152,48 +3180,24 @@
                 })();
                 const r6 = infer_range(d4);
                 const mx7 = !(v["max"] == null) ? v["max"] : r6["max"];
-                return { "ctype": "slider", "key": k, "path": path, "label": (() => {
-                  const or__23426__auto__8 = v["label"];
-                  if (truth_(or__23426__auto__8)) {
-                    return or__23426__auto__8;
-                  } else {
-                    return humanize(k);
-                  }
-                  ;
-                })(), "default": d4, "min": !(v["min"] == null) ? v["min"] : r6["min"], "max": mx7, "step": !(v["step"] == null) ? v["step"] : infer_step(mx7) };
+                return { "ctype": "slider", "key": k, "path": path, "label": obj_label(v, k), "default": d4, "min": !(v["min"] == null) ? v["min"] : r6["min"], "max": mx7, "step": !(v["step"] == null) ? v["step"] : infer_step(mx7) };
               } else {
                 if (t3 === "toggle") {
-                  return { "ctype": "toggle", "key": k, "path": path, "label": (() => {
-                    const or__23426__auto__9 = v["label"];
-                    if (truth_(or__23426__auto__9)) {
-                      return or__23426__auto__9;
-                    } else {
-                      return humanize(k);
-                    }
-                    ;
-                  })(), "default": boolean$(v["default"]) };
+                  return { "ctype": "toggle", "key": k, "path": path, "label": obj_label(v, k), "default": boolean$(v["default"]) };
                 } else {
                   if (t3 === "text") {
-                    return { "ctype": "text", "key": k, "path": path, "label": (() => {
-                      const or__23426__auto__10 = v["label"];
-                      if (truth_(or__23426__auto__10)) {
-                        return or__23426__auto__10;
-                      } else {
-                        return humanize(k);
-                      }
-                      ;
-                    })(), "default": (() => {
-                      const or__23426__auto__11 = v["default"];
-                      if (truth_(or__23426__auto__11)) {
-                        return or__23426__auto__11;
+                    return { "ctype": "text", "key": k, "path": path, "label": obj_label(v, k), "default": (() => {
+                      const or__23426__auto__8 = v["default"];
+                      if (truth_(or__23426__auto__8)) {
+                        return or__23426__auto__8;
                       } else {
                         return "";
                       }
                       ;
                     })(), "placeholder": (() => {
-                      const or__23426__auto__12 = v["placeholder"];
-                      if (truth_(or__23426__auto__12)) {
-                        return or__23426__auto__12;
+                      const or__23426__auto__9 = v["placeholder"];
+                      if (truth_(or__23426__auto__9)) {
+                        return or__23426__auto__9;
                       } else {
                         return "";
                       }
@@ -3201,31 +3205,23 @@
                     })() };
                   } else {
                     if (t3 === "select") {
-                      const os13 = normalize_options((() => {
-                        const or__23426__auto__14 = v["options"];
-                        if (truth_(or__23426__auto__14)) {
-                          return or__23426__auto__14;
+                      const os10 = normalize_options((() => {
+                        const or__23426__auto__11 = v["options"];
+                        if (truth_(or__23426__auto__11)) {
+                          return or__23426__auto__11;
                         } else {
                           return [];
                         }
                         ;
                       })());
-                      return { "ctype": "select", "key": k, "path": path, "label": (() => {
-                        const or__23426__auto__15 = v["label"];
-                        if (truth_(or__23426__auto__15)) {
-                          return or__23426__auto__15;
+                      return { "ctype": "select", "key": k, "path": path, "label": obj_label(v, k), "options": os10, "default": (() => {
+                        const or__23426__auto__12 = v["default"];
+                        if (truth_(or__23426__auto__12)) {
+                          return or__23426__auto__12;
                         } else {
-                          return humanize(k);
-                        }
-                        ;
-                      })(), "options": os13, "default": (() => {
-                        const or__23426__auto__16 = v["default"];
-                        if (truth_(or__23426__auto__16)) {
-                          return or__23426__auto__16;
-                        } else {
-                          const or__23426__auto__17 = truth_(seq(os13)) ? first(os13)["value"] : null;
-                          if (truth_(or__23426__auto__17)) {
-                            return or__23426__auto__17;
+                          const or__23426__auto__13 = truth_(seq(os10)) ? first(os10)["value"] : null;
+                          if (truth_(or__23426__auto__13)) {
+                            return or__23426__auto__13;
                           } else {
                             return "";
                           }
@@ -3235,18 +3231,10 @@
                       })() };
                     } else {
                       if (t3 === "color") {
-                        return { "ctype": "color", "key": k, "path": path, "label": (() => {
-                          const or__23426__auto__18 = v["label"];
-                          if (truth_(or__23426__auto__18)) {
-                            return or__23426__auto__18;
-                          } else {
-                            return humanize(k);
-                          }
-                          ;
-                        })(), "default": (() => {
-                          const or__23426__auto__19 = v["default"];
-                          if (truth_(or__23426__auto__19)) {
-                            return or__23426__auto__19;
+                        return { "ctype": "color", "key": k, "path": path, "label": obj_label(v, k), "default": (() => {
+                          const or__23426__auto__14 = v["default"];
+                          if (truth_(or__23426__auto__14)) {
+                            return or__23426__auto__14;
                           } else {
                             return "#000000";
                           }
@@ -3254,23 +3242,15 @@
                         })() };
                       } else {
                         if (t3 === "image") {
-                          const os20 = truth_(v["options"]) ? normalize_options(v["options"]) : null;
-                          return { "ctype": "image", "key": k, "path": path, "label": (() => {
-                            const or__23426__auto__21 = v["label"];
-                            if (truth_(or__23426__auto__21)) {
-                              return or__23426__auto__21;
+                          const os15 = truth_(v["options"]) ? normalize_options(v["options"]) : null;
+                          return { "ctype": "image", "key": k, "path": path, "label": obj_label(v, k), "options": os15, "default": (() => {
+                            const or__23426__auto__16 = v["default"];
+                            if (truth_(or__23426__auto__16)) {
+                              return or__23426__auto__16;
                             } else {
-                              return humanize(k);
-                            }
-                            ;
-                          })(), "options": os20, "default": (() => {
-                            const or__23426__auto__22 = v["default"];
-                            if (truth_(or__23426__auto__22)) {
-                              return or__23426__auto__22;
-                            } else {
-                              const or__23426__auto__23 = truth_(seq(os20)) ? first(os20)["value"] : null;
-                              if (truth_(or__23426__auto__23)) {
-                                return or__23426__auto__23;
+                              const or__23426__auto__17 = truth_(seq(os15)) ? first(os15)["value"] : null;
+                              if (truth_(or__23426__auto__17)) {
+                                return or__23426__auto__17;
                               } else {
                                 return "";
                               }
@@ -3280,99 +3260,83 @@
                           })() };
                         } else {
                           if (t3 === "pad") {
-                            const ax24 = (function(a, def_) {
-                              const tup25 = (() => {
-                                const or__23426__auto__26 = v[a];
-                                if (truth_(or__23426__auto__26)) {
-                                  return or__23426__auto__26;
+                            const ax18 = (function(a, def_) {
+                              const tup19 = (() => {
+                                const or__23426__auto__20 = v[a];
+                                if (truth_(or__23426__auto__20)) {
+                                  return or__23426__auto__20;
                                 } else {
                                   return def_;
                                 }
                                 ;
                               })();
-                              return { "default": tup25[0], "min": tup25[1], "max": tup25[2], "step": (() => {
-                                const or__23426__auto__27 = tup25[3];
-                                if (truth_(or__23426__auto__27)) {
-                                  return or__23426__auto__27;
+                              return { "default": tup19[0], "min": tup19[1], "max": tup19[2], "step": (() => {
+                                const or__23426__auto__21 = tup19[3];
+                                if (truth_(or__23426__auto__21)) {
+                                  return or__23426__auto__21;
                                 } else {
-                                  return (tup25[2] - tup25[1]) / 200;
+                                  return (tup19[2] - tup19[1]) / 200;
                                 }
                                 ;
                               })() };
                             });
-                            const default_axis28 = [0, -1, 1, 0.01];
-                            const xa29 = ax24("x", default_axis28);
-                            const ya30 = ax24("y", default_axis28);
-                            const labels31 = (() => {
-                              const or__23426__auto__32 = v["labels"];
-                              if (truth_(or__23426__auto__32)) {
-                                return or__23426__auto__32;
+                            const default_axis22 = [0, -1, 1, 0.01];
+                            const xa23 = ax18("x", default_axis22);
+                            const ya24 = ax18("y", default_axis22);
+                            const labels25 = (() => {
+                              const or__23426__auto__26 = v["labels"];
+                              if (truth_(or__23426__auto__26)) {
+                                return or__23426__auto__26;
                               } else {
                                 return {};
                               }
                               ;
                             })();
-                            return { "y": ya30, "path": path, "key": k, "default": { "x": xa29["default"], "y": ya30["default"] }, "y-label": (() => {
-                              const or__23426__auto__33 = labels31["y"];
-                              if (truth_(or__23426__auto__33)) {
-                                return or__23426__auto__33;
+                            return { "y": ya24, "path": path, "key": k, "default": { "x": xa23["default"], "y": ya24["default"] }, "y-label": (() => {
+                              const or__23426__auto__27 = labels25["y"];
+                              if (truth_(or__23426__auto__27)) {
+                                return or__23426__auto__27;
                               } else {
                                 return "Y";
                               }
                               ;
                             })(), "x-label": (() => {
-                              const or__23426__auto__34 = labels31["x"];
-                              if (truth_(or__23426__auto__34)) {
-                                return or__23426__auto__34;
+                              const or__23426__auto__28 = labels25["x"];
+                              if (truth_(or__23426__auto__28)) {
+                                return or__23426__auto__28;
                               } else {
                                 return "X";
                               }
                               ;
-                            })(), "label": (() => {
-                              const or__23426__auto__35 = v["label"];
-                              if (truth_(or__23426__auto__35)) {
-                                return or__23426__auto__35;
-                              } else {
-                                return humanize(k);
-                              }
-                              ;
-                            })(), "ctype": "pad", "x": xa29 };
+                            })(), "label": obj_label(v, k), "ctype": "pad", "x": xa23 };
                           } else {
                             if (truth_((() => {
-                              const or__23426__auto__36 = t3 === "spring";
-                              if (or__23426__auto__36) {
-                                return or__23426__auto__36;
+                              const or__23426__auto__29 = t3 === "spring";
+                              if (or__23426__auto__29) {
+                                return or__23426__auto__29;
                               } else {
                                 return t3 === "easing";
                               }
                               ;
                             })())) {
-                              return { "ctype": "transition", "key": k, "path": path, "label": (() => {
-                                const or__23426__auto__37 = v["label"];
-                                if (truth_(or__23426__auto__37)) {
-                                  return or__23426__auto__37;
-                                } else {
-                                  return humanize(k);
-                                }
-                                ;
-                              })(), "default": JSON.parse(JSON.stringify(v)) };
+                              return { "ctype": "transition", "key": k, "path": path, "label": obj_label(v, k), "default": JSON.parse(JSON.stringify(v)) };
                             } else {
                               if (t3 === "action") {
-                                return { "ctype": "action", "key": k, "path": path, "label": (() => {
-                                  const or__23426__auto__38 = v["label"];
-                                  if (truth_(or__23426__auto__38)) {
-                                    return or__23426__auto__38;
+                                return { "ctype": "action", "key": k, "path": path, "label": obj_label(v, k), "variant": (() => {
+                                  const or__23426__auto__30 = v["variant"];
+                                  if (truth_(or__23426__auto__30)) {
+                                    return or__23426__auto__30;
                                   } else {
-                                    return humanize(k);
+                                    return "secondary";
                                   }
                                   ;
-                                })() };
+                                })(), "loud": boolean$(v["loud"]) };
                               } else {
                                 if ("else") {
                                   return { "ctype": "folder", "key": k, "path": path, "label": (() => {
-                                    const or__23426__auto__39 = v["_label"];
-                                    if (truth_(or__23426__auto__39)) {
-                                      return or__23426__auto__39;
+                                    const or__23426__auto__31 = v["_label"];
+                                    if (truth_(or__23426__auto__31)) {
+                                      return or__23426__auto__31;
                                     } else {
                                       return humanize(k);
                                     }
@@ -4297,20 +4261,20 @@
     const map__12 = c;
     const path3 = get(map__12, "path");
     const label4 = get(map__12, "label");
-    const r5 = mk2("div", "dial-row dial-row--action");
-    const btn6 = mk2("button", "dial-action");
-    attr_BANG_(btn6, "type", "button");
-    txt_BANG_(btn6, label4);
-    on_BANG_(btn6, "click", (function(_) {
-      const temp__23062__auto__7 = get(panel, "onAction");
-      if (truth_(temp__23062__auto__7)) {
-        const f8 = temp__23062__auto__7;
-        return f8(path_str(path3));
+    const variant5 = get(map__12, "variant");
+    const loud6 = get(map__12, "loud");
+    const btn7 = mk2("button", `${"btn btn-sm btn-"}${variant5 ?? ""}${(truth_(loud6) ? " btn-loud" : null) ?? ""}${" dial-action"}`);
+    attr_BANG_(btn7, "type", "button");
+    txt_BANG_(btn7, label4);
+    on_BANG_(btn7, "click", (function(_) {
+      const temp__23062__auto__8 = get(panel, "onAction");
+      if (truth_(temp__23062__auto__8)) {
+        const f9 = temp__23062__auto__8;
+        return f9(path_str(path3));
       }
       ;
     }));
-    add_BANG_(r5, btn6);
-    return r5;
+    return btn7;
   };
   var render_folder = function(panel, c) {
     const wrap1 = mk2("div", "dial-folder");
@@ -4332,11 +4296,7 @@
       swap_BANG_(open5, not);
       return sync6();
     }));
-    for (let G__7 of iterable(get(c, "children"))) {
-      const child8 = G__7;
-      add_BANG_(body3, render_control(panel, child8));
-    }
-    ;
+    render_controls_BANG_(panel, body3, get(c, "children"));
     add_BANG_(wrap1, head2, body3);
     sync6();
     return wrap1;
@@ -4389,6 +4349,25 @@
       }
     }
     ;
+  };
+  var render_controls_BANG_ = function(panel, parent, controls) {
+    const actions1 = atom(null);
+    for (let G__2 of iterable(controls)) {
+      const c3 = G__2;
+      if (get(c3, "ctype") === "action") {
+        if (truth_(deref(actions1))) {
+        } else {
+          reset_BANG_(actions1, mk2("div", "dial-row dial-actions"));
+          add_BANG_(parent, deref(actions1));
+        }
+        ;
+        add_BANG_(deref(actions1), render_control(panel, c3));
+      } else {
+        reset_BANG_(actions1, null);
+        add_BANG_(parent, render_control(panel, c3));
+      }
+    }
+    return null;
   };
   var storage_for = function(panel) {
     const p1 = get(panel, "persist");
@@ -4547,11 +4526,7 @@
     const body1 = get(panel, "bodyEl");
     body1.innerHTML = "";
     panel["updaters"] = {};
-    for (let G__2 of iterable(get(panel, "controls"))) {
-      const c3 = G__2;
-      add_BANG_(body1, render_control(panel, c3));
-    }
-    return null;
+    return render_controls_BANG_(panel, body1, get(panel, "controls"));
   };
   var select_version_BANG_ = function(panel, id) {
     panel["activePreset"] = id;
