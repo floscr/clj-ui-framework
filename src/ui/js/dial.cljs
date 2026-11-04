@@ -31,12 +31,18 @@
                           savePreset, deletePreset, getPresets,
                           getActivePresetId, clearActivePreset}
 
+   Sliders: drag to scrub (Shift snaps to 10 steps, Ctrl/Cmd to 5, also on
+   the arrow keys), click the number to type, right-click (long-press) for a
+   Reset menu (window.__uiContextMenu, ui.js.context-menu).
+
    Panel fields are read with (:kw panel) and written with (aset panel \"kw\" v)
    — never `.-` interop, which munges hyphens to underscores in squint.
 
    See src/ui/dial.css for styling."
   (:require [clojure.string :as str]
-            [color-picker :as color-picker]))
+            [color-picker :as color-picker]
+            ;; window.__uiContextMenu: right-click a slider to reset it
+            [context-menu]))
 
 ;; ── DOM helpers ─────────────────────────────────────────────────────
 
@@ -256,6 +262,18 @@
 
 ;; Slider ------------------------------------------------------------
 
+;; lucide rotate-ccw, in the context menu's [tag [[attr val] …]] form
+(def ^:private reset-icon
+  #js [#js ["path" #js [#js ["d" "M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"]]]
+       #js ["path" #js [#js ["d" "M3 3v5h5"]]]])
+
+(defn- snap-mult
+  "Steps a scrub snaps to: Shift → 10, Ctrl/Cmd → 5, otherwise 1."
+  [e]
+  (cond (.-shiftKey e) 10
+        (or (.-ctrlKey e) (.-metaKey e)) 5
+        :else 1))
+
 (defn- render-slider [panel c]
   (let [{:keys [path label min max step]} c
         r      (mk "div" "dial-row dial-row--slider")
@@ -268,13 +286,15 @@
                  (let [pct (* 100 (clamp (/ (- v min) (- max min)) 0 1))]
                    (set! (.. fill -style -width) (str pct "%"))
                    (set! (.-value num) (fmt-num v))))
-        set-at (fn [clientx]
+        put!   (fn [v] (commit! panel path v) (paint v))
+        ;; Shift snaps the scrub to 10 steps, Ctrl to 5 (10 px / 5 px on a
+        ;; 1px-step slider)
+        set-at (fn [clientx mult]
                  (let [rect (.getBoundingClientRect field)
                        t    (clamp (/ (- clientx (.-left rect)) (.-width rect)) 0 1)
-                       raw  (+ min (* t (- max min)))
-                       v    (clamp (round-step raw step) min max)]
-                   (commit! panel path v)
-                   (paint v)))]
+                       raw  (+ min (* t (- max min)))]
+                   (put! (clamp (round-step raw (* step mult)) min max))))
+        reset-value! (fn [] (set-value! panel path (:default c)))]
     (txt! lab label)
     (attr! lab "data-tooltip" label)
     (set! (.-type num) "text")
@@ -283,47 +303,63 @@
     (add! field fill lab num)
     (add! r field)
     (attr! field "tabindex" "0")
-    (let [drag #js {:on false}]
+    (attr! field "data-long-press" "true")
+    (let [drag #js {:on false :x 0}]
       (on! field "pointerdown"
            (fn [e]
              ;; the number is click-to-edit only — pressing it never scrubs;
-             ;; scrubbing happens on the rest of the track
-             (when (not= (.-target e) num)
-               (.preventDefault e)
+             ;; scrubbing happens on the rest of the track. No preventDefault:
+             ;; the press focuses the track natively, so pointer focus never
+             ;; matches :focus-visible (no ring after a drag)
+             (when (and (not= (.-target e) num) (= (.-button e) 0))
                (.setPointerCapture field (.-pointerId e))
                (aset drag "on" true)
-               (set-at (.-clientX e)))))
+               (aset drag "x" (.-clientX e))
+               (set-at (.-clientX e) (snap-mult e)))))
       (on! field "pointermove"
-           (fn [e] (when (aget drag "on") (set-at (.-clientX e)))))
+           (fn [e] (when (aget drag "on")
+                     (aset drag "x" (.-clientX e))
+                     (set-at (.-clientX e) (snap-mult e)))))
       (on! field "pointerup"
            (fn [e]
              (when (aget drag "on")
                (aset drag "on" false)
                (when (.hasPointerCapture field (.-pointerId e))
-                 (.releasePointerCapture field (.-pointerId e)))
-               (.focus field))))
-      (on! field "pointercancel" (fn [_] (aset drag "on" false))))
+                 (.releasePointerCapture field (.-pointerId e))))))
+      (on! field "pointercancel" (fn [_] (aset drag "on" false)))
+      ;; pressing or releasing Shift / Ctrl mid-drag re-snaps in place
+      (doseq [ev ["keydown" "keyup"]]
+        (on! field ev
+             (fn [e]
+               (when (and (aget drag "on")
+                          (let [k (.-key e)] (or (= k "Shift") (= k "Control") (= k "Meta"))))
+                 (set-at (aget drag "x") (snap-mult e)))))))
+    ;; right-click (long-press on touch): reset to the default value
+    (on! field "contextmenu"
+         (fn [e]
+           (when-let [open js/window.__uiContextMenu]
+             (.preventDefault e)
+             (open e #js [#js {:label "Reset" :icon-paths reset-icon
+                               :on-click reset-value!}]))))
     (on! num "focus" (fn [_] (.select num)))
     (on! num "change"
          (fn [_] (let [v (js/parseFloat (.-value num))]
                    (if (js/isFinite v)
-                     (let [v2 (clamp (round-step v step) min max)]
-                       (commit! panel path v2) (paint v2))
+                     (put! (clamp (round-step v step) min max))
                      (paint (cur))))))
     (on! field "keydown"
          (fn [e]
            (when (not= (.-target e) num)
              (let [k (.-key e)
-                   big (or (.-shiftKey e) (= k "PageUp") (= k "PageDown"))
-                   d (* step (if big 10 1))]
+                   d (* step (if (or (= k "PageUp") (= k "PageDown")) 10 (snap-mult e)))]
                (cond
                  (or (= k "Enter") (= k " ")) (do (.preventDefault e) (.focus num) (.select num))
                  (or (= k "ArrowUp") (= k "ArrowRight") (= k "PageUp"))
-                 (do (.preventDefault e) (let [v (clamp (+ (cur) d) min max)] (commit! panel path v) (paint v)))
+                 (do (.preventDefault e) (put! (clamp (+ (cur) d) min max)))
                  (or (= k "ArrowDown") (= k "ArrowLeft") (= k "PageDown"))
-                 (do (.preventDefault e) (let [v (clamp (- (cur) d) min max)] (commit! panel path v) (paint v)))
-                 (= k "Home") (do (.preventDefault e) (commit! panel path min) (paint min))
-                 (= k "End")  (do (.preventDefault e) (commit! panel path max) (paint max)))))))
+                 (do (.preventDefault e) (put! (clamp (- (cur) d) min max)))
+                 (= k "Home") (do (.preventDefault e) (put! min))
+                 (= k "End")  (do (.preventDefault e) (put! max)))))))
     (paint (cur))
     (reg-updater! panel path paint)
     r))
@@ -341,6 +377,7 @@
                 (set! (.-checked input) (boolean v))
                 (if v (.add (.-classList track) "switch-track--checked")
                     (.remove (.-classList track) "switch-track--checked")))]
+    (.add (.-classList r) "dial-row--toggle")
     (attr! input "type" "checkbox")
     (add! track thumb)
     (add! wrap input track)
@@ -355,19 +392,27 @@
 ;; Text --------------------------------------------------------------
 
 (defn- render-text [panel c]
+  ;; label above a full-width box: free text needs the width, not the
+  ;; label column's leftovers
   (let [{:keys [path label placeholder]} c
-        r  (row label)
-        ta (mk "textarea" "dial-text")]
-    (attr! ta "rows" "1")
+        r    (row label)
+        ta   (mk "textarea" "dial-text")
+        ;; grow with the text up to 200px; 0 = not laid out (minimized)
+        grow (fn []
+               (set! (.. ta -style -height) "auto")
+               (let [h (.-scrollHeight ta)]
+                 (when (pos? h)
+                   (set! (.. ta -style -height) (str (Math/min 200 h) "px")))))]
+    (.add (.-classList r) "dial-row--text")
+    (attr! ta "rows" "3")
     (when (seq placeholder) (attr! ta "placeholder" placeholder))
     (on! ta "input"
          (fn [_]
-           (set! (.. ta -style -height) "auto")
-           (set! (.. ta -style -height) (str (Math/min 120 (.-scrollHeight ta)) "px"))
+           (grow)
            (commit! panel path (.-value ta))))
     (add! r ta)
     (set! (.-value ta) (or (get-in @(:store panel) path) ""))
-    (reg-updater! panel path (fn [v] (set! (.-value ta) (or v ""))))
+    (reg-updater! panel path (fn [v] (set! (.-value ta) (or v "")) (grow)))
     r))
 
 ;; Select ------------------------------------------------------------

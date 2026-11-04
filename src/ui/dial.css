@@ -180,6 +180,10 @@
 
 .dial-row--action { grid-template-columns: 1fr; }
 .dial-row--slider { grid-template-columns: 1fr; }
+/* label takes the width, the switch sits at the end */
+.dial-row--toggle { grid-template-columns: 1fr auto; }
+/* label above a full-width box */
+.dial-row--text { grid-template-columns: 1fr; gap: var(--size-1); }
 
 .dial-label {
   font-size: var(--font-xs);
@@ -208,7 +212,21 @@
   user-select: none;
 }
 
-.dial-slider:focus-visible { box-shadow: inset 0 0 0 1px var(--accent); }
+/* The keyboard ring sits on a layer above the fill and the label: an inset
+   shadow on the track itself is painted under the positioned fill. */
+.dial-slider::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.dial-slider:focus-visible::after {
+  outline: var(--focus-outline);
+  outline-offset: -2px;
+}
 
 .dial-slider-fill {
   position: absolute;
@@ -277,10 +295,16 @@
   background: var(--bg-1);
   border: var(--border-0);
   border-radius: var(--radius-sm);
-  padding: 3px 6px;
+  padding: var(--size-1) var(--size-2);
   resize: none;
-  line-height: var(--size-4);
+  line-height: var(--size-5);
   font-family: inherit;
+}
+
+/* like the framework fields: focus turns the border accent */
+.dial-text:focus {
+  outline: none;
+  border-color: var(--accent);
 }
 
 /* Compact clj-ui select to match the panel's dense rows. */

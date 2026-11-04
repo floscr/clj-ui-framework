@@ -3494,6 +3494,31 @@
     ;
     return r1;
   };
+  var reset_icon = [["path", [["d", "M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"]]], ["path", [["d", "M3 3v5h5"]]]];
+  var snap_mult = function(e) {
+    if (truth_(e.shiftKey)) {
+      return 10;
+    } else {
+      if (truth_((() => {
+        const or__23426__auto__1 = e.ctrlKey;
+        if (truth_(or__23426__auto__1)) {
+          return or__23426__auto__1;
+        } else {
+          return e.metaKey;
+        }
+        ;
+      })())) {
+        return 5;
+      } else {
+        if ("else") {
+          return 1;
+        } else {
+          return null;
+        }
+      }
+    }
+    ;
+  };
   var render_slider = function(panel, c) {
     const map__12 = c;
     const path3 = get(map__12, "path");
@@ -3514,13 +3539,18 @@
       fill10.style.width = `${pct15 ?? ""}${"%"}`;
       return num12.value = fmt_num2(v);
     });
-    const set_at16 = (function(clientx) {
-      const rect17 = field9.getBoundingClientRect();
-      const t18 = clamp2((clientx - rect17.left) / rect17.width, 0, 1);
-      const raw19 = min5 + t18 * (max6 - min5);
-      const v20 = clamp2(round_step(raw19, step7), min5, max6);
-      commit_BANG_2(panel, path3, v20);
-      return paint14(v20);
+    const put_BANG_16 = (function(v) {
+      commit_BANG_2(panel, path3, v);
+      return paint14(v);
+    });
+    const set_at17 = (function(clientx, mult) {
+      const rect18 = field9.getBoundingClientRect();
+      const t19 = clamp2((clientx - rect18.left) / rect18.width, 0, 1);
+      const raw20 = min5 + t19 * (max6 - min5);
+      return put_BANG_16(clamp2(round_step(raw20, step7 * mult), min5, max6));
+    });
+    const reset_value_BANG_21 = (function() {
+      return set_value_BANG_2(panel, path3, get(c, "default"));
     });
     txt_BANG_(lab11, label4);
     attr_BANG_(lab11, "data-tooltip", label4);
@@ -3530,45 +3560,84 @@
     add_BANG_(field9, fill10, lab11, num12);
     add_BANG_(r8, field9);
     attr_BANG_(field9, "tabindex", "0");
-    const drag21 = { "on": false };
+    attr_BANG_(field9, "data-long-press", "true");
+    const drag22 = { "on": false, "x": 0 };
     on_BANG_(field9, "pointerdown", (function(e) {
-      if (!_EQ_(e.target, num12)) {
-        e.preventDefault();
+      if (truth_(!_EQ_(e.target, num12) && e.button === 0)) {
         field9.setPointerCapture(e.pointerId);
-        drag21["on"] = true;
-        return set_at16(e.clientX);
+        drag22["on"] = true;
+        drag22["x"] = e.clientX;
+        return set_at17(e.clientX, snap_mult(e));
       }
       ;
     }));
     on_BANG_(field9, "pointermove", (function(e) {
-      if (truth_(drag21["on"])) {
-        return set_at16(e.clientX);
+      if (truth_(drag22["on"])) {
+        drag22["x"] = e.clientX;
+        return set_at17(e.clientX, snap_mult(e));
       }
       ;
     }));
     on_BANG_(field9, "pointerup", (function(e) {
-      if (truth_(drag21["on"])) {
-        drag21["on"] = false;
+      if (truth_(drag22["on"])) {
+        drag22["on"] = false;
         if (truth_(field9.hasPointerCapture(e.pointerId))) {
-          field9.releasePointerCapture(e.pointerId);
+          return field9.releasePointerCapture(e.pointerId);
         }
         ;
-        return field9.focus();
       }
       ;
     }));
     on_BANG_(field9, "pointercancel", (function(_) {
-      return drag21["on"] = false;
+      return drag22["on"] = false;
+    }));
+    for (let G__23 of iterable(["keydown", "keyup"])) {
+      const ev24 = G__23;
+      on_BANG_(field9, ev24, (function(e) {
+        if (truth_((() => {
+          const and__23442__auto__25 = drag22["on"];
+          if (truth_(and__23442__auto__25)) {
+            const k26 = e.key;
+            const or__23426__auto__27 = k26 === "Shift";
+            if (or__23426__auto__27) {
+              return or__23426__auto__27;
+            } else {
+              const or__23426__auto__28 = k26 === "Control";
+              if (or__23426__auto__28) {
+                return or__23426__auto__28;
+              } else {
+                return k26 === "Meta";
+              }
+              ;
+            }
+            ;
+          } else {
+            return and__23442__auto__25;
+          }
+          ;
+        })())) {
+          return set_at17(drag22["x"], snap_mult(e));
+        }
+        ;
+      }));
+    }
+    ;
+    on_BANG_(field9, "contextmenu", (function(e) {
+      const temp__23062__auto__29 = window.__uiContextMenu;
+      if (truth_(temp__23062__auto__29)) {
+        const open30 = temp__23062__auto__29;
+        e.preventDefault();
+        return open30(e, [{ "label": "Reset", "icon-paths": reset_icon, "on-click": reset_value_BANG_21 }]);
+      }
+      ;
     }));
     on_BANG_(num12, "focus", (function(_) {
       return num12.select();
     }));
     on_BANG_(num12, "change", (function(_) {
-      const v22 = parseFloat(num12.value);
-      if (truth_(isFinite(v22))) {
-        const v223 = clamp2(round_step(v22, step7), min5, max6);
-        commit_BANG_2(panel, path3, v223);
-        return paint14(v223);
+      const v31 = parseFloat(num12.value);
+      if (truth_(isFinite(v31))) {
+        return put_BANG_16(clamp2(round_step(v31, step7), min5, max6));
       } else {
         return paint14(cur13());
       }
@@ -3576,29 +3645,22 @@
     }));
     on_BANG_(field9, "keydown", (function(e) {
       if (!_EQ_(e.target, num12)) {
-        const k24 = e.key;
-        const big25 = (() => {
-          const or__23426__auto__26 = e.shiftKey;
-          if (truth_(or__23426__auto__26)) {
-            return or__23426__auto__26;
+        const k32 = e.key;
+        const d33 = step7 * (truth_((() => {
+          const or__23426__auto__34 = k32 === "PageUp";
+          if (or__23426__auto__34) {
+            return or__23426__auto__34;
           } else {
-            const or__23426__auto__27 = k24 === "PageUp";
-            if (or__23426__auto__27) {
-              return or__23426__auto__27;
-            } else {
-              return k24 === "PageDown";
-            }
-            ;
+            return k32 === "PageDown";
           }
           ;
-        })();
-        const d28 = step7 * (truth_(big25) ? 10 : 1);
+        })()) ? 10 : snap_mult(e));
         if (truth_((() => {
-          const or__23426__auto__29 = k24 === "Enter";
-          if (or__23426__auto__29) {
-            return or__23426__auto__29;
+          const or__23426__auto__35 = k32 === "Enter";
+          if (or__23426__auto__35) {
+            return or__23426__auto__35;
           } else {
-            return k24 === " ";
+            return k32 === " ";
           }
           ;
         })())) {
@@ -3607,54 +3669,48 @@
           return num12.select();
         } else {
           if (truth_((() => {
-            const or__23426__auto__30 = k24 === "ArrowUp";
-            if (or__23426__auto__30) {
-              return or__23426__auto__30;
+            const or__23426__auto__36 = k32 === "ArrowUp";
+            if (or__23426__auto__36) {
+              return or__23426__auto__36;
             } else {
-              const or__23426__auto__31 = k24 === "ArrowRight";
-              if (or__23426__auto__31) {
-                return or__23426__auto__31;
+              const or__23426__auto__37 = k32 === "ArrowRight";
+              if (or__23426__auto__37) {
+                return or__23426__auto__37;
               } else {
-                return k24 === "PageUp";
+                return k32 === "PageUp";
               }
               ;
             }
             ;
           })())) {
             e.preventDefault();
-            const v32 = clamp2(cur13() + d28, min5, max6);
-            commit_BANG_2(panel, path3, v32);
-            return paint14(v32);
+            return put_BANG_16(clamp2(cur13() + d33, min5, max6));
           } else {
             if (truth_((() => {
-              const or__23426__auto__33 = k24 === "ArrowDown";
-              if (or__23426__auto__33) {
-                return or__23426__auto__33;
+              const or__23426__auto__38 = k32 === "ArrowDown";
+              if (or__23426__auto__38) {
+                return or__23426__auto__38;
               } else {
-                const or__23426__auto__34 = k24 === "ArrowLeft";
-                if (or__23426__auto__34) {
-                  return or__23426__auto__34;
+                const or__23426__auto__39 = k32 === "ArrowLeft";
+                if (or__23426__auto__39) {
+                  return or__23426__auto__39;
                 } else {
-                  return k24 === "PageDown";
+                  return k32 === "PageDown";
                 }
                 ;
               }
               ;
             })())) {
               e.preventDefault();
-              const v35 = clamp2(cur13() - d28, min5, max6);
-              commit_BANG_2(panel, path3, v35);
-              return paint14(v35);
+              return put_BANG_16(clamp2(cur13() - d33, min5, max6));
             } else {
-              if (k24 === "Home") {
+              if (k32 === "Home") {
                 e.preventDefault();
-                commit_BANG_2(panel, path3, min5);
-                return paint14(min5);
+                return put_BANG_16(min5);
               } else {
-                if (k24 === "End") {
+                if (k32 === "End") {
                   e.preventDefault();
-                  commit_BANG_2(panel, path3, max6);
-                  return paint14(max6);
+                  return put_BANG_16(max6);
                 } else {
                   return null;
                 }
@@ -3688,6 +3744,7 @@
       }
       ;
     });
+    r5.classList.add("dial-row--toggle");
     attr_BANG_(input7, "type", "checkbox");
     add_BANG_(track8, thumb9);
     add_BANG_(wrap6, input7, track8);
@@ -3708,36 +3765,45 @@
     const placeholder5 = get(map__12, "placeholder");
     const r6 = row(label4);
     const ta7 = mk2("textarea", "dial-text");
-    attr_BANG_(ta7, "rows", "1");
+    const grow8 = (function() {
+      ta7.style.height = "auto";
+      const h9 = ta7.scrollHeight;
+      if (h9 > 0) {
+        return ta7.style.height = `${Math.min(200, h9) ?? ""}px`;
+      }
+      ;
+    });
+    r6.classList.add("dial-row--text");
+    attr_BANG_(ta7, "rows", "3");
     if (truth_(seq(placeholder5))) {
       attr_BANG_(ta7, "placeholder", placeholder5);
     }
     ;
     on_BANG_(ta7, "input", (function(_) {
-      ta7.style.height = "auto";
-      ta7.style.height = `${Math.min(120, ta7.scrollHeight) ?? ""}px`;
+      grow8();
       return commit_BANG_2(panel, path3, ta7.value);
     }));
     add_BANG_(r6, ta7);
     ta7.value = (() => {
-      const or__23426__auto__8 = get_in(deref(get(panel, "store")), path3);
-      if (truth_(or__23426__auto__8)) {
-        return or__23426__auto__8;
+      const or__23426__auto__10 = get_in(deref(get(panel, "store")), path3);
+      if (truth_(or__23426__auto__10)) {
+        return or__23426__auto__10;
       } else {
         return "";
       }
       ;
     })();
     reg_updater_BANG_(panel, path3, (function(v) {
-      return ta7.value = (() => {
-        const or__23426__auto__9 = v;
-        if (truth_(or__23426__auto__9)) {
-          return or__23426__auto__9;
+      ta7.value = (() => {
+        const or__23426__auto__11 = v;
+        if (truth_(or__23426__auto__11)) {
+          return or__23426__auto__11;
         } else {
           return "";
         }
         ;
       })();
+      return grow8();
     }));
     return r6;
   };
