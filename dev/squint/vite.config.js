@@ -1,6 +1,13 @@
 import { defineConfig } from "vite";
 
+// Dev only: xi's chrome design mode holds the page reload while its popover is
+// open (config/xi/mcp-servers/chrome/vite in the dotfiles; skipped without them).
+const xiDesignReload = import(
+  `${process.env.HOME}/.config/dotfiles/config/xi/mcp-servers/chrome/vite/xi-design-reload.mjs`
+).then((m) => m.default(), () => null);
+
 export default defineConfig({
+  plugins: [xiDesignReload],
   root: ".",
   publicDir: "public",
   // Production build is served by the hiccup server under /squint/ —

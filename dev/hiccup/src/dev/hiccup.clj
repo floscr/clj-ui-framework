@@ -701,13 +701,15 @@
     (sidebar/sidebar-footer {}
       (sidebar/sidebar-user {:user-name "Dev Mode" :email (str "hiccup · port " own-port) :avatar "bb"}))))
 
+;; The reload asks xi's chrome design mode first (window.__xiDeferReload), which
+;; holds it while its popover is open and runs it once that closes.
 (def live-reload-script
   "/* Live reload: poll /dev/changes, reload on version bump */
   (function() {
     var lastV = null;
     setInterval(function() {
       fetch('/dev/changes').then(function(r) { return r.text(); }).then(function(v) {
-        if (lastV !== null && v !== lastV) location.reload();
+        if (lastV !== null && v !== lastV) (function(r){var d=window.__xiDeferReload;if(!(typeof d==='function'&&d(r)))r();})(function(){location.reload();});
         lastV = v;
       }).catch(function() {});
     }, 500);
