@@ -1,6 +1,6 @@
 {:id :spinner
  :title "Spinner"
- :summary "An indeterminate loading indicator in four sizes that inherits the current text color."
+ :summary "An indeterminate loading indicator in four sizes: a stretching accent arc on a muted track."
  :category :feedback
  :group "Status"
  :keywords ["spinner" "loading" "indeterminate" "busy"]
@@ -18,7 +18,7 @@
 
  :api
  [{:fn "spinner"
-   :doc "A <span> with role=status and a Loading label; the ring uses currentColor."
+   :doc "A <span> with role=status and a Loading label. Recolor with the --spinner-arc (default accent) and --spinner-track (default bg-2) custom properties, the stroke with --spinner-w."
    :props [{:name :size :type ":xs | :sm | :md | :lg" :default ":md"}
            {:name :class :type "string"} {:name :attrs :type "map" :doc "Override aria-label with something specific."}]}
   {:fn "spinner-classes" :doc "Class string for {:size}."}
@@ -26,13 +26,15 @@
 
  :accessibility ["Announces Loading once via role=status; pass a specific aria-label when several spinners are on screen."]
 
- :motion ["Spins continuously; reduced motion stops the rotation (the ring stays visible)."]
+ :motion ["Two arcs sweep on an eased curve so the arc stretches and shrinks while the whole spinner drifts; transform only, so it runs on the compositor."
+          "Reduced motion drops the stretching sweep and keeps a steady rotation, so it still reads as busy."]
 
  :responsive ["Sizes are fixed; :sm fits inside a button, :lg centers in an empty region."]
 
  :targets
  {:clj "Static markup." :cljs ":class may be a vector." :squint "Static markup."}
 
- :notes-for-ai ["Inside a button use the button's :loading prop; it picks the right size and color."]
+ :notes-for-ai ["Inside a button use the button's :loading prop; it picks the right size and color."
+                "Recolor through --spinner-arc and --spinner-track, never border colors: the arcs live on ::before and ::after."]
 
  :related [:skeleton :progress :button]}

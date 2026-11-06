@@ -204,8 +204,8 @@ a.btn-link {
 /* Spinner inside a loading button adapts to the button's text color
    so it stays visible on any variant (primary, success, ghost, …). */
 .btn-loading .spinner {
-  border-color: color-mix(in srgb, currentColor 30%, transparent);
-  border-top-color: currentColor;
+  --spinner-arc: currentColor;
+  --spinner-track: color-mix(in srgb, currentColor 30%, transparent);
 }
 
 /* ── Disabled ────────────────────────────────────────────────── */

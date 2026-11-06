@@ -1,14 +1,45 @@
+/* Spinner: a Material-style stretching arc, transform-only (from xi).
+   Two 90° arcs, ::before (head) and ::after (tail), each sweep a full turn
+   on the same eased curve, the head leading by 70ms. The head whips ahead
+   so the arc stretches to ~170°, then the tail catches up during the slow
+   crawl and it shrinks back to 90°. The host drifts linearly so each sweep
+   starts somewhere new. Only `transform` animates, so it all runs on the
+   compositor: no layout or paint per frame.
+   The lag, duration and curve are tuned together so the arcs never part
+   (peak gap ≈ 82° < the 90° arc); retune them as a set.
+   Per-instance knobs: --spinner-w (stroke), --spinner-arc, --spinner-track. */
 .spinner {
+  --spinner-w: 2px;
+  position: relative;
   display: inline-block;
+  flex-shrink: 0;
   width: 1.5rem;
   height: 1.5rem;
-  border: 2px solid var(--bg-2);
-  border-top-color: var(--accent);
   border-radius: var(--radius-pill);
-  animation: spinner-spin 1s linear infinite; /* lint-allow */
+  box-shadow: inset 0 0 0 var(--spinner-w) var(--spinner-track, var(--bg-2));
+  animation: spinner-spin 2.4s linear infinite; /* lint-allow */
+}
+
+.spinner::before,
+.spinner::after,
+.spinner-overlay::before,
+.spinner-overlay::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: var(--spinner-w) solid transparent;
+  border-top-color: var(--spinner-arc, var(--accent));
+  border-radius: var(--radius-pill);
+  animation: spinner-spin 0.9s cubic-bezier(0.45, 0.1, 0.15, 1) infinite; /* lint-allow */
+}
+
+.spinner::before,
+.spinner-overlay::before {
+  animation-delay: -0.07s; /* lint-allow */
 }
 
 .spinner-xs {
+  --spinner-w: 1.5px;
   width: var(--size-3);
   height: var(--size-3);
 }
@@ -19,12 +50,16 @@
 }
 
 .spinner-lg {
+  --spinner-w: 3px;
   width: 2rem;
   height: 2rem;
-  border-width: 3px;
 }
 
+/* The overlay draws the two arcs on its own pseudo-elements, centered over
+   the dimmed content. The track is the rest of the head arc's border: it
+   turns with the arc, but a uniform ring shows no motion. */
 .spinner-overlay {
+  --spinner-w: 2px;
   position: relative;
 }
 
@@ -33,22 +68,37 @@
   pointer-events: none;
 }
 
-.spinner-overlay::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  margin: auto;
+.spinner-overlay::before,
+.spinner-overlay::after {
   z-index: 1;
   width: 1.5rem;
   height: 1.5rem;
-  border: 2px solid var(--bg-2);
-  border-top-color: var(--accent);
-  border-radius: var(--radius-pill);
-  animation: spinner-spin 1s linear infinite; /* lint-allow */
+  margin: auto;
+}
+
+.spinner-overlay::before {
+  border-color: var(--spinner-track, var(--bg-2));
+  border-top-color: var(--spinner-arc, var(--accent));
 }
 
 @keyframes spinner-spin {
   to {
-    transform: rotate(360deg);
+    transform: rotate(1turn);
+  }
+}
+
+/* Reduced motion: the base styles stop every loop, but a spinner still has
+   to read as busy. Drop the stretching sweep, keep a steady rotation. */
+@media (prefers-reduced-motion: reduce) {
+  .spinner::before,
+  .spinner::after,
+  .spinner-overlay::before,
+  .spinner-overlay::after {
+    animation: none !important; /* lint-allow */
+  }
+
+  .spinner {
+    animation-duration: 1.2s !important; /* lint-allow */
+    animation-iteration-count: infinite !important;
   }
 }
