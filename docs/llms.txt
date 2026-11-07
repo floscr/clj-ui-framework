@@ -81,7 +81,7 @@ Dark mode: `data-theme="dark"` on `<html>` (auto via prefers-color-scheme otherw
 - [Processing bar](components/processing-bar.md): A compact accent-bordered panel listing background jobs in progress with thumbnails, labels and spinners.
 - [Progress](components/progress.md): Shows how much of a known task is complete as a filled track.
 - [Skeleton](components/skeleton.md): Reserves space with a pulsing placeholder while content loads.
-- [Spinner](components/spinner.md): An indeterminate loading indicator in four sizes that inherits the current text color.
+- [Spinner](components/spinner.md): An indeterminate loading indicator in four sizes: a stretching accent arc on a muted track.
 - [Toast](components/toast.md): A brief floating confirmation for completed background work, shown by the JS runtime on every target.
 
 ### Data

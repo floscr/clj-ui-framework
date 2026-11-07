@@ -1,6 +1,6 @@
 # Spinner
 
-> An indeterminate loading indicator in four sizes that inherits the current text color.
+> An indeterminate loading indicator in four sizes: a stretching accent arc on a muted track.
 
 - Type: Component (feedback, Status)
 - Namespace: `ui.spinner`
@@ -31,7 +31,7 @@
 
 ### `spinner`
 
-A <span> with role=status and a Loading label; the ring uses currentColor.
+A <span> with role=status and a Loading label. Recolor with the --spinner-arc (default accent) and --spinner-track (default bg-2) custom properties, the stroke with --spinner-w.
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -53,7 +53,8 @@ Vector form.
 
 ## Motion
 
-- Spins continuously; reduced motion stops the rotation (the ring stays visible).
+- Two arcs sweep on an eased curve so the arc stretches and shrinks while the whole spinner drifts; transform only, so it runs on the compositor.
+- Reduced motion drops the stretching sweep and keeps a steady rotation, so it still reads as busy.
 
 ## Responsive behavior
 
@@ -68,6 +69,7 @@ Vector form.
 ## Notes for AI
 
 - Inside a button use the button's :loading prop; it picks the right size and color.
+- Recolor through --spinner-arc and --spinner-track, never border colors: the arcs live on ::before and ::after.
 
 ## Related
 
@@ -77,6 +79,6 @@ Vector form.
 
 ## Guidance for AI tools
 
-Spinner: An indeterminate loading indicator in four sizes that inherits the current text color. Use only the documented props; `:class` and `:attrs` are for layout and extra attributes, never for restyling internals. The same call renders on all three targets; see Targets for the per-target event and class conventions. Keep keyboard access and both themes intact.
+Spinner: An indeterminate loading indicator in four sizes: a stretching accent arc on a muted track. Use only the documented props; `:class` and `:attrs` are for layout and extra attributes, never for restyling internals. The same call renders on all three targets; see Targets for the per-target event and class conventions. Keep keyboard access and both themes intact.
 
 Full library index: docs/llms.txt

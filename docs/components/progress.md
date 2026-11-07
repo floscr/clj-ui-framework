@@ -82,7 +82,7 @@ Vector form.
 
 ## Related
 
-- [Spinner](spinner.md): An indeterminate loading indicator in four sizes that inherits the current text color.
+- [Spinner](spinner.md): An indeterminate loading indicator in four sizes: a stretching accent arc on a muted track.
 - [Skeleton](skeleton.md): Reserves space with a pulsing placeholder while content loads.
 - [File progress](file-progress.md): A bordered list of files with size, status and an optional progress bar and remove button.
 - [Processing bar](processing-bar.md): A compact accent-bordered panel listing background jobs in progress with thumbnails, labels and spinners.

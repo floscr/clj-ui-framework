@@ -2612,6 +2612,18 @@
     return btn1;
   };
   var chevron_left = [["path", [["d", "m15 18-6-6 6-6"]]]];
+  var chevron_right = [["path", [["d", "m9 18 6-6-6-6"]]]];
+  var make_head = function(label, on_back) {
+    const head1 = make_el("div", "context-menu-panel-head");
+    const back2 = make_button("context-menu-panel-back context-menu-action", null, on_back);
+    const span3 = make_el("span", "");
+    back2.setAttribute("aria-label", "Back");
+    back2.appendChild(create_icon(chevron_left));
+    head1.appendChild(back2);
+    span3.textContent = label;
+    head1.appendChild(span3);
+    return head1;
+  };
   var show_panel_BANG_ = function(menu, item, on_back) {
     const h01 = menu.offsetHeight;
     const w02 = menu.offsetWidth;
@@ -2621,123 +2633,142 @@
     const message6 = truth_(string_QMARK_(confirm4)) ? confirm4 : "This can't be undone.";
     const danger7 = item["variant"] === "danger";
     const panel8 = make_el("div", "context-menu-panel");
-    const head9 = make_el("div", "context-menu-panel-head");
-    const back10 = make_button("context-menu-panel-back context-menu-action", null, on_back);
-    const body11 = make_el("div", "context-menu-panel-body");
-    const actions12 = make_el("div", "context-menu-panel-actions");
-    const run13 = make_button(`${"btn btn-sm context-menu-action "}${(danger7 ? "btn-danger" : "btn-primary") ?? ""}`, null, (function() {
+    const body9 = make_el("div", "context-menu-panel-body");
+    const actions10 = make_el("div", "context-menu-panel-actions");
+    const run11 = make_button(`${"btn btn-sm context-menu-action "}${(danger7 ? "btn-danger" : "btn-primary") ?? ""}`, null, (function() {
       dismiss_BANG_();
       return execute_item_BANG_(item);
     }));
-    const cancel14 = make_button("btn btn-sm btn-ghost context-menu-action", "Cancel", on_back);
+    const cancel12 = make_button("btn btn-sm btn-ghost context-menu-action", "Cancel", on_back);
     disarm_BANG_();
-    back10.setAttribute("aria-label", "Back");
-    back10.appendChild(create_icon(chevron_left));
-    head9.appendChild(back10);
-    const span15 = make_el("span", "");
-    span15.textContent = label3;
-    head9.appendChild(span15);
     if (truth_(title5)) {
-      const t16 = make_el("p", "context-menu-panel-title");
-      t16.textContent = title5;
-      body11.appendChild(t16);
+      const t13 = make_el("p", "context-menu-panel-title");
+      t13.textContent = title5;
+      body9.appendChild(t13);
     }
     ;
-    const m17 = make_el("p", "context-menu-panel-message");
-    m17.textContent = message6;
-    body11.appendChild(m17);
-    const paths18 = item["icon-paths"];
+    const m14 = make_el("p", "context-menu-panel-message");
+    m14.textContent = message6;
+    body9.appendChild(m14);
+    const paths15 = item["icon-paths"];
     if (truth_((() => {
-      const and__23442__auto__19 = paths18;
-      if (truth_(and__23442__auto__19)) {
-        return paths18.length > 0;
+      const and__23442__auto__16 = paths15;
+      if (truth_(and__23442__auto__16)) {
+        return paths15.length > 0;
       } else {
-        return and__23442__auto__19;
+        return and__23442__auto__16;
       }
       ;
     })())) {
-      run13.appendChild(create_icon(paths18));
+      run11.appendChild(create_icon(paths15));
     }
     ;
-    run13.appendChild(document.createTextNode(label3));
-    actions12.appendChild(run13);
-    actions12.appendChild(cancel14);
-    panel8.appendChild(head9);
-    panel8.appendChild(body11);
-    panel8.appendChild(actions12);
+    run11.appendChild(document.createTextNode(label3));
+    actions10.appendChild(run11);
+    actions10.appendChild(cancel12);
+    panel8.appendChild(make_head(label3, on_back));
+    panel8.appendChild(body9);
+    panel8.appendChild(actions10);
     menu.innerHTML = "";
     menu.style.minWidth = `${w02 ?? ""}px`;
     menu.classList.add("context-menu--panel");
     menu.appendChild(panel8);
     get_state().back = on_back;
     animate_height_BANG_(menu, h01);
-    return cancel14.focus();
+    return cancel12.focus();
   };
-  var fill_menu_BANG_ = function(menu, items2, focus_idx) {
+  var first_item_idx = function(items2) {
+    return items2.findIndex((function(item) {
+      return !(item["type"] === "separator");
+    }));
+  };
+  var fill_menu_BANG_ = function(menu, items2, focus_idx, page) {
     const h01 = menu.offsetHeight;
+    const w02 = menu.offsetWidth;
+    const root3 = truth_(page) ? make_el("div", "context-menu-panel") : menu;
+    disarm_BANG_();
     menu.innerHTML = "";
     menu.classList.remove("context-menu--panel");
-    menu.style.minWidth = "";
-    get_state().back = null;
+    menu.style.minWidth = truth_(page) ? `${w02 ?? ""}px` : "";
+    get_state().back = truth_(page) ? page["back"] : null;
+    if (truth_(page)) {
+      root3.appendChild(make_head(page["label"], page["back"]));
+      menu.appendChild(root3);
+    }
+    ;
     items2.forEach((function(item, idx) {
       if (item["type"] === "separator") {
-        const sep2 = make_el("div", "context-menu-separator");
-        sep2.setAttribute("role", "separator");
-        return menu.appendChild(sep2);
+        const sep4 = make_el("div", "context-menu-separator");
+        sep4.setAttribute("role", "separator");
+        return root3.appendChild(sep4);
       } else {
-        const url3 = item["url"];
-        const el4 = make_el(truth_(url3) ? "a" : "button", item["variant"] === "danger" ? "context-menu-item context-menu-item--danger" : "context-menu-item");
-        const span5 = document.createElement("span");
-        el4.setAttribute("role", "menuitem");
-        el4.setAttribute("tabindex", "-1");
-        if (truth_(url3)) {
-          el4.setAttribute("href", url3);
+        const url5 = item["url"];
+        const sub6 = item["items"];
+        const el7 = make_el(truth_(url5) ? "a" : "button", item["variant"] === "danger" ? "context-menu-item context-menu-item--danger" : "context-menu-item");
+        const span8 = document.createElement("span");
+        el7.setAttribute("role", "menuitem");
+        el7.setAttribute("tabindex", "-1");
+        if (truth_(url5)) {
+          el7.setAttribute("href", url5);
         }
         ;
-        const paths6 = item["icon-paths"];
+        const paths9 = item["icon-paths"];
         if (truth_((() => {
-          const and__23442__auto__7 = paths6;
-          if (truth_(and__23442__auto__7)) {
-            return paths6.length > 0;
+          const and__23442__auto__10 = paths9;
+          if (truth_(and__23442__auto__10)) {
+            return paths9.length > 0;
           } else {
-            return and__23442__auto__7;
+            return and__23442__auto__10;
           }
           ;
         })())) {
-          el4.appendChild(create_icon(paths6));
+          el7.appendChild(create_icon(paths9));
         }
         ;
-        span5.textContent = item["label"];
-        el4.appendChild(span5);
-        el4.addEventListener("click", (function(e) {
+        span8.textContent = item["label"];
+        el7.appendChild(span8);
+        if (truth_(sub6)) {
+          el7.setAttribute("aria-haspopup", "menu");
+          const chev11 = create_icon(chevron_right);
+          chev11.setAttribute("class", "context-menu-item-chevron");
+          el7.appendChild(chev11);
+        }
+        ;
+        el7.addEventListener("click", (function(e) {
           e.preventDefault();
           e.stopPropagation();
-          if (not(item["confirm"])) {
-            dismiss_BANG_();
-            return execute_item_BANG_(item);
+          if (truth_(sub6)) {
+            return fill_menu_BANG_(menu, sub6, first_item_idx(sub6), { "label": item["label"], "back": (function() {
+              return fill_menu_BANG_(menu, items2, idx, page);
+            }) });
           } else {
-            if (item["confirm-style"] === "panel") {
-              return show_panel_BANG_(menu, item, (function() {
-                return fill_menu_BANG_(menu, items2, idx);
-              }));
+            if (not(item["confirm"])) {
+              dismiss_BANG_();
+              return execute_item_BANG_(item);
             } else {
-              if (truth_(el4.classList.contains("context-menu-item--armed"))) {
-                dismiss_BANG_();
-                return execute_item_BANG_(item);
+              if (item["confirm-style"] === "panel") {
+                return show_panel_BANG_(menu, item, (function() {
+                  return fill_menu_BANG_(menu, items2, idx, page);
+                }));
               } else {
-                if ("else") {
-                  return arm_BANG_(menu, el4, span5, item);
+                if (truth_(el7.classList.contains("context-menu-item--armed"))) {
+                  dismiss_BANG_();
+                  return execute_item_BANG_(item);
                 } else {
-                  return null;
+                  if ("else") {
+                    return arm_BANG_(menu, el7, span8, item);
+                  } else {
+                    return null;
+                  }
                 }
               }
             }
           }
           ;
         }));
-        menu.appendChild(el4);
+        root3.appendChild(el7);
         if (_EQ_(idx, focus_idx)) {
-          return el4.focus();
+          return el7.focus();
         }
         ;
       }
@@ -2751,7 +2782,7 @@
   var create_menu = function(items2) {
     const menu1 = make_el("div", "context-menu");
     menu1.setAttribute("role", "menu");
-    fill_menu_BANG_(menu1, items2, null);
+    fill_menu_BANG_(menu1, items2, null, null);
     return menu1;
   };
   var clamp_to_viewport_BANG_ = function(menu) {

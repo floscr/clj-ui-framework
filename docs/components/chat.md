@@ -135,7 +135,7 @@ Class string for {:role :pending}.
 
 - [Markdown](markdown.md): A minimal markdown to hiccup renderer for docs and chat replies: headings, code blocks, tables, lists, inline code and bold.
 - [Form](form.md): Labeled fields, inputs, textareas, checkboxes, radios, file and range inputs, joined groups and a search bar.
-- [Spinner](spinner.md): An indeterminate loading indicator in four sizes that inherits the current text color.
+- [Spinner](spinner.md): An indeterminate loading indicator in four sizes: a stretching accent arc on a muted track.
 
 ## Guidance for AI tools
 

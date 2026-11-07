@@ -15,6 +15,8 @@
    :confirm string is the message and :confirm-title names the object:
      {:label \"Remove\" :url \"/rm/1\" :confirm \"This can't be undone.\"
       :confirm-style :panel :confirm-title \"report.pdf\"}
+   :items makes a row a sub-menu that drills into those items:
+     {:label \"Move to\" :icon :layers :items [{:label \"Inbox\" :url \"/mv/1/inbox\"}]}
    Hiccup: items are serialized as a data attribute; a tiny JS runtime
    (ui-runtime.js, compiled from squint) handles DOM creation.
 
@@ -66,6 +68,7 @@
                                                  (if (string? c) c true)))
         (:confirm-style item) (assoc :confirm-style (util/kw-name (:confirm-style item)))
         (:confirm-title item) (assoc :confirm-title (:confirm-title item))
+        (:items item)         (assoc :items (mapv normalize-item (:items item)))
         icon-name             (assoc :icon-paths (icon-paths-for icon-name))))))
 
 ;; ── JSON serialization (hiccup/clj only) ────────────────────────────
@@ -112,6 +115,7 @@
               {:label \"Delete\" :url \"/del/123\" :icon :trash :variant :danger
                :confirm true}
               :confirm-style :panel / :confirm-title pick the panel confirm.
+              :items (item maps) drills into a sub-menu.
               Squint/Replicant items may have :on-click instead of :url.
      :class - additional CSS classes
      :attrs - additional HTML attributes"

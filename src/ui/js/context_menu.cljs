@@ -145,6 +145,20 @@
     btn))
 
 (def ^:private chevron-left #js [#js ["path" #js [#js ["d" "m15 18-6-6 6-6"]]]])
+(def ^:private chevron-right #js [#js ["path" #js [#js ["d" "m9 18 6-6-6-6"]]]])
+
+(defn- make-head
+  "Header of a drilled page (confirm panel, sub-page): back button + `label`."
+  [label on-back]
+  (let [head (make-el "div" "context-menu-panel-head")
+        back (make-button "context-menu-panel-back context-menu-action" nil on-back)
+        span (make-el "span" "")]
+    (.setAttribute back "aria-label" "Back")
+    (.appendChild back (create-icon chevron-left))
+    (.appendChild head back)
+    (set! (.-textContent span) label)
+    (.appendChild head span)
+    head))
 
 (defn- show-panel!
   "Swap the menu's items for the confirm page of `item`. `on-back` restores
@@ -158,8 +172,6 @@
         message (if (string? confirm) confirm "This can't be undone.")
         danger  (= (aget item "variant") "danger")
         panel   (make-el "div" "context-menu-panel")
-        head    (make-el "div" "context-menu-panel-head")
-        back    (make-button "context-menu-panel-back context-menu-action" nil on-back)
         body    (make-el "div" "context-menu-panel-body")
         actions (make-el "div" "context-menu-panel-actions")
         run     (make-button (str "btn btn-sm context-menu-action "
@@ -168,12 +180,6 @@
                              (fn [] (dismiss!) (execute-item! item)))
         cancel  (make-button "btn btn-sm btn-ghost context-menu-action" "Cancel" on-back)]
     (disarm!)
-    (.setAttribute back "aria-label" "Back")
-    (.appendChild back (create-icon chevron-left))
-    (.appendChild head back)
-    (let [span (make-el "span" "")]
-      (set! (.-textContent span) label)
-      (.appendChild head span))
     (when title
       (let [t (make-el "p" "context-menu-panel-title")]
         (set! (.-textContent t) title)
@@ -187,7 +193,7 @@
     (.appendChild run (.createTextNode js/document label))
     (.appendChild actions run)
     (.appendChild actions cancel)
-    (.appendChild panel head)
+    (.appendChild panel (make-head label on-back))
     (.appendChild panel body)
     (.appendChild panel actions)
     (set! (.-innerHTML menu) "")
@@ -201,24 +207,38 @@
 
 ;; ── Menu DOM Creation ───────────────────────────────────────────────
 
+(defn- first-item-idx [items]
+  (.findIndex items (fn [item] (not= (aget item "type") "separator"))))
+
 (defn- fill-menu!
   "Render `items` into `menu`, replacing its content. Focuses the item at
-   index `focus-idx` when given (returning from a confirm panel)."
-  [menu items focus-idx]
-  (let [h0 (.-offsetHeight menu)]
+   index `focus-idx` when given (drilling, or returning from a confirm
+   panel or sub-page). `page` is nil for the top list, or #js {:label :back}
+   for the sub-page of an item with :items: a back header over the rows,
+   and Back / Escape run its :back."
+  [menu items focus-idx page]
+  (let [h0   (.-offsetHeight menu)
+        w0   (.-offsetWidth menu)
+        root (if page (make-el "div" "context-menu-panel") menu)]
+    (disarm!)
     (set! (.-innerHTML menu) "")
     (.remove (.-classList menu) "context-menu--panel")
-    (set! (.. menu -style -minWidth) "")
-    (set! (.-back (get-state)) nil)
+    ;; a sub-page never narrows the menu under the finger
+    (set! (.. menu -style -minWidth) (if page (str w0 "px") ""))
+    (set! (.-back (get-state)) (when page (aget page "back")))
+    (when page
+      (.appendChild root (make-head (aget page "label") (aget page "back")))
+      (.appendChild menu root))
     (.forEach items
       (fn [item idx]
         (if (= (aget item "type") "separator")
           ;; Separator
           (let [sep (make-el "div" "context-menu-separator")]
             (.setAttribute sep "role" "separator")
-            (.appendChild menu sep))
+            (.appendChild root sep))
           ;; Item
           (let [url    (aget item "url")
+                sub    (aget item "items")
                 el     (make-el (if url "a" "button")
                                 (if (= (aget item "variant") "danger")
                                   "context-menu-item context-menu-item--danger"
@@ -234,31 +254,41 @@
             ;; Label
             (set! (.-textContent span) (aget item "label"))
             (.appendChild el span)
+            (when sub
+              (.setAttribute el "aria-haspopup" "menu")
+              (let [chev (create-icon chevron-right)]
+                (.setAttribute chev "class" "context-menu-item-chevron")
+                (.appendChild el chev)))
             ;; Click handler
             (.addEventListener el "click"
               (fn [e]
                 (.preventDefault e)
                 (.stopPropagation e)
                 (cond
+                  sub
+                  (fill-menu! menu sub (first-item-idx sub)
+                              #js {:label (aget item "label")
+                                   :back  (fn [] (fill-menu! menu items idx page))})
+
                   (not (aget item "confirm"))
                   (do (dismiss!) (execute-item! item))
 
                   (= (aget item "confirm-style") "panel")
-                  (show-panel! menu item (fn [] (fill-menu! menu items idx)))
+                  (show-panel! menu item (fn [] (fill-menu! menu items idx page)))
 
                   (.contains (.-classList el) "context-menu-item--armed")
                   (do (dismiss!) (execute-item! item))
 
                   :else
                   (arm! menu el span item))))
-            (.appendChild menu el)
+            (.appendChild root el)
             (when (= idx focus-idx) (.focus el))))))
     (when (some? focus-idx) (animate-height! menu h0))))
 
 (defn- create-menu [items]
   (let [menu (make-el "div" "context-menu")]
     (.setAttribute menu "role" "menu")
-    (fill-menu! menu items nil)
+    (fill-menu! menu items nil nil)
     menu))
 
 ;; ── Positioning ─────────────────────────────────────────────────────
@@ -377,7 +407,7 @@
                       (let [key (.-key e)]
                         (cond
                           ;; Escape steps back: armed row → disarm, confirm
-                          ;; panel → item list, otherwise close
+                          ;; panel or sub-page → its list, otherwise close
                           (= key "Escape")
                           (do (.preventDefault e)
                               (cond

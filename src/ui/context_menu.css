@@ -94,6 +94,14 @@
   outline: none;
 }
 
+/* an item with :items: drills into a sub-page (same head as the confirm panel) */
+.context-menu-item-chevron {
+  margin-left: auto;
+  padding-left: var(--size-2);
+  box-sizing: content-box;
+  color: var(--fg-2);
+}
+
 .context-menu-item--danger {
   color: var(--danger-600);
 }

@@ -51,7 +51,7 @@
 | [Processing bar](components/processing-bar.md) | `ui.processing-bar` | A compact accent-bordered panel listing background jobs in progress with thumbnails, labels and spinners. | `processing-item`, `processing-bar` |
 | [Progress](components/progress.md) | `ui.progress` | Shows how much of a known task is complete as a filled track. | `progress-bar-class-list`, `progress-bar-classes`, `progress` |
 | [Skeleton](components/skeleton.md) | `ui.skeleton` | Reserves space with a pulsing placeholder while content loads. | `skeleton-class-list`, `skeleton-classes`, `skeleton` |
-| [Spinner](components/spinner.md) | `ui.spinner` | An indeterminate loading indicator in four sizes that inherits the current text color. | `spinner-class-list`, `spinner-classes`, `spinner` |
+| [Spinner](components/spinner.md) | `ui.spinner` | An indeterminate loading indicator in four sizes: a stretching accent arc on a muted track. | `spinner-class-list`, `spinner-classes`, `spinner` |
 | [Toast](components/toast.md) | `ui.toast` | A brief floating confirmation for completed background work, shown by the JS runtime on every target. | `toast-class-list`, `toast-classes`, `toast`, `toast-flash`, `show-toast!` |
 
 ### Data

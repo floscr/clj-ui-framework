@@ -84,7 +84,7 @@ Vector form.
 
 ## Related
 
-- [Spinner](spinner.md): An indeterminate loading indicator in four sizes that inherits the current text color.
+- [Spinner](spinner.md): An indeterminate loading indicator in four sizes: a stretching accent arc on a muted track.
 - [Progress](progress.md): Shows how much of a known task is complete as a filled track.
 - [Empty state](empty-state.md): A centered placeholder with an optional icon for lists and views that have nothing to show yet.
 

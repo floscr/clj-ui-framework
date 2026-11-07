@@ -45,4 +45,22 @@
                     {:label "Delete session" :url "#delete" :icon :trash
                      :variant :danger :confirm "The conversation and its file records are removed. This can't be undone."
                      :confirm-style :panel :confirm-title "Credit Card Format"}]}
-           (target "Panel" true)))]]))])
+           (target "Panel" true)))]]))
+   (example :submenu "Sub-menus"
+     (fn []
+       [:div {}
+        (note "An item with :items shows a chevron and drills into a page of those items; Back or Escape returns.")
+        [:div {:style (sx {:margin-top "0.75rem"})}
+         (row
+          (context-menu/context-menu-trigger
+           {:items [{:label "Open" :url "#open" :icon :external-link}
+                    {:label "Move to" :icon :layers
+                     :items [{:label "Inbox"   :url "#inbox"}
+                             {:label "Archive" :url "#archive"}
+                             {:type :separator}
+                             {:label "Projects" :icon :layers
+                              :items [{:label "Website" :url "#website"}
+                                      {:label "Pitch"   :url "#pitch"}]}]}
+                    {:type :separator}
+                    {:label "Delete" :url "#delete" :icon :trash :variant :danger :confirm true}]}
+           (target "Move to…")))]]))])

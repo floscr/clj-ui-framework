@@ -80,7 +80,7 @@ One job row with spinner and status.
 
 - [File progress](file-progress.md): A bordered list of files with size, status and an optional progress bar and remove button.
 - [Toast](toast.md): A brief floating confirmation for completed background work, shown by the JS runtime on every target.
-- [Spinner](spinner.md): An indeterminate loading indicator in four sizes that inherits the current text color.
+- [Spinner](spinner.md): An indeterminate loading indicator in four sizes: a stretching accent arc on a muted track.
 
 ## Guidance for AI tools
 
