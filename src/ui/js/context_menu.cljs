@@ -11,7 +11,8 @@
 (defn- get-state []
   (or (aget js/window "__uiCtxState")
       (let [s #js {:menu nil :cleanup nil :growthObserver nil
-                   :armed nil :back nil}]
+                   :armed nil :back nil :swap nil
+                   :anchor nil :placedX nil :placedY nil}]
         (aset js/window "__uiCtxState" s)
         s)))
 
@@ -87,6 +88,7 @@
   (disarm!)
   (let [state (get-state)]
     (set! (.-back state) nil)
+    (set! (.-swap state) nil)
     (when (.-menu state)
       (.remove (.-menu state))
       (set! (.-menu state) nil)
@@ -107,25 +109,7 @@
       (when url
         (set! (.-location js/window) url)))))
 
-;; ── Confirm: panel (:confirm-style :panel) ──────────────────────────
-;; The menu drills into a second page: back header, what is affected, a
-;; full-width action button and Cancel. Back, Cancel and Escape return to
-;; the menu instead of closing it.
-
-;; matches --duration-standard / --ease-standard (WAAPI can't read tokens)
-(def ^:private resize-ms 240)
-(def ^:private resize-easing "cubic-bezier(0.2, 0, 0, 1)")
-
-(defn- reduced-motion? []
-  (.-matches (js/window.matchMedia "(prefers-reduced-motion: reduce)")))
-
-(defn- animate-height!
-  "Animate `menu` from height `h0` to its current height."
-  [menu h0]
-  (let [h1 (.-offsetHeight menu)]
-    (when (and (not= h0 h1) (.-animate menu) (not (reduced-motion?)))
-      (.animate menu #js {:height #js [(str h0 "px") (str h1 "px")]}
-                #js {:duration resize-ms :easing resize-easing}))))
+;; ── Building blocks ─────────────────────────────────────────────────
 
 (defn- make-el [tag class-name]
   (let [el (.createElement js/document tag)]
@@ -148,11 +132,11 @@
 (def ^:private chevron-right #js [#js ["path" #js [#js ["d" "m9 18 6-6-6-6"]]]])
 
 (defn- make-head
-  "Header of a drilled page (confirm panel, sub-page): back button + `label`."
+  "Header of a drilled page (sub-page, confirm panel): back button + `label`."
   [label on-back]
   (let [head (make-el "div" "context-menu-panel-head")
         back (make-button "context-menu-panel-back context-menu-action" nil on-back)
-        span (make-el "span" "")]
+        span (make-el "span" "context-menu-panel-label")]
     (.setAttribute back "aria-label" "Back")
     (.appendChild back (create-icon chevron-left))
     (.appendChild head back)
@@ -160,18 +144,177 @@
     (.appendChild head span)
     head))
 
-(defn- show-panel!
-  "Swap the menu's items for the confirm page of `item`. `on-back` restores
-   the item list."
-  [menu item on-back]
-  (let [h0      (.-offsetHeight menu)
-        w0      (.-offsetWidth menu)
-        label   (aget item "label")
+;; ── Positioning ─────────────────────────────────────────────────────
+;; The menu opens at its anchor (the pointer) and is pulled back on-screen.
+;; A page change places it from the anchor again: a taller page moves it up,
+;; coming back to a shorter one moves it down where it opened.
+
+(defn- clamp-to-viewport!
+  "Keep `menu` fully on-screen: if it overflows the right or bottom viewport
+   edge, pull it back (never past the 8px top/left margin). Measures via
+   style left/top + offsetWidth/Height — NOT getBoundingClientRect — so the
+   open animation's transform scale can't skew the numbers."
+  [menu]
+  (let [x  (js/parseFloat (.. menu -style -left))
+        y  (js/parseFloat (.. menu -style -top))
+        w  (.-offsetWidth menu)
+        h  (.-offsetHeight menu)
+        vw (.-innerWidth js/window)
+        vh (.-innerHeight js/window)]
+    (when (> (+ x w) (- vw 8))
+      (set! (.. menu -style -left) (str (max 8 (- vw w 8)) "px")))
+    (when (> (+ y h) (- vh 8))
+      (set! (.. menu -style -top) (str (max 8 (- vh h 8)) "px")))))
+
+(defn- place!
+  "Put `menu` at its anchor, pulled back on-screen. A position set from
+   outside since the last placing (the app moved the menu, or a re-clamp
+   after it grew) becomes the new anchor."
+  [menu]
+  (let [state (get-state)
+        style (.-style menu)]
+    (when (or (not= (.-left style) (.-placedX state))
+              (not= (.-top style) (.-placedY state)))
+      (set! (.-anchor state) #js {:x (.-left style) :y (.-top style)}))
+    (set! (.-left style) (.. state -anchor -x))
+    (set! (.-top style) (.. state -anchor -y))
+    (clamp-to-viewport! menu)
+    (set! (.-placedX state) (.-left style))
+    (set! (.-placedY state) (.-top style))))
+
+(defn- position-menu! [menu x y]
+  (let [state (get-state)
+        style (.-style menu)]
+    (set! (.-left style) (str x "px"))
+    (set! (.-top style) (str y "px"))
+    (set! (.-anchor state) #js {:x (.-left style) :y (.-top style)})
+    (set! (.-placedX state) (.-left style))
+    (set! (.-placedY state) (.-top style))
+    ;; Append first so we can measure
+    (.appendChild js/document.body menu)
+    (place! menu)
+    ;; Re-clamp when the menu's contents change after open — apps may inject
+    ;; extra DOM (action bars, search inputs) post-positioning, which would
+    ;; otherwise push the menu past the bottom edge. MutationObserver fires as
+    ;; a microtask (childList only, so our own style writes don't retrigger).
+    ;; A page change places the menu itself; mid-slide the measured box is
+    ;; the animated one, so the observer keeps out of it.
+    (let [mo (js/MutationObserver.
+              (fn [_] (when (not (.-swap (get-state))) (clamp-to-viewport! menu))))]
+      (.observe mo menu #js {:childList true :subtree true})
+      (set! (.-growthObserver state) mo))))
+
+;; ── Pages ───────────────────────────────────────────────────────────
+;; The menu shows one .context-menu-page at a time: the item list, the
+;; sub-page of an item with :items, or a confirm panel. Drilling in slides
+;; the new page in from the right over the old one, which drifts left and
+;; fades; Back is the mirror image. Meanwhile the menu's box animates to
+;; the new page's size and position. Reduced motion swaps instantly.
+
+;; matches --duration-standard / --ease-standard (WAAPI can't read tokens)
+(def ^:private swap-ms 240)
+(def ^:private swap-easing "cubic-bezier(0.2, 0, 0, 1)")
+
+(defn- reduced-motion? []
+  (.-matches (js/window.matchMedia "(prefers-reduced-motion: reduce)")))
+
+(defn- finish-swap!
+  "Cut a running page change short: drop the old page, release the box."
+  []
+  (let [state (get-state)
+        swap  (.-swap state)]
+    (when swap
+      (set! (.-swap state) nil)
+      (.forEach (.-anims swap) (fn [a] (.cancel a)))
+      (.remove (.-ghost swap))
+      (set! (.. swap -menu -style -overflow) ""))))
+
+(defn- px [n] (str n "px"))
+
+(defn- slide!
+  "Animate from the box (`h0` `w0` `x0` `y0`) and the outgoing page `old`
+   to the menu's current box and `page`. `old` stays in the menu, inert and
+   pinned where it was, until the slide ends."
+  [menu page old forward? h0 w0 x0 y0]
+  (let [state (get-state)
+        style (.-style menu)
+        opts  #js {:duration swap-ms :easing swap-easing}
+        box   (.animate menu #js {:height #js [(px h0) (px (.-offsetHeight menu))]
+                                  :width  #js [(px w0) (px (.-offsetWidth menu))]
+                                  :left   #js [x0 (.-left style)]
+                                  :top    #js [y0 (.-top style)]}
+                        opts)
+        in    (.animate page (if forward?
+                               #js {:transform #js ["translateX(100%)" "translateX(0)"]}
+                               #js {:transform #js ["translateX(-30%)" "translateX(0)"]
+                                    :opacity   #js [0 1]})
+                        opts)
+        out   (.animate old (if forward?
+                              #js {:transform #js ["translateX(0)" "translateX(-30%)"]
+                                   :opacity   #js [1 0]}
+                              #js {:transform #js ["translateX(0)" "translateX(100%)"]})
+                        opts)
+        swap  #js {:menu menu :ghost old :anims #js [box in out]}]
+    ;; the pinned old page must not make the shrinking box scroll
+    (set! (.-overflow style) "hidden")
+    (set! (.-swap state) swap)
+    (set! (.-onfinish box) (fn [] (when (= (.-swap state) swap) (finish-swap!))))))
+
+(defn- show-page!
+  "Make `page` the menu's page. `direction` \"forward\" or \"back\" slides
+   from the current one, nil swaps in place. The page may carry .focusEl
+   (focused after the swap), .onBack (Back / Escape) and .scrollTop0 (the
+   scroll to restore, coming back to a long list)."
+  [menu page direction]
+  (finish-swap!)
+  (disarm!)
+  (let [state  (get-state)
+        style  (.-style menu)
+        old    (.querySelector menu ":scope > .context-menu-page")
+        h0     (.-offsetHeight menu)
+        w0     (.-offsetWidth menu)
+        x0     (.-left style)
+        y0     (.-top style)
+        slide? (and direction old (.-isConnected menu) (.-animate menu)
+                    (not (reduced-motion?)))
+        root?  (.contains (.-classList page) "context-menu-page--root")]
+    (if slide?
+      ;; the old page stays for the slide, pinned over the scrolled spot;
+      ;; going back it slides off above the incoming one
+      (let [s (.-style old)]
+        (.setAttribute old "inert" "")
+        (set! (.-position s) "absolute")
+        (set! (.-left s) "0")
+        (set! (.-top s) (px (- (.-scrollTop menu))))
+        (set! (.-width s) (px (.-clientWidth menu)))
+        (set! (.-zIndex s) (if (= direction "back") "1" "0")))
+      (when old (.remove old)))
+    (.toggle (.-classList menu) "context-menu--panel"
+             (.contains (.-classList page) "context-menu-panel"))
+    ;; a drilled page never narrows the menu under the finger
+    (set! (.-minWidth style) (if root? "" (px w0)))
+    (.appendChild menu page)
+    (set! (.-scrollTop menu) (or (.-scrollTop0 page) 0))
+    (set! (.-back state) (.-onBack page))
+    (when (.-isConnected menu) (place! menu))
+    (when slide? (slide! menu page old (= direction "forward") h0 w0 x0 y0))
+    (let [f (.-focusEl page)]
+      (when f (.focus f #js {:preventScroll true})))))
+
+;; ── Confirm: panel (:confirm-style :panel) ──────────────────────────
+;; The menu drills into a confirm page: back header, what is affected, a
+;; full-width action button and Cancel. Back, Cancel and Escape return to
+;; the list instead of closing the menu.
+
+(defn- confirm-page
+  "The confirm page of `item`; `on-back` returns to the list."
+  [item on-back]
+  (let [label   (aget item "label")
         confirm (aget item "confirm")
         title   (aget item "confirm-title")
         message (if (string? confirm) confirm "This can't be undone.")
         danger  (= (aget item "variant") "danger")
-        panel   (make-el "div" "context-menu-panel")
+        page    (make-el "div" "context-menu-page context-menu-panel")
         body    (make-el "div" "context-menu-panel-body")
         actions (make-el "div" "context-menu-panel-actions")
         run     (make-button (str "btn btn-sm context-menu-action "
@@ -179,7 +322,6 @@
                              nil
                              (fn [] (dismiss!) (execute-item! item)))
         cancel  (make-button "btn btn-sm btn-ghost context-menu-action" "Cancel" on-back)]
-    (disarm!)
     (when title
       (let [t (make-el "p" "context-menu-panel-title")]
         (set! (.-textContent t) title)
@@ -193,65 +335,56 @@
     (.appendChild run (.createTextNode js/document label))
     (.appendChild actions run)
     (.appendChild actions cancel)
-    (.appendChild panel (make-head label on-back))
-    (.appendChild panel body)
-    (.appendChild panel actions)
-    (set! (.-innerHTML menu) "")
-    (set! (.. menu -style -minWidth) (str w0 "px"))
-    (.add (.-classList menu) "context-menu--panel")
-    (.appendChild menu panel)
-    (set! (.-back (get-state)) on-back)
-    (animate-height! menu h0)
+    (.appendChild page (make-head label on-back))
+    (.appendChild page body)
+    (.appendChild page actions)
+    (set! (.-onBack page) on-back)
     ;; Cancel first: a stray Enter never runs the action
-    (.focus cancel)))
+    (set! (.-focusEl page) cancel)
+    page))
 
-;; ── Menu DOM Creation ───────────────────────────────────────────────
+;; ── Item pages ──────────────────────────────────────────────────────
 
 (defn- first-item-idx [items]
   (.findIndex items (fn [item] (not= (aget item "type") "separator"))))
 
-(defn- fill-menu!
-  "Render `items` into `menu`, replacing its content. Focuses the item at
-   index `focus-idx` when given (drilling, or returning from a confirm
-   panel or sub-page). `page` is nil for the top list, or #js {:label :back}
-   for the sub-page of an item with :items: a back header over the rows,
-   and Back / Escape run its :back."
-  [menu items focus-idx page]
-  (let [h0   (.-offsetHeight menu)
-        w0   (.-offsetWidth menu)
-        root (if page (make-el "div" "context-menu-panel") menu)]
-    (disarm!)
-    (set! (.-innerHTML menu) "")
-    (.remove (.-classList menu) "context-menu--panel")
-    ;; a sub-page never narrows the menu under the finger
-    (set! (.. menu -style -minWidth) (if page (str w0 "px") ""))
-    (set! (.-back (get-state)) (when page (aget page "back")))
-    (when page
-      (.appendChild root (make-head (aget page "label") (aget page "back")))
-      (.appendChild menu root))
+(defn- items-page
+  "A page of `items` for `menu`. `parent` is nil for the top list, or
+   #js {:label :back} for the sub-page of an item with :items: a back header
+   over the rows, and Back / Escape run its :back. Focuses the row at
+   `focus-idx` when shown."
+  [menu items focus-idx parent]
+  (let [page (make-el "div" (if parent
+                               "context-menu-page context-menu-page--sub"
+                               "context-menu-page context-menu-page--root"))]
+    (when parent
+      (.appendChild page (make-head (aget parent "label") (aget parent "back")))
+      (set! (.-onBack page) (aget parent "back")))
     (.forEach items
       (fn [item idx]
         (if (= (aget item "type") "separator")
-          ;; Separator
           (let [sep (make-el "div" "context-menu-separator")]
             (.setAttribute sep "role" "separator")
-            (.appendChild root sep))
-          ;; Item
-          (let [url    (aget item "url")
-                sub    (aget item "items")
-                el     (make-el (if url "a" "button")
-                                (if (= (aget item "variant") "danger")
-                                  "context-menu-item context-menu-item--danger"
-                                  "context-menu-item"))
-                span   (.createElement js/document "span")]
+            (.appendChild page sep))
+          (let [url  (aget item "url")
+                sub  (aget item "items")
+                el   (make-el (if url "a" "button")
+                              (if (= (aget item "variant") "danger")
+                                "context-menu-item context-menu-item--danger"
+                                "context-menu-item"))
+                span (make-el "span" "context-menu-item-label")
+                ;; this page again, as it was: the row focused, the scroll kept
+                back (fn [scroll]
+                       (fn []
+                         (let [p (items-page menu items idx parent)]
+                           (set! (.-scrollTop0 p) scroll)
+                           (show-page! menu p "back"))))]
             (.setAttribute el "role" "menuitem")
             (.setAttribute el "tabindex" "-1")
             (when url (.setAttribute el "href" url))
-            ;; Icon
             (let [paths (aget item "icon-paths")]
               (when (and paths (> (.-length paths) 0))
                 (.appendChild el (create-icon paths))))
-            ;; Label
             (set! (.-textContent span) (aget item "label"))
             (.appendChild el span)
             (when sub
@@ -259,71 +392,38 @@
               (let [chev (create-icon chevron-right)]
                 (.setAttribute chev "class" "context-menu-item-chevron")
                 (.appendChild el chev)))
-            ;; Click handler
             (.addEventListener el "click"
               (fn [e]
                 (.preventDefault e)
                 (.stopPropagation e)
                 (cond
                   sub
-                  (fill-menu! menu sub (first-item-idx sub)
-                              #js {:label (aget item "label")
-                                   :back  (fn [] (fill-menu! menu items idx page))})
+                  (show-page! menu
+                              (items-page menu sub (first-item-idx sub)
+                                          #js {:label (aget item "label")
+                                               :back  (back (.-scrollTop menu))})
+                              "forward")
 
                   (not (aget item "confirm"))
                   (do (dismiss!) (execute-item! item))
 
                   (= (aget item "confirm-style") "panel")
-                  (show-panel! menu item (fn [] (fill-menu! menu items idx page)))
+                  (show-page! menu (confirm-page item (back (.-scrollTop menu))) "forward")
 
                   (.contains (.-classList el) "context-menu-item--armed")
                   (do (dismiss!) (execute-item! item))
 
                   :else
                   (arm! menu el span item))))
-            (.appendChild root el)
-            (when (= idx focus-idx) (.focus el))))))
-    (when (some? focus-idx) (animate-height! menu h0))))
+            (.appendChild page el)
+            (when (= idx focus-idx) (set! (.-focusEl page) el))))))
+    page))
 
 (defn- create-menu [items]
   (let [menu (make-el "div" "context-menu")]
     (.setAttribute menu "role" "menu")
-    (fill-menu! menu items nil nil)
+    (show-page! menu (items-page menu items nil nil) nil)
     menu))
-
-;; ── Positioning ─────────────────────────────────────────────────────
-
-(defn- clamp-to-viewport!
-  "Keep `menu` fully on-screen: if it overflows the right or bottom viewport
-   edge, pull it back (never past the 8px top/left margin). Measures via
-   style left/top + offsetWidth/Height — NOT getBoundingClientRect — so the
-   open animation's transform scale can't skew the numbers. Respects any
-   repositioning done after open."
-  [menu]
-  (let [x  (js/parseFloat (.. menu -style -left))
-        y  (js/parseFloat (.. menu -style -top))
-        w  (.-offsetWidth menu)
-        h  (.-offsetHeight menu)
-        vw (.-innerWidth js/window)
-        vh (.-innerHeight js/window)]
-    (when (> (+ x w) (- vw 8))
-      (set! (.. menu -style -left) (str (max 8 (- vw w 8)) "px")))
-    (when (> (+ y h) (- vh 8))
-      (set! (.. menu -style -top) (str (max 8 (- vh h 8)) "px")))))
-
-(defn- position-menu! [menu x y]
-  (set! (.. menu -style -left) (str x "px"))
-  (set! (.. menu -style -top)  (str y "px"))
-  ;; Append first so we can measure
-  (.appendChild js/document.body menu)
-  (clamp-to-viewport! menu)
-  ;; Re-clamp when the menu's contents change after open — apps may inject
-  ;; extra DOM (action bars, search inputs) post-positioning, which would
-  ;; otherwise push the menu past the bottom edge. MutationObserver fires as
-  ;; a microtask (childList only, so our own style writes don't retrigger).
-  (let [mo (js/MutationObserver. (fn [_] (clamp-to-viewport! menu)))]
-    (.observe mo menu #js {:childList true :subtree true})
-    (set! (.-growthObserver (get-state)) mo)))
 
 (defn- moves-trigger?
   "Whether a scroll event's target carries `trigger` along: the document or a
@@ -337,8 +437,10 @@
 
 ;; ── Keyboard Navigation ─────────────────────────────────────────────
 
-;; menu items, or the buttons of a confirm panel
-(def ^:private focusable ".context-menu-item, .context-menu-action")
+;; menu items, or the buttons of a drilled page's header and confirm panel;
+;; never those of a page sliding out (inert)
+(def ^:private focusable
+  ".context-menu-page:not([inert]) :is(.context-menu-item, .context-menu-action)")
 
 (defn- focus-first-item! [menu]
   (let [first-item (.querySelector menu focusable)]

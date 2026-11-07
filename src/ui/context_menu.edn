@@ -42,9 +42,10 @@
   "While the menu is open, text selection is off for the whole page (.clj-ui-menu-open on html) and any further right-click only closes the menu; neither another menu nor the browser menu opens."]
 
  :motion ["The menu scales in from its corner over --duration-fast with --ease-enter and is clamped to the viewport."
-          "An armed row pops in with --ease-spring and drains a countdown bar; the confirm panel and a sub-page slide in while the menu height animates (skipped under reduced motion)."]
+          "An armed row pops in with --ease-spring and drains a countdown bar; a page change (sub-page, confirm panel) slides: drilling in pushes the new page in from the right while the old one drifts left and fades, Back mirrors it, and the menu's size and position animate to the new page (--duration-standard, --ease-standard; an instant swap under reduced motion)."]
 
- :responsive ["On touch, a 500ms long-press opens the menu; the iOS callout is suppressed on the trigger."]
+ :responsive ["On touch, a 500ms long-press opens the menu; the iOS callout is suppressed on the trigger."
+              "The menu never exceeds the viewport width (long labels end in an ellipsis); a taller sub-page moves the menu up to stay on-screen, and Back returns it to where it opened. The back button grows to --control-md on touch."]
  :runtime ["ui.js.context-menu" "ui.js.gestures"]
 
  :targets

@@ -2481,7 +2481,7 @@
     if (truth_(or__23426__auto__1)) {
       return or__23426__auto__1;
     } else {
-      const s2 = { "menu": null, "cleanup": null, "growthObserver": null, "armed": null, "back": null };
+      const s2 = { "armed": null, "placedY": null, "placedX": null, "growthObserver": null, "back": null, "swap": null, "anchor": null, "menu": null, "cleanup": null };
       window["__uiCtxState"] = s2;
       return s2;
     }
@@ -2542,6 +2542,7 @@
     disarm_BANG_();
     const state1 = get_state();
     state1.back = null;
+    state1.swap = null;
     if (truth_(state1.menu)) {
       state1.menu.remove();
       state1.menu = null;
@@ -2571,26 +2572,6 @@
     }
     ;
   };
-  var resize_ms = 240;
-  var resize_easing = "cubic-bezier(0.2, 0, 0, 1)";
-  var reduced_motion_QMARK_ = function() {
-    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  };
-  var animate_height_BANG_ = function(menu, h0) {
-    const h11 = menu.offsetHeight;
-    if (truth_(!_EQ_(h0, h11) && (() => {
-      const and__23442__auto__2 = menu.animate;
-      if (truth_(and__23442__auto__2)) {
-        return not(reduced_motion_QMARK_());
-      } else {
-        return and__23442__auto__2;
-      }
-      ;
-    })())) {
-      return menu.animate({ "height": [`${h0 ?? ""}px`, `${h11 ?? ""}px`] }, { "duration": resize_ms, "easing": resize_easing });
-    }
-    ;
-  };
   var make_el = function(tag, class_name) {
     const el1 = document.createElement(tag);
     el1.className = class_name;
@@ -2616,174 +2597,13 @@
   var make_head = function(label, on_back) {
     const head1 = make_el("div", "context-menu-panel-head");
     const back2 = make_button("context-menu-panel-back context-menu-action", null, on_back);
-    const span3 = make_el("span", "");
+    const span3 = make_el("span", "context-menu-panel-label");
     back2.setAttribute("aria-label", "Back");
     back2.appendChild(create_icon(chevron_left));
     head1.appendChild(back2);
     span3.textContent = label;
     head1.appendChild(span3);
     return head1;
-  };
-  var show_panel_BANG_ = function(menu, item, on_back) {
-    const h01 = menu.offsetHeight;
-    const w02 = menu.offsetWidth;
-    const label3 = item["label"];
-    const confirm4 = item["confirm"];
-    const title5 = item["confirm-title"];
-    const message6 = truth_(string_QMARK_(confirm4)) ? confirm4 : "This can't be undone.";
-    const danger7 = item["variant"] === "danger";
-    const panel8 = make_el("div", "context-menu-panel");
-    const body9 = make_el("div", "context-menu-panel-body");
-    const actions10 = make_el("div", "context-menu-panel-actions");
-    const run11 = make_button(`${"btn btn-sm context-menu-action "}${(danger7 ? "btn-danger" : "btn-primary") ?? ""}`, null, (function() {
-      dismiss_BANG_();
-      return execute_item_BANG_(item);
-    }));
-    const cancel12 = make_button("btn btn-sm btn-ghost context-menu-action", "Cancel", on_back);
-    disarm_BANG_();
-    if (truth_(title5)) {
-      const t13 = make_el("p", "context-menu-panel-title");
-      t13.textContent = title5;
-      body9.appendChild(t13);
-    }
-    ;
-    const m14 = make_el("p", "context-menu-panel-message");
-    m14.textContent = message6;
-    body9.appendChild(m14);
-    const paths15 = item["icon-paths"];
-    if (truth_((() => {
-      const and__23442__auto__16 = paths15;
-      if (truth_(and__23442__auto__16)) {
-        return paths15.length > 0;
-      } else {
-        return and__23442__auto__16;
-      }
-      ;
-    })())) {
-      run11.appendChild(create_icon(paths15));
-    }
-    ;
-    run11.appendChild(document.createTextNode(label3));
-    actions10.appendChild(run11);
-    actions10.appendChild(cancel12);
-    panel8.appendChild(make_head(label3, on_back));
-    panel8.appendChild(body9);
-    panel8.appendChild(actions10);
-    menu.innerHTML = "";
-    menu.style.minWidth = `${w02 ?? ""}px`;
-    menu.classList.add("context-menu--panel");
-    menu.appendChild(panel8);
-    get_state().back = on_back;
-    animate_height_BANG_(menu, h01);
-    return cancel12.focus();
-  };
-  var first_item_idx = function(items2) {
-    return items2.findIndex((function(item) {
-      return !(item["type"] === "separator");
-    }));
-  };
-  var fill_menu_BANG_ = function(menu, items2, focus_idx, page) {
-    const h01 = menu.offsetHeight;
-    const w02 = menu.offsetWidth;
-    const root3 = truth_(page) ? make_el("div", "context-menu-panel") : menu;
-    disarm_BANG_();
-    menu.innerHTML = "";
-    menu.classList.remove("context-menu--panel");
-    menu.style.minWidth = truth_(page) ? `${w02 ?? ""}px` : "";
-    get_state().back = truth_(page) ? page["back"] : null;
-    if (truth_(page)) {
-      root3.appendChild(make_head(page["label"], page["back"]));
-      menu.appendChild(root3);
-    }
-    ;
-    items2.forEach((function(item, idx) {
-      if (item["type"] === "separator") {
-        const sep4 = make_el("div", "context-menu-separator");
-        sep4.setAttribute("role", "separator");
-        return root3.appendChild(sep4);
-      } else {
-        const url5 = item["url"];
-        const sub6 = item["items"];
-        const el7 = make_el(truth_(url5) ? "a" : "button", item["variant"] === "danger" ? "context-menu-item context-menu-item--danger" : "context-menu-item");
-        const span8 = document.createElement("span");
-        el7.setAttribute("role", "menuitem");
-        el7.setAttribute("tabindex", "-1");
-        if (truth_(url5)) {
-          el7.setAttribute("href", url5);
-        }
-        ;
-        const paths9 = item["icon-paths"];
-        if (truth_((() => {
-          const and__23442__auto__10 = paths9;
-          if (truth_(and__23442__auto__10)) {
-            return paths9.length > 0;
-          } else {
-            return and__23442__auto__10;
-          }
-          ;
-        })())) {
-          el7.appendChild(create_icon(paths9));
-        }
-        ;
-        span8.textContent = item["label"];
-        el7.appendChild(span8);
-        if (truth_(sub6)) {
-          el7.setAttribute("aria-haspopup", "menu");
-          const chev11 = create_icon(chevron_right);
-          chev11.setAttribute("class", "context-menu-item-chevron");
-          el7.appendChild(chev11);
-        }
-        ;
-        el7.addEventListener("click", (function(e) {
-          e.preventDefault();
-          e.stopPropagation();
-          if (truth_(sub6)) {
-            return fill_menu_BANG_(menu, sub6, first_item_idx(sub6), { "label": item["label"], "back": (function() {
-              return fill_menu_BANG_(menu, items2, idx, page);
-            }) });
-          } else {
-            if (not(item["confirm"])) {
-              dismiss_BANG_();
-              return execute_item_BANG_(item);
-            } else {
-              if (item["confirm-style"] === "panel") {
-                return show_panel_BANG_(menu, item, (function() {
-                  return fill_menu_BANG_(menu, items2, idx, page);
-                }));
-              } else {
-                if (truth_(el7.classList.contains("context-menu-item--armed"))) {
-                  dismiss_BANG_();
-                  return execute_item_BANG_(item);
-                } else {
-                  if ("else") {
-                    return arm_BANG_(menu, el7, span8, item);
-                  } else {
-                    return null;
-                  }
-                }
-              }
-            }
-          }
-          ;
-        }));
-        root3.appendChild(el7);
-        if (_EQ_(idx, focus_idx)) {
-          return el7.focus();
-        }
-        ;
-      }
-      ;
-    }));
-    if (!(focus_idx == null)) {
-      return animate_height_BANG_(menu, h01);
-    }
-    ;
-  };
-  var create_menu = function(items2) {
-    const menu1 = make_el("div", "context-menu");
-    menu1.setAttribute("role", "menu");
-    fill_menu_BANG_(menu1, items2, null, null);
-    return menu1;
   };
   var clamp_to_viewport_BANG_ = function(menu) {
     const x1 = parseFloat(menu.style.left);
@@ -2801,16 +2621,309 @@
     }
     ;
   };
-  var position_menu_BANG_ = function(menu, x, y) {
-    menu.style.left = `${x ?? ""}px`;
-    menu.style.top = `${y ?? ""}px`;
-    document.body.appendChild(menu);
+  var place_BANG_ = function(menu) {
+    const state1 = get_state();
+    const style2 = menu.style;
+    if (truth_((() => {
+      const or__23426__auto__3 = !_EQ_(style2.left, state1.placedX);
+      if (or__23426__auto__3) {
+        return or__23426__auto__3;
+      } else {
+        return !_EQ_(style2.top, state1.placedY);
+      }
+      ;
+    })())) {
+      state1.anchor = { "x": style2.left, "y": style2.top };
+    }
+    ;
+    style2.left = state1.anchor.x;
+    style2.top = state1.anchor.y;
     clamp_to_viewport_BANG_(menu);
-    const mo1 = new MutationObserver((function(_) {
-      return clamp_to_viewport_BANG_(menu);
+    state1.placedX = style2.left;
+    return state1.placedY = style2.top;
+  };
+  var position_menu_BANG_ = function(menu, x, y) {
+    const state1 = get_state();
+    const style2 = menu.style;
+    style2.left = `${x ?? ""}px`;
+    style2.top = `${y ?? ""}px`;
+    state1.anchor = { "x": style2.left, "y": style2.top };
+    state1.placedX = style2.left;
+    state1.placedY = style2.top;
+    document.body.appendChild(menu);
+    place_BANG_(menu);
+    const mo3 = new MutationObserver((function(_) {
+      if (not(get_state().swap)) {
+        return clamp_to_viewport_BANG_(menu);
+      }
+      ;
     }));
-    mo1.observe(menu, { "childList": true, "subtree": true });
-    return get_state().growthObserver = mo1;
+    mo3.observe(menu, { "childList": true, "subtree": true });
+    return state1.growthObserver = mo3;
+  };
+  var swap_ms = 240;
+  var swap_easing = "cubic-bezier(0.2, 0, 0, 1)";
+  var reduced_motion_QMARK_ = function() {
+    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  };
+  var finish_swap_BANG_ = function() {
+    const state1 = get_state();
+    const swap2 = state1.swap;
+    if (truth_(swap2)) {
+      state1.swap = null;
+      swap2.anims.forEach((function(a) {
+        return a.cancel();
+      }));
+      swap2.ghost.remove();
+      return swap2.menu.style.overflow = "";
+    }
+    ;
+  };
+  var px = function(n) {
+    return `${n ?? ""}px`;
+  };
+  var slide_BANG_ = function(menu, page, old, forward_QMARK_, h0, w0, x0, y0) {
+    const state1 = get_state();
+    const style2 = menu.style;
+    const opts3 = { "duration": swap_ms, "easing": swap_easing };
+    const box4 = menu.animate({ "height": [px(h0), px(menu.offsetHeight)], "width": [px(w0), px(menu.offsetWidth)], "left": [x0, style2.left], "top": [y0, style2.top] }, opts3);
+    const in$5 = page.animate(truth_(forward_QMARK_) ? { "transform": ["translateX(100%)", "translateX(0)"] } : { "transform": ["translateX(-30%)", "translateX(0)"], "opacity": [0, 1] }, opts3);
+    const out6 = old.animate(truth_(forward_QMARK_) ? { "transform": ["translateX(0)", "translateX(-30%)"], "opacity": [1, 0] } : { "transform": ["translateX(0)", "translateX(100%)"] }, opts3);
+    const swap7 = { "menu": menu, "ghost": old, "anims": [box4, in$5, out6] };
+    style2.overflow = "hidden";
+    state1.swap = swap7;
+    return box4.onfinish = (function() {
+      if (_EQ_(state1.swap, swap7)) {
+        return finish_swap_BANG_();
+      }
+      ;
+    });
+  };
+  var show_page_BANG_ = function(menu, page, direction) {
+    finish_swap_BANG_();
+    disarm_BANG_();
+    const state1 = get_state();
+    const style2 = menu.style;
+    const old3 = menu.querySelector(":scope > .context-menu-page");
+    const h04 = menu.offsetHeight;
+    const w05 = menu.offsetWidth;
+    const x06 = style2.left;
+    const y07 = style2.top;
+    const slide_QMARK_8 = (() => {
+      const and__23442__auto__9 = direction;
+      if (truth_(and__23442__auto__9)) {
+        const and__23442__auto__10 = old3;
+        if (truth_(and__23442__auto__10)) {
+          const and__23442__auto__11 = menu.isConnected;
+          if (truth_(and__23442__auto__11)) {
+            const and__23442__auto__12 = menu.animate;
+            if (truth_(and__23442__auto__12)) {
+              return not(reduced_motion_QMARK_());
+            } else {
+              return and__23442__auto__12;
+            }
+            ;
+          } else {
+            return and__23442__auto__11;
+          }
+          ;
+        } else {
+          return and__23442__auto__10;
+        }
+        ;
+      } else {
+        return and__23442__auto__9;
+      }
+      ;
+    })();
+    const root_QMARK_13 = page.classList.contains("context-menu-page--root");
+    if (truth_(slide_QMARK_8)) {
+      const s14 = old3.style;
+      old3.setAttribute("inert", "");
+      s14.position = "absolute";
+      s14.left = "0";
+      s14.top = px(-menu.scrollTop);
+      s14.width = px(menu.clientWidth);
+      s14.zIndex = direction === "back" ? "1" : "0";
+    } else {
+      if (truth_(old3)) {
+        old3.remove();
+      }
+    }
+    ;
+    menu.classList.toggle("context-menu--panel", page.classList.contains("context-menu-panel"));
+    style2.minWidth = truth_(root_QMARK_13) ? "" : px(w05);
+    menu.appendChild(page);
+    menu.scrollTop = (() => {
+      const or__23426__auto__15 = page.scrollTop0;
+      if (truth_(or__23426__auto__15)) {
+        return or__23426__auto__15;
+      } else {
+        return 0;
+      }
+      ;
+    })();
+    state1.back = page.onBack;
+    if (truth_(menu.isConnected)) {
+      place_BANG_(menu);
+    }
+    ;
+    if (truth_(slide_QMARK_8)) {
+      slide_BANG_(menu, page, old3, direction === "forward", h04, w05, x06, y07);
+    }
+    ;
+    const f16 = page.focusEl;
+    if (truth_(f16)) {
+      return f16.focus({ "preventScroll": true });
+    }
+    ;
+  };
+  var confirm_page = function(item, on_back) {
+    const label1 = item["label"];
+    const confirm2 = item["confirm"];
+    const title3 = item["confirm-title"];
+    const message4 = truth_(string_QMARK_(confirm2)) ? confirm2 : "This can't be undone.";
+    const danger5 = item["variant"] === "danger";
+    const page6 = make_el("div", "context-menu-page context-menu-panel");
+    const body7 = make_el("div", "context-menu-panel-body");
+    const actions8 = make_el("div", "context-menu-panel-actions");
+    const run9 = make_button(`${"btn btn-sm context-menu-action "}${(danger5 ? "btn-danger" : "btn-primary") ?? ""}`, null, (function() {
+      dismiss_BANG_();
+      return execute_item_BANG_(item);
+    }));
+    const cancel10 = make_button("btn btn-sm btn-ghost context-menu-action", "Cancel", on_back);
+    if (truth_(title3)) {
+      const t11 = make_el("p", "context-menu-panel-title");
+      t11.textContent = title3;
+      body7.appendChild(t11);
+    }
+    ;
+    const m12 = make_el("p", "context-menu-panel-message");
+    m12.textContent = message4;
+    body7.appendChild(m12);
+    const paths13 = item["icon-paths"];
+    if (truth_((() => {
+      const and__23442__auto__14 = paths13;
+      if (truth_(and__23442__auto__14)) {
+        return paths13.length > 0;
+      } else {
+        return and__23442__auto__14;
+      }
+      ;
+    })())) {
+      run9.appendChild(create_icon(paths13));
+    }
+    ;
+    run9.appendChild(document.createTextNode(label1));
+    actions8.appendChild(run9);
+    actions8.appendChild(cancel10);
+    page6.appendChild(make_head(label1, on_back));
+    page6.appendChild(body7);
+    page6.appendChild(actions8);
+    page6.onBack = on_back;
+    page6.focusEl = cancel10;
+    return page6;
+  };
+  var first_item_idx = function(items2) {
+    return items2.findIndex((function(item) {
+      return !(item["type"] === "separator");
+    }));
+  };
+  var items_page = function(menu, items2, focus_idx, parent) {
+    const page1 = make_el("div", truth_(parent) ? "context-menu-page context-menu-page--sub" : "context-menu-page context-menu-page--root");
+    if (truth_(parent)) {
+      page1.appendChild(make_head(parent["label"], parent["back"]));
+      page1.onBack = parent["back"];
+    }
+    ;
+    items2.forEach((function(item, idx) {
+      if (item["type"] === "separator") {
+        const sep2 = make_el("div", "context-menu-separator");
+        sep2.setAttribute("role", "separator");
+        return page1.appendChild(sep2);
+      } else {
+        const url3 = item["url"];
+        const sub4 = item["items"];
+        const el5 = make_el(truth_(url3) ? "a" : "button", item["variant"] === "danger" ? "context-menu-item context-menu-item--danger" : "context-menu-item");
+        const span6 = make_el("span", "context-menu-item-label");
+        const back7 = (function(scroll) {
+          return function() {
+            const p8 = items_page(menu, items2, idx, parent);
+            p8.scrollTop0 = scroll;
+            return show_page_BANG_(menu, p8, "back");
+          };
+        });
+        el5.setAttribute("role", "menuitem");
+        el5.setAttribute("tabindex", "-1");
+        if (truth_(url3)) {
+          el5.setAttribute("href", url3);
+        }
+        ;
+        const paths9 = item["icon-paths"];
+        if (truth_((() => {
+          const and__23442__auto__10 = paths9;
+          if (truth_(and__23442__auto__10)) {
+            return paths9.length > 0;
+          } else {
+            return and__23442__auto__10;
+          }
+          ;
+        })())) {
+          el5.appendChild(create_icon(paths9));
+        }
+        ;
+        span6.textContent = item["label"];
+        el5.appendChild(span6);
+        if (truth_(sub4)) {
+          el5.setAttribute("aria-haspopup", "menu");
+          const chev11 = create_icon(chevron_right);
+          chev11.setAttribute("class", "context-menu-item-chevron");
+          el5.appendChild(chev11);
+        }
+        ;
+        el5.addEventListener("click", (function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          if (truth_(sub4)) {
+            return show_page_BANG_(menu, items_page(menu, sub4, first_item_idx(sub4), { "label": item["label"], "back": back7(menu.scrollTop) }), "forward");
+          } else {
+            if (not(item["confirm"])) {
+              dismiss_BANG_();
+              return execute_item_BANG_(item);
+            } else {
+              if (item["confirm-style"] === "panel") {
+                return show_page_BANG_(menu, confirm_page(item, back7(menu.scrollTop)), "forward");
+              } else {
+                if (truth_(el5.classList.contains("context-menu-item--armed"))) {
+                  dismiss_BANG_();
+                  return execute_item_BANG_(item);
+                } else {
+                  if ("else") {
+                    return arm_BANG_(menu, el5, span6, item);
+                  } else {
+                    return null;
+                  }
+                }
+              }
+            }
+          }
+          ;
+        }));
+        page1.appendChild(el5);
+        if (_EQ_(idx, focus_idx)) {
+          return page1.focusEl = el5;
+        }
+        ;
+      }
+      ;
+    }));
+    return page1;
+  };
+  var create_menu = function(items2) {
+    const menu1 = make_el("div", "context-menu");
+    menu1.setAttribute("role", "menu");
+    show_page_BANG_(menu1, items_page(menu1, items2, null, null), null);
+    return menu1;
   };
   var moves_trigger_QMARK_ = function(trigger, e) {
     const t1 = e.target;
@@ -2828,7 +2941,7 @@
     }
     ;
   };
-  var focusable = ".context-menu-item, .context-menu-action";
+  var focusable = ".context-menu-page:not([inert]) :is(.context-menu-item, .context-menu-action)";
   var focus_first_item_BANG_ = function(menu) {
     const first_item1 = menu.querySelector(focusable);
     if (truth_(first_item1)) {
@@ -5392,9 +5505,9 @@
     }
     ;
   };
-  var zoom_at = function(z, s, px, py) {
+  var zoom_at = function(z, s, px2, py) {
     const k1 = s / get(z, "s");
-    return assoc(z, "s", s, "tx", px - k1 * (px - get(z, "tx")), "ty", py - k1 * (py - get(z, "ty")));
+    return assoc(z, "s", s, "tx", px2 - k1 * (px2 - get(z, "tx")), "ty", py - k1 * (py - get(z, "ty")));
   };
   var settle = function(img, z) {
     const s1 = clamp3(1, max_scale, get(z, "s"));
@@ -6078,14 +6191,14 @@
     }
     ;
   };
-  var jump_size_BANG_ = function(panel, px) {
-    return panel.el.style[extent_key(panel.group)] = `${px ?? ""}px`;
+  var jump_size_BANG_ = function(panel, px2) {
+    return panel.el.style[extent_key(panel.group)] = `${px2 ?? ""}px`;
   };
-  var jump_content_BANG_ = function(panel, px) {
+  var jump_content_BANG_ = function(panel, px2) {
     const temp__23062__auto__1 = panel.content;
     if (truth_(temp__23062__auto__1)) {
       const content2 = temp__23062__auto__1;
-      return content2.style[extent_key(panel.group)] = `${px ?? ""}px`;
+      return content2.style[extent_key(panel.group)] = `${px2 ?? ""}px`;
     }
     ;
   };
@@ -6280,9 +6393,9 @@
     }
     ;
   };
-  var apply_size_BANG_ = function(panel, px) {
+  var apply_size_BANG_ = function(panel, px2) {
     const b1 = bounds(panel);
-    const v2 = clamp4(px, b1.min, b1.max);
+    const v2 = clamp4(px2, b1.min, b1.max);
     const total3 = group_extent(panel.group);
     if (truth_((() => {
       const and__23442__auto__4 = panel.collapsed;
@@ -8582,7 +8695,7 @@
     ;
     return panel.insertAdjacentHTML("beforeend", html2);
   };
-  var place_BANG_ = function(p, panel, trigger) {
+  var place_BANG_2 = function(p, panel, trigger) {
     const r1 = p.root.getBoundingClientRect();
     const b2 = trigger.getBoundingClientRect();
     const w3 = panel.offsetWidth;
@@ -8641,7 +8754,7 @@
       }
       ;
       panel1.hidden = false;
-      place_BANG_(p, panel1, trigger);
+      place_BANG_2(p, panel1, trigger);
       trigger.setAttribute("aria-expanded", "true");
       p.open = { "panel": panel1, "trigger": trigger, "id": id };
       flag_BANG_(p.root, "data-panel-open", true);

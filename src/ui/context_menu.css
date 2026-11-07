@@ -48,6 +48,7 @@
   position: fixed;
   z-index: 9999;
   min-width: 10rem;
+  max-width: calc(100vw - 16px);
   padding: 0;
   background: var(--bg-1);
   border: var(--border-0);
@@ -92,6 +93,12 @@
 .context-menu-item:focus-visible {
   background: var(--bg-2);
   outline: none;
+}
+
+.context-menu-item-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* an item with :items: drills into a sub-page (same head as the confirm panel) */
@@ -160,13 +167,15 @@
   max-width: calc(100vw - 16px);
 }
 
-.context-menu-panel {
-  animation: context-menu-push var(--duration-standard) var(--ease-enter);
-}
+/* ── Pages ───────────────────────────────────────────────────────── */
+/* The menu shows one page: the list, a sub-page or a confirm panel. On a
+   page change ui/js/context_menu slides the old and new page and animates
+   the menu's box (WAAPI); each page is opaque so the incoming one covers
+   the outgoing one. */
 
-@keyframes context-menu-push {
-  from { opacity: 0; transform: translateX(var(--size-3)); }
-  to   { opacity: 1; transform: translateX(0); }
+.context-menu-page {
+  position: relative;
+  background: var(--bg-1);
 }
 
 .context-menu-panel-head {
@@ -198,6 +207,18 @@
 .context-menu-panel-back:focus-visible {
   background: var(--bg-2);
   color: var(--fg-0);
+}
+
+.clj-ui-touch .context-menu-panel-back {
+  width: var(--control-md);
+  height: var(--control-md);
+}
+
+.context-menu-panel-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .context-menu-panel-body {
