@@ -98,12 +98,12 @@
 |-----------|-----------|-------------|------------|
 | [Markdown](components/markdown.md) | `ui.markdown` | A minimal markdown to hiccup renderer for docs and chat replies: headings, code blocks, tables, lists, inline code and bold. | `markdown->hiccup` |
 
-## Icons (89)
+## Icons (92)
 
 Lucide-compatible inline SVG icons — see `AGENTS.md` § Icons for
 usage and how to add new ones.
 
-`alert-circle`, `alert-triangle`, `arrow-down`, `arrow-left`, `arrow-right`, `arrow-up`, `bell`, `book-open`, `bookmark`, `calendar`, `camera`, `captions`, `check`, `chevron-down`, `chevron-left`, `chevron-right`, `chevron-up`, `circle-check`, `circle-x`, `clock`, `code`, `copy`, `database`, `download`, `edit`, `external-link`, `eye`, `eye-off`, `file`, `file-spreadsheet`, `file-text`, `film`, `filter`, `folder`, `gauge`, `globe`, `grid`, `grip-vertical`, `heart`, `home`, `image`, `inbox`, `info`, `layers`, `layout-dashboard`, `link`, `list`, `list-video`, `lock`, `log-in`, `log-out`, `mail`, `map-pin`, `maximize`, `menu`, `mic`, `minimize`, `minus`, `monitor`, `moon`, `music`, `package`, `pause`, `picture-in-picture-2`, `play`, `plus`, `refresh`, `repeat`, `rotate-ccw`, `rotate-cw`, `search`, `settings`, `shield`, `shuffle`, `skip-back`, `skip-forward`, `sliders-horizontal`, `star`, `sun`, `terminal`, `trash`, `upload`, `user`, `users`, `volume-1`, `volume-2`, `volume-x`, `x`, `zap`
+`alert-circle`, `alert-triangle`, `arrow-down`, `arrow-left`, `arrow-right`, `arrow-up`, `bell`, `book-open`, `bookmark`, `calendar`, `camera`, `captions`, `check`, `chevron-down`, `chevron-left`, `chevron-right`, `chevron-up`, `circle-check`, `circle-x`, `clock`, `code`, `copy`, `database`, `download`, `edit`, `external-link`, `eye`, `eye-off`, `file`, `file-spreadsheet`, `file-text`, `film`, `filter`, `folder`, `gauge`, `globe`, `grid`, `grip-vertical`, `heart`, `home`, `image`, `inbox`, `info`, `layers`, `layout-dashboard`, `link`, `list`, `list-video`, `lock`, `log-in`, `log-out`, `mail`, `map-pin`, `maximize`, `menu`, `mic`, `minimize`, `minus`, `monitor`, `moon`, `music`, `package`, `palette`, `pause`, `picture-in-picture-2`, `play`, `plus`, `refresh`, `repeat`, `rotate-ccw`, `rotate-cw`, `scissors`, `search`, `settings`, `shield`, `shuffle`, `signpost`, `skip-back`, `skip-forward`, `sliders-horizontal`, `star`, `sun`, `terminal`, `trash`, `upload`, `user`, `users`, `volume-1`, `volume-2`, `volume-x`, `x`, `zap`
 
 Icons with dedicated filled path data (`:filled true`):
 
