@@ -38,6 +38,10 @@
    the arrow keys), click the number to type, right-click (long-press) for a
    Reset menu (window.__uiContextMenu, ui.js.context-menu).
 
+   Enter in a one-line field (Ctrl/Cmd+Enter in a text box) commits it and
+   presses the panel's primary action (variant \"primary\"), like a form's
+   submit button.
+
    Panel fields are read with (:kw panel) and written with (aset panel \"kw\" v)
    — never `.-` interop, which munges hyphens to underscores in squint.
 
@@ -675,11 +679,14 @@
 
 (defn- render-action
   "A ui.button (`variant`: primary / secondary / ghost / danger / success,
-   `loud`), small. Consecutive actions share one row, see render-controls!."
+   `loud`), small. Consecutive actions share one row, see render-controls!.
+   A primary action is the panel's submit: Enter in a field presses it
+   (see submit-on-enter!)."
   [panel c]
   (let [{:keys [path label variant loud]} c
         btn (mk "button" (str "btn btn-sm btn-" variant (when loud " btn-loud") " dial-action"))]
     (attr! btn "type" "button")
+    (when (= variant "primary") (attr! btn "data-dial-submit" "true"))
     (txt! btn label)
     (on! btn "click" (fn [_] (when-let [f (:onAction panel)] (f (path-str path)))))
     btn))
@@ -863,6 +870,22 @@
 
 ;; ── Panel construction + mount ──────────────────────────────────────
 
+(defn- submit-on-enter!
+  "Like a form's submit button: Enter in a one-line field (a slider's
+   number, a color value; Ctrl/Cmd+Enter in a text box) commits the field
+   and presses the panel's primary action. Blurring fires the field's
+   change first, so the action sees the typed value."
+  [card e]
+  (let [t   (.-target e)
+        tag (.-tagName t)]
+    (when (and (= (.-key e) "Enter") (not (.-isComposing e)) (not (.-shiftKey e))
+               (or (and (= tag "INPUT") (= (.-type t) "text"))
+                   (and (= tag "TEXTAREA") (or (.-ctrlKey e) (.-metaKey e)))))
+      (when-let [btn (.querySelector card "[data-dial-submit]")]
+        (.preventDefault e)
+        (.blur t)
+        (.click btn)))))
+
 (defn- make-panel [name config opts]
   (let [id (or (aget opts "id") (str "dial-" (.slice (.toString (js/Math.random) 36) 2 8)))
         controls (parse-config config #js [])
@@ -930,6 +953,7 @@
     (on! iconb "click" (fn [_]
                          (.remove (.-classList card) "is-iconified")
                          (aset panel "open" true)))
+    (on! card "keydown" (fn [e] (submit-on-enter! card e)))
     (on! head "pointerdown" (fn [e]
                               (when (or (= (.-target e) head) (= (.-target e) title))
                                 (start-drag! e))))

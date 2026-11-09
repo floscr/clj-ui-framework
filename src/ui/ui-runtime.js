@@ -4409,6 +4409,10 @@
     const loud6 = get(map__12, "loud");
     const btn7 = mk2("button", `${"btn btn-sm btn-"}${variant5 ?? ""}${(truth_(loud6) ? " btn-loud" : null) ?? ""}${" dial-action"}`);
     attr_BANG_(btn7, "type", "button");
+    if (variant5 === "primary") {
+      attr_BANG_(btn7, "data-dial-submit", "true");
+    }
+    ;
     txt_BANG_(btn7, label4);
     on_BANG_(btn7, "click", (function(_) {
       const temp__23062__auto__8 = get(panel, "onAction");
@@ -4736,6 +4740,37 @@
     }
     ;
   };
+  var submit_on_enter_BANG_ = function(card, e) {
+    const t1 = e.target;
+    const tag2 = t1.tagName;
+    if (truth_(e.key === "Enter" && (not(e.isComposing) && (not(e.shiftKey) && (() => {
+      const or__23426__auto__3 = tag2 === "INPUT" && t1.type === "text";
+      if (truth_(or__23426__auto__3)) {
+        return or__23426__auto__3;
+      } else {
+        return tag2 === "TEXTAREA" && (() => {
+          const or__23426__auto__4 = e.ctrlKey;
+          if (truth_(or__23426__auto__4)) {
+            return or__23426__auto__4;
+          } else {
+            return e.metaKey;
+          }
+          ;
+        })();
+      }
+      ;
+    })())))) {
+      const temp__23062__auto__5 = card.querySelector("[data-dial-submit]");
+      if (truth_(temp__23062__auto__5)) {
+        const btn6 = temp__23062__auto__5;
+        e.preventDefault();
+        t1.blur();
+        return btn6.click();
+      }
+      ;
+    }
+    ;
+  };
   var make_panel = function(name, config, opts) {
     const id1 = (() => {
       const or__23426__auto__2 = opts["id"];
@@ -4865,6 +4900,9 @@
     on_BANG_(iconb16, "click", (function(_) {
       card7.classList.remove("is-iconified");
       return panel["open"] = true;
+    }));
+    on_BANG_(card7, "keydown", (function(e) {
+      return submit_on_enter_BANG_(card7, e);
     }));
     on_BANG_(head8, "pointerdown", (function(e) {
       if (truth_((() => {
