@@ -4,7 +4,7 @@
 > See `AGENTS.md` for conventions, per-target pitfalls, and how to
 > add new components and icons. Agents: start at `docs/llms.txt`.
 
-## Components (52)
+## Components (53)
 
 ### Actions
 
@@ -26,6 +26,7 @@
 | [Drop zone](components/drop-zone.md) | `ui.drop-zone` | A generous target for dropping or picking files, with a full-page overlay variant and a click-to-add label. | `drop-zone-class-list`, `drop-zone-classes`, `file-label`, `drop-zone`, `init-body-drop-zone!`, `drop-zone-overlay` |
 | [Form](components/form.md) | `ui.form` | Labeled fields, inputs, textareas, checkboxes, radios, file and range inputs, joined groups and a search bar. | `form-field-class-list`, `form-field-classes`, `form-field`, `form-input-class-list`, `form-input-classes`, `form-input`, `form-textarea-class-list`, `form-textarea-classes`, `form-textarea`, `form-textarea-auto`, `form-select`, `form-checkbox`, `form-radio-group`, `form-file`, `form-range`, `form-group`, `form-group-addon`, `search-bar` |
 | [Number field](components/number-field.md) | `ui.number-field` | A bounded numeric input with increment and decrement steppers and scroll-wheel support. | `normalize-variant`, `clamp-value`, `step-value`, `number-field-class-list`, `number-field-classes`, `number-field` |
+| [Rating](components/rating.md) | `ui.rating` | A star rating with half stars: pick by pointing at a star's half, clear by choosing the value again, or show a score read-only. | `value-str`, `steps`, `format-value`, `value-label`, `rating-class-list`, `rating-classes`, `rating` |
 | [Select](components/select.md) | `ui.select` | A compact choice field with a framework-drawn listbox, keyboard navigation and form support. | `normalize-options`, `selected-label`, `select` |
 | [Switch](components/switch.md) | `ui.switch` | A toggle for a setting that takes effect immediately. | `switch-class-list`, `switch-classes`, `switch-toggle` |
 | [Tag input](components/tag-input.md) | `ui.tag-input` | Turns short text into removable tags with a filtered suggestion dropdown; fully controlled by the host. | `tag-input-class-list`, `tag-input-classes`, `tag-pill-class-list`, `tag-pill-classes`, `tag-pill`, `tag-dropdown-item`, `tag-dropdown`, `tag-input`, `filter-tags` |

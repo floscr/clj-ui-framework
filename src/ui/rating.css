@@ -1,0 +1,186 @@
+/* Rating — half stars over a radio group. The fill of each star is
+   clamp(0, value - index, 1) of its width; the value is --rating-value,
+   set by the rules at the end from data-value (the rendered value), the
+   checked radio (a pick) and the hovered half (a preview, highest). */
+
+.rating {
+  --rating-value: 0;
+  --rating-star: var(--size-6);
+  --rating-gap: 2px;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+  flex: none;
+  touch-action: pan-y;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.rating--sm { --rating-star: var(--size-3); --rating-gap: 1px; }
+.rating--lg { --rating-star: var(--size-8); --rating-gap: 3px; }
+.rating--md:not(.rating--read-only) { min-height: var(--control-md); }
+
+.rating-stars {
+  display: inline-flex;
+  pointer-events: none;
+}
+
+.rating-star {
+  --i: 0;
+  position: relative;
+  width: var(--rating-star);
+  height: var(--rating-star);
+  box-sizing: content-box;
+  padding: 0 calc(var(--rating-gap) / 2);
+}
+
+.rating-star svg {
+  position: absolute;
+  top: 0;
+  left: calc(var(--rating-gap) / 2);
+  width: var(--rating-star);
+  height: var(--rating-star);
+}
+
+.rating-star-empty path { fill: color-mix(in oklch, var(--fg-0) 16%, transparent); }
+.rating-star-fill path { fill: var(--warning); }
+
+.rating-star-fill {
+  clip-path: inset(0 calc((1 - clamp(0, var(--rating-value) - var(--i), 1)) * 100%) 0 0);
+  transition: clip-path var(--duration-fast) var(--ease-standard), opacity var(--duration-fast) var(--ease-standard);
+}
+
+/* Hit areas: one label per step, in a row over the stars. */
+.rating-hits {
+  position: absolute;
+  inset: 0;
+  display: flex;
+}
+
+.rating-hit {
+  flex: 1;
+  cursor: pointer;
+}
+
+.rating-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+  opacity: 0;
+}
+
+/* A preview dims the fill so it reads as not yet chosen. Only for a
+   real pointer: on touch :hover sticks after the tap. */
+@media (hover: hover) {
+  .rating:has(.rating-hit:hover) .rating-star-fill { opacity: 0.6; }
+}
+
+.rating:has(.rating-input:focus-visible) {
+  outline: var(--focus-outline);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+.rating--disabled { opacity: 0.5; }
+.rating--disabled .rating-hit { cursor: default; }
+.rating--read-only .rating-star-fill { transition: none; }
+
+/* A value that just landed pops star by star (the runtime adds the class). */
+.rating--committed .rating-star {
+  animation: rating-pop var(--duration-standard) var(--ease-spring) both;
+  animation-delay: calc(var(--i) * 30ms); /* lint-allow */
+}
+
+@keyframes rating-pop {
+  0% { transform: scale(1); }
+  35% { transform: scale(1.18); }
+  100% { transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rating-star-fill { transition: none; }
+  .rating--committed .rating-star { animation: none; }
+}
+
+/* Star index, for the fill and the pop's stagger. */
+.rating-star:nth-child(1) { --i: 0; }
+.rating-star:nth-child(2) { --i: 1; }
+.rating-star:nth-child(3) { --i: 2; }
+.rating-star:nth-child(4) { --i: 3; }
+.rating-star:nth-child(5) { --i: 4; }
+.rating-star:nth-child(6) { --i: 5; }
+.rating-star:nth-child(7) { --i: 6; }
+.rating-star:nth-child(8) { --i: 7; }
+.rating-star:nth-child(9) { --i: 8; }
+.rating-star:nth-child(10) { --i: 9; }
+
+/* The value: rendered, then picked, then previewed. */
+.rating[data-value="0.5"] { --rating-value: 0.5; }
+.rating[data-value="1"] { --rating-value: 1; }
+.rating[data-value="1.5"] { --rating-value: 1.5; }
+.rating[data-value="2"] { --rating-value: 2; }
+.rating[data-value="2.5"] { --rating-value: 2.5; }
+.rating[data-value="3"] { --rating-value: 3; }
+.rating[data-value="3.5"] { --rating-value: 3.5; }
+.rating[data-value="4"] { --rating-value: 4; }
+.rating[data-value="4.5"] { --rating-value: 4.5; }
+.rating[data-value="5"] { --rating-value: 5; }
+.rating[data-value="5.5"] { --rating-value: 5.5; }
+.rating[data-value="6"] { --rating-value: 6; }
+.rating[data-value="6.5"] { --rating-value: 6.5; }
+.rating[data-value="7"] { --rating-value: 7; }
+.rating[data-value="7.5"] { --rating-value: 7.5; }
+.rating[data-value="8"] { --rating-value: 8; }
+.rating[data-value="8.5"] { --rating-value: 8.5; }
+.rating[data-value="9"] { --rating-value: 9; }
+.rating[data-value="9.5"] { --rating-value: 9.5; }
+.rating[data-value="10"] { --rating-value: 10; }
+.rating:has(.rating-input[value="0"]:checked) { --rating-value: 0; }
+.rating:has(.rating-input[value="0.5"]:checked) { --rating-value: 0.5; }
+.rating:has(.rating-input[value="1"]:checked) { --rating-value: 1; }
+.rating:has(.rating-input[value="1.5"]:checked) { --rating-value: 1.5; }
+.rating:has(.rating-input[value="2"]:checked) { --rating-value: 2; }
+.rating:has(.rating-input[value="2.5"]:checked) { --rating-value: 2.5; }
+.rating:has(.rating-input[value="3"]:checked) { --rating-value: 3; }
+.rating:has(.rating-input[value="3.5"]:checked) { --rating-value: 3.5; }
+.rating:has(.rating-input[value="4"]:checked) { --rating-value: 4; }
+.rating:has(.rating-input[value="4.5"]:checked) { --rating-value: 4.5; }
+.rating:has(.rating-input[value="5"]:checked) { --rating-value: 5; }
+.rating:has(.rating-input[value="5.5"]:checked) { --rating-value: 5.5; }
+.rating:has(.rating-input[value="6"]:checked) { --rating-value: 6; }
+.rating:has(.rating-input[value="6.5"]:checked) { --rating-value: 6.5; }
+.rating:has(.rating-input[value="7"]:checked) { --rating-value: 7; }
+.rating:has(.rating-input[value="7.5"]:checked) { --rating-value: 7.5; }
+.rating:has(.rating-input[value="8"]:checked) { --rating-value: 8; }
+.rating:has(.rating-input[value="8.5"]:checked) { --rating-value: 8.5; }
+.rating:has(.rating-input[value="9"]:checked) { --rating-value: 9; }
+.rating:has(.rating-input[value="9.5"]:checked) { --rating-value: 9.5; }
+.rating:has(.rating-input[value="10"]:checked) { --rating-value: 10; }
+@media (hover: hover) {
+  .rating:not(.rating--disabled):has(.rating-hit[data-value="0.5"]:hover) { --rating-value: 0.5; }
+  .rating:not(.rating--disabled):has(.rating-hit[data-value="1"]:hover) { --rating-value: 1; }
+  .rating:not(.rating--disabled):has(.rating-hit[data-value="1.5"]:hover) { --rating-value: 1.5; }
+  .rating:not(.rating--disabled):has(.rating-hit[data-value="2"]:hover) { --rating-value: 2; }
+  .rating:not(.rating--disabled):has(.rating-hit[data-value="2.5"]:hover) { --rating-value: 2.5; }
+  .rating:not(.rating--disabled):has(.rating-hit[data-value="3"]:hover) { --rating-value: 3; }
+  .rating:not(.rating--disabled):has(.rating-hit[data-value="3.5"]:hover) { --rating-value: 3.5; }
+  .rating:not(.rating--disabled):has(.rating-hit[data-value="4"]:hover) { --rating-value: 4; }
+  .rating:not(.rating--disabled):has(.rating-hit[data-value="4.5"]:hover) { --rating-value: 4.5; }
+  .rating:not(.rating--disabled):has(.rating-hit[data-value="5"]:hover) { --rating-value: 5; }
+  .rating:not(.rating--disabled):has(.rating-hit[data-value="5.5"]:hover) { --rating-value: 5.5; }
+  .rating:not(.rating--disabled):has(.rating-hit[data-value="6"]:hover) { --rating-value: 6; }
+  .rating:not(.rating--disabled):has(.rating-hit[data-value="6.5"]:hover) { --rating-value: 6.5; }
+  .rating:not(.rating--disabled):has(.rating-hit[data-value="7"]:hover) { --rating-value: 7; }
+  .rating:not(.rating--disabled):has(.rating-hit[data-value="7.5"]:hover) { --rating-value: 7.5; }
+  .rating:not(.rating--disabled):has(.rating-hit[data-value="8"]:hover) { --rating-value: 8; }
+  .rating:not(.rating--disabled):has(.rating-hit[data-value="8.5"]:hover) { --rating-value: 8.5; }
+  .rating:not(.rating--disabled):has(.rating-hit[data-value="9"]:hover) { --rating-value: 9; }
+  .rating:not(.rating--disabled):has(.rating-hit[data-value="9.5"]:hover) { --rating-value: 9.5; }
+  .rating:not(.rating--disabled):has(.rating-hit[data-value="10"]:hover) { --rating-value: 10; }
+}

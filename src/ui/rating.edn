@@ -1,0 +1,67 @@
+{:id :rating
+ :title "Rating"
+ :summary "A star rating with half stars: pick by pointing at a star's half, clear by choosing the value again, or show a score read-only."
+ :category :inputs
+ :group "Choices"
+ :keywords ["rating" "stars" "star rating" "half stars" "score" "review"]
+
+ :when-to-use
+ ["Your own score for something: a film, a book, a recipe."
+  "Showing a stored score on cards and lists, read-only and :sm."]
+
+ :when-not-to-use
+ ["Use form-range when the value is continuous or has more than 20 steps."
+  "Use form-radio-group when the options are labelled choices, not a scale."
+  "Use metric for an average or a score from elsewhere that needs its number."]
+
+ :usage "(require '[ui.rating :as rating])\n\n(rating/rating {:value 3.5 :name \"rating\" :label \"Your rating\"})\n(rating/rating {:value 4 :read-only true :size :sm})"
+
+ :examples
+ [{:title "Saving each pick with htmx"
+   :code "[:form {:hx-post \"/api/rating\" :hx-trigger \"change\" :hx-swap \"none\"}\n [:input {:type \"hidden\" :name \"id\" :value film-id}]\n (rating/rating {:value 4 :name \"rating\" :label \"Your rating\"})]"}
+  {:title "Whole stars, ten of them"
+   :code "(rating/rating {:value 7 :max 10 :half false})"}]
+
+ :api
+ [{:fn "rating"
+   :doc "Interactive: a radio group (a hidden 0 radio for none, one radio per step) under a row of stars. Read-only: an image of the value."
+   :props [{:name :value :type "number" :default "0" :doc "0 or nil for none, else a step such as 3.5."}
+           {:name :max :type "number" :default "5" :doc "Number of stars, up to 10."}
+           {:name :half :type "boolean" :default "true" :doc "false allows whole stars only."}
+           {:name :name :type "string" :doc "Radio group name, submitted with a form. Generated when absent."}
+           {:name :label :type "string" :default "\"Rating\"" :doc "Accessible name of the group."}
+           {:name :size :type ":sm | :md | :lg" :default ":md" :doc ":sm for cards and lists."}
+           {:name :read-only :type "boolean" :doc "An image of the value with an aria-label, no inputs."}
+           {:name :disabled :type "boolean" :doc "Shown dimmed, not changeable."}
+           {:name :on-change :type "fn [event]" :doc ":cljs and :squint. The target is the checked radio; its value is \"0\" when cleared."}
+           {:name :class :type "string" :doc "On the wrapper."}
+           {:name :attrs :type "map" :doc "On the wrapper."}]}
+  {:fn "steps" :doc "The values a rating can take for {:max :half}, lowest first."}
+  {:fn "value-str" :doc "A value as the radios carry it: \"4\", \"3.5\"."}
+  {:fn "format-value" :doc "A value for reading: 3.5 becomes \"3½\"."}
+  {:fn "value-label" :doc "A value for a screen reader: \"3½ stars\", \"Not rated\"."}
+  {:fn "rating-classes" :doc "Class string for {:size :read-only :disabled}."}]
+
+ :keyboard [["Arrow keys" "Move between values (native radio group)."]
+            ["Space" "Picks the focused value."]
+            ["Backspace / Delete" "Clears the rating (runtime)."]]
+
+ :accessibility ["Interactive: role=radiogroup with the label, each radio named like \"3½ stars\", a 0 radio named \"Not rated\"."
+                 "Read-only: role=img with an aria-label such as \"Rating: 4 out of 5\"."
+                 "The focus ring sits around the stars while a radio has keyboard focus."]
+ :motion ["The fill moves over --duration-fast; a pick pops the stars one after another with --ease-spring."
+          "A hover preview dims the fill, only on devices that hover."
+          "Reduced motion drops the fill transition and the pop."]
+ :responsive ["The width never changes with the value, so a rating can sit in a row of buttons."
+              ":md stars sit in a 36px tall row; :sm is for cards and lists."]
+ :runtime ["ui.js.rating"]
+
+ :targets
+ {:clj "Uncontrolled: submit it in a form, or post each pick with htmx (hx-trigger change). Needs ui-runtime.js to clear by choosing the value again."
+  :cljs "Pass :value and :on-change; read the value from the event target."
+  :squint "Same as Replicant; require ui.js.rating in the SPA for clearing and the pop."}
+
+ :notes-for-ai ["Read the value as a number from the checked radio: \"0\" means cleared."
+                "Use :read-only with :size :sm on cards; don't render an interactive rating per card."]
+
+ :related [:form :number-field :metric]}

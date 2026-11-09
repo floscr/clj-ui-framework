@@ -11,6 +11,7 @@
             [number-field]
             [panels]
             [popover]
+            [rating]
             [select]
             [theme]
             [toast]

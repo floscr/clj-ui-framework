@@ -114,6 +114,7 @@
               [ui.pagination-test]
               [ui.form-test]
               [ui.number-field-test]
+              [ui.rating-test]
               [ui.color-picker-test]
               [ui.select-test]
               [ui.icon-test]
@@ -169,6 +170,7 @@
                                       'ui.pagination-test
                                       'ui.form-test
                                       'ui.number-field-test
+                                      'ui.rating-test
                                       'ui.color-picker-test
                                       'ui.select-test
                                       'ui.icon-test
