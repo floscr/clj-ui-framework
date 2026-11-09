@@ -9,6 +9,37 @@ clj-ui-framework/clj-ui-framework
  :git/sha "<sha the tag points at>"}
 ```
 
+## v2.4.0 — 2026-11-09
+
+### New
+
+- **Rating** (`ui.rating` + the `ui.js.rating` runtime): a star rating
+  with half stars, picked by the half of a star you point at. Choosing the
+  value again or Backspace / Delete clears it, and a value that lands pops
+  the stars one by one. A radio group under the stars, whose fill follows
+  the checked or hovered radio in CSS, so it renders in every target and
+  posts with a form (htmx `hx-trigger "change"`). `:read-only` with
+  `:size :sm` shows a score on cards. Its width never changes with the
+  value.
+- **Runtime tooltips** in one shared layer: per-trigger delay, instant
+  switching between triggers, shortcut keycaps, rich content cards, a
+  danger tone and a bubble that inverts the page. `tooltip-attrs` puts a
+  plain tooltip on any element (`data-tooltip`), and components use them
+  instead of native titles (theme toggle, player bar, timeline, video
+  player, file browser, file progress, grid, day grid, dial); icon-only
+  buttons get aria-labels.
+- **Context menu sub-menus**: an item with `:items` drills into a page of
+  them under a back header; pages slide while the menu animates to the
+  new size and position.
+- **Spinner**: a stretching arc on a muted track, recolored through
+  `--spinner-arc` / `--spinner-track` / `--spinner-w`.
+- **Dial**: actions render as `ui.button` and share a row, sliders reset
+  from a right-click menu and snap with Shift / Ctrl, `label false` hides
+  a control's label.
+- **Theme**: a `[data-theme=light]` block, so a subtree can be light under
+  a dark root.
+- Icons `palette`, `signpost` and `scissors`.
+
 ## v2.3.0 — 2026-11-02
 
 ### New
