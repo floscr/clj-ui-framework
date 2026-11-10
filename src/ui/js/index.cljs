@@ -8,6 +8,7 @@
             [gestures]
             [lightbox]
             [masonry]
+            [notification]
             [number-field]
             [panels]
             [popover]

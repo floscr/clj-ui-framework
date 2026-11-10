@@ -1,97 +1,121 @@
 {:id :notification
  :title "Notification"
- :summary "Cards for things that happen out of view, like a copy or a command running in the background, stacked with the newest in front and the rest tucked behind until you reach for them."
+ :summary "Sonner's toaster in this framework's card: toasts stacked per screen position, the newest in front and the rest tucked behind, fanned out on hover, swiped away, with a pure queue model and Sonner's toast() for pages without app state."
  :category :feedback
  :group "Messages"
- :keywords ["notification" "toast" "toast stack" "sonner" "background job" "copied" "snackbar" "live activity"]
+ :keywords ["notification" "toast" "toaster" "sonner" "toast stack" "background job" "copied" "snackbar" "swipe to dismiss" "promise toast"]
 
  :when-to-use
- ["Work that runs in the background and finishes later: a shell command, an export, a sync. The card starts as :loading and turns into its result in place."
-  "A short confirmation that needs more than one word, or an action like Open or Undo."
-  "Several of these at once: the stack keeps them to one card's height until you hover or tap it."]
+ ["Results of work that happens out of view: a command in the background, an export, a sync. A :loading toast turns into its result in place (post the same :id)."
+  "A confirmation with an action, like Undo or Open."
+  "Several at once: the toaster keeps them to one toast's height until hovered, tapped or reached with Alt+T."]
 
  :when-not-to-use
- ["Use toast for a one-line flash the JS runtime shows and removes on its own, or from an HTMX response."
-  "Use alert for a message that belongs to the page and must stay until it is resolved."
-  "Use processing-bar for a list of uploads or jobs you watch as they progress."]
+ ["Use toast for the legacy one-line flash the runtime shows on its own."
+  "Use alert for a message that belongs to the page and stays until resolved."
+  "Use processing-bar for a list of uploads or jobs watched as they progress."]
 
- :usage "(require '[ui.notification :as notification]\n         '[ui.button :as button])\n\n(notification/notification-stack {}\n  (notification/notification {:status :success :title \"Copied to clipboard\"})\n  (notification/notification {:status :loading\n                              :title \"Running in background\"\n                              :description [:code \"bb test --focus xi.session-test\"]\n                              :meta \"0:12\"\n                              :on-dismiss dismiss!}\n    (button/button {:size :sm :on-click open-terminal!} \"Open\")))"
+ :usage "(require '[ui.notification :as notification])\n\n;; the queue lives in the host's state; every handler gets `now`\n(defonce !q (atom (notification/queue)))\n\n(defn notify! [item]\n  (swap! !q notification/post item (js/Date.now))\n  (schedule!)) ; one timer at (notification/next-due @!q) → notification/expire\n\n(notification/notification-toaster\n  {:items      (notification/visible @!q)\n   :position   :bottom-right\n   :on-dismiss (fn [id reason] (swap! !q notification/dismiss id (js/Date.now) reason) (schedule!))\n   :on-pause   (fn [paused?] (swap! !q (if paused? notification/pause notification/resume) (js/Date.now)) (schedule!))})"
 
  :examples
- [{:title "A background command that finished"
-   :code "(notification/notification {:status :success\n                            :title \"Tests passed\"\n                            :description [:code \"bb test\"]\n                            :meta \"212 tests · 34 s\"}\n  (button/button {:size :sm :on-click open-terminal!} \"Open\"))"}
-  {:title "A failure that stays until dismissed"
-   :code "(notification/notification {:status :danger\n                            :title \"Command failed\"\n                            :description [:code \"bb test\"]\n                            :meta \"exit 1 · 1 failure\"\n                            :on-dismiss dismiss!}\n  (button/button {:size :sm :on-click open-terminal!} \"Open\"))"}
-  {:title "Pinned to the bottom right of the viewport, fanned out on tap"
-   :code "(notification/notification-stack {:position :bottom-right :expanded @expanded?}\n  (for [n notifications] (notification/notification n)))"}
-  {:title "The queue model in a Replicant app: the state in an atom, one timer"
-   :code "(defonce !queue (atom (notification/queue)))\n\n(defn schedule! []\n  (when-let [due (notification/next-due @!queue)]\n    (js/setTimeout (fn [] (swap! !queue notification/expire (js/Date.now)) (schedule!))\n                   (- due (js/Date.now)))))\n\n(defn notify! [item]\n  (swap! !queue notification/post item (js/Date.now))\n  (schedule!))\n\n(notify! {:id \"job-1\" :source :terminal :status :loading :title \"Running in background\"})\n;; later, the same id turns the card into the result\n(notify! {:id \"job-1\" :status :success :title \"Tests passed\"})\n\n(notification/notification-stack\n  {:on-dismiss-all (fn [_] (swap! !queue notification/dismiss-all))\n   :attrs {:on {:mouseenter (fn [_] (swap! !queue notification/pause (js/Date.now)))\n                :mouseleave (fn [_] (swap! !queue notification/resume (js/Date.now)) (schedule!))}}}\n  (for [n (notification/visible @!queue)]\n    (notification/notification\n      (assoc n :on-dismiss (fn [_] (swap! !queue notification/dismiss (:id n)))\n               :attrs {:replicant/key (:id n)}))))"}]
+ [{:title "A background job: loading, then its result in the same toast"
+   :code "(notify! {:id \"job-1\" :type :loading :title \"Running in background\" :description [:code \"bb test\"]})\n;; later\n(notify! {:id \"job-1\" :type :success :title \"Tests passed\" :meta \"212 tests · 34 s\"\n          :action {:label \"Open\" :on-click open-terminal!}})"}
+  {:title "Sonner's toast() on a server-rendered page (needs ui-runtime.js)"
+   :code ";; in a handler or an onclick attribute\nwindow.__uiNotify.success(\"Saved\", {description: \"3 files\", action: {label: \"Undo\", onClick: undo}})\nwindow.__uiNotify.promise(fetch(\"/export\"), {loading: \"Exporting\", success: \"Export finished\", error: \"Export failed\"})\n\n;; or from an HTMX response fragment\n[:div {:data-ui-notify \"Saved\" :data-type \"success\"}]"}
+  {:title "Contained above a composer instead of the viewport"
+   :code "(notification/notification-toaster {:items items :contained true :offset {:bottom 64 :right 16}})"}]
 
  :api
- [{:fn "notification"
-   :doc "One card: a tinted icon tile, a title with an optional description and meta line, actions at the end and an optional dismiss button on its top-left corner. role status, or alert when :danger."
-   :children "Actions: one small button, like Open or Undo."
-   :props [{:name :status :type ":loading | :success | :warning | :danger" :doc "nil is neutral. :loading shows a spinner in the tile; changing it swaps the icon in place."}
-           {:name :icon :type "icon keyword | false" :doc "Overrides the status's icon (:check, :alert-triangle, :x); false removes the tile."}
-           {:name :title :type "string | hiccup" :doc "What happened, one line, truncated."}
-           {:name :description :type "string | hiccup" :doc "Second line, truncated: the command, the file."}
-           {:name :meta :type "string | hiccup" :doc "Muted third line with tabular numbers: elapsed time, counts."}
-           {:name :on-dismiss :type "fn" :doc "Shows the dismiss button and handles its click (:cljs, :squint)."}
-           {:name :dismiss-attrs :type "map" :doc "Shows the dismiss button with these attributes, e.g. HTMX ones on :clj."}
+ [{:fn "notification-toaster"
+   :doc "Sonner's Toaster: a polite live region (section) with one list per position, each toast an <li> carrying Sonner's data attributes. The ui.js.notification runtime shows and moves them; dismissals and pausing come back as notificationdismiss and notificationpause DOM events."
+   :props [{:name :items :type "vector" :doc "The toasts, newest first: notification props plus :id, :position, :removed-at (the queue model's visible)."}
+           {:name :position :type ":top-left | :top-center | :top-right | :bottom-left | :bottom-center | :bottom-right" :default ":bottom-right"}
+           {:name :expand :type "boolean" :doc "Always fanned out."}
+           {:name :visible-toasts :type "number" :default "3"}
+           {:name :gap :type "px" :default "14"}
+           {:name :offset :type "px | CSS length | {:top :right :bottom :left}" :default "24px"}
+           {:name :mobile-offset :type "same" :default "16px" :doc "Under 600px wide, where toasts span the width."}
+           {:name :close-button :type "boolean" :doc "Close buttons on every toast."}
+           {:name :rich-colors :type "boolean" :doc "Rich colors on every toast."}
+           {:name :invert :type "boolean" :doc "Every toast on the opposite theme's surface."}
+           {:name :dir :type "\"ltr\" | \"rtl\""}
+           {:name :hotkey :type "vector" :default "[\"altKey\" \"KeyT\"]" :doc "Focuses and fans out the toaster; Escape folds it."}
+           {:name :label :type "string" :default "\"Notifications\"" :doc "Accessible name; the hotkey is appended."}
+           {:name :swipe-directions :type "vector of \"top\" \"right\" \"bottom\" \"left\"" :doc "Default: toward the toaster's edge and side."}
+           {:name :icons :type "map" :doc "{:success :info :warning :error :loading} icon keyword or hiccup."}
+           {:name :contained :type "boolean" :doc "Positioned in the nearest positioned ancestor instead of the viewport (not in Sonner)."}
+           {:name :on-dismiss :type "fn" :doc "(fn [id reason]): close, swipe, action or cancel (:cljs, :squint)."}
+           {:name :on-pause :type "fn" :doc "(fn [paused?]): while hovered, pressed or the tab hidden."}
+           {:name :class :type "string"} {:name :attrs :type "map" :doc "HTMX on :clj, e.g. hx-trigger on notificationdismiss."}]}
+  {:fn "notification"
+   :doc "One card as a static block (previews, a page's own list). Toasts in a toaster are the same card with stacking added."
+   :children "Extra actions after :cancel and :action."
+   :props [{:name :type :type ":default | :success | :info | :warning | :error | :loading" :doc ":loading shows Sonner's twelve-bar loader."}
+           {:name :title :type "string | hiccup"}
+           {:name :description :type "string | hiccup" :doc "Second line, truncated."}
+           {:name :meta :type "string | hiccup" :doc "Muted third line, tabular numbers (ours, not Sonner's)."}
+           {:name :icon :type "icon keyword | hiccup | false" :doc "Overrides the type's icon; false for none."}
+           {:name :action :type "{:label :on-click :attrs} | hiccup" :doc "Dismisses the toast after the click unless the event was prevented."}
+           {:name :cancel :type "{:label :on-click :attrs} | hiccup" :doc "A quieter button before the action; dismisses."}
+           {:name :close-button :type "boolean" :doc "The round close button on the top-left corner."}
+           {:name :close-label :type "string" :default "\"Close toast\""}
+           {:name :dismissible :type "boolean" :default "true" :doc "false: close and swipe do nothing."}
+           {:name :rich-colors :type "boolean" :doc "Tints the whole card with its type's color."}
+           {:name :invert :type "boolean"}
+           {:name :unstyled :type "boolean" :doc "No card surface."}
+           {:name :class-names :type "map" :doc ":title :description :content :icon :close-button :action-button :cancel-button"}
            {:name :class :type "string"} {:name :attrs :type "map"}]}
-  {:fn "notification-stack"
-   :doc "A polite live region, newest child first: the first sits in front, the next two tuck behind it as edges 12px apart, the rest hide. Hover, keyboard focus or :expanded fans them out into a list with the newest at the bottom."
-   :children "notification elements, newest first."
-   :props [{:name :expanded :type "boolean" :doc "Fans the stack out; set it on tap, since touch screens have no hover."}
-           {:name :position :type ":bottom-right | :bottom-center | :bottom-left" :doc "Pins the stack to that viewport edge; full width on phones. nil keeps it in the flow."}
-           {:name :label :type "string" :default "\"Notifications\"" :doc "Accessible name of the region."}
-           {:name :on-dismiss-all :type "fn" :doc "Adds a Close all button above the fanned-out list (:cljs, :squint)."}
-           {:name :dismiss-all-attrs :type "map" :doc "Adds the Close all button with these attributes, e.g. HTMX ones on :clj."}
-           {:name :class :type "string"} {:name :attrs :type "map"}]}
-  {:fn "queue" :doc "An empty queue: {:items [] :muted #{} :paused-at nil :seq 0}. Items are notification props plus :id, :source, :duration and the :expires-at the model stamps."}
-  {:fn "post" :doc "(post state item now) or with a limit (default 12). A queued :id updates that card in place, keeps its other keys and restarts its clock; anything else goes in front and the oldest drop past the limit. Items without :id get one."}
-  {:fn "lifetime" :doc "Milliseconds an item stays, nil until dismissed: :duration (0 keeps it), else :loading and :danger stay, :warning 8 s, the rest 5 s."}
-  {:fn "dismiss" :doc "(dismiss state id)."}
-  {:fn "dismiss-all" :doc "Removes every item; a later post with a dismissed job's id comes back as a new card."}
-  {:fn "mute" :doc "(mute state source): the source's items stay queued and timed but leave visible."}
+  {:fn "queue" :doc "An empty queue: {:items [] :muted #{} :paused-at nil :seq 0}. Items are toast props plus :id, :source, :duration, :position, and what the model stamps (:expires-at, :removed-at, :closed)."}
+  {:fn "post" :doc "(post state item now) or with opts {:duration :limit}. A queued :id updates in place (a loading one gets :promise for its loader fade); a leaving one is replaced; else in front."}
+  {:fn "lifetime" :doc "Sonner's rule: :loading and ##Inf stay, a positive :duration counts, else the default 4 s (errors too)."}
+  {:fn "dismiss" :doc "(dismiss state id now) or with a reason: the item stays remove-delay (200 ms) with :removed-at for its exit, then expire drops it."}
+  {:fn "dismiss-all" :doc "(dismiss-all state now)."}
+  {:fn "expire" :doc "(expire state now): starts closing what is due (:closed :auto, not while paused) and drops what finished leaving."}
+  {:fn "next-due" :doc "The one time to call expire next, nil for never."}
+  {:fn "pause" :doc "(pause state now): Sonner pauses while expanded, pressed or the tab is hidden."}
+  {:fn "resume" :doc "(resume state now): each clock keeps the time it had left."}
+  {:fn "newly-closed" :doc "(newly-closed before after): items that started leaving, for onAutoClose (:closed :auto) and onDismiss."}
+  {:fn "visible" :doc "Items to render, newest first, muted sources left out, leaving ones kept for their exit."}
+  {:fn "active" :doc "Visible items that are not leaving."}
+  {:fn "mute" :doc "(mute state source): queued and timed, not visible."}
   {:fn "unmute" :doc "(unmute state source)."}
   {:fn "muted?" :doc "(muted? state source)."}
-  {:fn "pause" :doc "(pause state now): stops every clock, while the stack is hovered or focused."}
-  {:fn "resume" :doc "(resume state now): each clock keeps the time it had left."}
-  {:fn "expire" :doc "(expire state now): removes the items whose time is up; nothing while paused."}
-  {:fn "next-due" :doc "The earliest :expires-at, nil for never or while paused: schedule one timer for it, then call expire."}
-  {:fn "visible" :doc "The items to render, newest first, without muted sources."}
-  {:fn "notification-classes" :doc "Class string for {:status :multiline}."}
-  {:fn "notification-class-list" :doc "Vector form of notification-classes."}
-  {:fn "notification-stack-classes" :doc "Class string for {:expanded :position}."}
-  {:fn "notification-stack-class-list" :doc "Vector form of notification-stack-classes."}]
+  {:fn "position-parts" :doc ":bottom-right → [\"bottom\" \"right\"]."}
+  {:fn "default-swipe-directions" :doc "Toward the toaster's edge and side."}
+  {:fn "hotkey-label" :doc "[\"altKey\" \"KeyT\"] → \"alt+T\"."}
+  {:fn "offset-attrs" :doc "Offset prop → data-<prefix>-<side> attributes the runtime turns into CSS variables."}
+  {:fn "notification-classes" :doc "Class string for {:type :multiline}."}
+  {:fn "notification-class-list" :doc "Vector form of notification-classes."}]
 
- :keyboard [["Tab" "Moves into the stack, which fans out while it holds focus, then between actions and dismiss buttons."]]
+ :keyboard [["Alt+T" "Focuses the toaster and fans it out."]
+            ["Escape" "Folds it while focus is inside."]
+            ["Tab" "Moves between toasts and their buttons."]]
 
  :accessibility
- ["The stack is a labelled section with aria-live polite, so new cards are announced; a :danger card is role alert."
-  "Tucked cards keep their buttons in the tab order; focusing one fans the stack out so it is visible."
-  "The dismiss button is labelled Dismiss and has a 44px tap target around its 20px circle."]
+ ["The toaster is a labelled section with aria-live polite and aria-relevant additions text, so new and updated toasts are announced."
+  "Focus that leaves the toaster returns to where it came from, as in Sonner."
+  "The close button is labelled Close toast and has a 44px tap target around its 20px circle."]
 
  :motion
- ["A new card rises from below over --duration-standard with --ease-enter; older ones slide back and narrow by 0.05 per step."
-  "A status change pops the new icon in with --ease-spring. Fanning out slides the tucked cards up into the list."
+ ["Sonner's timing: toasts enter from the edge over 400ms, older ones tuck behind 14px apart and 5% narrower a step, and move to their offsets when fanned out."
+  "Leaving: the front one slides out and fades over 200ms; a swiped one leaves in its direction. A promise toast fades its loader out and its icon in."
   "Reduced motion keeps the end states and drops the travel."]
 
  :responsive
- ["The stack is at most 352px wide. Pinned stacks span the screen with a 16px gutter below 480px."
-  "Touch screens show the dismiss button all the time; pointers reveal it on hover or focus."]
+ ["Toasts are 356px wide; under 600px they span the screen at the mobile offsets (16px)."
+  "Touch: a tap fans the stack out, a swipe toward the toaster's edge or side dismisses."]
+
+ :runtime ["ui.js.notification"]
 
  :targets
- {:clj "Static markup; give :dismiss-attrs HTMX attributes to dismiss on the server."
-  :cljs ":on-dismiss becomes {:on {:click f}}. Give each card a stable :replicant/key in :attrs so a status change updates it in place."
-  :squint ":on-dismiss is a flat :on-click attribute."}
+ {:clj "Render notification-toaster with the items; listen for notificationdismiss with HTMX (hx-trigger) or use window.__uiNotify / [data-ui-notify] markers."
+  :cljs ":on-dismiss and :on-pause become listeners for the runtime's events; toasts are keyed by :id."
+  :squint "Same, as flat :on-notificationdismiss attributes."}
 
  :notes-for-ai
- ["Keep the queue model's map wherever the app keeps state and update it only with post, dismiss, expire and the others; schedule one timer at next-due. The model never reads the clock or starts timers itself."
-  "Render (visible state) newest first, with :replicant/key (:id item) so a status change updates the card in place. Set :expanded on tap; call pause and resume on hover and focus."
-  "Copy is a label in words: Copied to clipboard, Tests passed, Command failed. Not Success!"
-  "Background work keeps one card and changes its :status from :loading to :success or :danger instead of adding a second card."
-  "Keep a failure until it is dismissed; let successes leave after a few seconds."]
+ ["Keep the queue model's map in the host's state and change it only through post, dismiss, expire, pause and resume; schedule one timer at next-due."
+  "Pass (visible state) as :items so leaving toasts stay for their exit animation."
+  "Background work keeps one toast: post the same :id with :loading, then :success or :error."
+  "Copy is a label in words: Copied to clipboard, Tests passed, Command failed. Not Success!"]
 
  :related [:toast :alert :processing-bar :spinner :button]}

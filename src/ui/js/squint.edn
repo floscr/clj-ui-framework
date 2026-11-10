@@ -1,2 +1,2 @@
-{:paths ["."]
+{:paths ["." "../.."]
  :output-dir ".compiled"}
