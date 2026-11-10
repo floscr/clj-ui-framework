@@ -5,7 +5,7 @@
 - Type: Component (feedback, Messages)
 - Namespace: `ui.notification`
 - Source: `src/ui/notification.cljc`
-- Public fns: `notification-class-list`, `notification-classes`, `notification`, `notification-stack-class-list`, `notification-stack-classes`, `notification-stack`
+- Public fns: `notification-class-list`, `notification-classes`, `notification`, `notification-stack-class-list`, `notification-stack-classes`, `notification-stack`, `queue`, `lifetime`, `post`, `dismiss`, `dismiss-all`, `mute`, `unmute`, `muted?`, `pause`, `resume`, `expire`, `next-due`, `visible`
 - Keywords: notification, toast, toast stack, sonner, background job, copied, snackbar, live activity
 
 ## When to use
@@ -66,6 +66,34 @@
   (for [n notifications] (notification/notification n)))
 ```
 
+### The queue model in a Replicant app: the state in an atom, one timer
+
+```clojure
+(defonce !queue (atom (notification/queue)))
+
+(defn schedule! []
+  (when-let [due (notification/next-due @!queue)]
+    (js/setTimeout (fn [] (swap! !queue notification/expire (js/Date.now)) (schedule!))
+                   (- due (js/Date.now)))))
+
+(defn notify! [item]
+  (swap! !queue notification/post item (js/Date.now))
+  (schedule!))
+
+(notify! {:id "job-1" :source :terminal :status :loading :title "Running in background"})
+;; later, the same id turns the card into the result
+(notify! {:id "job-1" :status :success :title "Tests passed"})
+
+(notification/notification-stack
+  {:on-dismiss-all (fn [_] (swap! !queue notification/dismiss-all))
+   :attrs {:on {:mouseenter (fn [_] (swap! !queue notification/pause (js/Date.now)))
+                :mouseleave (fn [_] (swap! !queue notification/resume (js/Date.now)) (schedule!))}}}
+  (for [n (notification/visible @!queue)]
+    (notification/notification
+      (assoc n :on-dismiss (fn [_] (swap! !queue notification/dismiss (:id n)))
+               :attrs {:replicant/key (:id n)}))))
+```
+
 ## API reference
 
 ### `notification`
@@ -97,8 +125,62 @@ Children: notification elements, newest first.
 | `:expanded` | `boolean` | – | Fans the stack out; set it on tap, since touch screens have no hover. |
 | `:position` | `:bottom-right \| :bottom-center \| :bottom-left` | – | Pins the stack to that viewport edge; full width on phones. nil keeps it in the flow. |
 | `:label` | `string` | `"Notifications"` | Accessible name of the region. |
+| `:on-dismiss-all` | `fn` | – | Adds a Close all button above the fanned-out list (:cljs, :squint). |
+| `:dismiss-all-attrs` | `map` | – | Adds the Close all button with these attributes, e.g. HTMX ones on :clj. |
 | `:class` | `string` | – |  |
 | `:attrs` | `map` | – |  |
+
+### `queue`
+
+An empty queue: {:items [] :muted #{} :paused-at nil :seq 0}. Items are notification props plus :id, :source, :duration and the :expires-at the model stamps.
+
+### `post`
+
+(post state item now) or with a limit (default 12). A queued :id updates that card in place, keeps its other keys and restarts its clock; anything else goes in front and the oldest drop past the limit. Items without :id get one.
+
+### `lifetime`
+
+Milliseconds an item stays, nil until dismissed: :duration (0 keeps it), else :loading and :danger stay, :warning 8 s, the rest 5 s.
+
+### `dismiss`
+
+(dismiss state id).
+
+### `dismiss-all`
+
+Removes every item; a later post with a dismissed job's id comes back as a new card.
+
+### `mute`
+
+(mute state source): the source's items stay queued and timed but leave visible.
+
+### `unmute`
+
+(unmute state source).
+
+### `muted?`
+
+(muted? state source).
+
+### `pause`
+
+(pause state now): stops every clock, while the stack is hovered or focused.
+
+### `resume`
+
+(resume state now): each clock keeps the time it had left.
+
+### `expire`
+
+(expire state now): removes the items whose time is up; nothing while paused.
+
+### `next-due`
+
+The earliest :expires-at, nil for never or while paused: schedule one timer for it, then call expire.
+
+### `visible`
+
+The items to render, newest first, without muted sources.
 
 ### `notification-classes`
 
@@ -147,7 +229,8 @@ Vector form of notification-stack-classes.
 
 ## Notes for AI
 
-- The host owns the queue: it renders the cards newest first, removes them when their time is up and sets :expanded on tap.
+- Keep the queue model's map wherever the app keeps state and update it only with post, dismiss, expire and the others; schedule one timer at next-due. The model never reads the clock or starts timers itself.
+- Render (visible state) newest first, with :replicant/key (:id item) so a status change updates the card in place. Set :expanded on tap; call pause and resume on hover and focus.
 - Copy is a label in words: Copied to clipboard, Tests passed, Command failed. Not Success!
 - Background work keeps one card and changes its :status from :loading to :success or :danger instead of adding a second card.
 - Keep a failure until it is dismissed; let successes leave after a few seconds.

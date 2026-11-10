@@ -4,8 +4,11 @@
    result), and a stack that tucks older cards behind the newest one
    and fans them out on hover, focus or :expanded.
 
-   Both are plain markup the host renders; queueing, timers and exits
-   belong to the host (ui.toast is the runtime-owned one-line flash)."
+   Both are plain markup the host renders. The queue model at the end
+   holds the rules (update by id, lifetimes by status, pause, mute,
+   close all) as pure functions of the state and `now`; the host keeps
+   the state wherever it keeps state and schedules `expire` at
+   `next-due`. ui.toast is the runtime-owned one-line flash."
   (:require [clojure.string :as str]
             [ui.util :as util]
             [ui.icon :as icon]
@@ -96,24 +99,158 @@
   [opts]
   (str/join " " (notification-stack-class-list opts)))
 
+(defn- dismiss-all-el [on-dismiss-all dismiss-all-attrs]
+  [:div {:class "notification-stack-bar"}
+   [:button (merge #?(:squint (cond-> {:class "notification-stack-close" :type "button"}
+                                on-dismiss-all (assoc :on-click on-dismiss-all))
+                      :cljs   (cond-> {:class ["notification-stack-close"] :type "button"}
+                                on-dismiss-all (assoc-in [:on :click] on-dismiss-all))
+                      :clj    {:class "notification-stack-close" :type "button"})
+                   dismiss-all-attrs)
+    "Close all"]])
+
 (defn notification-stack
   "A polite live region that stacks notifications, newest first: the first
    child sits in front, the next two tuck behind it as edges, the rest
    hide. Hover, keyboard focus or :expanded fans them out into a list.
 
    Props:
-     :expanded - boolean; fan out (set it on tap for touch screens)
-     :position - nil stays in the flow; :bottom-right, :bottom-center or
-                 :bottom-left pins it to that viewport edge
-     :label    - accessible name of the region (default \"Notifications\")
-     :class    - additional CSS classes
-     :attrs    - additional HTML attributes map
+     :expanded          - boolean; fan out (set it on tap for touch screens)
+     :position          - nil stays in the flow; :bottom-right, :bottom-center
+                          or :bottom-left pins it to that viewport edge
+     :label             - accessible name of the region (default \"Notifications\")
+     :on-dismiss-all    - click handler of a Close all button shown above the
+                          fanned-out list (:cljs, :squint)
+     :dismiss-all-attrs - attributes for that button (HTMX on :clj)
+     :class             - additional CSS classes
+     :attrs             - additional HTML attributes map
 
    Children are notification elements, newest first."
-  [{:keys [expanded position label class attrs] :as _props} & notifications]
-  (into [:section (util/class-attrs (notification-stack-class-list {:expanded expanded :position position})
-                                    class
-                                    (merge {:aria-label (or label "Notifications")
-                                            :aria-live "polite"}
-                                           attrs))]
-        (remove nil? notifications)))
+  [{:keys [expanded position label on-dismiss-all dismiss-all-attrs class attrs] :as _props} & notifications]
+  (let [notifications (remove nil? notifications)]
+    (cond-> (into [:section (util/class-attrs (notification-stack-class-list {:expanded expanded :position position})
+                                              class
+                                              (merge {:aria-label (or label "Notifications")
+                                                      :aria-live "polite"}
+                                                     attrs))]
+                  notifications)
+      (and (or on-dismiss-all dismiss-all-attrs) (seq notifications))
+      (conj (dismiss-all-el on-dismiss-all dismiss-all-attrs)))))
+
+;; ── Queue model ───────────────────────────────────────────────────
+;; {:items [item …] newest first, :muted #{source}, :paused-at ms, :seq n}
+;; An item is the card's props plus :id, :source, :duration and the
+;; :expires-at the model stamps on it. Time is always passed in as `now`.
+
+(def default-limit 12)
+
+(def default-lifetime 5000)
+
+(def ^:private status-lifetimes
+  {"loading" nil
+   "danger"  nil
+   "warning" 8000})
+
+(defn queue
+  "An empty notification queue."
+  []
+  {:items [] :muted #{} :paused-at nil :seq 0})
+
+(defn lifetime
+  "Milliseconds an item stays, nil until dismissed: its :duration (0 keeps
+   it), else by :status: :loading and :danger stay, :warning 8 s, the
+   rest 5 s."
+  [{:keys [status duration]}]
+  (if (number? duration)
+    (when (pos? duration) duration)
+    (let [s (some-> status util/kw-name)]
+      (if (contains? status-lifetimes s)
+        (get status-lifetimes s)
+        default-lifetime))))
+
+(defn- stamp
+  "Sets :expires-at from the item's lifetime. While paused the clock
+   starts at the pause, and resume shifts it by the pause's length."
+  [item now paused-at]
+  (let [ms (lifetime item)]
+    (assoc item :expires-at (when ms (+ (or paused-at now) ms)))))
+
+(defn post
+  "Shows `item` (the card's props plus :id, :source and :duration). An
+   :id already queued updates that card in place, its other keys kept,
+   and restarts its lifetime; anything else goes in front, past `limit`
+   (default 12) the oldest drop."
+  ([state item now] (post state item now default-limit))
+  ([state item now limit]
+   (let [{:keys [items paused-at]} state
+         id      (:id item)
+         queued? (and (some? id) (some (fn [i] (= id (:id i))) items))]
+     (if queued?
+       (assoc state :items (mapv (fn [i] (if (= id (:id i)) (stamp (merge i item) now paused-at) i))
+                                 items))
+       (let [n    (inc (or (:seq state) 0))
+             item (stamp (cond-> item (nil? id) (assoc :id (str "notification-" n))) now paused-at)]
+         (assoc state :seq n :items (vec (take limit (cons item items)))))))))
+
+(defn dismiss
+  "Removes the item with `id`."
+  [state id]
+  (assoc state :items (vec (remove (fn [i] (= id (:id i))) (:items state)))))
+
+(defn dismiss-all
+  "Removes every item. A later post with the id of a dismissed running
+   job shows its result as a new card."
+  [state]
+  (assoc state :items []))
+
+(defn mute
+  "Hides the items of `source` (kept and timed, but not visible) until
+   unmute."
+  [state source]
+  (assoc state :muted (conj (or (:muted state) #{}) source)))
+
+(defn unmute
+  [state source]
+  (assoc state :muted (disj (or (:muted state) #{}) source)))
+
+(defn muted?
+  [state source]
+  (contains? (or (:muted state) #{}) source))
+
+(defn pause
+  "Stops every clock, while the stack is hovered or focused."
+  [state now]
+  (if (:paused-at state) state (assoc state :paused-at now)))
+
+(defn resume
+  "Restarts the clocks with the time each had left."
+  [state now]
+  (if-let [paused-at (:paused-at state)]
+    (let [d (- now paused-at)]
+      (assoc state
+             :paused-at nil
+             :items (mapv (fn [i] (cond-> i (:expires-at i) (assoc :expires-at (+ (:expires-at i) d))))
+                          (:items state))))
+    state))
+
+(defn expire
+  "Removes the items whose time is up; nothing while paused."
+  [state now]
+  (if (:paused-at state)
+    state
+    (assoc state :items (vec (remove (fn [i] (when-let [t (:expires-at i)] (<= t now)))
+                                     (:items state))))))
+
+(defn next-due
+  "When to call expire next (ms, same clock as `now`), nil for never:
+   the host schedules its timer from this."
+  [state]
+  (when-not (:paused-at state)
+    (let [ts (keep (fn [i] (:expires-at i)) (:items state))]
+      (when (seq ts) (apply min ts)))))
+
+(defn visible
+  "The items to render, newest first, muted sources left out."
+  [state]
+  (let [muted (or (:muted state) #{})]
+    (vec (remove (fn [i] (contains? muted (:source i))) (:items state)))))

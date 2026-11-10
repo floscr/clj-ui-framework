@@ -239,6 +239,43 @@
   transition-timing-function: var(--ease-enter);
 }
 
+/* Close all: the last child, so column-reverse puts it on top; only fanned out */
+.notification-stack-bar {
+  display: none;
+  justify-content: flex-end;
+}
+
+.notification-stack-expanded > .notification-stack-bar,
+.notification-stack:hover > .notification-stack-bar,
+.notification-stack:focus-within > .notification-stack-bar {
+  display: flex;
+  animation: notification-fan var(--duration-standard) var(--ease-enter);
+}
+
+.notification-stack-close {
+  height: var(--control-sm);
+  padding: 0 var(--size-3);
+  border: var(--border-1);
+  border-radius: var(--radius-pill);
+  background: var(--bg-1);
+  color: var(--fg-1);
+  font-size: var(--font-xs);
+  font-weight: var(--weight-medium);
+  box-shadow: var(--shadow-2);
+  cursor: pointer;
+  transition:
+    color var(--duration-fast) var(--ease-standard),
+    transform var(--duration-fast) var(--ease-standard);
+}
+
+.notification-stack-close:hover {
+  color: var(--fg-0);
+}
+
+.notification-stack-close:active {
+  transform: scale(0.97);
+}
+
 @keyframes notification-fan {
   from { opacity: 0; transform: translateY(var(--size-3)) scale(0.97); }
 }

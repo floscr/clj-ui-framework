@@ -58,10 +58,12 @@
            (running)
            (notification/notification {:status :success :title "Export finished"})))))
 
-   (example :expanded "Fanned out with :expanded, as after a tap"
+   (example :expanded "Fanned out with :expanded, as after a tap, with Close all"
      (fn []
-       (deck "14rem"
-         (notification/notification-stack {:expanded true}
+       (deck "16rem"
+         (notification/notification-stack {:expanded true
+                                           :on-dismiss-all (log-click "Close all")
+                                           :dismiss-all-attrs {:title "Close all notifications"}}
            (copied)
            (running)
            (notification/notification {:status :success :title "Export finished"})))))])
