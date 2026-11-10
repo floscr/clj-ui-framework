@@ -7777,7 +7777,7 @@
     const style1 = li.style;
     const h02 = style1.height;
     style1.height = "auto";
-    const h3 = li.getBoundingClientRect().height;
+    const h3 = li.offsetHeight;
     style1.height = h02;
     return h3;
   };
@@ -7973,7 +7973,11 @@
       li.addEventListener("pointerdown", (function(e) {
         if (truth_(!(2 === e.button) && swipable_QMARK_(li))) {
           drag1["t"] = Date.now();
-          e.target.setPointerCapture(e.pointerId);
+          try {
+            e.target.setPointerCapture(e.pointerId);
+          } catch (_2) {
+          }
+          ;
           if ("BUTTON" === e.target.tagName) {
             return null;
           } else {
@@ -7985,43 +7989,43 @@
         ;
       }));
       li.addEventListener("pointermove", (function(e) {
-        const temp__23062__auto__2 = drag1["start"];
-        if (truth_(temp__23062__auto__2)) {
-          const start3 = temp__23062__auto__2;
+        const temp__23062__auto__3 = drag1["start"];
+        if (truth_(temp__23062__auto__3)) {
+          const start4 = temp__23062__auto__3;
           if (`${window.getSelection() ?? ""}`.length > 0) {
             return null;
           } else {
-            const dx4 = e.clientX - start3["x"];
-            const dy5 = e.clientY - start3["y"];
+            const dx5 = e.clientX - start4["x"];
+            const dy6 = e.clientY - start4["y"];
             if (truth_(drag1["axis"] == null && (() => {
-              const or__23426__auto__6 = Math.abs(dx4) > 1;
-              if (or__23426__auto__6) {
-                return or__23426__auto__6;
+              const or__23426__auto__7 = Math.abs(dx5) > 1;
+              if (or__23426__auto__7) {
+                return or__23426__auto__7;
               } else {
-                return Math.abs(dy5) > 1;
+                return Math.abs(dy6) > 1;
               }
               ;
             })())) {
-              drag1["axis"] = Math.abs(dx4) > Math.abs(dy5) ? "x" : "y";
+              drag1["axis"] = Math.abs(dx5) > Math.abs(dy6) ? "x" : "y";
             }
             ;
-            const map__78 = swipe_amount(drag1["axis"], dx4, dy5, swipe_directions(li));
-            const x9 = get(map__78, "x");
-            const y10 = get(map__78, "y");
+            const map__89 = swipe_amount(drag1["axis"], dx5, dy6, swipe_directions(li));
+            const x10 = get(map__89, "x");
+            const y11 = get(map__89, "y");
             if (truth_((() => {
-              const or__23426__auto__11 = Math.abs(x9) > 0;
-              if (or__23426__auto__11) {
-                return or__23426__auto__11;
+              const or__23426__auto__12 = Math.abs(x10) > 0;
+              if (or__23426__auto__12) {
+                return or__23426__auto__12;
               } else {
-                return Math.abs(y10) > 0;
+                return Math.abs(y11) > 0;
               }
               ;
             })())) {
               li.setAttribute("data-swiped", "true");
             }
             ;
-            set_var_BANG_(li, "--swipe-amount-x", `${x9 ?? ""}px`);
-            return set_var_BANG_(li, "--swipe-amount-y", `${y10 ?? ""}px`);
+            set_var_BANG_(li, "--swipe-amount-x", `${x10 ?? ""}px`);
+            return set_var_BANG_(li, "--swipe-amount-y", `${y11 ?? ""}px`);
           }
           ;
         }
@@ -8029,36 +8033,36 @@
       }));
       li.addEventListener("pointerup", (function(_) {
         if (truth_((() => {
-          const and__23442__auto__12 = swipable_QMARK_(li);
-          if (truth_(and__23442__auto__12)) {
+          const and__23442__auto__13 = swipable_QMARK_(li);
+          if (truth_(and__23442__auto__13)) {
             return !("true" === attr(li, "data-swipe-out"));
           } else {
-            return and__23442__auto__12;
+            return and__23442__auto__13;
           }
           ;
         })())) {
-          const x13 = (() => {
-            const or__23426__auto__14 = parseFloat(li.style.getPropertyValue("--swipe-amount-x"));
-            if (truth_(or__23426__auto__14)) {
-              return or__23426__auto__14;
+          const x14 = (() => {
+            const or__23426__auto__15 = parseFloat(li.style.getPropertyValue("--swipe-amount-x"));
+            if (truth_(or__23426__auto__15)) {
+              return or__23426__auto__15;
             } else {
               return 0;
             }
             ;
           })();
-          const y15 = (() => {
-            const or__23426__auto__16 = parseFloat(li.style.getPropertyValue("--swipe-amount-y"));
-            if (truth_(or__23426__auto__16)) {
-              return or__23426__auto__16;
+          const y16 = (() => {
+            const or__23426__auto__17 = parseFloat(li.style.getPropertyValue("--swipe-amount-y"));
+            if (truth_(or__23426__auto__17)) {
+              return or__23426__auto__17;
             } else {
               return 0;
             }
             ;
           })();
-          const out17 = swipe_out(drag1["axis"], x13, y15, Date.now() - drag1["t"], swipe_directions(li));
+          const out18 = swipe_out(drag1["axis"], x14, y16, Date.now() - drag1["t"], swipe_directions(li));
           drag1["start"] = null;
-          if (truth_(out17)) {
-            li.setAttribute("data-swipe-direction", out17);
+          if (truth_(out18)) {
+            li.setAttribute("data-swipe-direction", out18);
             li.setAttribute("data-swipe-out", "true");
             return emit_BANG_2(li, "notificationdismiss", { "id": attr(li, "data-id"), "reason": "swipe" });
           } else {

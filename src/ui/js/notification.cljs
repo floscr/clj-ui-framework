@@ -81,12 +81,13 @@
   (.dispatchEvent el (js/CustomEvent. type #js {:bubbles true :detail (clj->js detail)})))
 
 (defn- natural-height
-  "The toast's own height, whatever the collapsed stack makes of it."
+  "The toast's own height, whatever the collapsed stack makes of it: its
+   layout height, since a tucked toast's bounding box is scaled down."
   [li]
   (let [style (.-style li)
         h0    (.-height style)]
     (set! (.-height style) "auto")
-    (let [h (.-height (.getBoundingClientRect li))]
+    (let [h (.-offsetHeight li)]
       (set! (.-height style) h0)
       h)))
 
@@ -173,7 +174,9 @@
         (fn [e]
           (when (and (not= 2 (.-button e)) (swipable? li))
             (aset drag "t" (js/Date.now))
-            (.setPointerCapture (.-target e) (.-pointerId e))
+            ;; keeps the drag when the pointer leaves the toast; a pointer the
+            ;; browser no longer tracks only loses that
+            (try (.setPointerCapture (.-target e) (.-pointerId e)) (catch :default _ nil))
             (when-not (= "BUTTON" (.-tagName (.-target e)))
               (.setAttribute li "data-swiping" "true")
               (aset drag "start" #js {:x (.-clientX e) :y (.-clientY e)})))))
