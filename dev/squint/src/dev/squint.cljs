@@ -506,6 +506,7 @@
    (player-bar-demo)
    (timeline-demo)
    (examples/section-for :alert)
+   (examples/section-for :notification)
    (examples/section-for :badge)
    (examples/section-for :card)
    (examples/section-for :page)

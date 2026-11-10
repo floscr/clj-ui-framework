@@ -18,6 +18,7 @@
 
 - Confirm foreground actions in place (the button label, the row, the value); never as the only confirmation.
 - Use alert for a message that must stay until resolved.
+- Use notification for an icon, a second line, an action, or work that is still running.
 
 ## Usage
 
@@ -103,6 +104,7 @@ Vector form.
 
 ## Related
 
+- [Notification](notification.md): Cards for things that happen out of view, like a copy or a command running in the background, stacked with the newest in front and the rest tucked behind until you reach for them.
 - [Alert](alert.md): A persistent inline message with a tone, icon and optional title that helps people recover or continue.
 - [Processing bar](processing-bar.md): A compact accent-bordered panel listing background jobs in progress with thumbnails, labels and spinners.
 - [Dialog](dialog.md): A focused modal surface for decisions that need attention, as a native <dialog> or an overlay for reactive apps.

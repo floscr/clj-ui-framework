@@ -11,7 +11,8 @@
 
  :when-not-to-use
  ["Confirm foreground actions in place (the button label, the row, the value); never as the only confirmation."
-  "Use alert for a message that must stay until resolved."]
+  "Use alert for a message that must stay until resolved."
+  "Use notification for an icon, a second line, an action, or work that is still running."]
 
  :usage "(require '[ui.toast :as toast])\n\n;; Replicant / Squint\n(toast/show-toast! {:message \"Export finished\" :variant :success})\n\n;; Hiccup / HTMX: include the marker in the response fragment\n(toast/toast-flash {:message \"Saved\" :variant :success})"
 
@@ -52,4 +53,4 @@
  ["A toast never carries the only copy of an error; errors that need action use alert."
   "Success toasts are a label change in words: Export finished, not Success!"]
 
- :related [:alert :processing-bar :dialog]}
+ :related [:notification :alert :processing-bar :dialog]}

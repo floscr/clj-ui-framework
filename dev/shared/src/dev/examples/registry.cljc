@@ -60,6 +60,7 @@
             [dev.examples.metric :as metric]
             [dev.examples.day-grid :as day-grid]
             [dev.examples.list-row :as list-row]
+            [dev.examples.notification :as notification]
             [dev.examples.video-player :as video-player]))
 
 (def entries
@@ -116,6 +117,7 @@
    {:id :metric          :title "Metric"          :examples metric/examples}
    {:id :day-grid        :title "Day grid"        :examples day-grid/examples}
    {:id :list-row        :title "List row"        :examples list-row/examples}
+   {:id :notification    :title "Notification"    :examples notification/examples}
    {:id :video-player    :title "Video player"    :examples video-player/examples}])
 
 (defn entry

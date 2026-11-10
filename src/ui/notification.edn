@@ -1,0 +1,79 @@
+{:id :notification
+ :title "Notification"
+ :summary "Cards for things that happen out of view, like a copy or a command running in the background, stacked with the newest in front and the rest tucked behind until you reach for them."
+ :category :feedback
+ :group "Messages"
+ :keywords ["notification" "toast" "toast stack" "sonner" "background job" "copied" "snackbar" "live activity"]
+
+ :when-to-use
+ ["Work that runs in the background and finishes later: a shell command, an export, a sync. The card starts as :loading and turns into its result in place."
+  "A short confirmation that needs more than one word, or an action like Open or Undo."
+  "Several of these at once: the stack keeps them to one card's height until you hover or tap it."]
+
+ :when-not-to-use
+ ["Use toast for a one-line flash the JS runtime shows and removes on its own, or from an HTMX response."
+  "Use alert for a message that belongs to the page and must stay until it is resolved."
+  "Use processing-bar for a list of uploads or jobs you watch as they progress."]
+
+ :usage "(require '[ui.notification :as notification]\n         '[ui.button :as button])\n\n(notification/notification-stack {}\n  (notification/notification {:status :success :title \"Copied to clipboard\"})\n  (notification/notification {:status :loading\n                              :title \"Running in background\"\n                              :description [:code \"bb test --focus xi.session-test\"]\n                              :meta \"0:12\"\n                              :on-dismiss dismiss!}\n    (button/button {:size :sm :on-click open-terminal!} \"Open\")))"
+
+ :examples
+ [{:title "A background command that finished"
+   :code "(notification/notification {:status :success\n                            :title \"Tests passed\"\n                            :description [:code \"bb test\"]\n                            :meta \"212 tests · 34 s\"}\n  (button/button {:size :sm :on-click open-terminal!} \"Open\"))"}
+  {:title "A failure that stays until dismissed"
+   :code "(notification/notification {:status :danger\n                            :title \"Command failed\"\n                            :description [:code \"bb test\"]\n                            :meta \"exit 1 · 1 failure\"\n                            :on-dismiss dismiss!}\n  (button/button {:size :sm :on-click open-terminal!} \"Open\"))"}
+  {:title "Pinned to the bottom right of the viewport, fanned out on tap"
+   :code "(notification/notification-stack {:position :bottom-right :expanded @expanded?}\n  (for [n notifications] (notification/notification n)))"}]
+
+ :api
+ [{:fn "notification"
+   :doc "One card: a tinted icon tile, a title with an optional description and meta line, actions at the end and an optional dismiss button on its top-left corner. role status, or alert when :danger."
+   :children "Actions: one small button, like Open or Undo."
+   :props [{:name :status :type ":loading | :success | :warning | :danger" :doc "nil is neutral. :loading shows a spinner in the tile; changing it swaps the icon in place."}
+           {:name :icon :type "icon keyword | false" :doc "Overrides the status's icon (:check, :alert-triangle, :x); false removes the tile."}
+           {:name :title :type "string | hiccup" :doc "What happened, one line, truncated."}
+           {:name :description :type "string | hiccup" :doc "Second line, truncated: the command, the file."}
+           {:name :meta :type "string | hiccup" :doc "Muted third line with tabular numbers: elapsed time, counts."}
+           {:name :on-dismiss :type "fn" :doc "Shows the dismiss button and handles its click (:cljs, :squint)."}
+           {:name :dismiss-attrs :type "map" :doc "Shows the dismiss button with these attributes, e.g. HTMX ones on :clj."}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "notification-stack"
+   :doc "A polite live region, newest child first: the first sits in front, the next two tuck behind it as edges 12px apart, the rest hide. Hover, keyboard focus or :expanded fans them out into a list with the newest at the bottom."
+   :children "notification elements, newest first."
+   :props [{:name :expanded :type "boolean" :doc "Fans the stack out; set it on tap, since touch screens have no hover."}
+           {:name :position :type ":bottom-right | :bottom-center | :bottom-left" :doc "Pins the stack to that viewport edge; full width on phones. nil keeps it in the flow."}
+           {:name :label :type "string" :default "\"Notifications\"" :doc "Accessible name of the region."}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "notification-classes" :doc "Class string for {:status :multiline}."}
+  {:fn "notification-class-list" :doc "Vector form of notification-classes."}
+  {:fn "notification-stack-classes" :doc "Class string for {:expanded :position}."}
+  {:fn "notification-stack-class-list" :doc "Vector form of notification-stack-classes."}]
+
+ :keyboard [["Tab" "Moves into the stack, which fans out while it holds focus, then between actions and dismiss buttons."]]
+
+ :accessibility
+ ["The stack is a labelled section with aria-live polite, so new cards are announced; a :danger card is role alert."
+  "Tucked cards keep their buttons in the tab order; focusing one fans the stack out so it is visible."
+  "The dismiss button is labelled Dismiss and has a 44px tap target around its 20px circle."]
+
+ :motion
+ ["A new card rises from below over --duration-standard with --ease-enter; older ones slide back and narrow by 0.05 per step."
+  "A status change pops the new icon in with --ease-spring. Fanning out slides the tucked cards up into the list."
+  "Reduced motion keeps the end states and drops the travel."]
+
+ :responsive
+ ["The stack is at most 352px wide. Pinned stacks span the screen with a 16px gutter below 480px."
+  "Touch screens show the dismiss button all the time; pointers reveal it on hover or focus."]
+
+ :targets
+ {:clj "Static markup; give :dismiss-attrs HTMX attributes to dismiss on the server."
+  :cljs ":on-dismiss becomes {:on {:click f}}. Give each card a stable :replicant/key in :attrs so a status change updates it in place."
+  :squint ":on-dismiss is a flat :on-click attribute."}
+
+ :notes-for-ai
+ ["The host owns the queue: it renders the cards newest first, removes them when their time is up and sets :expanded on tap."
+  "Copy is a label in words: Copied to clipboard, Tests passed, Command failed. Not Success!"
+  "Background work keeps one card and changes its :status from :loading to :success or :danger instead of adding a second card."
+  "Keep a failure until it is dismissed; let successes leave after a few seconds."]
+
+ :related [:toast :alert :processing-bar :spinner :button]}

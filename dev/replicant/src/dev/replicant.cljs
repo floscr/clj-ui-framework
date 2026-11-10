@@ -348,6 +348,7 @@
    (examples/section-for :button)
    (player-bar-demo)
    (examples/section-for :alert)
+   (examples/section-for :notification)
    (examples/section-for :badge)
    (examples/section-for :card)
    (examples/section-for :page)
