@@ -112,13 +112,22 @@
             :data-disabled (flag disabled?)}
    (icon/icon {:icon-name :x :size :sm})])
 
+(defn loading-locked?
+  "Sonner keeps a :loading toast until it settles: no close button, no
+   swipe. An explicit :dismissible true lifts that."
+  [{:keys [type dismissible]}]
+  (and (= "loading" (kw type)) (not (true? dismissible))))
+
+(defn swipable?
+  [{:keys [dismissible] :as item}]
+  (and (not (false? dismissible)) (not (loading-locked? item))))
+
 (defn- card-children
-  [{:keys [type title description meta action cancel close-button close-label dismissible] :as item}
+  [{:keys [title description meta action cancel close-button close-label dismissible] :as item}
    icons class-names extra]
-  (let [cn       (or class-names {})
-        loading? (= "loading" (kw type))]
+  (let [cn (or class-names {})]
     (cond-> []
-      (and close-button (not loading?))
+      (and close-button (not (loading-locked? item)))
       (conj (close-el close-label (false? dismissible) (:close-button cn)))
       true    (conj (icon-el item icons (:icon cn)))
       true    (conj (cond-> [:div {:class (classes "notification-text" (:content cn)) :data-content ""}
@@ -147,7 +156,9 @@
      :cancel       - same, a quieter button before the action
      :close-button - show the round close button on the top-left corner
      :close-label  - its aria-label (default \"Close toast\")
-     :dismissible  - false: close and swipe do nothing
+     :dismissible  - false: close and swipe do nothing; true also closes and
+                     swipes a :loading toast, which otherwise stays until it
+                     settles
      :rich-colors  - tint the whole card with its type's color
      :invert       - the opposite theme's surface
      :unstyled     - no card surface, the host styles it
@@ -228,6 +239,7 @@
                                          :data-promise (flag promise)
                                          :data-removed (flag removed-at)
                                          :data-dismissible (flag (not (false? dismissible)))
+                                         :data-swipable (flag (swipable? item))
                                          :data-index (str index)
                                          :data-count (str total)
                                          :data-front (flag (zero? index))

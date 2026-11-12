@@ -163,8 +163,7 @@
   (let [ol (.closest li "[data-ui-notification-list]")]
     (.split (or (some-> ol (attr "data-swipe-directions")) "") " ")))
 
-(defn- swipable? [li]
-  (and (= "true" (attr li "data-dismissible")) (not= "loading" (attr li "data-type"))))
+(defn- swipable? [li] (= "true" (attr li "data-swipable")))
 
 (defn- bind-toast! [li]
   (when-not (aget li "__uiNBound")

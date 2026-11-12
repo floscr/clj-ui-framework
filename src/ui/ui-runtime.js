@@ -6318,11 +6318,11 @@
   };
   var class_attrs = function(class_list, class$, attrs) {
     return merge({ "class": (() => {
-      const G__10081 = join(" ", class_list);
+      const G__10101 = join(" ", class_list);
       if (truth_(class$)) {
-        return `${G__10081 ?? ""}${" "}${class$ ?? ""}`;
+        return `${G__10101 ?? ""}${" "}${class$ ?? ""}`;
       } else {
-        return G__10081;
+        return G__10101;
       }
       ;
     })() }, attrs);
@@ -6401,16 +6401,16 @@
 
   // .compiled/ui/spinner.mjs
   var default_size2 = "md";
-  var spinner_class_list = function(p__889) {
-    const map__12 = p__889;
+  var spinner_class_list = function(p__891) {
+    const map__12 = p__891;
     const size3 = get(map__12, "size");
     const s4 = (() => {
       const or__23426__auto__5 = (() => {
-        const G__8906 = size3;
-        if (G__8906 == null) {
+        const G__8926 = size3;
+        if (G__8926 == null) {
           return null;
         } else {
-          return kw_name(G__8906);
+          return kw_name(G__8926);
         }
         ;
       })();
@@ -6421,31 +6421,31 @@
       }
       ;
     })();
-    const G__8917 = ["spinner"];
-    const G__8918 = s4 === "xs" ? conj(G__8917, "spinner-xs") : G__8917;
-    const G__8919 = s4 === "sm" ? conj(G__8918, "spinner-sm") : G__8918;
+    const G__8937 = ["spinner"];
+    const G__8938 = s4 === "xs" ? conj(G__8937, "spinner-xs") : G__8937;
+    const G__8939 = s4 === "sm" ? conj(G__8938, "spinner-sm") : G__8938;
     if (s4 === "lg") {
-      return conj(G__8919, "spinner-lg");
+      return conj(G__8939, "spinner-lg");
     } else {
-      return G__8919;
+      return G__8939;
     }
     ;
   };
   var spinner_classes = function(opts) {
     return join(" ", spinner_class_list(opts));
   };
-  var spinner = function(p__892) {
-    const map__12 = p__892;
+  var spinner = function(p__894) {
+    const map__12 = p__894;
     const _props3 = map__12;
     const size4 = get(map__12, "size");
     const class$5 = get(map__12, "class");
     const attrs6 = get(map__12, "attrs");
     const classes7 = (() => {
-      const G__8938 = spinner_classes({ "size": size4 });
+      const G__8958 = spinner_classes({ "size": size4 });
       if (truth_(class$5)) {
-        return `${G__8938 ?? ""}${" "}${class$5 ?? ""}`;
+        return `${G__8958 ?? ""}${" "}${class$5 ?? ""}`;
       } else {
-        return G__8938;
+        return G__8958;
       }
       ;
     })();
@@ -6842,57 +6842,67 @@
       ;
     })(), "data-close-button": "", "data-disabled": flag(disabled_QMARK_3) }, icon({ "icon-name": "x", "size": "sm" })];
   };
-  var card_children = function(p__618, icons, class_names, extra) {
+  var loading_locked_QMARK_ = function(p__618) {
     const map__12 = p__618;
+    const type3 = get(map__12, "type");
+    const dismissible4 = get(map__12, "dismissible");
+    return "loading" === kw(type3) && not(true_QMARK_(dismissible4));
+  };
+  var swipable_QMARK_ = function(p__619) {
+    const map__12 = p__619;
     const item3 = map__12;
-    const close_label4 = get(map__12, "close-label");
+    const dismissible4 = get(map__12, "dismissible");
+    return not(false_QMARK_(dismissible4)) && not(loading_locked_QMARK_(item3));
+  };
+  var card_children = function(p__620, icons, class_names, extra) {
+    const map__12 = p__620;
+    const item3 = map__12;
+    const title4 = get(map__12, "title");
     const description5 = get(map__12, "description");
     const meta6 = get(map__12, "meta");
-    const close_button7 = get(map__12, "close-button");
-    const dismissible8 = get(map__12, "dismissible");
-    const type9 = get(map__12, "type");
-    const title10 = get(map__12, "title");
-    const cancel11 = get(map__12, "cancel");
-    const action12 = get(map__12, "action");
-    const cn13 = (() => {
-      const or__23426__auto__14 = class_names;
-      if (truth_(or__23426__auto__14)) {
-        return or__23426__auto__14;
+    const action7 = get(map__12, "action");
+    const cancel8 = get(map__12, "cancel");
+    const close_button9 = get(map__12, "close-button");
+    const close_label10 = get(map__12, "close-label");
+    const dismissible11 = get(map__12, "dismissible");
+    const cn12 = (() => {
+      const or__23426__auto__13 = class_names;
+      if (truth_(or__23426__auto__13)) {
+        return or__23426__auto__13;
       } else {
         return {};
       }
       ;
     })();
-    const loading_QMARK_15 = "loading" === kw(type9);
-    const G__61916 = [];
-    const G__61917 = truth_((() => {
-      const and__23442__auto__18 = close_button7;
-      if (truth_(and__23442__auto__18)) {
-        return !loading_QMARK_15;
+    const G__62114 = [];
+    const G__62115 = truth_((() => {
+      const and__23442__auto__16 = close_button9;
+      if (truth_(and__23442__auto__16)) {
+        return not(loading_locked_QMARK_(item3));
       } else {
-        return and__23442__auto__18;
+        return and__23442__auto__16;
       }
       ;
-    })()) ? conj(G__61916, close_el(close_label4, false_QMARK_(dismissible8), get(cn13, "close-button"))) : G__61916;
-    const G__61919 = true ? conj(G__61917, icon_el(item3, icons, get(cn13, "icon"))) : G__61917;
-    const G__61920 = true ? conj(G__61919, (() => {
-      const G__62021 = ["div", { "class": classes("notification-text", get(cn13, "content")), "data-content": "" }, ["p", { "class": classes("notification-title", get(cn13, "title")), "data-title": "" }, title10]];
-      const G__62022 = truth_(description5) ? conj(G__62021, ["div", { "class": classes("notification-description", get(cn13, "description")), "data-description": "" }, description5]) : G__62021;
+    })()) ? conj(G__62114, close_el(close_label10, false_QMARK_(dismissible11), get(cn12, "close-button"))) : G__62114;
+    const G__62117 = true ? conj(G__62115, icon_el(item3, icons, get(cn12, "icon"))) : G__62115;
+    const G__62118 = true ? conj(G__62117, (() => {
+      const G__62219 = ["div", { "class": classes("notification-text", get(cn12, "content")), "data-content": "" }, ["p", { "class": classes("notification-title", get(cn12, "title")), "data-title": "" }, title4]];
+      const G__62220 = truth_(description5) ? conj(G__62219, ["div", { "class": classes("notification-description", get(cn12, "description")), "data-description": "" }, description5]) : G__62219;
       if (truth_(meta6)) {
-        return conj(G__62022, ["div", { "class": "notification-meta" }, meta6]);
+        return conj(G__62220, ["div", { "class": "notification-meta" }, meta6]);
       } else {
-        return G__62022;
+        return G__62220;
       }
       ;
-    })()) : G__61919;
+    })()) : G__62117;
     if (truth_((() => {
-      const or__23426__auto__23 = cancel11;
-      if (truth_(or__23426__auto__23)) {
-        return or__23426__auto__23;
+      const or__23426__auto__21 = cancel8;
+      if (truth_(or__23426__auto__21)) {
+        return or__23426__auto__21;
       } else {
-        const or__23426__auto__24 = action12;
-        if (truth_(or__23426__auto__24)) {
-          return or__23426__auto__24;
+        const or__23426__auto__22 = action7;
+        if (truth_(or__23426__auto__22)) {
+          return or__23426__auto__22;
         } else {
           return seq(extra);
         }
@@ -6900,43 +6910,43 @@
       }
       ;
     })())) {
-      return conj(G__61920, (() => {
-        const G__62125 = ["div", { "class": "notification-actions" }];
-        const G__62126 = truth_(cancel11) ? conj(G__62125, button_el("cancel", cancel11, get(cn13, "cancel-button"))) : G__62125;
-        const G__62127 = truth_(action12) ? conj(G__62126, button_el("action", action12, get(cn13, "action-button"))) : G__62126;
+      return conj(G__62118, (() => {
+        const G__62323 = ["div", { "class": "notification-actions" }];
+        const G__62324 = truth_(cancel8) ? conj(G__62323, button_el("cancel", cancel8, get(cn12, "cancel-button"))) : G__62323;
+        const G__62325 = truth_(action7) ? conj(G__62324, button_el("action", action7, get(cn12, "action-button"))) : G__62324;
         if (truth_(seq(extra))) {
-          return into(G__62127, extra);
+          return into(G__62325, extra);
         } else {
-          return G__62127;
+          return G__62325;
         }
         ;
       })());
     } else {
-      return G__61920;
+      return G__62118;
     }
     ;
   };
   var notification = (() => {
-    const f622 = (function(var_args) {
-      const args6231 = [];
+    const f624 = (function(var_args) {
+      const args6251 = [];
       const len__23321__auto__2 = arguments.length;
-      let i6243 = 0;
+      let i6263 = 0;
       while (true) {
-        if (i6243 < len__23321__auto__2) {
-          args6231.push(arguments[i6243]);
-          let G__4 = i6243 + 1;
-          i6243 = G__4;
+        if (i6263 < len__23321__auto__2) {
+          args6251.push(arguments[i6263]);
+          let G__4 = i6263 + 1;
+          i6263 = G__4;
           continue;
         }
         ;
         break;
       }
       ;
-      const argseq__23513__auto__5 = 1 < args6231.length ? args6231.slice(1) : null;
-      return f622.cljs$core$IFn$_invoke$arity$variadic(arguments[0], argseq__23513__auto__5);
+      const argseq__23513__auto__5 = 1 < args6251.length ? args6251.slice(1) : null;
+      return f624.cljs$core$IFn$_invoke$arity$variadic(arguments[0], argseq__23513__auto__5);
     });
-    f622.cljs$core$IFn$_invoke$arity$variadic = (function(p__626, children) {
-      const map__67 = p__626;
+    f624.cljs$core$IFn$_invoke$arity$variadic = (function(p__628, children) {
+      const map__67 = p__628;
       const item8 = map__67;
       const class_names9 = get(map__67, "class-names");
       const invert10 = get(map__67, "invert");
@@ -6972,8 +6982,8 @@
         ;
       })(), "data-styled": flag(not(unstyled13)), "data-rich-colors": flag(rich_colors19), "data-invert": flag(invert10) }, attrs22))], card_children(item8, null, class_names9, remove(nil_QMARK_, children)));
     });
-    f622.cljs$lang$maxFixedArity = 1;
-    return f622;
+    f624.cljs$lang$maxFixedArity = 1;
+    return f624;
   })();
   var position_parts = function(position) {
     return split((() => {
@@ -6990,11 +7000,11 @@
     const vec__14 = position_parts(position);
     const y5 = nth(vec__14, 0, null);
     const x6 = nth(vec__14, 1, null);
-    const G__6277 = [y5];
+    const G__6297 = [y5];
     if (!(x6 === "center")) {
-      return conj(G__6277, x6);
+      return conj(G__6297, x6);
     } else {
-      return G__6277;
+      return G__6297;
     }
     ;
   };
@@ -7053,8 +7063,8 @@
     }
     ;
   };
-  var toast_el = function(p__628, p__629) {
-    const map__13 = p__628;
+  var toast_el = function(p__630, p__631) {
+    const map__13 = p__630;
     const item4 = map__13;
     const class_names5 = get(map__13, "class-names");
     const invert6 = get(map__13, "invert");
@@ -7069,7 +7079,7 @@
     const class$15 = get(map__13, "class");
     const removed_at16 = get(map__13, "removed-at");
     const attrs17 = get(map__13, "attrs");
-    const map__218 = p__629;
+    const map__218 = p__631;
     const x19 = get(map__218, "x");
     const y20 = get(map__218, "y");
     const index21 = get(map__218, "index");
@@ -7089,11 +7099,11 @@
       ;
     })();
     const item30 = (() => {
-      const G__63031 = item4;
+      const G__63231 = item4;
       if (get(item4, "close-button") == null) {
-        return assoc(G__63031, "close-button", close_button22);
+        return assoc(G__63231, "close-button", close_button22);
       } else {
-        return G__63031;
+        return G__63231;
       }
       ;
     })();
@@ -7105,7 +7115,7 @@
         return meta9;
       }
       ;
-    })()) }), class$15, merge({ "data-dismissible": flag(not(false_QMARK_(dismissible11))), "data-styled": flag(not(unstyled8)), "data-index": `${index21 ?? ""}`, "data-rich-colors": flag(!(rich_colors13 == null) ? rich_colors13 : rich_colors_default23), "data-type": t28, "tabindex": "0", "data-count": `${total26 ?? ""}`, "data-front": flag(index21 === 0), "data-id": `${id14 ?? ""}`, "data-removed": flag(removed_at16), "data-y-position": y20, "data-visible": flag(index21 < visible_toasts27), "data-invert": flag((() => {
+    })()) }), class$15, merge({ "data-dismissible": flag(not(false_QMARK_(dismissible11))), "data-styled": flag(not(unstyled8)), "data-index": `${index21 ?? ""}`, "data-rich-colors": flag(!(rich_colors13 == null) ? rich_colors13 : rich_colors_default23), "data-type": t28, "tabindex": "0", "data-count": `${total26 ?? ""}`, "data-front": flag(index21 === 0), "data-id": `${id14 ?? ""}`, "data-swipable": flag(swipable_QMARK_(item30)), "data-removed": flag(removed_at16), "data-y-position": y20, "data-visible": flag(index21 < visible_toasts27), "data-invert": flag((() => {
       const or__23426__auto__33 = invert6;
       if (truth_(or__23426__auto__33)) {
         return or__23426__auto__33;
@@ -7116,21 +7126,21 @@
     })()), "data-x-position": x19, "data-ui-notification": "", "data-promise": flag(promise10) }, {}, attrs17))], card_children(item30, icons24, class_names5, null));
   };
   var event_attrs = function(on_dismiss, on_pause) {
-    const G__6311 = {};
-    const G__6312 = truth_(on_dismiss) ? { ...G__6311, "on-notificationdismiss": (function(e) {
+    const G__6331 = {};
+    const G__6332 = truth_(on_dismiss) ? { ...G__6331, "on-notificationdismiss": (function(e) {
       return on_dismiss(e.detail.id, e.detail.reason);
-    }) } : G__6311;
+    }) } : G__6331;
     if (truth_(on_pause)) {
-      return assoc(G__6312, "on-notificationpause", (function(e) {
+      return assoc(G__6332, "on-notificationpause", (function(e) {
         return on_pause(e.detail.paused);
       }));
     } else {
-      return G__6312;
+      return G__6332;
     }
     ;
   };
-  var notification_toaster = function(p__632) {
-    const map__12 = p__632;
+  var notification_toaster = function(p__634) {
+    const map__12 = p__634;
     const items3 = get(map__12, "items");
     const on_dismiss4 = get(map__12, "on-dismiss");
     const on_pause5 = get(map__12, "on-pause");
@@ -7182,11 +7192,11 @@
       return kw(get(i, "position"));
     }), items3)));
     return into(["section", class_attrs((() => {
-      const G__63330 = ["notification-toaster"];
+      const G__63530 = ["notification-toaster"];
       if (truth_(contained15)) {
-        return conj(G__63330, "notification-toaster-contained");
+        return conj(G__63530, "notification-toaster-contained");
       } else {
-        return G__63330;
+        return G__63530;
       }
       ;
     })(), class$18, merge({ "data-ui-notification-toaster": "", "tabindex": "-1", "aria-label": `${(() => {
@@ -7243,25 +7253,25 @@
     return { "items": [], "muted": /* @__PURE__ */ new Set([]), "paused-at": null, "seq": 0 };
   };
   var lifetime = (() => {
-    const f634 = (function(...args635) {
-      const G__6361 = args635.length;
-      switch (G__6361) {
+    const f636 = (function(...args637) {
+      const G__6381 = args637.length;
+      switch (G__6381) {
         case 1:
-          return f634.cljs$core$IFn$_invoke$arity$1(args635[0]);
+          return f636.cljs$core$IFn$_invoke$arity$1(args637[0]);
           break;
         case 2:
-          return f634.cljs$core$IFn$_invoke$arity$2(args635[0], args635[1]);
+          return f636.cljs$core$IFn$_invoke$arity$2(args637[0], args637[1]);
           break;
         default:
-          throw new Error(`${"Invalid arity: "}${args635.length ?? ""}`);
+          throw new Error(`${"Invalid arity: "}${args637.length ?? ""}`);
       }
       ;
     });
-    f634.cljs$core$IFn$_invoke$arity$1 = (function(item) {
+    f636.cljs$core$IFn$_invoke$arity$1 = (function(item) {
       return lifetime(item, default_duration2);
     });
-    f634.cljs$core$IFn$_invoke$arity$2 = (function(p__637, default$) {
-      const map__34 = p__637;
+    f636.cljs$core$IFn$_invoke$arity$2 = (function(p__639, default$) {
+      const map__34 = p__639;
       const type5 = get(map__34, "type");
       const duration6 = get(map__34, "duration");
       if ("loading" === kw(type5)) {
@@ -7299,8 +7309,8 @@
       }
       ;
     });
-    f634.cljs$lang$maxFixedArity = 2;
-    return f634;
+    f636.cljs$lang$maxFixedArity = 2;
+    return f636;
   })();
   var stamp = function(item, now3, paused_at, default$) {
     const ms1 = lifetime(item, default$);
@@ -7323,25 +7333,25 @@
     ;
   };
   var post = (() => {
-    const f638 = (function(...args639) {
-      const G__6401 = args639.length;
-      switch (G__6401) {
+    const f640 = (function(...args641) {
+      const G__6421 = args641.length;
+      switch (G__6421) {
         case 3:
-          return f638.cljs$core$IFn$_invoke$arity$3(args639[0], args639[1], args639[2]);
+          return f640.cljs$core$IFn$_invoke$arity$3(args641[0], args641[1], args641[2]);
           break;
         case 4:
-          return f638.cljs$core$IFn$_invoke$arity$4(args639[0], args639[1], args639[2], args639[3]);
+          return f640.cljs$core$IFn$_invoke$arity$4(args641[0], args641[1], args641[2], args641[3]);
           break;
         default:
-          throw new Error(`${"Invalid arity: "}${args639.length ?? ""}`);
+          throw new Error(`${"Invalid arity: "}${args641.length ?? ""}`);
       }
       ;
     });
-    f638.cljs$core$IFn$_invoke$arity$3 = (function(state3, item, now3) {
+    f640.cljs$core$IFn$_invoke$arity$3 = (function(state3, item, now3) {
       return post(state3, item, now3, null);
     });
-    f638.cljs$core$IFn$_invoke$arity$4 = (function(state3, item, now3, p__641) {
-      const map__34 = p__641;
+    f640.cljs$core$IFn$_invoke$arity$4 = (function(state3, item, now3, p__643) {
+      const map__34 = p__643;
       const duration5 = get(map__34, "duration");
       const limit6 = get(map__34, "limit");
       const map__78 = state3;
@@ -7388,11 +7398,11 @@
           return assoc(state3, "items", mapv((function(i) {
             if (_EQ_(id13, get(i, "id"))) {
               return fresh15((() => {
-                const G__64217 = merge(i, item);
+                const G__64417 = merge(i, item);
                 if ("loading" === kw(get(i, "type"))) {
-                  return assoc(G__64217, "promise", true);
+                  return assoc(G__64417, "promise", true);
                 } else {
-                  return G__64217;
+                  return G__64417;
                 }
                 ;
               })());
@@ -7413,11 +7423,11 @@
               ;
             })() + 1;
             const item20 = fresh15((() => {
-              const G__64321 = item;
+              const G__64521 = item;
               if (id13 == null) {
-                return assoc(G__64321, "id", `notification-${n18 ?? ""}`);
+                return assoc(G__64521, "id", `notification-${n18 ?? ""}`);
               } else {
-                return G__64321;
+                return G__64521;
               }
               ;
             })());
@@ -7437,28 +7447,28 @@
       }
       ;
     });
-    f638.cljs$lang$maxFixedArity = 4;
-    return f638;
+    f640.cljs$lang$maxFixedArity = 4;
+    return f640;
   })();
   var dismiss = (() => {
-    const f644 = (function(...args645) {
-      const G__6461 = args645.length;
-      switch (G__6461) {
+    const f646 = (function(...args647) {
+      const G__6481 = args647.length;
+      switch (G__6481) {
         case 3:
-          return f644.cljs$core$IFn$_invoke$arity$3(args645[0], args645[1], args645[2]);
+          return f646.cljs$core$IFn$_invoke$arity$3(args647[0], args647[1], args647[2]);
           break;
         case 4:
-          return f644.cljs$core$IFn$_invoke$arity$4(args645[0], args645[1], args645[2], args645[3]);
+          return f646.cljs$core$IFn$_invoke$arity$4(args647[0], args647[1], args647[2], args647[3]);
           break;
         default:
-          throw new Error(`${"Invalid arity: "}${args645.length ?? ""}`);
+          throw new Error(`${"Invalid arity: "}${args647.length ?? ""}`);
       }
       ;
     });
-    f644.cljs$core$IFn$_invoke$arity$3 = (function(state3, id, now3) {
+    f646.cljs$core$IFn$_invoke$arity$3 = (function(state3, id, now3) {
       return dismiss(state3, id, now3, "dismiss");
     });
-    f644.cljs$core$IFn$_invoke$arity$4 = (function(state3, id, now3, reason) {
+    f646.cljs$core$IFn$_invoke$arity$4 = (function(state3, id, now3, reason) {
       return assoc(state3, "items", mapv((function(i) {
         if (_EQ_(id, get(i, "id"))) {
           return close2(i, now3, reason);
@@ -7468,8 +7478,8 @@
         ;
       }), get(state3, "items")));
     });
-    f644.cljs$lang$maxFixedArity = 4;
-    return f644;
+    f646.cljs$lang$maxFixedArity = 4;
+    return f646;
   })();
   var dismiss_all = function(state3, now3) {
     return assoc(state3, "items", mapv((function(i) {
@@ -7490,7 +7500,7 @@
       const paused_at2 = temp__23007__auto__1;
       const d3 = now3 - paused_at2;
       return assoc(state3, "paused-at", null, "items", mapv((function(i) {
-        const G__6474 = i;
+        const G__6494 = i;
         if (truth_((() => {
           const and__23442__auto__5 = get(i, "expires-at");
           if (truth_(and__23442__auto__5)) {
@@ -7500,9 +7510,9 @@
           }
           ;
         })())) {
-          return assoc(G__6474, "expires-at", get(i, "expires-at") + d3);
+          return assoc(G__6494, "expires-at", get(i, "expires-at") + d3);
         } else {
-          return G__6474;
+          return G__6494;
         }
         ;
       }), get(state3, "items")));
@@ -7961,8 +7971,8 @@
       ;
     })().split(" ");
   };
-  var swipable_QMARK_ = function(li) {
-    return "true" === attr(li, "data-dismissible") && !("loading" === attr(li, "data-type"));
+  var swipable_QMARK_2 = function(li) {
+    return "true" === attr(li, "data-swipable");
   };
   var bind_toast_BANG_ = function(li) {
     if (truth_(li["__uiNBound"])) {
@@ -7971,7 +7981,7 @@
       li["__uiNBound"] = true;
       const drag1 = { "start": null, "t": 0, "axis": null };
       li.addEventListener("pointerdown", (function(e) {
-        if (truth_(!(2 === e.button) && swipable_QMARK_(li))) {
+        if (truth_(!(2 === e.button) && swipable_QMARK_2(li))) {
           drag1["t"] = Date.now();
           try {
             e.target.setPointerCapture(e.pointerId);
@@ -8033,7 +8043,7 @@
       }));
       li.addEventListener("pointerup", (function(_) {
         if (truth_((() => {
-          const and__23442__auto__13 = swipable_QMARK_(li);
+          const and__23442__auto__13 = swipable_QMARK_2(li);
           if (truth_(and__23442__auto__13)) {
             return !("true" === attr(li, "data-swipe-out"));
           } else {

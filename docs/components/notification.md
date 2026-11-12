@@ -5,7 +5,7 @@
 - Type: Component (feedback, Messages)
 - Namespace: `ui.notification`
 - Source: `src/ui/notification.cljc`
-- Public fns: `notification-class-list`, `notification-classes`, `notification`, `position-parts`, `default-swipe-directions`, `hotkey-label`, `offset-attrs`, `notification-toaster`, `queue`, `lifetime`, `post`, `dismiss`, `dismiss-all`, `mute`, `unmute`, `muted?`, `pause`, `resume`, `expire`, `next-due`, `newly-closed`, `visible`, `active`
+- Public fns: `notification-class-list`, `notification-classes`, `loading-locked?`, `swipable?`, `notification`, `position-parts`, `default-swipe-directions`, `hotkey-label`, `offset-attrs`, `notification-toaster`, `queue`, `lifetime`, `post`, `dismiss`, `dismiss-all`, `mute`, `unmute`, `muted?`, `pause`, `resume`, `expire`, `next-due`, `newly-closed`, `visible`, `active`
 - JS runtime: `ui.js.notification` (bundled in ui-runtime.js)
 - Keywords: notification, toast, toaster, sonner, toast stack, background job, copied, snackbar, swipe to dismiss, promise toast
 
@@ -114,7 +114,7 @@ Children: Extra actions after :cancel and :action.
 | `:cancel` | `{:label :on-click :attrs} \| hiccup` | – | A quieter button before the action; dismisses. |
 | `:close-button` | `boolean` | – | The round close button on the top-left corner. |
 | `:close-label` | `string` | `"Close toast"` |  |
-| `:dismissible` | `boolean` | `true` | false: close and swipe do nothing. |
+| `:dismissible` | `boolean` | `true` | false: close and swipe do nothing. true also closes and swipes a :loading toast, which otherwise stays until it settles (Sonner's rule). |
 | `:rich-colors` | `boolean` | – | Tints the whole card with its type's color. |
 | `:invert` | `boolean` | – |  |
 | `:unstyled` | `boolean` | – | No card surface. |

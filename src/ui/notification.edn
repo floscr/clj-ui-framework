@@ -59,7 +59,7 @@
            {:name :cancel :type "{:label :on-click :attrs} | hiccup" :doc "A quieter button before the action; dismisses."}
            {:name :close-button :type "boolean" :doc "The round close button on the top-left corner."}
            {:name :close-label :type "string" :default "\"Close toast\""}
-           {:name :dismissible :type "boolean" :default "true" :doc "false: close and swipe do nothing."}
+           {:name :dismissible :type "boolean" :default "true" :doc "false: close and swipe do nothing. true also closes and swipes a :loading toast, which otherwise stays until it settles (Sonner's rule)."}
            {:name :rich-colors :type "boolean" :doc "Tints the whole card with its type's color."}
            {:name :invert :type "boolean"}
            {:name :unstyled :type "boolean" :doc "No card surface."}

@@ -44,7 +44,10 @@
       (is (= 1 (count (find-all :data-close-button card)))))
     (is (empty? (find-all :data-close-button (notification/notification {:title "T"}))))
     (is (empty? (find-all :data-close-button
-                          (notification/notification {:type :loading :title "T" :close-button true})))))
+                          (notification/notification {:type :loading :title "T" :close-button true}))))
+    (is (= 1 (count (find-all :data-close-button
+                              (notification/notification {:type :loading :title "T" :close-button true
+                                                          :dismissible true}))))))
   (testing "rich colors, invert, unstyled as data attributes"
     (let [a (attrs (notification/notification {:type :error :title "T" :rich-colors true :invert true :unstyled true}))]
       (is (= ["true" "true" "false"] [(:data-rich-colors a) (:data-invert a) (:data-styled a)])))))
@@ -54,6 +57,11 @@
   (is (= ["top" "center"] (notification/position-parts :top-center)))
   (is (= ["bottom" "right"] (notification/default-swipe-directions :bottom-right)))
   (is (= ["top"] (notification/default-swipe-directions :top-center)))
+  (testing "swipable unless not dismissible or loading; an explicit dismissible swipes a loading one"
+    (is (notification/swipable? {:type :success}))
+    (is (not (notification/swipable? {:type :success :dismissible false})))
+    (is (not (notification/swipable? {:type :loading})))
+    (is (notification/swipable? {:type :loading :dismissible true})))
   (is (= "alt+T" (notification/hotkey-label ["altKey" "KeyT"])))
   (is (= {:data-offset-top "24px" :data-offset-right "24px" :data-offset-bottom "24px" :data-offset-left "24px"}
          (notification/offset-attrs "offset" 24)))
