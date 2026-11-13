@@ -8716,7 +8716,8 @@
         return update_queue_BANG_(dismiss, e.detail.id, now(), e.detail.reason);
       }));
       el2.addEventListener("notificationpause", (function(e) {
-        return update_queue_BANG_(truth_(e.detail.paused) ? pause : resume, now());
+        api["queue"] = (truth_(e.detail.paused) ? pause : resume)(api["queue"], now());
+        return schedule_expire_BANG_();
       }));
       document.body.appendChild(el2);
       api["root"] = el2;
