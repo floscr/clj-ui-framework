@@ -421,8 +421,13 @@
       (let [el (dom (n/notification-toaster (props (aget api "options"))))]
         (.addEventListener el "notificationdismiss"
           (fn [e] (update-queue! n/dismiss (.. e -detail -id) (now) (.. e -detail -reason))))
+        ;; Pausing changes no markup: only the clocks move. A render here
+        ;; would rebuild the toast under a pointer that is going down on its
+        ;; action, and the click would land on the replaced button's parent.
         (.addEventListener el "notificationpause"
-          (fn [e] (update-queue! (if (.. e -detail -paused) n/pause n/resume) (now))))
+          (fn [e]
+            (aset api "queue" ((if (.. e -detail -paused) n/pause n/resume) (aget api "queue") (now)))
+            (schedule-expire!)))
         (.appendChild js/document.body el)
         (aset api "root" el)
         el)))
