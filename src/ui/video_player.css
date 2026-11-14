@@ -216,7 +216,6 @@ html:has(.video-player[data-tiled]) body { overflow: hidden; }
 .video-player[data-loading] .video-player-center {
   opacity: 0;
   pointer-events: none;
-  transform: translate(-50%, -50%) scale(0.92);
 }
 
 .video-player .video-player-big { width: 76px; height: 76px; }
