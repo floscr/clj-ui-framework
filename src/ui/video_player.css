@@ -3,7 +3,7 @@
    The player is always dark: it sits on video, so it doesn't follow the
    page theme. State comes from attributes the runtime sets on the root:
    data-paused data-idle data-loading data-muted data-fullscreen
-   data-panel-open data-upnext. */
+   data-tiled data-panel-open data-upnext. */
 
 .video-player {
   --vp-glass: rgba(48, 48, 54, 0.42);
@@ -36,6 +36,21 @@
   height: 100%;
   border-radius: 0;
 }
+
+/* Tiled fullscreen (Alt+click): over the whole browser window, the page
+   behind it held still. */
+.video-player[data-tiled] {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  aspect-ratio: auto;
+  width: 100vw;
+  height: 100dvh;
+  border-radius: 0;
+}
+
+html:has(.video-player[data-tiled]),
+html:has(.video-player[data-tiled]) body { overflow: hidden; }
 
 .video-player [hidden] { display: none !important; }
 
@@ -150,8 +165,8 @@
 .video-player:not([data-paused]) .video-player-i-pause { display: block; }
 .video-player[data-muted] .video-player-i-vol { display: none; }
 .video-player[data-muted] .video-player-i-muted { display: block; }
-.video-player[data-fullscreen] .video-player-i-enter { display: none; }
-.video-player[data-fullscreen] .video-player-i-exit { display: block; }
+.video-player:is([data-fullscreen], [data-tiled]) .video-player-i-enter { display: none; }
+.video-player:is([data-fullscreen], [data-tiled]) .video-player-i-exit { display: block; }
 
 /* ── Top chip ──────────────────────────────────────────────────── */
 

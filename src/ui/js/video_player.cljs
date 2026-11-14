@@ -12,7 +12,13 @@
    doesn't fight it. State flags on the root:
 
      data-paused data-idle data-loading data-muted data-fullscreen
-     data-panel-open data-upnext data-error data-autoplay-muted
+     data-tiled data-panel-open data-upnext data-error data-autoplay-muted
+
+   Tiled fullscreen (Alt+click on the fullscreen button, Alt+double-click
+   on the picture) covers the browser window instead of the screen and sets
+   <html data-tiled-fullscreen>, for a browser add-on that hides the
+   browser's toolbars. Escape, f or the button leave it; so does switching
+   to another tab.
 
    Autoplay (data-autoplay, or the controller's play) falls back to muted
    playback when the browser refuses sound, with a Tap to unmute pill.
@@ -391,9 +397,37 @@
     (set! (.-muted v) (zero? x))
     (try (.setItem js/localStorage volume-key (str x)) (catch :default _))))
 
-(defn- fullscreen! [p]
+(defn- tiled? [p] (.hasAttribute (.-root p) "data-tiled"))
+
+(defn- set-tiled!
+  "Tiled fullscreen: the player covers the browser window instead of the
+   screen, so a tiling window manager keeps the window where it is.
+   <html data-tiled-fullscreen> lets a browser add-on hide the browser's own
+   toolbars meanwhile."
+  [p on?]
+  (let [root (.-root p)
+        html (.-documentElement js/document)]
+    (close-panel! p)
+    (flag! root "data-tiled" on?)
+    (flag! html "data-tiled-fullscreen" on?)
+    (when on? (.focus root #js {:preventScroll true}))
+    (show-ui! p)
+    (sync! p)))
+
+(defn- tiled-fullscreen!
+  "Alt+click on the fullscreen button or Alt+double-click on the picture."
+  [p]
+  (if (tiled? p)
+    (set-tiled! p false)
+    (do (when (.-fullscreenElement js/document) (.exitFullscreen js/document))
+        (set-tiled! p true))))
+
+(defn- fullscreen!
+  "Real fullscreen; leaves tiled fullscreen instead while that is on."
+  [p]
   (let [root (.-root p) v (.-video p)]
     (cond
+      (tiled? p) (set-tiled! p false)
       (.-fullscreenElement js/document) (.exitFullscreen js/document)
       (.-requestFullscreen root) (.requestFullscreen root)
       (.-webkitEnterFullscreen v) (.webkitEnterFullscreen v))))
@@ -491,6 +525,7 @@
         handled
         (cond
           (and (= k "Escape") (.-open p)) (do (close-panel! p) true)
+          (and (= k "Escape") (tiled? p)) (do (set-tiled! p false) true)
           (.-open p) false
           (or (= k " ") (= k "k")) (do (toggle-play! p) true)
           (= k "f") (do (fullscreen! p) true)
@@ -628,9 +663,13 @@
                              (.hasAttribute t "data-vp-action")
                              (emit! p #js {:kind "action" :id (.getAttribute t "data-vp-action")})
 
+                             (and (.-altKey e) (= "fullscreen" (.getAttribute t "data-vp-act")))
+                             (tiled-fullscreen! p)
+
                              :else (act! p (.getAttribute t "data-vp-act"))))))
     (.addEventListener root "dblclick"
-                       (fn [e] (when (.closest (.-target e) "[data-vp=surface]") (fullscreen! p))))
+                       (fn [e] (when (.closest (.-target e) "[data-vp=surface]")
+                                 (if (.-altKey e) (tiled-fullscreen! p) (fullscreen! p)))))
     (.addEventListener js/document "pointerdown"
                        (fn [e]
                          (when-let [o (.-open p)]
@@ -666,6 +705,7 @@
 
 (defn- teardown! [root]
   (when-let [p (.get players root)]
+    (when (tiled? p) (flag! (.-documentElement js/document) "data-tiled-fullscreen" false))
     (destroy-hls! p)
     (.delete players root)))
 
@@ -684,6 +724,11 @@
   (.addEventListener js/document "keydown" on-document-key)
   (.addEventListener js/document "fullscreenchange"
                      (fn [] (.forEach players (fn [p] (close-panel! p) (sync! p)))))
+  ;; Another tab or window: leave tiled fullscreen, so the browser's
+  ;; toolbars aren't left hidden behind the user's back.
+  (.addEventListener js/document "visibilitychange"
+                     (fn [] (when (.-hidden js/document)
+                              (.forEach players (fn [p] (when (tiled? p) (set-tiled! p false)))))))
   (let [raf (atom nil)
         obs (js/MutationObserver.
              (fn [_]

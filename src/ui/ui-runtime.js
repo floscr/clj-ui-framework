@@ -12402,19 +12402,51 @@
       }
     })();
   };
+  var tiled_QMARK_ = function(p) {
+    return p.root.hasAttribute("data-tiled");
+  };
+  var set_tiled_BANG_ = function(p, on_QMARK_) {
+    const root1 = p.root;
+    const html2 = document.documentElement;
+    close_panel_BANG_(p);
+    flag_BANG_(root1, "data-tiled", on_QMARK_);
+    flag_BANG_(html2, "data-tiled-fullscreen", on_QMARK_);
+    if (truth_(on_QMARK_)) {
+      root1.focus({ "preventScroll": true });
+    }
+    ;
+    show_ui_BANG_(p);
+    return sync_BANG_3(p);
+  };
+  var tiled_fullscreen_BANG_ = function(p) {
+    if (truth_(tiled_QMARK_(p))) {
+      return set_tiled_BANG_(p, false);
+    } else {
+      if (truth_(document.fullscreenElement)) {
+        document.exitFullscreen();
+      }
+      ;
+      return set_tiled_BANG_(p, true);
+    }
+    ;
+  };
   var fullscreen_BANG_ = function(p) {
     const root1 = p.root;
     const v2 = p.video;
-    if (truth_(document.fullscreenElement)) {
-      return document.exitFullscreen();
+    if (truth_(tiled_QMARK_(p))) {
+      return set_tiled_BANG_(p, false);
     } else {
-      if (truth_(root1.requestFullscreen)) {
-        return root1.requestFullscreen();
+      if (truth_(document.fullscreenElement)) {
+        return document.exitFullscreen();
       } else {
-        if (truth_(v2.webkitEnterFullscreen)) {
-          return v2.webkitEnterFullscreen();
+        if (truth_(root1.requestFullscreen)) {
+          return root1.requestFullscreen();
         } else {
-          return null;
+          if (truth_(v2.webkitEnterFullscreen)) {
+            return v2.webkitEnterFullscreen();
+          } else {
+            return null;
+          }
         }
       }
     }
@@ -12625,6 +12657,9 @@
     const k1 = e.key;
     const handled2 = truth_(k1 === "Escape" && p.open) ? (() => {
       close_panel_BANG_(p);
+      return true;
+    })() : truth_(k1 === "Escape" && tiled_QMARK_(p)) ? (() => {
+      set_tiled_BANG_(p, false);
       return true;
     })() : truth_(p.open) ? false : truth_((() => {
       const or__23426__auto__3 = k1 === " ";
@@ -12983,10 +13018,22 @@
               if (truth_(t7.hasAttribute("data-vp-action"))) {
                 return emit_BANG_4(p2, { "kind": "action", "id": t7.getAttribute("data-vp-action") });
               } else {
-                if ("else") {
-                  return act_BANG_(p2, t7.getAttribute("data-vp-act"));
+                if (truth_((() => {
+                  const and__23442__auto__8 = e.altKey;
+                  if (truth_(and__23442__auto__8)) {
+                    return "fullscreen" === t7.getAttribute("data-vp-act");
+                  } else {
+                    return and__23442__auto__8;
+                  }
+                  ;
+                })())) {
+                  return tiled_fullscreen_BANG_(p2);
                 } else {
-                  return null;
+                  if ("else") {
+                    return act_BANG_(p2, t7.getAttribute("data-vp-act"));
+                  } else {
+                    return null;
+                  }
                 }
               }
             }
@@ -12997,20 +13044,25 @@
     }));
     root.addEventListener("dblclick", (function(e) {
       if (truth_(e.target.closest("[data-vp=surface]"))) {
-        return fullscreen_BANG_(p2);
+        if (truth_(e.altKey)) {
+          return tiled_fullscreen_BANG_(p2);
+        } else {
+          return fullscreen_BANG_(p2);
+        }
+        ;
       }
       ;
     }));
     document.addEventListener("pointerdown", (function(e) {
-      const temp__23062__auto__8 = p2.open;
-      if (truth_(temp__23062__auto__8)) {
-        const o9 = temp__23062__auto__8;
+      const temp__23062__auto__9 = p2.open;
+      if (truth_(temp__23062__auto__9)) {
+        const o10 = temp__23062__auto__9;
         if (truth_((() => {
-          const or__23426__auto__10 = o9.panel.contains(e.target);
-          if (truth_(or__23426__auto__10)) {
-            return or__23426__auto__10;
+          const or__23426__auto__11 = o10.panel.contains(e.target);
+          if (truth_(or__23426__auto__11)) {
+            return or__23426__auto__11;
           } else {
-            return o9.trigger.contains(e.target);
+            return o10.trigger.contains(e.target);
           }
           ;
         })())) {
@@ -13033,16 +13085,16 @@
       }
       ;
     }));
-    const temp__23062__auto__11 = q2(root, "[data-vp=scrub]");
-    if (truth_(temp__23062__auto__11)) {
-      const s12 = temp__23062__auto__11;
-      wire_scrub_BANG_(p2, s12);
+    const temp__23062__auto__12 = q2(root, "[data-vp=scrub]");
+    if (truth_(temp__23062__auto__12)) {
+      const s13 = temp__23062__auto__12;
+      wire_scrub_BANG_(p2, s13);
     }
     ;
-    const temp__23062__auto__13 = q2(root, "[data-vp=volume]");
-    if (truth_(temp__23062__auto__13)) {
-      const s14 = temp__23062__auto__13;
-      wire_volume_BANG_(p2, s14);
+    const temp__23062__auto__14 = q2(root, "[data-vp=volume]");
+    if (truth_(temp__23062__auto__14)) {
+      const s15 = temp__23062__auto__14;
+      wire_volume_BANG_(p2, s15);
     }
     ;
     ["play", "pause", "volumechange", "ratechange"].forEach((function(t) {
@@ -13075,17 +13127,17 @@
     }));
     v1.addEventListener("ended", (function() {
       if (truth_((() => {
-        const and__23442__auto__15 = has_next_QMARK_(p2);
-        if (truth_(and__23442__auto__15)) {
-          const and__23442__auto__16 = p2.auto;
-          if (truth_(and__23442__auto__16)) {
+        const and__23442__auto__16 = has_next_QMARK_(p2);
+        if (truth_(and__23442__auto__16)) {
+          const and__23442__auto__17 = p2.auto;
+          if (truth_(and__23442__auto__17)) {
             return not(p2.dismissed);
           } else {
-            return and__23442__auto__16;
+            return and__23442__auto__17;
           }
           ;
         } else {
-          return and__23442__auto__15;
+          return and__23442__auto__16;
         }
         ;
       })())) {
@@ -13093,10 +13145,10 @@
       }
       ;
     }));
-    const temp__23062__auto__17 = q2(root, "[data-vp-act=pip]");
-    if (truth_(temp__23062__auto__17)) {
-      const b18 = temp__23062__auto__17;
-      b18.hidden = not(document.pictureInPictureEnabled);
+    const temp__23062__auto__18 = q2(root, "[data-vp-act=pip]");
+    if (truth_(temp__23062__auto__18)) {
+      const b19 = temp__23062__auto__18;
+      b19.hidden = not(document.pictureInPictureEnabled);
     }
     ;
     init_tracks_BANG_(p2);
@@ -13108,6 +13160,10 @@
     const temp__23062__auto__1 = players.get(root);
     if (truth_(temp__23062__auto__1)) {
       const p2 = temp__23062__auto__1;
+      if (truth_(tiled_QMARK_(p2))) {
+        flag_BANG_(document.documentElement, "data-tiled-fullscreen", false);
+      }
+      ;
       destroy_hls_BANG_(p2);
       return players.delete(root);
     }
@@ -13153,6 +13209,17 @@
         close_panel_BANG_(p);
         return sync_BANG_3(p);
       }));
+    }));
+    document.addEventListener("visibilitychange", (function() {
+      if (truth_(document.hidden)) {
+        return players.forEach((function(p) {
+          if (truth_(tiled_QMARK_(p))) {
+            return set_tiled_BANG_(p, false);
+          }
+          ;
+        }));
+      }
+      ;
     }));
     const raf1 = atom(null);
     const obs2 = new MutationObserver((function(_) {

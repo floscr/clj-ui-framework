@@ -176,7 +176,7 @@
                                 :aria-label label :data-tooltip label :hidden true}
                        (ic icn)]]
         "fullscreen" [[:button {:type "button" :class (cls "video-player-btn") :data-vp-act "fullscreen"
-                                :aria-label label :data-tooltip "Fullscreen (f)"}
+                                :aria-label label :data-tooltip "Fullscreen (f), Alt+click: fill the window"}
                        (ic :maximize "video-player-i-enter") (ic :minimize "video-player-i-exit")]]
         nil))))
 

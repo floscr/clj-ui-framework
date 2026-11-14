@@ -53,9 +53,10 @@
             ["Up / Down" "Volume."]
             ["m" "Mute."]
             ["c" "Subtitles on or off."]
-            ["f" "Fullscreen."]
+            ["f" "Fullscreen; leaves tiled fullscreen while that is on."]
+            ["Alt+click" "On the fullscreen button (or Alt+double-click on the picture): tiled fullscreen, the player over the browser window without real fullscreen, so a tiling window manager keeps the window in place. Sets <html data-tiled-fullscreen> for an add-on that hides the browser's toolbars."]
             ["n" "Next, when there is one."]
-            ["Escape" "Closes an open popover."]]
+            ["Escape" "Closes an open popover, else leaves tiled fullscreen."]]
 
  :accessibility ["The root is a labelled region; keys work while focus is inside it, or anywhere when it is the only player on the page."
                  "The seek bar and volume are sliders with values; options are menuitemradio with aria-checked; triggers carry aria-expanded and aria-pressed."
