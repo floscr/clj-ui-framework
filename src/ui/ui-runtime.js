@@ -1,5 +1,5 @@
 (() => {
-  // ../../../../../home/floscr/Code/Projects/clj-ui-framework/dev/squint/node_modules/squint-cljs/src/squint/core.js
+  // ../../../dev/squint/node_modules/squint-cljs/src/squint/core.js
   function toFn(x) {
     if (x == null) return x;
     if (x instanceof Function) {
@@ -3439,7 +3439,7 @@
   })();
   window["__uiContextMenu"] = open_context_menu;
 
-  // ../../../../../home/floscr/Code/Projects/clj-ui-framework/dev/squint/node_modules/squint-cljs/src/squint/string.js
+  // ../../../dev/squint/node_modules/squint-cljs/src/squint/string.js
   function join(sep, coll) {
     if (coll === void 0) {
       coll = sep;
@@ -12286,6 +12286,7 @@
       }
       ;
     })())) {
+      scrub5.style.setProperty("--vp-duration", d3);
       if (truth_(p.dragging)) {
       } else {
         scrub5.style.setProperty("--vp-played", t4 / d3);
@@ -12527,22 +12528,74 @@
     const r1 = el2.getBoundingClientRect();
     return clamp7((e.clientX - r1.left) / r1.width, 0, 1);
   };
+  var seg_bound = function(el2, k) {
+    return parseFloat(el2.style.getPropertyValue(k));
+  };
+  var segment_label = function(scrub, t) {
+    return some((function(el2) {
+      if (truth_(t >= seg_bound(el2, "--vp-seg-start") && t < seg_bound(el2, "--vp-seg-end"))) {
+        return el2.getAttribute("data-label");
+      }
+      ;
+    }), qa(scrub, "[data-vp-segment]"));
+  };
+  var segment_el = function(s) {
+    const el1 = document.createElement("i");
+    el1.className = "video-player-segment";
+    el1.setAttribute("data-vp-segment", (() => {
+      const or__23426__auto__2 = s.kind;
+      if (truth_(or__23426__auto__2)) {
+        return or__23426__auto__2;
+      } else {
+        return "";
+      }
+      ;
+    })());
+    if (truth_(s.label)) {
+      el1.setAttribute("data-label", s.label);
+    }
+    ;
+    el1.style.setProperty("--vp-seg-start", s.start);
+    el1.style.setProperty("--vp-seg-end", s.end);
+    return el1;
+  };
+  var set_segments_BANG_ = function(p, segs) {
+    const temp__23062__auto__1 = q2(p.root, "[data-vp=segments]");
+    if (truth_(temp__23062__auto__1)) {
+      const box2 = temp__23062__auto__1;
+      box2.replaceChildren();
+      return (() => {
+        const or__23426__auto__3 = segs;
+        if (truth_(or__23426__auto__3)) {
+          return or__23426__auto__3;
+        } else {
+          return [];
+        }
+        ;
+      })().forEach((function(s) {
+        return box2.append(segment_el(s));
+      }));
+    }
+    ;
+  };
   var wire_scrub_BANG_ = function(p, scrub) {
     const v1 = p.video;
     const tip2 = q2(scrub, "[data-vp=tip]");
     scrub.addEventListener("pointermove", (function(e) {
       const f3 = frac(scrub, e);
+      const t4 = f3 * (() => {
+        const or__23426__auto__5 = v1.duration;
+        if (truth_(or__23426__auto__5)) {
+          return or__23426__auto__5;
+        } else {
+          return 0;
+        }
+        ;
+      })();
+      const label6 = segment_label(scrub, t4);
       scrub.style.setProperty("--vp-pointer", f3);
       if (truth_(tip2)) {
-        tip2.textContent = fmt(f3 * (() => {
-          const or__23426__auto__4 = v1.duration;
-          if (truth_(or__23426__auto__4)) {
-            return or__23426__auto__4;
-          } else {
-            return 0;
-          }
-          ;
-        })());
+        tip2.textContent = truth_(label6) ? `${fmt(t4) ?? ""}${" \xB7 "}${label6 ?? ""}` : fmt(t4);
       }
       ;
       if (truth_(p.dragging)) {
@@ -12556,14 +12609,14 @@
       scrub.classList.add("is-dragging");
       return scrub.style.setProperty("--vp-played", frac(scrub, e));
     }));
-    const end5 = (function(e) {
+    const end7 = (function(e) {
       if (truth_(p.dragging)) {
         p.dragging = false;
         scrub.classList.remove("is-dragging");
         return v1.currentTime = frac(scrub, e) * (() => {
-          const or__23426__auto__6 = v1.duration;
-          if (truth_(or__23426__auto__6)) {
-            return or__23426__auto__6;
+          const or__23426__auto__8 = v1.duration;
+          if (truth_(or__23426__auto__8)) {
+            return or__23426__auto__8;
           } else {
             return 0;
           }
@@ -12572,11 +12625,11 @@
       }
       ;
     });
-    scrub.addEventListener("pointerup", end5);
-    scrub.addEventListener("pointercancel", end5);
+    scrub.addEventListener("pointerup", end7);
+    scrub.addEventListener("pointercancel", end7);
     return scrub.addEventListener("keydown", (function(e) {
-      const G__5707 = e.key;
-      switch (G__5707) {
+      const G__5709 = e.key;
+      switch (G__5709) {
         case "ArrowLeft":
           e.preventDefault();
           e.stopPropagation();
@@ -12594,9 +12647,9 @@
         case "End":
           e.preventDefault();
           return v1.currentTime = (() => {
-            const or__23426__auto__9 = v1.duration;
-            if (truth_(or__23426__auto__9)) {
-              return or__23426__auto__9;
+            const or__23426__auto__11 = v1.duration;
+            if (truth_(or__23426__auto__11)) {
+              return or__23426__auto__11;
             } else {
               return 0;
             }
@@ -13253,6 +13306,8 @@
         return p1.video.currentTime = t;
       }), "toast": (function(msg) {
         return toast_BANG_(p1, msg);
+      }), "segments": (function(segs) {
+        return set_segments_BANG_(p1, segs);
       }), "load": (function() {
         load_BANG_(p1);
         return sync_BANG_3(p1);

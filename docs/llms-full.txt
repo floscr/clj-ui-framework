@@ -7176,6 +7176,14 @@ Full library index: docs/llms.txt
 [:script "document.querySelector('[data-video-player]').addEventListener('change', e => console.log(e.detail))"]
 ```
 
+### Mark sponsor segments on the seek bar
+
+```clojure
+(vp/video-player {:src src :segments [{:start 62 :end 118 :label "Sponsor" :kind :sponsor}]})
+;; or once a host script has fetched them:
+(.segments (js/window.__uiVideoPlayer root) #js [#js {:start 62 :end 118 :label "Sponsor"}])
+```
+
 ### Replace a built-in: the host's own quality list
 
 ```clojure
@@ -7204,6 +7212,7 @@ The player. Render it once; the ui.js.video-player runtime owns playback state. 
 | `:tracks` | `[{:src :label :lang :default?}]` | – | WebVTT subtitle tracks. HLS subtitle renditions appear on their own. |
 | `:next` | `{:title :thumb :href}` | – | The next item: a Next button, the up-next card, the autonext toggle. :href navigates; else only :on-next fires. |
 | `:autonext?` | `boolean` | `true` | Initial state of autoplay next. |
+| `:segments` | `[{:start :end :label :kind}]` | – | Stretches marked on the seek bar, in seconds (sponsor segments, intros). Drawn as fine sage hatching with a hairline edge; restyle with the --vp-segment-* custom properties on .video-player-scrub (color, stripe, gap, stripe-width, angle, edge, edge-width), per kind via [data-vp-segment=kind]; the seek tooltip names the one under the pointer. Segments known only after render go through the controller's segments. |
 | `:controls` | `vector of ids` | – | Right capsule in order. Built-ins: :subtitles :quality :speed :autonext :pip :fullscreen. |
 | `:buttons` | `vector of maps` | – | Custom controls: menus {:id :icon :label :options :value :show-value?}, {:type :toggle :pressed?} or {:type :action}. |
 | `:fit` | `:contain \| :fill` | `:contain` | :fill fills the parent (full-page players) instead of 16:9. |
@@ -7228,9 +7237,10 @@ Class string for the root.
 | Up / Down | Volume. |
 | m | Mute. |
 | c | Subtitles on or off. |
-| f | Fullscreen. |
+| f | Fullscreen; leaves tiled fullscreen while that is on. |
+| Alt+click | On the fullscreen button (or Alt+double-click on the picture): tiled fullscreen, the player over the browser window without real fullscreen, so a tiling window manager keeps the window in place. Sets <html data-tiled-fullscreen> for an add-on that hides the browser's toolbars. |
 | n | Next, when there is one. |
-| Escape | Closes an open popover. |
+| Escape | Closes an open popover, else leaves tiled fullscreen. |
 
 ## Accessibility
 
@@ -7259,7 +7269,7 @@ Class string for the root.
 - Don't re-render the player on every timeupdate: the runtime owns time, play state and the open popover. Re-render only when :src, :next or a custom button's :value changes.
 - Custom option values travel through the DOM as strings; on-select maps them back to the original value.
 - A button with a built-in id (e.g. :quality) replaces the built-in.
-- window.__uiVideoPlayer(root) returns {video play pause seek toast load} for host scripts (progress saving, resume).
+- window.__uiVideoPlayer(root) returns {video play pause seek toast load segments} for host scripts (progress saving, resume). segments([{start end label kind}]) replaces the marked stretches; use it or :segments, not both, on a re-rendering target.
 
 ## Related
 

@@ -254,6 +254,14 @@ html:has(.video-player[data-tiled]) body { overflow: hidden; }
   --vp-played: 0;
   --vp-buffered: 0;
   --vp-pointer: 0;
+  /* Segment look: hue, stripe strengths and width, edge strength and width. */
+  --vp-segment-color: rgb(185, 194, 153);
+  --vp-segment-stripe: 41%;
+  --vp-segment-gap: 24%;
+  --vp-segment-stripe-width: 1px;
+  --vp-segment-angle: -45deg;
+  --vp-segment-edge: 61%;
+  --vp-segment-edge-width: 0.5px;
   position: relative;
   flex: 1;
   height: 22px;
@@ -279,6 +287,22 @@ html:has(.video-player[data-tiled]) body { overflow: hidden; }
 .video-player-track i { position: absolute; inset: 0 auto 0 0; }
 .video-player-buffered { width: calc(var(--vp-buffered) * 100%); background: rgba(255, 255, 255, 0.2); }
 .video-player-played { width: calc(var(--vp-played) * 100%); background: rgba(255, 255, 255, 0.95); }
+
+/* Marked stretches (sponsor segments, chapters), over played and buffered.
+   Positions are seconds over the runtime's --vp-duration; until the
+   duration is known the division is invalid and they take no room. */
+.video-player-segments { position: absolute; inset: 0; pointer-events: none; }
+.video-player-track .video-player-segment {
+  left: calc(var(--vp-seg-start) / var(--vp-duration) * 100%);
+  width: calc((var(--vp-seg-end) - var(--vp-seg-start)) / var(--vp-duration) * 100%);
+  /* Hatched, edged by a thin line on each side. */
+  background: repeating-linear-gradient(var(--vp-segment-angle),
+    color-mix(in srgb, var(--vp-segment-color) var(--vp-segment-stripe), transparent) 0 var(--vp-segment-stripe-width),
+    color-mix(in srgb, var(--vp-segment-color) var(--vp-segment-gap), transparent) var(--vp-segment-stripe-width) calc(2 * var(--vp-segment-stripe-width)));
+  box-shadow:
+    inset var(--vp-segment-edge-width) 0 0 color-mix(in srgb, var(--vp-segment-color) var(--vp-segment-edge), transparent),
+    inset calc(-1 * var(--vp-segment-edge-width)) 0 0 color-mix(in srgb, var(--vp-segment-color) var(--vp-segment-edge), transparent);
+}
 
 .video-player-tip {
   position: absolute;

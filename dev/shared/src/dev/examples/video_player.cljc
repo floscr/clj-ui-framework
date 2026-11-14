@@ -23,6 +23,14 @@
                                {:value "end" :label "End of episode"}]
                      :value 0}]}))))
 
+   (example :segments "Marked segments: a sponsor read on the seek bar"
+     (fn []
+       (frame
+        (vp/video-player
+         {:src stream :title "Big Buck Bunny" :start-at 50
+          :segments [{:start 62 :end 118 :label "Sponsor" :kind :sponsor}
+                     {:start 420 :end 445 :label "Sponsor" :kind :sponsor}]}))))
+
    (example :plain "Plain variant: no glass, controls on a gradient"
      (fn []
        (frame

@@ -185,6 +185,22 @@
             :aria-label "Play" :data-tooltip "Play (space)"}
    (filled :play "video-player-i-play") (filled :pause "video-player-i-pause")])
 
+(defn- segment-style
+  "A segment's start and end in seconds, as the custom properties the CSS
+   divides by the runtime's --vp-duration."
+  [start end]
+  #?(:squint {"--vp-seg-start" start "--vp-seg-end" end}
+     :cljs   {:--vp-seg-start start :--vp-seg-end end}
+     :clj    (str "--vp-seg-start: " start "; --vp-seg-end: " end ";")))
+
+(defn- segment
+  "One marked stretch of the seek bar."
+  [{:keys [start end label kind]}]
+  [:i (cond-> {:class (cls "video-player-segment")
+               :data-vp-segment (if kind (util/kw-name kind) "")
+               :style (segment-style start end)}
+        label (assoc :data-label label))])
+
 (defn- up-next [{:keys [title thumb]}]
   [:div {:class (cls "video-player-upnext video-player-glass") :data-vp "upnext" :hidden true}
    [:div {:class (cls "video-player-upnext-thumb")}
@@ -244,6 +260,11 @@
                    up-next card and the :autonext toggle. With :href the
                    runtime navigates there; else only :on-next fires.
      :autonext?  - initial state of autoplay-next (default true)
+     :segments   - [{:start 30 :end 75 :label \"Sponsor\" :kind :sponsor}]
+                   stretches marked on the seek bar (seconds); the seek
+                   tooltip names the one under the pointer. :kind lands in
+                   data-vp-segment for per-kind colours. A host that only
+                   learns them later calls the controller's segments.
      :controls   - ids in the right capsule, in order (default: subtitles
                    quality speed, every :buttons id, autonext pip fullscreen)
      :buttons    - custom controls, see the namespace doc
@@ -256,7 +277,7 @@
      :on-next    - (fn []) Next pressed or the up-next countdown ran out
      :class      - extra classes on the root
      :attrs      - extra attributes on the root"
-  [{:keys [src hls? poster title back start-at autoplay? tracks next autonext?
+  [{:keys [src hls? poster title back start-at autoplay? tracks next autonext? segments
            controls buttons fit variant on-select on-toggle on-action on-next class attrs]}]
   (let [custom (into {} (map (fn [b] [(util/kw-name (:id b)) b]) buttons))
         ids (map util/kw-name (or controls (default-controls buttons next)))
@@ -316,7 +337,9 @@
               :aria-label "Seek" :aria-valuemin "0" :aria-valuemax "0" :aria-valuenow "0"}
         [:div {:class (cls "video-player-track")}
          [:i {:class (cls "video-player-buffered")}]
-         [:i {:class (cls "video-player-played")}]]
+         [:i {:class (cls "video-player-played")}]
+         (into [:span {:class (cls "video-player-segments") :data-vp "segments"}]
+               (map segment segments))]
         [:span {:class (cls "video-player-tip") :data-vp "tip"}]]
        [:span {:class (cls "video-player-time") :data-vp "left"} "-0:00"]]
       [:div {:class (cls "video-player-row")}

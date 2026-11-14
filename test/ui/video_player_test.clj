@@ -116,6 +116,24 @@
     (testing ":controls is exact"
       (is (empty? (find-attr tree :data-vp-open "speed"))))))
 
+(deftest segments-test
+  (let [tree (vp/video-player {:src "a.mp4"
+                               :segments [{:start 30 :end 75.5 :label "Sponsor" :kind :sponsor}
+                                          {:start 300 :end 320}]})
+        box (first (find-attr tree :data-vp "segments"))
+        segs (map attrs (find-attr box :data-vp-segment))]
+    (testing "segments sit in the track's container, seconds as custom properties"
+      (is (= 2 (count segs)))
+      (is (= "--vp-seg-start: 30; --vp-seg-end: 75.5;" (:style (first segs))))
+      (is (= "video-player-segment" (:class (first segs)))))
+    (testing "kind and label for colours and the seek tooltip"
+      (is (= ["sponsor" ""] (map :data-vp-segment segs)))
+      (is (= ["Sponsor" nil] (map :data-label segs)))))
+  (testing "without :segments the container is there, empty, for the controller"
+    (let [box (first (find-attr (vp/video-player {:src "a.mp4"}) :data-vp "segments"))]
+      (is (some? box))
+      (is (empty? (find-attr box :data-vp-segment))))))
+
 (deftest tracks-test
   (let [tree (vp/video-player {:src "a.mp4" :tracks [{:src "en.vtt" :label "English" :lang "en" :default? true}]})
         [_ a] (first (filter #(= :track (first %)) (nodes tree)))]

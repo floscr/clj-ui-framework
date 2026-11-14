@@ -32,7 +32,8 @@
    detail {kind: select|toggle|action|next, id, value, on}.
 
    window.__uiVideoPlayer(root) returns the controller
-   {play pause seek toast load video}.")
+   {play pause seek toast load segments video}; segments([{start end label
+   kind}]) replaces the marked stretches of the seek bar.")
 
 (def ^:private players (js/Map.))
 (def ^:private idle-ms 2600)
@@ -346,6 +347,7 @@
     (when-let [n (q root "[data-vp=time]")] (set! (.-textContent n) (fmt t)))
     (when-let [n (q root "[data-vp=left]")] (set! (.-textContent n) (str "-" (fmt (- d t)))))
     (when (and scrub (pos? d))
+      (.setProperty (.-style scrub) "--vp-duration" d)
       (when-not (.-dragging p)
         (.setProperty (.-style scrub) "--vp-played" (/ t d)))
       (.setAttribute scrub "aria-valuemax" (js/Math.round d))
@@ -468,14 +470,44 @@
   (let [r (.getBoundingClientRect el)]
     (clamp (/ (- (.-clientX e) (.-left r)) (.-width r)) 0 1)))
 
+(defn- seg-bound [el k]
+  (js/parseFloat (.getPropertyValue (.-style el) k)))
+
+(defn- segment-label
+  "The label of the marked segment at t seconds, or nil."
+  [scrub t]
+  (some (fn [el]
+          (when (and (>= t (seg-bound el "--vp-seg-start")) (< t (seg-bound el "--vp-seg-end")))
+            (.getAttribute el "data-label")))
+        (qa scrub "[data-vp-segment]")))
+
+(defn- segment-el
+  "A segment from the controller: {start end label kind}, start and end in
+   seconds."
+  [s]
+  (let [el (.createElement js/document "i")]
+    (set! (.-className el) "video-player-segment")
+    (.setAttribute el "data-vp-segment" (or (.-kind s) ""))
+    (when (.-label s) (.setAttribute el "data-label" (.-label s)))
+    (.setProperty (.-style el) "--vp-seg-start" (.-start s))
+    (.setProperty (.-style el) "--vp-seg-end" (.-end s))
+    el))
+
+(defn- set-segments! [p segs]
+  (when-let [box (q (.-root p) "[data-vp=segments]")]
+    (.replaceChildren box)
+    (.forEach (or segs #js []) (fn [s] (.append box (segment-el s))))))
+
 (defn- wire-scrub! [p scrub]
   (let [v (.-video p)
         tip (q scrub "[data-vp=tip]")]
     (.addEventListener scrub "pointermove"
                        (fn [e]
-                         (let [f (frac scrub e)]
+                         (let [f (frac scrub e)
+                               t (* f (or (.-duration v) 0))
+                               label (segment-label scrub t)]
                            (.setProperty (.-style scrub) "--vp-pointer" f)
-                           (when tip (set! (.-textContent tip) (fmt (* f (or (.-duration v) 0)))))
+                           (when tip (set! (.-textContent tip) (if label (str (fmt t) " · " label) (fmt t))))
                            (when (.-dragging p) (.setProperty (.-style scrub) "--vp-played" f)))))
     (.addEventListener scrub "pointerdown"
                        (fn [e]
@@ -752,6 +784,7 @@
                :pause (fn [] (.pause (.-video p)))
                :seek (fn [t] (set! (.. p -video -currentTime) t))
                :toast (fn [msg] (toast! p msg))
+               :segments (fn [segs] (set-segments! p segs))
                :load (fn [] (load! p) (sync! p))})))
 
 (if (= "loading" (.-readyState js/document))

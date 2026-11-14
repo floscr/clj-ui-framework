@@ -20,6 +20,8 @@
  :examples
  [{:title "Hiccup page: load hls.js, then listen for the runtime's change event"
    :code "[:head [:script {:src vp/hls-script-url}]]\n...\n(vp/video-player {:src src :title title :next {:title \"Episode 2\" :href \"/watch/2\"}})\n[:script \"document.querySelector('[data-video-player]').addEventListener('change', e => console.log(e.detail))\"]"}
+  {:title "Mark sponsor segments on the seek bar"
+   :code "(vp/video-player {:src src :segments [{:start 62 :end 118 :label \"Sponsor\" :kind :sponsor}]})\n;; or once a host script has fetched them:\n(.segments (js/window.__uiVideoPlayer root) #js [#js {:start 62 :end 118 :label \"Sponsor\"}])"}
   {:title "Replace a built-in: the host's own quality list"
    :code "(vp/video-player {:src src\n                  :buttons [{:id :quality :label \"Quality\" :show-value? true\n                             :options [{:value \"1080\" :label \"1080p\"} {:value \"720\" :label \"720p\" :default? true}]\n                             :value \"720\"}]\n                  :on-select (fn [id v] (when (= id \"quality\") (reload-at! v))))"}]
 
@@ -36,6 +38,7 @@
            {:name :tracks :type "[{:src :label :lang :default?}]" :doc "WebVTT subtitle tracks. HLS subtitle renditions appear on their own."}
            {:name :next :type "{:title :thumb :href}" :doc "The next item: a Next button, the up-next card, the autonext toggle. :href navigates; else only :on-next fires."}
            {:name :autonext? :type "boolean" :default "true" :doc "Initial state of autoplay next."}
+           {:name :segments :type "[{:start :end :label :kind}]" :doc "Stretches marked on the seek bar, in seconds (sponsor segments, intros). Drawn as fine sage hatching with a hairline edge; restyle with the --vp-segment-* custom properties on .video-player-scrub (color, stripe, gap, stripe-width, angle, edge, edge-width), per kind via [data-vp-segment=kind]; the seek tooltip names the one under the pointer. Segments known only after render go through the controller's segments."}
            {:name :controls :type "vector of ids" :doc "Right capsule in order. Built-ins: :subtitles :quality :speed :autonext :pip :fullscreen."}
            {:name :buttons :type "vector of maps" :doc "Custom controls: menus {:id :icon :label :options :value :show-value?}, {:type :toggle :pressed?} or {:type :action}."}
            {:name :fit :type ":contain | :fill" :default ":contain" :doc ":fill fills the parent (full-page players) instead of 16:9."}
@@ -78,6 +81,6 @@
  :notes-for-ai ["Don't re-render the player on every timeupdate: the runtime owns time, play state and the open popover. Re-render only when :src, :next or a custom button's :value changes."
                 "Custom option values travel through the DOM as strings; on-select maps them back to the original value."
                 "A button with a built-in id (e.g. :quality) replaces the built-in."
-                "window.__uiVideoPlayer(root) returns {video play pause seek toast load} for host scripts (progress saving, resume)."]
+                "window.__uiVideoPlayer(root) returns {video play pause seek toast load segments} for host scripts (progress saving, resume). segments([{start end label kind}]) replaces the marked stretches; use it or :segments, not both, on a re-rendering target."]
 
  :related [:player-bar :timeline :popover]}
