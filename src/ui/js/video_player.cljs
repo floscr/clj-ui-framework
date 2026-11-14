@@ -13,6 +13,7 @@
 
      data-paused data-idle data-loading data-muted data-fullscreen
      data-tiled data-panel-open data-upnext data-error data-autoplay-muted
+     data-reconnecting
 
    Tiled fullscreen (Alt+click on the fullscreen button, Alt+double-click
    on the picture) covers the browser window instead of the screen and sets
@@ -581,6 +582,7 @@
     (set! (.-dismissed p) false)
     (set! (.-sub p) -1)
     (flag! root "data-error" false)
+    (flag! root "data-reconnecting" false)
     ;; An autoplaying source shows the spinner from the start, not the big
     ;; play button; playing/canplay clear it.
     (flag! root "data-loading" (and autoplay? (not= "" src)))
@@ -603,16 +605,19 @@
                       (set! (.-hidden b) (< (.-length (levels p)) 2)))
                (sync! p) (play!)))
         (.on h (.. Hls -Events -LEVEL_SWITCHED) (fn [] (sync! p)))
-        (.on h (.. Hls -Events -FRAG_LOADED) (fn [] (set! (.-fails p) 0)))
+        (.on h (.. Hls -Events -FRAG_LOADED)
+             (fn [] (set! (.-fails p) 0) (flag! root "data-reconnecting" false)))
         (.on h (.. Hls -Events -ERROR)
              (fn [_ d]
                (when (.-fatal d)
                  (set! (.-fails p) (inc (.-fails p)))
                  (cond
-                   (> (.-fails p) 8) (do (flag! root "data-error" true)
+                   (> (.-fails p) 8) (do (flag! root "data-reconnecting" false)
+                                         (flag! root "data-error" true)
                                          (toast! p (str "Playback error: " (.-details d))))
                    (= (.-type d) (.. Hls -ErrorTypes -MEDIA_ERROR)) (.recoverMediaError h)
-                   :else (do (toast! p "Reconnecting…")
+                   ;; The top-right pill, not a toast over the picture.
+                   :else (do (flag! root "data-reconnecting" true)
                              (js/setTimeout (fn [] (when (identical? (.-hls p) h)
                                                      (.startLoad h (.-currentTime v))))
                                             (js/Math.min 8000 (* 500 (.-fails p))))))))))
@@ -691,6 +696,7 @@
     (.addEventListener v "waiting" (fn [] (flag! root "data-loading" true)))
     (.forEach #js ["playing" "canplay" "pause"]
               (fn [t] (.addEventListener v t (fn [] (flag! root "data-loading" false)))))
+    (.addEventListener v "playing" (fn [] (flag! root "data-reconnecting" false)))
     (.addEventListener v "loadedmetadata" (fn [] (init-tracks! p) (sync! p) (tick! p)))
     (.addEventListener (.-textTracks v) "addtrack" (fn [] (init-tracks! p) (sync! p)))
     (.addEventListener v "ended"

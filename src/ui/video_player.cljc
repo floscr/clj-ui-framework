@@ -303,6 +303,9 @@
      [:div {:class (cls "video-player-caption") :data-vp "caption"}]
      [:div {:class (cls "video-player-spinner")}]
      [:div {:class (cls "video-player-toast") :data-vp "toast" :role "status" :aria-live "polite"}]
+     [:div {:class (cls "video-player-reconnect video-player-glass") :role "status" :aria-live "polite"}
+      [:i {:class (cls "video-player-reconnect-spinner")}]
+      [:span "Reconnecting…"]]
      [:button {:type "button" :class (cls "video-player-unmute video-player-glass") :data-vp-act "unmute"}
       (ic :volume-x) "Tap to unmute"]
      (when next (up-next next))

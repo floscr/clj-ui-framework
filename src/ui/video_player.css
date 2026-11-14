@@ -3,7 +3,7 @@
    The player is always dark: it sits on video, so it doesn't follow the
    page theme. State comes from attributes the runtime sets on the root:
    data-paused data-idle data-loading data-muted data-fullscreen
-   data-tiled data-panel-open data-upnext. */
+   data-tiled data-panel-open data-upnext data-reconnecting. */
 
 .video-player {
   --vp-glass: rgba(48, 48, 54, 0.42);
@@ -474,6 +474,42 @@ html:has(.video-player[data-tiled]) body { overflow: hidden; }
 }
 
 .video-player[data-loading] .video-player-spinner { display: block; }
+
+/* Reconnecting: a status pill in the top right instead of a notice over
+   the picture. It stays through idle hiding, and while it shows the
+   centre spinner gives way to its small one. */
+.video-player .video-player-reconnect {
+  position: absolute;
+  top: var(--size-3);
+  right: var(--size-3);
+  z-index: 6;
+  display: none;
+  align-items: center;
+  gap: var(--size-2);
+  height: 36px;
+  padding: 0 var(--size-4) 0 var(--size-3);
+  border-radius: var(--radius-pill);
+  font-size: var(--font-xs);
+  font-weight: 500;
+  white-space: nowrap;
+  pointer-events: none;
+  animation: video-player-pop var(--duration-standard) var(--ease-enter);
+}
+
+.video-player-reconnect-spinner {
+  width: 14px;
+  height: 14px;
+  flex: none;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  animation: video-player-spin 0.8s linear infinite; /* lint-allow: loop */
+}
+
+.video-player[data-reconnecting] .video-player-reconnect { display: inline-flex; }
+.video-player[data-reconnecting] .video-player-spinner { display: none; }
+/* under the unmute pill when both show */
+.video-player[data-autoplay-muted] .video-player-reconnect { top: calc(var(--size-3) + 48px); }
 
 @keyframes video-player-spin { to { transform: rotate(360deg); } }
 

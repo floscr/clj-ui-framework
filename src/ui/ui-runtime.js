@@ -1,5 +1,5 @@
 (() => {
-  // ../../../dev/squint/node_modules/squint-cljs/src/squint/core.js
+  // ../../../../../home/floscr/Code/Projects/clj-ui-framework/dev/squint/node_modules/squint-cljs/src/squint/core.js
   function toFn(x) {
     if (x == null) return x;
     if (x instanceof Function) {
@@ -3439,7 +3439,7 @@
   })();
   window["__uiContextMenu"] = open_context_menu;
 
-  // ../../../dev/squint/node_modules/squint-cljs/src/squint/string.js
+  // ../../../../../home/floscr/Code/Projects/clj-ui-framework/dev/squint/node_modules/squint-cljs/src/squint/string.js
   function join(sep, coll) {
     if (coll === void 0) {
       coll = sep;
@@ -12856,6 +12856,7 @@
     p.dismissed = false;
     p.sub = -1;
     flag_BANG_(root1, "data-error", false);
+    flag_BANG_(root1, "data-reconnecting", false);
     flag_BANG_(root1, "data-loading", autoplay_QMARK_11 && !_EQ_("", src3));
     if (_EQ_("", src3)) {
       const temp__23062__auto__13 = q2(root1, "[data-vp-builtin=quality]");
@@ -12901,12 +12902,14 @@
           return sync_BANG_3(p);
         }));
         h17.on(Hls10.Events.FRAG_LOADED, (function() {
-          return p.fails = 0;
+          p.fails = 0;
+          return flag_BANG_(root1, "data-reconnecting", false);
         }));
         return h17.on(Hls10.Events.ERROR, (function(_, d) {
           if (truth_(d.fatal)) {
             p.fails = p.fails + 1;
             if (p.fails > 8) {
+              flag_BANG_(root1, "data-reconnecting", false);
               flag_BANG_(root1, "data-error", true);
               return toast_BANG_(p, `${"Playback error: "}${d.details ?? ""}`);
             } else {
@@ -12914,7 +12917,7 @@
                 return h17.recoverMediaError();
               } else {
                 if ("else") {
-                  toast_BANG_(p, "Reconnecting\u2026");
+                  flag_BANG_(root1, "data-reconnecting", true);
                   return setTimeout((function() {
                     if (p.hls === h17) {
                       return h17.startLoad(v2.currentTime);
@@ -13115,6 +13118,9 @@
       return v1.addEventListener(t, (function() {
         return flag_BANG_(root, "data-loading", false);
       }));
+    }));
+    v1.addEventListener("playing", (function() {
+      return flag_BANG_(root, "data-reconnecting", false);
     }));
     v1.addEventListener("loadedmetadata", (function() {
       init_tracks_BANG_(p2);
