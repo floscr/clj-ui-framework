@@ -15,6 +15,7 @@
   --lightbox-chrome-top: calc(var(--size-16) + env(safe-area-inset-top, 0px));
   --lightbox-chrome-bottom: calc(var(--size-14) + env(safe-area-inset-bottom, 0px));
   --lightbox-thumb-size: var(--size-12);
+  --lightbox-backdrop: rgba(0, 0, 0, 0.96);
 }
 
 /* The runtime hears this animation start, so it notices every lightbox
@@ -47,7 +48,7 @@
 .ui-lightbox-backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.96);
+  background: var(--lightbox-backdrop);
   opacity: calc(1 - var(--lightbox-pull-progress) * 0.85);
   transition: opacity var(--duration-standard) var(--ease-standard);
 }
@@ -441,6 +442,10 @@ html.clj-ui-touch .ui-lightbox-zoom-button {
 /* ── Phones: edge to edge, chrome over the photo ── */
 
 @media (max-width: 640px) {
+  .ui-lightbox {
+    --lightbox-backdrop: black;
+  }
+
   .ui-lightbox-slide {
     padding:
       env(safe-area-inset-top, 0px)

@@ -306,9 +306,12 @@
         (let [thumb (.getAttribute m "data-thumb")
               full  (.getAttribute m "data-src")]
           (if (and thumb (not= thumb full))
-            (do (set-slide-state! slide "preview")
+            (do (set-slide-state! slide "loading")
                 (set! (.-onload m) (fn []
                                      (set! (.-onload m) nil)
+                                     ;; the thumbnail shows: no spinner over it
+                                     (when (= "thumb" (aget m "__lbShown"))
+                                       (set-slide-state! slide "preview"))
                                      (fit! slide)))
                 (show-src! slide m thumb "thumb")
                 (load-full! slide m))

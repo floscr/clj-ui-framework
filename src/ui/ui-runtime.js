@@ -6287,9 +6287,13 @@
             }
             ;
           })())) {
-            set_slide_state_BANG_(slide, "preview");
+            set_slide_state_BANG_(slide, "loading");
             m2.onload = (function() {
               m2.onload = null;
+              if ("thumb" === m2["__lbShown"]) {
+                set_slide_state_BANG_(slide, "preview");
+              }
+              ;
               return fit_BANG_(slide);
             });
             show_src_BANG_(slide, m2, thumb3, "thumb");
