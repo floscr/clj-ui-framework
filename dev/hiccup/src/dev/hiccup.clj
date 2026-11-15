@@ -192,14 +192,16 @@
 (defn lightbox-demo []
   (section "Lightbox"
     [:p {:style "color: var(--fg-2); font-size: var(--font-sm);"}
-     "Click a thumbnail to open the fullscreen lightbox overlay (requires JavaScript)."]
+     "Click a thumbnail: a managed lightbox, opened by ui-runtime.js with no app code."]
     [:div {:style "display: flex; gap: 0.75rem; flex-wrap: wrap;"}
-     (for [{:keys [src alt]} sample-images]
-       (lightbox/image-thumbnail {:src src :alt alt}))]
+     (map-indexed (fn [i {:keys [src alt]}]
+                    (lightbox/image-thumbnail {:src src :alt alt :lightbox "demo-lightbox" :index i}))
+                  sample-images)]
+    (lightbox/lightbox {:id "demo-lightbox" :open false :items sample-images :thumbnails true :history true})
     [:p {:style "color: var(--fg-2); font-size: var(--font-sm); margin-top: 0.5rem;"}
-     "Static lightbox overlay preview:"]
+     "Contained preview:"]
     [:div {:style "position: relative; height: 300px; border-radius: var(--radius-md); overflow: hidden;"}
-     (lightbox/lightbox {:src (:src (first sample-images)) :alt "Indigo"})]))
+     (lightbox/lightbox {:contained true :items sample-images})]))
 
 (defn tag-input-demo []
   (section "Tag Input"
@@ -337,8 +339,7 @@
    (examples/section-for :color-picker)
    (examples/section-for :chat)
    (tag-input-demo)
-   (lightbox-demo)
-   [:style (h/raw ".lightbox-overlay { position: absolute !important; }")]])
+   (lightbox-demo)])
 
 (def sample-files
   [{:name "Documents"          :file-type :folder      :modified "May 10, 2026"}

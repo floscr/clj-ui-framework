@@ -21,14 +21,29 @@
    {:name "podcast-ep12.mp3"     :file-type :audio       :size "48 MB"   :modified "May 3, 2026"}
    {:name "app.clj"              :file-type :code        :size "8.2 KB"  :modified "May 14, 2026"}])
 
+(defn- svg-photo
+  "A w × h placeholder photo as an SVG data URI (with a viewBox, so it
+   scales like a real image)."
+  [w h color label]
+  (str "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='" w "' height='" h
+       "' viewBox='0 0 " w " " h "'%3E"
+       "%3Crect fill='%23" color "' width='" w "' height='" h "'/%3E"
+       "%3Ctext x='" (/ w 2) "' y='" (/ h 2) "' text-anchor='middle' dominant-baseline='middle' fill='white' "
+       "font-size='" (quot (min w h) 12) "' font-family='sans-serif'%3E" label "%3C/text%3E%3C/svg%3E"))
+
 (defn- svg-tile [color label]
-  (str "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E"
-       "%3Crect fill='%23" color "' width='400' height='300'/%3E"
-       "%3Ctext x='200' y='150' text-anchor='middle' dominant-baseline='middle' fill='white' "
-       "font-size='24' font-family='sans-serif'%3E" label "%3C/text%3E%3C/svg%3E"))
+  (svg-photo 400 300 color label))
 
 (def images
   [{:src (svg-tile "4f46e5" "Indigo") :alt "Indigo"}
    {:src (svg-tile "16a34a" "Green")  :alt "Green"}
    {:src (svg-tile "dc2626" "Red")    :alt "Red"}
    {:src (svg-tile "ea580c" "Orange") :alt "Orange"}])
+
+(def photos
+  "Gallery photos of mixed aspect, each with a caption (lightbox examples)."
+  [{:src (svg-photo 1600 1200 "4f46e5" "Indigo") :alt "Indigo" :width 1600 :height 1200 :caption "Indigo, 4:3"}
+   {:src (svg-photo 1000 1500 "16a34a" "Green")  :alt "Green"  :width 1000 :height 1500 :caption "Green, 2:3"}
+   {:src (svg-photo 1400 1400 "dc2626" "Red")    :alt "Red"    :width 1400 :height 1400 :caption "Red, square"}
+   {:src (svg-photo 1920 1080 "ea580c" "Orange") :alt "Orange" :width 1920 :height 1080 :caption "Orange, 16:9"}
+   {:src (svg-photo 1200 1600 "0891b2" "Cyan")   :alt "Cyan"   :width 1200 :height 1600 :caption "Cyan, 3:4"}])

@@ -1084,27 +1084,79 @@ side-effect require, like the other runtime modules:
 (:require [ui.js.gestures])
 ```
 
-## Lightbox Zoom (`ui.js.lightbox`) — automatic
+## Lightbox (`ui.lightbox` + `ui.js.lightbox`) — runtime-owned behaviour
 
-Every `ui.lightbox` image is zoomable without per-app wiring: the
-`ui.js.lightbox` runtime module (bundled in ui-runtime.js) installs
-document-level Pointer Event handlers on `.lightbox-overlay`.
+`ui.lightbox/lightbox` renders a viewer (`.ui-lightbox[data-lightbox]`) for
+one image (`:src`) or a gallery (`:items`); the `ui.js.lightbox` runtime
+(in ui-runtime.js) owns everything that moves. **Don't hand-roll zoom,
+swipe, keys or a close animation in apps.** Squint/Replicant SPAs without
+ui-runtime.js add `(:require [ui.js.lightbox])`.
 
-- two-finger pinch zooms around the pinch midpoint; one finger / mouse
-  drag pans a zoomed image
-- double-tap / double-click on the image toggles 1x ↔ 2.5x at that point
-- mouse wheel / trackpad pinch (ctrl+wheel) zooms around the cursor
-- release snaps into bounds (1x–5x, no panning past the image edges)
-- the click ending a drag/pinch is suppressed, so it never closes the
-  lightbox; a plain tap on the backdrop still does
-- zoom lives in the image's inline `transform` + a `data-zoomed`
-  attribute (grab cursor) — no component state; it resets when the image
-  (re)loads
+Two ways to drive it:
 
-`ui/lightbox.css` sets `touch-action: none` on the overlay so the browser
-hands the gestures to the runtime (the page-level pinch block from
-`ui.js.touch` stays in place). **Don't hand-roll zoom in apps.**
-Squint/Replicant SPAs without ui-runtime.js add `(:require [ui.js.lightbox])`.
+- **Host-controlled** (Replicant / Squint): render it while open with
+  `:index`; `:on-change` gets the new index after a swipe / key / button;
+  `:on-close` fires *after* the close animation, and is where the host
+  unmounts it. The runtime reports through non-bubbling `change` / `close`
+  events on the root (`onchange` / `onclose` are GlobalEventHandlers, so
+  Eucalypt's `:on-close` and Replicant's `:on {:close}` both bind them).
+- **Managed** (any target, the only way on `:clj`): render it with `:id`
+  and `:open false`; `image-thumbnail {:lightbox id :index i}` opens it.
+
+What the runtime does:
+
+- **open / close:** notices a viewer mounting or unhiding through the CSS
+  `ui-lightbox-mount` animation (no document-wide MutationObserver). The
+  thumbnail (`[data-lightbox-key]`, matching the slide's `data-key` =
+  item `:key`, else `:thumb`, else `:src`) **morphs** into the slide with
+  FLIP + WAAPI (clip-path un-crops an `object-fit: cover` tile and keeps
+  its radius) and back on close, from the current zoom / pull pose; it
+  fades when the thumbnail is gone or off screen. The thumbnail is hidden
+  (`[data-lightbox-source]`) while it is "in" the viewer. No View
+  Transitions on purpose: ramka's list of per-browser VT workarounds
+  (Android URL-bar aborts, WebKit named groups, Firefox full-bleed capture,
+  iOS swallowed frames) is not worth it for this.
+- **gallery:** native scroll-snap slides (`scroll-snap-stop: always`). A
+  swipe in flight locks key / button navigation (a programmatic scroll
+  can't cancel a compositor fling); settle on `scrollend` with a quiet-gap
+  fallback (Safari < 17.4 has no `scrollend`, Firefox drops it after a
+  snap, iOS after a rubber band). Keys and buttons jump instantly and slide
+  the new photo in, so key repeat never waits for a smooth scroll.
+- **images:** the markup never has a `src` (so a VDOM re-render can't reset
+  it): the runtime shows `:thumb` first, sized to the fit box, then swaps
+  in the full image once `decode()`d; only the shown slide ±1 load. The img
+  box is always the fit box in px (from `:width`/`:height`, the loaded
+  image or the thumbnail), never upscaled past a known natural size.
+- **zoom:** pinch (focal, rubber band past the bounds, a two-finger slide
+  only pans until the fingers really pinch), one-finger / mouse pan with
+  momentum, double-tap toggle, ctrl+wheel and trackpad pinch to the cursor
+  (Chrome/Firefox send pinch as ctrl+wheel *without* a Control keydown:
+  elastic; a real Ctrl+wheel hard-clamps), Safari desktop trackpad pinch
+  via `GestureEvent` (never on touch screens: iOS fires it for a second
+  finger mid-scroll), a plain wheel pans when zoomed (`:scroll-to-zoom`
+  makes it zoom), `+ - 0` keys and buttons. Bounds are measured against
+  the slide, not the window; max zoom = the image's own resolution (2×–8×).
+- **pull to dismiss:** vertical drag (touch, pen, mouse) or a vertical
+  trackpad / wheel flick at 1×; `--lightbox-pull-progress` (0 → 1) on the
+  root drives the backdrop; past 22% of the height or a flick closes.
+- **keys:** Escape, ←/→ (pan when zoomed), ↑/↓ (pan), Home/End, `+ = - _ 0`.
+  Unmodified only: ctrl/cmd + plus stays the browser's page zoom.
+- **page:** `html[data-lightbox-open]` locks the page scroll (the scrollbar
+  width is kept as padding); on touch screens it also sets `user-select:
+  none` (iOS selects the page behind during a zoomed tap and pan). Wheel
+  and gesture listeners only exist while something is open, passive on
+  WebKit: a non-passive wheel listener above a scroller drops Safari's
+  momentum scrolling.
+- **hosts that re-create nodes:** a viewer removed while open and mounted
+  again within 250ms (Eucalypt resets a whole tree when it can't patch) is
+  taken over in the same tick: no second morph, no second history entry.
+- **legacy overlays:** hand-built `.lightbox-overlay` + `.lightbox-image`
+  markup (apps not yet on `ui.lightbox`) keeps the old zoom (bare wheel
+  zooms, CSS-transition snap-back, reset on image load) and gets the page
+  lock.
+- the click that ends a drag is swallowed (for 400ms: a touch drag ending
+  in `pointercancel` has no click, so a stale flag must not eat the next
+  one); a backdrop click closes only when the press started on it too.
 
 ## Video Player (`ui.js.video-player`) — runtime-owned state
 

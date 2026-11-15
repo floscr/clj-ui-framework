@@ -1,37 +1,90 @@
 {:id :lightbox
  :title "Lightbox"
- :summary "A fullscreen image overlay with pinch, wheel and double-tap zoom and drag to pan, plus a clickable thumbnail."
+ :summary "A fullscreen viewer for one image or a gallery: swipe, pinch and wheel zoom, pull to dismiss, and a morph out of and back into the thumbnail."
  :category :media
  :group "Media"
- :keywords ["lightbox" "image viewer" "zoom" "fullscreen image" "gallery"]
+ :keywords ["lightbox" "image viewer" "gallery" "carousel" "zoom" "pinch" "fullscreen image" "photo viewer" "video"]
 
  :when-to-use
- ["Viewing one image large from a grid or a message."]
+ ["Looking at photos large from a grid, a message or a card."
+  "Paging through a set of images or videos, with captions or actions per item."]
 
  :when-not-to-use
- ["Use dialog for content that is not a single image."
-  "Use grid plus thumbnails for the collection itself."]
+ ["Use dialog for forms and content that is not media."
+  "Use grid plus thumbnails for the collection itself."
+  "Use video-player for a single video that plays in place."]
 
- :usage "(require '[ui.lightbox :as lightbox])\n\n(lightbox/image-thumbnail {:src thumb :on-click #(open! full})\n(lightbox/lightbox {:src (:open-image state) :on-close close!})"
+ :usage "(require '[ui.lightbox :as lightbox])\n\n;; host-controlled (replicant / squint)\n(lightbox/lightbox {:items photos :index (:open @state)\n                    :on-change #(swap! state assoc :open %)\n                    :on-close #(swap! state dissoc :open)})\n\n;; managed (any target, the only way on :clj)\n(lightbox/image-thumbnail {:src (:thumb p) :lightbox \"photos\" :index i})\n(lightbox/lightbox {:id \"photos\" :open false :items photos})"
+
+ :examples
+ [{:title "Gallery with captions, thumbnails and a download action"
+   :code "(lightbox/lightbox\n  {:items [{:src \"/p/1.jpg\" :thumb \"/p/1-s.jpg\" :caption \"Harbour\" :width 4000 :height 3000}\n          {:src \"/p/2.mp4\" :type :video :poster \"/p/2.jpg\"}]\n   :index 0\n   :thumbnails true\n   :history true\n   :actions [(lightbox/action {:icon-name :download :label \"Download\" :href \"/p/1.jpg\" :download true})]\n   :on-change on-change\n   :on-close on-close})"}]
 
  :api
- [{:fn "lightbox" :doc "Renders the overlay only while :src is set. Clicking the backdrop or the close button calls :on-close."
-   :props [{:name :src :type "string | nil"} {:name :alt :type "string" :default "\"image\""} {:name :on-close :type "fn"}]}
-  {:fn "image-thumbnail" :doc "A clickable image."
-   :props [{:name :src :type "string"} {:name :alt :type "string"} {:name :on-click :type "fn"} {:name :class :type "string | vector"}]}]
+ [{:fn "lightbox"
+   :doc "The viewer. Renders nothing without :src or :items. The runtime owns everything that moves and reports back through :on-change and :on-close (non-bubbling `change` and `close` events on the root)."
+   :props [{:name :items :type "vector" :doc "Maps of :src :thumb :alt :caption :width :height :key :type (:image, :video, :content) :poster :content :href :class :autoplay :loop :muted."}
+           {:name :src :type "string" :doc "Shorthand for one image."}
+           {:name :alt :type "string" :default "\"image\"" :doc "Alt text with :src."}
+           {:name :index :type "number" :default "0" :doc "The item shown on open; changing it navigates."}
+           {:name :id :type "string" :doc "Element id; managed thumbnails open it with :lightbox id."}
+           {:name :open :type "boolean" :default "true" :doc "false renders it hidden for managed mode."}
+           {:name :on-close :type "fn" :doc "Called after the close animation; unmount the lightbox here."}
+           {:name :on-change :type "fn" :doc "Called with the new index after a swipe, key or button."}
+           {:name :thumbnails :type "boolean" :doc "Shows a thumbnail strip."}
+           {:name :actions :type "hiccup" :doc "Toolbar buttons before zoom and close (see action)."}
+           {:name :footer :type "hiccup" :doc "A bar at the bottom, for selection or links."}
+           {:name :labels :type "map" :doc "Overrides for default-labels (button names, error text)."}
+           {:name :history :type "boolean" :doc "Opening pushes a history entry; Back closes."}
+           {:name :keyboard :type "boolean" :default "true" :doc "false turns the runtime's keys off."}
+           {:name :scroll-to-zoom :type "boolean" :doc "A plain mouse wheel zooms instead of panning."}
+           {:name :max-zoom :type "number" :doc "Zoom cap; default is the image's own resolution, 2x to 8x."}
+           {:name :contained :type "boolean" :doc "A preview inside its parent: no page lock, no keys, no morph."}
+           {:name :class :type "string | vector" :doc "Extra classes on the root."}]}
+  {:fn "image-thumbnail"
+   :doc "A clickable image, and the place the lightbox morphs out of and back into."
+   :props [{:name :src :type "string"}
+           {:name :alt :type "string" :default "\"image\""}
+           {:name :on-click :type "fn" :doc "Host-controlled: open the lightbox here."}
+           {:name :lightbox :type "string" :doc "Managed: the id of the lightbox to open."}
+           {:name :index :type "number" :doc "Managed: the item it opens."}
+           {:name :lightbox-key :type "string" :default ":src" :doc "The item key it stands for (:key, else :thumb, else :src of the item)."}
+           {:name :class :type "string | vector"}]}
+  {:fn "action"
+   :doc "A round toolbar button for :actions: a link with :href (a download with :download), else a button."
+   :props [{:name :icon-name :type "keyword"}
+           {:name :label :type "string" :doc "Accessible name."}
+           {:name :href :type "string"}
+           {:name :download :type "boolean | string"}
+           {:name :on-click :type "fn"}]}]
 
- :keyboard [["Escape" "Closes (wire in the host for the overlay variant)."]]
+ :keyboard [["Escape" "Closes."]
+            ["Left / Right" "Previous / next; pans when zoomed."]
+            ["Up / Down" "Pan when zoomed."]
+            ["Home / End" "First / last item."]
+            ["+ / =" "Zoom in."]
+            ["- / _" "Zoom out."]
+            ["0" "Reset zoom."]]
 
- :accessibility ["The image keeps its alt text; the close button is labeled."]
- :motion ["The overlay fades in over --duration-fast; zoom follows the gesture directly and snaps back into bounds on release."]
- :responsive ["Two-finger pinch and one-finger pan on touch; the page-level pinch block stays in place."]
+ :accessibility ["Every button carries an aria-label from :labels; the viewer is a role dialog."
+                 "Image zoom uses unmodified keys only, so ctrl / cmd plus stays the browser's page zoom."]
+
+ :motion ["Opening morphs the thumbnail into the slide (clip-path un-crops an object-fit cover tile and keeps its radius); closing morphs back from the current zoom or pull, or fades when the thumbnail is off screen."
+          "Zoom rubber-bands past its bounds and coasts after a flick; everything collapses to a fade under prefers-reduced-motion."]
+
+ :responsive ["Phones go edge to edge with the toolbar over the photo; prev / next and zoom buttons hide on touch screens, where swipe and pinch do the job."
+              "Safe-area insets pad every bar."]
+
  :runtime ["ui.js.lightbox"]
 
  :targets
- {:clj "Render the overlay from a query parameter or open it with inline JS."
-  :cljs "Controlled by state via :src and :on-close."
-  :squint "Same as Replicant; require ui.js.lightbox in the SPA."}
+ {:clj "Managed only: render it with :id and :open false, and image-thumbnail with :lightbox and :index opens it."
+  :cljs "Host-controlled: render it while open, :on-close unmounts it, :on-change tracks the index. Managed mode works too."
+  :squint "Same as Replicant; SPAs without ui-runtime.js require ui.js.lightbox."}
 
- :notes-for-ai ["Do not hand-roll zoom; the runtime owns it and resets on image load."]
+ :notes-for-ai ["Do not hand-roll zoom, swipe or a close animation; the runtime owns them."
+                "Unmount the lightbox in :on-close; it is invisible but still mounted until then."
+                "Give a thumbnail the same intrinsic aspect as the full image (crop with object-fit, not a CDN crop), or the morph and the thumbnail placeholder reframe when the full image lands."
+                "Set :width and :height on items when known: the slide is sized before the image loads."]
 
- :related [:grid :dialog :camera]}
+ :related [:grid :dialog :video-player :camera]}

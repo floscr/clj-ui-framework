@@ -119,7 +119,7 @@ Pure: next size along a vector, clamped.
 
 ## Related
 
-- [Lightbox](lightbox.md): A fullscreen image overlay with pinch, wheel and double-tap zoom and drag to pan, plus a clickable thumbnail.
+- [Lightbox](lightbox.md): A fullscreen viewer for one image or a gallery: swipe, pinch and wheel zoom, pull to dismiss, and a morph out of and back into the thumbnail.
 - [File browser](file-browser.md): Grid tiles and a sortable list or table of files and folders with type icons, selection and per-item context menus.
 - [Button group](button-group.md): Related actions as one segmented control: ghost or boxed, with icon items, counts and separators.
 

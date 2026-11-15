@@ -482,6 +482,19 @@
       return this.value;
     }
   };
+  function last(coll) {
+    coll = iterable(coll);
+    let lastEl;
+    switch (typeConst(coll)) {
+      case ARRAY_TYPE:
+        return coll[coll.length - 1];
+      default:
+        for (const x of coll) {
+          lastEl = x;
+        }
+        return lastEl;
+    }
+  }
   function reduced(x) {
     return new Reduced(x);
   }
@@ -971,6 +984,10 @@
       return;
     });
   }
+  function update(coll, k, f, ...args) {
+    f = toFn(f);
+    return assoc(coll, k, f(get(coll, k), ...args));
+  }
   function get_in(coll, path, orElse) {
     let entry = coll;
     for (const item of path) {
@@ -1402,8 +1419,8 @@
     const g3 = rgb1[1];
     const b4 = rgb1[2];
     const translucent_QMARK_5 = a < 0.999;
-    const G__5116 = fmt2;
-    switch (G__5116) {
+    const G__5356 = fmt2;
+    switch (G__5356) {
       case "oklch":
         const lch8 = rgb__GT_oklch(r2, g3, b4);
         const c9 = lch8[1];
@@ -2126,24 +2143,24 @@
     return dialog.querySelector(".command-item--active");
   };
   var set_active_BANG_ = (() => {
-    const f512 = (function(...args513) {
-      const G__5141 = args513.length;
-      switch (G__5141) {
+    const f536 = (function(...args537) {
+      const G__5381 = args537.length;
+      switch (G__5381) {
         case 2:
-          return f512.cljs$core$IFn$_invoke$arity$2(args513[0], args513[1]);
+          return f536.cljs$core$IFn$_invoke$arity$2(args537[0], args537[1]);
           break;
         case 3:
-          return f512.cljs$core$IFn$_invoke$arity$3(args513[0], args513[1], args513[2]);
+          return f536.cljs$core$IFn$_invoke$arity$3(args537[0], args537[1], args537[2]);
           break;
         default:
-          throw new Error(`${"Invalid arity: "}${args513.length ?? ""}`);
+          throw new Error(`${"Invalid arity: "}${args537.length ?? ""}`);
       }
       ;
     });
-    f512.cljs$core$IFn$_invoke$arity$2 = (function(dialog, el2) {
+    f536.cljs$core$IFn$_invoke$arity$2 = (function(dialog, el2) {
       return set_active_BANG_(dialog, el2, true);
     });
-    f512.cljs$core$IFn$_invoke$arity$3 = (function(dialog, el2, scroll_QMARK_) {
+    f536.cljs$core$IFn$_invoke$arity$3 = (function(dialog, el2, scroll_QMARK_) {
       const prev3 = active_item(dialog);
       if (truth_(prev3)) {
         prev3.classList.remove("command-item--active");
@@ -2166,8 +2183,8 @@
       }
       ;
     });
-    f512.cljs$lang$maxFixedArity = 3;
-    return f512;
+    f536.cljs$lang$maxFixedArity = 3;
+    return f536;
   })();
   var move_active_BANG_ = function(dialog, dir) {
     const vis1 = visible_items(dialog);
@@ -3323,25 +3340,25 @@
     ;
   };
   var open_context_menu = (() => {
-    const f515 = (function(var_args) {
-      const args5161 = [];
+    const f539 = (function(var_args) {
+      const args5401 = [];
       const len__23321__auto__2 = arguments.length;
-      let i5173 = 0;
+      let i5413 = 0;
       while (true) {
-        if (i5173 < len__23321__auto__2) {
-          args5161.push(arguments[i5173]);
-          let G__4 = i5173 + 1;
-          i5173 = G__4;
+        if (i5413 < len__23321__auto__2) {
+          args5401.push(arguments[i5413]);
+          let G__4 = i5413 + 1;
+          i5413 = G__4;
           continue;
         }
         ;
         break;
       }
       ;
-      const argseq__23513__auto__5 = 1 < args5161.length ? args5161.slice(1) : null;
-      return f515.cljs$core$IFn$_invoke$arity$variadic(arguments[0], argseq__23513__auto__5);
+      const argseq__23513__auto__5 = 1 < args5401.length ? args5401.slice(1) : null;
+      return f539.cljs$core$IFn$_invoke$arity$variadic(arguments[0], argseq__23513__auto__5);
     });
-    f515.cljs$core$IFn$_invoke$arity$variadic = (function(event, args) {
+    f539.cljs$core$IFn$_invoke$arity$variadic = (function(event, args) {
       dismiss_BANG_();
       const trigger6 = event.currentTarget;
       const items7 = (() => {
@@ -3434,8 +3451,8 @@
       window.addEventListener("resize", on_resize18);
       return state12.cleanup = cleanup19;
     });
-    f515.cljs$lang$maxFixedArity = 1;
-    return f515;
+    f539.cljs$lang$maxFixedArity = 1;
+    return f539;
   })();
   window["__uiContextMenu"] = open_context_menu;
 
@@ -3490,25 +3507,25 @@
     return e1;
   };
   var add_BANG_ = (() => {
-    const f519 = (function(var_args) {
-      const args5201 = [];
+    const f543 = (function(var_args) {
+      const args5441 = [];
       const len__23321__auto__2 = arguments.length;
-      let i5213 = 0;
+      let i5453 = 0;
       while (true) {
-        if (i5213 < len__23321__auto__2) {
-          args5201.push(arguments[i5213]);
-          let G__4 = i5213 + 1;
-          i5213 = G__4;
+        if (i5453 < len__23321__auto__2) {
+          args5441.push(arguments[i5453]);
+          let G__4 = i5453 + 1;
+          i5453 = G__4;
           continue;
         }
         ;
         break;
       }
       ;
-      const argseq__23513__auto__5 = 1 < args5201.length ? args5201.slice(1) : null;
-      return f519.cljs$core$IFn$_invoke$arity$variadic(arguments[0], argseq__23513__auto__5);
+      const argseq__23513__auto__5 = 1 < args5441.length ? args5441.slice(1) : null;
+      return f543.cljs$core$IFn$_invoke$arity$variadic(arguments[0], argseq__23513__auto__5);
     });
-    f519.cljs$core$IFn$_invoke$arity$variadic = (function(parent, children) {
+    f543.cljs$core$IFn$_invoke$arity$variadic = (function(parent, children) {
       for (let G__6 of iterable(children)) {
         const c7 = G__6;
         if (truth_(c7)) {
@@ -3518,8 +3535,8 @@
       ;
       return parent;
     });
-    f519.cljs$lang$maxFixedArity = 1;
-    return f519;
+    f543.cljs$lang$maxFixedArity = 1;
+    return f543;
   })();
   var txt_BANG_ = function(e, s) {
     e.textContent = `${s ?? ""}`;
@@ -4580,9 +4597,9 @@
       ctx13.beginPath();
       const v17 = cur9();
       const mode18 = get_mode10();
-      const n52319 = 61;
+      const n54719 = 61;
       let i20 = 0;
-      for (; i20 < n52319; i20++) {
+      for (; i20 < n54719; i20++) {
         (() => {
           const t21 = i20 / 60;
           const y22 = mode18 === "easing" ? (() => {
@@ -5672,24 +5689,24 @@
     return null;
   };
   var play = (() => {
-    const f524 = (function(...args525) {
-      const G__5261 = args525.length;
-      switch (G__5261) {
+    const f548 = (function(...args549) {
+      const G__5501 = args549.length;
+      switch (G__5501) {
         case 1:
-          return f524.cljs$core$IFn$_invoke$arity$1(args525[0]);
+          return f548.cljs$core$IFn$_invoke$arity$1(args549[0]);
           break;
         case 2:
-          return f524.cljs$core$IFn$_invoke$arity$2(args525[0], args525[1]);
+          return f548.cljs$core$IFn$_invoke$arity$2(args549[0], args549[1]);
           break;
         default:
-          throw new Error(`${"Invalid arity: "}${args525.length ?? ""}`);
+          throw new Error(`${"Invalid arity: "}${args549.length ?? ""}`);
       }
       ;
     });
-    f524.cljs$core$IFn$_invoke$arity$1 = (function(snap) {
+    f548.cljs$core$IFn$_invoke$arity$1 = (function(snap) {
       return play(snap, null);
     });
-    f524.cljs$core$IFn$_invoke$arity$2 = (function(snap, opts) {
+    f548.cljs$core$IFn$_invoke$arity$2 = (function(snap, opts) {
       if (truth_(reduced_motion_QMARK_2())) {
       } else {
         const opts3 = (() => {
@@ -5727,34 +5744,34 @@
       ;
       return null;
     });
-    f524.cljs$lang$maxFixedArity = 2;
-    return f524;
+    f548.cljs$lang$maxFixedArity = 2;
+    return f548;
   })();
   var wrap = (() => {
-    const f527 = (function(...args528) {
-      const G__5291 = args528.length;
-      switch (G__5291) {
+    const f551 = (function(...args552) {
+      const G__5531 = args552.length;
+      switch (G__5531) {
         case 2:
-          return f527.cljs$core$IFn$_invoke$arity$2(args528[0], args528[1]);
+          return f551.cljs$core$IFn$_invoke$arity$2(args552[0], args552[1]);
           break;
         case 3:
-          return f527.cljs$core$IFn$_invoke$arity$3(args528[0], args528[1], args528[2]);
+          return f551.cljs$core$IFn$_invoke$arity$3(args552[0], args552[1], args552[2]);
           break;
         default:
-          throw new Error(`${"Invalid arity: "}${args528.length ?? ""}`);
+          throw new Error(`${"Invalid arity: "}${args552.length ?? ""}`);
       }
       ;
     });
-    f527.cljs$core$IFn$_invoke$arity$2 = (function(target, mutate) {
+    f551.cljs$core$IFn$_invoke$arity$2 = (function(target, mutate) {
       return wrap(target, mutate, null);
     });
-    f527.cljs$core$IFn$_invoke$arity$3 = (function(target, mutate, opts) {
+    f551.cljs$core$IFn$_invoke$arity$3 = (function(target, mutate, opts) {
       const snap3 = capture(target);
       mutate();
       return play(snap3, opts);
     });
-    f527.cljs$lang$maxFixedArity = 3;
-    return f527;
+    f551.cljs$lang$maxFixedArity = 3;
+    return f551;
   })();
   window.__uiFlip = { "capture": capture, "play": play, "wrap": wrap };
 
@@ -5801,11 +5818,11 @@
     clear_held_BANG_();
     if (e.pointerType === "touch") {
       const temp__23062__auto__1 = (() => {
-        const G__5302 = e.target;
-        if (G__5302 == null) {
+        const G__5542 = e.target;
+        if (G__5542 == null) {
           return null;
         } else {
-          return G__5302.closest(selector);
+          return G__5542.closest(selector);
         }
         ;
       })();
@@ -5886,28 +5903,455 @@
   window["__uiLongPress"] = dispatch_contextmenu_BANG_;
 
   // .compiled/lightbox.mjs
-  var overlay_sel = ".lightbox-overlay";
-  var image_sel = ".lightbox-image";
-  var max_scale = 5;
-  var pinch_min = 0.75;
-  var pinch_max = 6;
+  var root_sel = ".ui-lightbox[data-lightbox]";
+  var legacy_sel = ".lightbox-overlay";
+  var legacy_image_sel = ".lightbox-image";
+  var no_gesture_sel = `${"button, a, input, textarea, select, label, video, audio, [contenteditable],"}${" .ui-lightbox-content, .ui-lightbox-top, .ui-lightbox-footer,"}${" .ui-lightbox-thumbs, .ui-lightbox-caption, .ui-lightbox-error,"}${" [data-lightbox-no-gesture], .lightbox-close, .lightbox-caption"}`;
+  var ease_out = "cubic-bezier(0.32, 0.72, 0, 1)";
+  var ease_coast = "cubic-bezier(0.2, 0.8, 0.2, 1)";
+  var morph_ms = 340;
+  var fade_ms = 220;
+  var settle_ms = 260;
+  var coast_ms = 480;
+  var legacy_max_scale = 5;
   var double_tap_scale = 2.5;
   var double_tap_ms = 300;
   var tap_slop_px = 10;
   var double_tap_slop_px = 30;
+  var axis_lock_px = 8;
+  var pinch_slop_px = 14;
+  var scroll_idle_ms = 140;
+  var wheel_idle_ms = 160;
+  var open_wait_ms = 160;
   var identity_zoom = { "s": 1, "tx": 0, "ty": 0 };
-  var pointers = /* @__PURE__ */ new Map();
-  var gesture = atom(null);
-  var suppress_click_QMARK_2 = atom(false);
-  var last_tap = atom(null);
+  var webkit_QMARK_ = !(window["GestureEvent"] == null);
+  var touch_screen_QMARK_ = (() => {
+    const or__23426__auto__1 = navigator.maxTouchPoints;
+    if (truth_(or__23426__auto__1)) {
+      return or__23426__auto__1;
+    } else {
+      return 0;
+    }
+    ;
+  })() > 0;
   var clamp3 = function(lo, hi, v) {
     return Math.min(hi, Math.max(lo, v));
   };
-  var rel = function(x, y) {
-    return [x - window.innerWidth / 2, y - window.innerHeight / 2];
+  var now = function() {
+    return performance.now();
   };
-  var zoom_of = function(img) {
-    const or__23426__auto__1 = img["__uiZoom"];
+  var reduced_motion_QMARK_3 = function() {
+    return matchMedia("(prefers-reduced-motion: reduce)").matches;
+  };
+  var closest2 = function(t, sel) {
+    if (truth_((() => {
+      const and__23442__auto__1 = t;
+      if (truth_(and__23442__auto__1)) {
+        return t.closest;
+      } else {
+        return and__23442__auto__1;
+      }
+      ;
+    })())) {
+      return t.closest(sel);
+    }
+    ;
+  };
+  var state2 = function(root) {
+    if (truth_(root)) {
+      return root["__lb"];
+    }
+    ;
+  };
+  var open_root_of = function(t) {
+    const root1 = closest2(t, root_sel);
+    if (truth_(state2(root1))) {
+      return root1;
+    }
+    ;
+  };
+  var px2 = function(v) {
+    return `${v ?? ""}px`;
+  };
+  var pose_css = function(p__555) {
+    const map__12 = p__555;
+    const s3 = get(map__12, "s");
+    const tx4 = get(map__12, "tx");
+    const ty5 = get(map__12, "ty");
+    return `${"translate("}${tx4 ?? ""}${"px, "}${ty5 ?? ""}${"px) scale("}${s3 ?? ""}${")"}`;
+  };
+  var parse_matrix = function(m) {
+    if (truth_((() => {
+      const or__23426__auto__1 = not(m);
+      if (or__23426__auto__1) {
+        return or__23426__auto__1;
+      } else {
+        return m === "none";
+      }
+      ;
+    })())) {
+      return identity_zoom;
+    } else {
+      const nums2 = m.replace(/^matrix(3d)?\(|\)$/, "").split(",").map(parseFloat);
+      if (16 === nums2.length) {
+        return { "s": nums2[0], "tx": nums2[12], "ty": nums2[13] };
+      } else {
+        return { "s": nums2[0], "tx": nums2[4], "ty": nums2[5] };
+      }
+      ;
+    }
+    ;
+  };
+  var radius_px = function(el2, w, h) {
+    const r1 = (() => {
+      const or__23426__auto__2 = getComputedStyle(el2).borderTopLeftRadius;
+      if (truth_(or__23426__auto__2)) {
+        return or__23426__auto__2;
+      } else {
+        return "0";
+      }
+      ;
+    })();
+    const v3 = parseFloat(r1);
+    if (truth_(isNaN(v3))) {
+      return 0;
+    } else {
+      if (truth_(r1.endsWith("%"))) {
+        return v3 / 100 * Math.min(w, h);
+      } else {
+        if ("else") {
+          return v3;
+        } else {
+          return null;
+        }
+      }
+    }
+    ;
+  };
+  var vibrate_BANG_ = function(ms) {
+    if (truth_(navigator.vibrate)) {
+      return (() => {
+        try {
+          return navigator.vibrate(ms);
+        } catch (_1) {
+          return null;
+        }
+      })();
+    }
+    ;
+  };
+  var dispatch_BANG_ = function(root, type, detail) {
+    return root.dispatchEvent(new CustomEvent(type, { "bubbles": false, "detail": detail }));
+  };
+  var surfaces = /* @__PURE__ */ new Set();
+  var wheel_installed = atom(null);
+  var disconnect_mo = atom(null);
+  var lock_page_BANG_ = function() {
+    const de1 = document.documentElement;
+    if (truth_(de1.hasAttribute("data-lightbox-open"))) {
+      return null;
+    } else {
+      de1.style.setProperty("--lightbox-scrollbar", px2(Math.max(0, window.innerWidth - de1.clientWidth)));
+      return de1.setAttribute("data-lightbox-open", "");
+    }
+    ;
+  };
+  var unlock_page_BANG_ = function() {
+    const de1 = document.documentElement;
+    de1.removeAttribute("data-lightbox-open");
+    return de1.style.removeProperty("--lightbox-scrollbar");
+  };
+  var page_surface_QMARK_ = function(el2) {
+    return not((() => {
+      const and__23442__auto__1 = el2.matches(root_sel);
+      if (truth_(and__23442__auto__1)) {
+        return el2.hasAttribute("data-contained");
+      } else {
+        return and__23442__auto__1;
+      }
+      ;
+    })());
+  };
+  var sync_surfaces_BANG_ = function() {
+    if (truth_(some(page_surface_QMARK_, Array.from(surfaces)))) {
+      lock_page_BANG_();
+    } else {
+      unlock_page_BANG_();
+    }
+    ;
+    const want1 = surfaces.size > 0;
+    if (truth_(want1 && not(deref(wheel_installed)))) {
+      const opts2 = { "capture": true, "passive": webkit_QMARK_ };
+      document.addEventListener("wheel", on_wheel, opts2);
+      if (truth_((() => {
+        const and__23442__auto__3 = webkit_QMARK_;
+        if (truth_(and__23442__auto__3)) {
+          return not(touch_screen_QMARK_);
+        } else {
+          return and__23442__auto__3;
+        }
+        ;
+      })())) {
+        document.addEventListener("gesturestart", on_gesture_start, true);
+        document.addEventListener("gesturechange", on_gesture_change, true);
+        document.addEventListener("gestureend", on_gesture_end, true);
+      }
+      ;
+      reset_BANG_(wheel_installed, opts2);
+    }
+    ;
+    if (truth_(!want1 && deref(wheel_installed))) {
+      document.removeEventListener("wheel", on_wheel, deref(wheel_installed));
+      document.removeEventListener("gesturestart", on_gesture_start, true);
+      document.removeEventListener("gesturechange", on_gesture_change, true);
+      document.removeEventListener("gestureend", on_gesture_end, true);
+      reset_BANG_(wheel_installed, null);
+    }
+    ;
+    const want4 = surfaces.size > 0;
+    if (truth_(want4 && not(deref(disconnect_mo)))) {
+      const mo5 = new MutationObserver((function(_) {
+        const gone6 = filter((function(_PERCENT_1) {
+          return not(_PERCENT_1.isConnected);
+        }), Array.from(surfaces));
+        if (truth_(seq(gone6))) {
+          for (let G__7 of iterable(gone6)) {
+            const el8 = G__7;
+            surface_removed_BANG_(el8);
+          }
+          ;
+          for (let G__9 of iterable(Array.from(document.querySelectorAll(`${root_sel ?? ""}${":not([hidden])"}`)))) {
+            const r10 = G__9;
+            if (truth_(state2(r10))) {
+            } else {
+              open_BANG_(r10);
+            }
+          }
+          return null;
+        }
+        ;
+      }));
+      mo5.observe(document.body, { "childList": true, "subtree": true });
+      reset_BANG_(disconnect_mo, mo5);
+    }
+    ;
+    if (truth_(!want4 && deref(disconnect_mo))) {
+      deref(disconnect_mo).disconnect();
+      return reset_BANG_(disconnect_mo, null);
+    }
+    ;
+  };
+  var add_surface_BANG_ = function(el2) {
+    surfaces.add(el2);
+    return sync_surfaces_BANG_();
+  };
+  var remove_surface_BANG_ = function(el2) {
+    surfaces.delete(el2);
+    return sync_surfaces_BANG_();
+  };
+  var scroller = function(root) {
+    return root.querySelector(".ui-lightbox-slides");
+  };
+  var slide_els = function(root) {
+    return Array.from(root.querySelectorAll(".ui-lightbox-slide"));
+  };
+  var slide_at = function(root, i) {
+    return slide_els(root)[i];
+  };
+  var media_of = function(slide) {
+    if (truth_(slide)) {
+      return slide.querySelector(".ui-lightbox-media");
+    }
+    ;
+  };
+  var image_QMARK_ = function(media) {
+    const and__23442__auto__1 = media;
+    if (truth_(and__23442__auto__1)) {
+      return "IMG" === media.tagName;
+    } else {
+      return and__23442__auto__1;
+    }
+    ;
+  };
+  var active_slide = function(root) {
+    return slide_at(root, state2(root).index);
+  };
+  var slide_width = function(root) {
+    return Math.max(1, scroller(root).clientWidth);
+  };
+  var content_box = function(slide) {
+    const cs1 = getComputedStyle(slide);
+    return { "w": slide.clientWidth - parseFloat(cs1.paddingLeft) - parseFloat(cs1.paddingRight), "h": slide.clientHeight - parseFloat(cs1.paddingTop) - parseFloat(cs1.paddingBottom) };
+  };
+  var natural_size = function(m) {
+    const hw1 = parseFloat(m.getAttribute("width"));
+    const hh2 = parseFloat(m.getAttribute("height"));
+    if (truth_(hw1 > 0 && hh2 > 0)) {
+      return [hw1, hh2, true];
+    } else {
+      if (truth_(image_QMARK_(m))) {
+        if (m.naturalWidth > 0) {
+          return [m.naturalWidth, m.naturalHeight, "full" === m["__lbShown"]];
+        }
+      } else {
+        if ("else") {
+          if (m.videoWidth > 0) {
+            return [m.videoWidth, m.videoHeight, false];
+          }
+        } else {
+          return null;
+        }
+      }
+    }
+    ;
+  };
+  var fit_BANG_ = function(slide) {
+    const m1 = media_of(slide);
+    if (truth_((() => {
+      const and__23442__auto__2 = m1;
+      if (truth_(and__23442__auto__2)) {
+        return !("DIV" === m1.tagName);
+      } else {
+        return and__23442__auto__2;
+      }
+      ;
+    })())) {
+      const temp__23062__auto__3 = natural_size(m1);
+      if (truth_(temp__23062__auto__3)) {
+        const vec__47 = temp__23062__auto__3;
+        const nw8 = nth(vec__47, 0, null);
+        const nh9 = nth(vec__47, 1, null);
+        const cap_QMARK_10 = nth(vec__47, 2, null);
+        const map__1112 = content_box(slide);
+        const w13 = get(map__1112, "w");
+        const h14 = get(map__1112, "h");
+        const k15 = Math.min(w13 / nw8, h14 / nh9, truth_(cap_QMARK_10) ? 1 : Infinity);
+        if (truth_(w13 > 0 && h14 > 0)) {
+          m1.style.width = px2(Math.round(nw8 * k15));
+          return m1.style.height = px2(Math.round(nh9 * k15));
+        }
+        ;
+      }
+      ;
+    }
+    ;
+  };
+  var set_slide_state_BANG_ = function(slide, v) {
+    if (truth_(v)) {
+      return slide.setAttribute("data-state", v);
+    } else {
+      return slide.removeAttribute("data-state");
+    }
+    ;
+  };
+  var show_src_BANG_ = function(slide, img, src, which) {
+    img["__lbShown"] = which;
+    return img.src = src;
+  };
+  var load_full_BANG_ = function(slide, img) {
+    const full1 = img.getAttribute("data-src");
+    const pre2 = new Image();
+    pre2.src = full1;
+    return pre2.decode().then((function() {
+      show_src_BANG_(slide, img, full1, "full");
+      set_slide_state_BANG_(slide, null);
+      return fit_BANG_(slide);
+    })).catch((function(_) {
+      show_src_BANG_(slide, img, full1, "full");
+      img.onload = (function() {
+        set_slide_state_BANG_(slide, null);
+        return fit_BANG_(slide);
+      });
+      return img.onerror = (function() {
+        return set_slide_state_BANG_(slide, "error");
+      });
+    }));
+  };
+  var load_slide_BANG_ = function(slide) {
+    const temp__23062__auto__1 = media_of(slide);
+    if (truth_(temp__23062__auto__1)) {
+      const m2 = temp__23062__auto__1;
+      if (truth_(m2["__lbLoading"])) {
+        return null;
+      } else {
+        m2["__lbLoading"] = true;
+        if (truth_(image_QMARK_(m2))) {
+          const thumb3 = m2.getAttribute("data-thumb");
+          const full4 = m2.getAttribute("data-src");
+          if (truth_((() => {
+            const and__23442__auto__5 = thumb3;
+            if (truth_(and__23442__auto__5)) {
+              return !_EQ_(thumb3, full4);
+            } else {
+              return and__23442__auto__5;
+            }
+            ;
+          })())) {
+            set_slide_state_BANG_(slide, "preview");
+            m2.onload = (function() {
+              m2.onload = null;
+              return fit_BANG_(slide);
+            });
+            show_src_BANG_(slide, m2, thumb3, "thumb");
+            load_full_BANG_(slide, m2);
+          } else {
+            set_slide_state_BANG_(slide, "loading");
+            m2.onload = (function() {
+              set_slide_state_BANG_(slide, null);
+              return fit_BANG_(slide);
+            });
+            m2.onerror = (function() {
+              return set_slide_state_BANG_(slide, "error");
+            });
+            show_src_BANG_(slide, m2, full4, "full");
+          }
+          ;
+          return fit_BANG_(slide);
+        } else {
+          if ("VIDEO" === m2.tagName) {
+            m2.onloadedmetadata = (function() {
+              return fit_BANG_(slide);
+            });
+            m2.preload = "metadata";
+            m2.src = m2.getAttribute("data-src");
+            return fit_BANG_(slide);
+          } else {
+            return null;
+          }
+        }
+        ;
+      }
+      ;
+    }
+    ;
+  };
+  var load_near_BANG_ = function(root) {
+    const i1 = state2(root).index;
+    for (let G__2 of iterable([i1, i1 + 1, i1 - 1])) {
+      const j3 = G__2;
+      const temp__23062__auto__4 = slide_at(root, j3);
+      if (truth_(temp__23062__auto__4)) {
+        const s5 = temp__23062__auto__4;
+        load_slide_BANG_(s5);
+      }
+    }
+    return null;
+  };
+  var fit_all_BANG_ = function(root) {
+    for (let G__1 of iterable(slide_els(root))) {
+      const s2 = G__1;
+      const temp__23062__auto__3 = media_of(s2);
+      if (truth_(temp__23062__auto__3)) {
+        const m4 = temp__23062__auto__3;
+        if (truth_(m4["__lbLoading"])) {
+          fit_BANG_(s2);
+        }
+      }
+    }
+    return null;
+  };
+  var zoom_of = function(m) {
+    const or__23426__auto__1 = m["__uiZoom"];
     if (truth_(or__23426__auto__1)) {
       return or__23426__auto__1;
     } else {
@@ -5915,156 +6359,1759 @@
     }
     ;
   };
-  var zoom_at = function(z, s, px2, py) {
-    const k1 = s / get(z, "s");
-    return assoc(z, "s", s, "tx", px2 - k1 * (px2 - get(z, "tx")), "ty", py - k1 * (py - get(z, "ty")));
-  };
-  var settle = function(img, z) {
-    const s1 = clamp3(1, max_scale, get(z, "s"));
-    const mx2 = Math.max(0, (s1 * img.offsetWidth - window.innerWidth) / 2);
-    const my3 = Math.max(0, (s1 * img.offsetHeight - window.innerHeight) / 2);
-    return assoc(z, "s", s1, "tx", clamp3(-mx2, mx2, get(z, "tx")), "ty", clamp3(-my3, my3, get(z, "ty")));
-  };
-  var apply_zoom_BANG_ = function(img, z, animate_QMARK_) {
-    img["__uiZoom"] = z;
-    const st1 = img.style;
-    st1.transition = truth_(animate_QMARK_) ? "" : "none";
-    st1.transform = 1 === get(z, "s") ? "" : `${"translate("}${get(z, "tx") ?? ""}${"px, "}${get(z, "ty") ?? ""}${"px) scale("}${get(z, "s") ?? ""}${")"}`;
-    if (get(z, "s") > 1) {
-      return img.setAttribute("data-zoomed", "");
+  var zoomed_QMARK_ = function(m) {
+    const and__23442__auto__1 = m;
+    if (truth_(and__23442__auto__1)) {
+      return get(zoom_of(m), "s") > 1.001;
     } else {
-      return img.removeAttribute("data-zoomed");
+      return and__23442__auto__1;
     }
     ;
   };
-  var reset_zoom_BANG_ = function(img) {
-    img["__uiZoom"] = null;
-    img.style.transform = "";
-    return img.removeAttribute("data-zoomed");
+  var viewport_rect = function(p__556) {
+    const map__12 = p__556;
+    const legacy_QMARK_3 = get(map__12, "legacy?");
+    const stage4 = get(map__12, "stage");
+    if (truth_(legacy_QMARK_3)) {
+      return { "left": 0, "top": 0, "right": window.innerWidth, "bottom": window.innerHeight };
+    } else {
+      const r5 = stage4.getBoundingClientRect();
+      return { "left": r5.left, "top": r5.top, "right": r5.right, "bottom": r5.bottom };
+    }
+    ;
   };
+  var layout_center = function(m) {
+    const r1 = m.getBoundingClientRect();
+    const z2 = zoom_of(m);
+    return [r1.left + r1.width / 2 - get(z2, "tx"), r1.top + r1.height / 2 - get(z2, "ty")];
+  };
+  var max_scale = function(p__557) {
+    const map__12 = p__557;
+    const legacy_QMARK_3 = get(map__12, "legacy?");
+    const root4 = get(map__12, "root");
+    const media5 = get(map__12, "media");
+    if (truth_(legacy_QMARK_3)) {
+      return legacy_max_scale;
+    } else {
+      const attr6 = parseFloat(root4.getAttribute("data-max-zoom"));
+      if (attr6 > 0) {
+        return attr6;
+      } else {
+        const w7 = media5.offsetWidth;
+        const nat8 = (() => {
+          const or__23426__auto__9 = first(natural_size(media5));
+          if (truth_(or__23426__auto__9)) {
+            return or__23426__auto__9;
+          } else {
+            return w7;
+          }
+          ;
+        })();
+        return clamp3(2, 8, w7 > 0 ? nat8 / w7 : 2);
+      }
+      ;
+    }
+    ;
+  };
+  var zoom_at = function(z, s, px3, py) {
+    const k1 = s / get(z, "s");
+    return assoc(z, "s", s, "tx", px3 - k1 * (px3 - get(z, "tx")), "ty", py - k1 * (py - get(z, "ty")));
+  };
+  var axis_range = function(vp_lo, vp_hi, c, size, s) {
+    const a1 = vp_lo - c + size * s / 2;
+    const b2 = vp_hi - c - size * s / 2;
+    return [Math.min(a1, b2), Math.max(a1, b2), a1 <= b2];
+  };
+  var settle = function(ctx, z) {
+    const m10 = get(ctx, "media");
+    const s11 = clamp3(1, max_scale(ctx), get(z, "s"));
+    const vp12 = viewport_rect(ctx);
+    const vec__113 = layout_center(m10);
+    const cx14 = nth(vec__113, 0, null);
+    const cy15 = nth(vec__113, 1, null);
+    const vec__416 = axis_range(get(vp12, "left"), get(vp12, "right"), cx14, m10.offsetWidth, s11);
+    const xlo17 = nth(vec__416, 0, null);
+    const xhi18 = nth(vec__416, 1, null);
+    const xfit19 = nth(vec__416, 2, null);
+    const vec__720 = axis_range(get(vp12, "top"), get(vp12, "bottom"), cy15, m10.offsetHeight, s11);
+    const ylo21 = nth(vec__720, 0, null);
+    const yhi22 = nth(vec__720, 1, null);
+    const yfit23 = nth(vec__720, 2, null);
+    if (s11 <= 1.001) {
+      return identity_zoom;
+    } else {
+      return { "s": s11, "tx": clamp3(xlo17, xhi18, truth_(xfit19) ? 0 : get(z, "tx")), "ty": clamp3(ylo21, yhi22, truth_(yfit23) ? 0 : get(z, "ty")) };
+    }
+    ;
+  };
+  var rubber = function(x, d) {
+    return (1 - 1 / (1 + x * 0.55 / Math.max(1, d))) * d;
+  };
+  var elastic_pan = function(t, p__558, d) {
+    const vec__14 = p__558;
+    const lo5 = nth(vec__14, 0, null);
+    const hi6 = nth(vec__14, 1, null);
+    const fit_QMARK_7 = nth(vec__14, 2, null);
+    const vec__811 = truth_(fit_QMARK_7) ? [clamp3(lo5, hi6, 0), clamp3(lo5, hi6, 0)] : [lo5, hi6];
+    const lo12 = nth(vec__811, 0, null);
+    const hi13 = nth(vec__811, 1, null);
+    if (t < lo12) {
+      return lo12 - rubber(lo12 - t, d);
+    } else {
+      if (t > hi13) {
+        return hi13 + rubber(t - hi13, d);
+      } else {
+        if ("else") {
+          return t;
+        } else {
+          return null;
+        }
+      }
+    }
+    ;
+  };
+  var elastic_scale = function(s, mx) {
+    if (s > mx) {
+      return mx * Math.pow(s / mx, 0.3);
+    } else {
+      if (s < 1) {
+        return Math.pow(s, 0.3);
+      } else {
+        if ("else") {
+          return s;
+        } else {
+          return null;
+        }
+      }
+    }
+    ;
+  };
+  var cancel_anim_BANG_ = function(m) {
+    const temp__23062__auto__1 = m["__lbAnim"];
+    if (truth_(temp__23062__auto__1)) {
+      const a2 = temp__23062__auto__1;
+      m["__lbAnim"] = null;
+      return a2.cancel();
+    }
+    ;
+  };
+  var live_pose_BANG_ = function(m) {
+    const temp__23007__auto__1 = m["__lbAnim"];
+    if (truth_(temp__23007__auto__1)) {
+      const a2 = temp__23007__auto__1;
+      const z3 = parse_matrix(getComputedStyle(m).transform);
+      m["__lbAnim"] = null;
+      a2.cancel();
+      m["__uiZoom"] = z3;
+      m.style.transform = pose_css(z3);
+      return z3;
+    } else {
+      return zoom_of(m);
+    }
+    ;
+  };
+  var set_zoom_attrs_BANG_ = function(ctx, z) {
+    const m1 = get(ctx, "media");
+    const on_QMARK_2 = get(z, "s") > 1.001;
+    if (on_QMARK_2) {
+      m1.setAttribute("data-zoomed", "");
+    } else {
+      m1.removeAttribute("data-zoomed");
+    }
+    ;
+    if (truth_(get(ctx, "legacy?"))) {
+      return null;
+    } else {
+      if (on_QMARK_2) {
+        get(ctx, "root").setAttribute("data-zoomed", "");
+      } else {
+        get(ctx, "root").removeAttribute("data-zoomed");
+      }
+      ;
+      return update_zoom_chrome_BANG_(get(ctx, "root"));
+    }
+    ;
+  };
+  var apply_zoom_BANG_ = function(ctx, z, opts) {
+    const m1 = get(ctx, "media");
+    const ms2 = truth_((() => {
+      const and__23442__auto__3 = opts;
+      if (truth_(and__23442__auto__3)) {
+        const and__23442__auto__4 = get(opts, "ms");
+        if (truth_(and__23442__auto__4)) {
+          return not(reduced_motion_QMARK_3());
+        } else {
+          return and__23442__auto__4;
+        }
+        ;
+      } else {
+        return and__23442__auto__3;
+      }
+      ;
+    })()) ? get(opts, "ms") : null;
+    const from5 = zoom_of(m1);
+    if (truth_(get(ctx, "legacy?"))) {
+      const st6 = m1.style;
+      st6.transition = truth_(ms2) ? "" : "none";
+      st6.transform = 1 === get(z, "s") ? "" : pose_css(z);
+    } else {
+      cancel_anim_BANG_(m1);
+      m1.style.transform = truth_(1 === get(z, "s") && (0 === get(z, "tx") && 0 === get(z, "ty"))) ? "" : pose_css(z);
+      if (truth_(ms2)) {
+        m1["__lbAnim"] = m1.animate([{ "transform": pose_css(from5) }, { "transform": pose_css(z) }], { "duration": ms2, "easing": (() => {
+          const or__23426__auto__7 = get(opts, "easing");
+          if (truth_(or__23426__auto__7)) {
+            return or__23426__auto__7;
+          } else {
+            return ease_out;
+          }
+          ;
+        })() });
+      }
+    }
+    ;
+    m1["__uiZoom"] = z;
+    return set_zoom_attrs_BANG_(ctx, z);
+  };
+  var reset_zoom_BANG_ = function(ctx) {
+    const m1 = get(ctx, "media");
+    if (truth_(m1)) {
+      if (truth_(get(ctx, "legacy?"))) {
+      } else {
+        cancel_anim_BANG_(m1);
+      }
+      ;
+      m1["__uiZoom"] = null;
+      m1.style.transform = "";
+      return set_zoom_attrs_BANG_(ctx, identity_zoom);
+    }
+    ;
+  };
+  var viewer_ctx = function(root) {
+    const slide1 = active_slide(root);
+    const m2 = media_of(slide1);
+    if (truth_(image_QMARK_(m2))) {
+      return { "legacy?": false, "root": root, "surface": root, "stage": slide1, "media": m2 };
+    }
+    ;
+  };
+  var ctx_at = function(t) {
+    const temp__23007__auto__1 = open_root_of(t);
+    if (truth_(temp__23007__auto__1)) {
+      const root2 = temp__23007__auto__1;
+      return viewer_ctx(root2);
+    } else {
+      const temp__23062__auto__3 = closest2(t, legacy_sel);
+      if (truth_(temp__23062__auto__3)) {
+        const overlay4 = temp__23062__auto__3;
+        const temp__23062__auto__5 = overlay4.querySelector(legacy_image_sel);
+        if (truth_(temp__23062__auto__5)) {
+          const m6 = temp__23062__auto__5;
+          return { "legacy?": true, "root": null, "surface": overlay4, "stage": overlay4, "media": m6 };
+        }
+        ;
+      }
+      ;
+    }
+    ;
+  };
+  var zoom_by_BANG_ = function(root, k) {
+    const temp__23062__auto__1 = viewer_ctx(root);
+    if (truth_(temp__23062__auto__1)) {
+      const ctx2 = temp__23062__auto__1;
+      const m3 = get(ctx2, "media");
+      const z4 = live_pose_BANG_(m3);
+      const target5 = truth_(k) ? settle(ctx2, zoom_at(z4, clamp3(1, max_scale(ctx2), get(z4, "s") * k), 0, 0)) : identity_zoom;
+      return apply_zoom_BANG_(ctx2, target5, { "ms": settle_ms });
+    }
+    ;
+  };
+  var pan_by_BANG_ = function(root, dx, dy) {
+    const temp__23062__auto__1 = viewer_ctx(root);
+    if (truth_(temp__23062__auto__1)) {
+      const ctx2 = temp__23062__auto__1;
+      const z3 = live_pose_BANG_(get(ctx2, "media"));
+      return apply_zoom_BANG_(ctx2, settle(ctx2, assoc(z3, "tx", get(z3, "tx") + dx, "ty", get(z3, "ty") + dy)), { "ms": fade_ms });
+    }
+    ;
+  };
+  var update_zoom_chrome_BANG_ = function(root) {
+    const ctx1 = viewer_ctx(root);
+    const m2 = get(ctx1, "media");
+    const z3 = truth_(m2) ? zoom_of(m2) : identity_zoom;
+    const mx4 = truth_(ctx1) ? max_scale(ctx1) : 1;
+    const temp__23062__auto__5 = root.querySelector("[data-lightbox-action='zoom-out']");
+    if (truth_(temp__23062__auto__5)) {
+      const b6 = temp__23062__auto__5;
+      b6.disabled = get(z3, "s") <= 1.001;
+    }
+    ;
+    const temp__23062__auto__7 = root.querySelector("[data-lightbox-action='zoom-in']");
+    if (truth_(temp__23062__auto__7)) {
+      const b8 = temp__23062__auto__7;
+      return b8.disabled = get(z3, "s") >= mx4 - 1e-3;
+    }
+    ;
+  };
+  var sync_videos_BANG_ = function(root) {
+    const i1 = state2(root).index;
+    for (let G__2 of iterable(map_indexed(vector, slide_els(root)))) {
+      const vec__36 = G__2;
+      const j7 = nth(vec__36, 0, null);
+      const s8 = nth(vec__36, 1, null);
+      const m9 = media_of(s8);
+      if (truth_((() => {
+        const and__23442__auto__10 = m9;
+        if (truth_(and__23442__auto__10)) {
+          return "VIDEO" === m9.tagName;
+        } else {
+          return and__23442__auto__10;
+        }
+        ;
+      })())) {
+        if (!_EQ_(i1, j7)) {
+          if (truth_(m9.paused)) {
+          } else {
+            m9.pause();
+          }
+        } else {
+          if (truth_(m9.hasAttribute("data-autoplay"))) {
+            if (truth_(m9.hasAttribute("data-muted"))) {
+              m9.muted = true;
+            }
+            ;
+            m9.play().catch((function(_) {
+              return null;
+            }));
+          }
+        }
+      }
+    }
+    return null;
+  };
+  var center_thumb_BANG_ = function(root, smooth_QMARK_) {
+    const strip1 = root.querySelector(".ui-lightbox-thumbs");
+    const i2 = state2(root).index;
+    if (truth_(strip1)) {
+      const temp__23062__auto__3 = strip1.querySelector(`${"[data-index='"}${i2 ?? ""}${"']"}`);
+      if (truth_(temp__23062__auto__3)) {
+        const b4 = temp__23062__auto__3;
+        return strip1.scrollTo({ "left": b4.offsetLeft + b4.offsetWidth / 2 - strip1.clientWidth / 2, "behavior": truth_((() => {
+          const and__23442__auto__5 = smooth_QMARK_;
+          if (truth_(and__23442__auto__5)) {
+            return not(reduced_motion_QMARK_3());
+          } else {
+            return and__23442__auto__5;
+          }
+          ;
+        })()) ? "smooth" : "instant" });
+      }
+      ;
+    }
+    ;
+  };
+  var sync_chrome_BANG_ = function(root) {
+    const st1 = state2(root);
+    const i2 = st1.index;
+    const n3 = slide_els(root).length;
+    const slide4 = slide_at(root, i2);
+    const temp__23062__auto__5 = root.querySelector(".ui-lightbox-counter");
+    if (truth_(temp__23062__auto__5)) {
+      const c6 = temp__23062__auto__5;
+      c6.textContent = `${i2 + 1}${" / "}${n3 ?? ""}`;
+    }
+    ;
+    const temp__23062__auto__7 = root.querySelector("[data-lightbox-action='prev']");
+    if (truth_(temp__23062__auto__7)) {
+      const b8 = temp__23062__auto__7;
+      b8.disabled = i2 <= 0;
+    }
+    ;
+    const temp__23062__auto__9 = root.querySelector("[data-lightbox-action='next']");
+    if (truth_(temp__23062__auto__9)) {
+      const b10 = temp__23062__auto__9;
+      b10.disabled = i2 >= n3 - 1;
+    }
+    ;
+    for (let G__11 of iterable(Array.from(root.querySelectorAll(".ui-lightbox-thumb-button")))) {
+      const b12 = G__11;
+      if (`${i2 ?? ""}` === b12.getAttribute("data-index")) {
+        b12.setAttribute("aria-current", "true");
+      } else {
+        b12.removeAttribute("aria-current");
+      }
+    }
+    ;
+    root.setAttribute("data-active-type", (() => {
+      const or__23426__auto__13 = (() => {
+        const G__55914 = slide4;
+        if (G__55914 == null) {
+          return null;
+        } else {
+          return G__55914.getAttribute("data-type");
+        }
+        ;
+      })();
+      if (truth_(or__23426__auto__13)) {
+        return or__23426__auto__13;
+      } else {
+        return "image";
+      }
+      ;
+    })());
+    return update_zoom_chrome_BANG_(root);
+  };
+  var set_index_BANG_ = function(root, i) {
+    const st1 = state2(root);
+    const prev2 = st1.index;
+    if (!_EQ_(i, prev2)) {
+      const temp__23062__auto__3 = media_of(slide_at(root, prev2));
+      if (truth_(temp__23062__auto__3)) {
+        const m4 = temp__23062__auto__3;
+        if (truth_(image_QMARK_(m4))) {
+          reset_zoom_BANG_({ "legacy?": false, "root": root, "media": m4 });
+        }
+      }
+      ;
+      st1.index = i;
+      sync_chrome_BANG_(root);
+      load_near_BANG_(root);
+      sync_videos_BANG_(root);
+      center_thumb_BANG_(root, true);
+      hide_source_BANG_(root);
+      return dispatch_BANG_(root, "change", { "index": i });
+    }
+    ;
+  };
+  var index_from_scroll = function(root) {
+    const sc1 = scroller(root);
+    return clamp3(0, slide_els(root).length - 1, Math.round(Math.abs(sc1.scrollLeft) / slide_width(root)));
+  };
+  var mid_swipe_QMARK_ = function(root) {
+    const st1 = state2(root);
+    const sc2 = scroller(root);
+    const w3 = slide_width(root);
+    const off4 = Math.abs(sc2.scrollLeft - w3 * Math.round(sc2.scrollLeft / w3));
+    const or__23426__auto__5 = st1.scrolling;
+    if (truth_(or__23426__auto__5)) {
+      return or__23426__auto__5;
+    } else {
+      return off4 > 2;
+    }
+    ;
+  };
+  var settle_scroll_BANG_ = function(root) {
+    const st1 = state2(root);
+    if (truth_(st1)) {
+      clearTimeout(st1.scrollTimer);
+      st1.scrolling = false;
+      if (truth_(st1.resizing)) {
+        return null;
+      } else {
+        return set_index_BANG_(root, index_from_scroll(root));
+      }
+      ;
+    }
+    ;
+  };
+  var on_slides_scroll = function(root) {
+    const st1 = state2(root);
+    if (truth_((() => {
+      const and__23442__auto__2 = st1;
+      if (truth_(and__23442__auto__2)) {
+        return not(st1.resizing) && not(st1.jumping);
+      } else {
+        return and__23442__auto__2;
+      }
+      ;
+    })())) {
+      st1.scrolling = true;
+      const i3 = index_from_scroll(root);
+      if (!_EQ_(i3, st1.index)) {
+        set_index_BANG_(root, i3);
+      }
+      ;
+      clearTimeout(st1.scrollTimer);
+      return st1.scrollTimer = setTimeout((function() {
+        return settle_scroll_BANG_(root);
+      }), scroll_idle_ms);
+    }
+    ;
+  };
+  var repaint_slide_BANG_ = function(slide) {
+    if (truth_((() => {
+      const and__23442__auto__1 = webkit_QMARK_;
+      if (truth_(and__23442__auto__1)) {
+        return slide;
+      } else {
+        return and__23442__auto__1;
+      }
+      ;
+    })())) {
+      const st2 = slide.style;
+      st2.visibility = "hidden";
+      slide.offsetWidth;
+      return st2.visibility = "";
+    }
+    ;
+  };
+  var jump_to_BANG_ = function(root, i) {
+    const st1 = state2(root);
+    const sc2 = scroller(root);
+    st1.jumping = true;
+    sc2.style.scrollSnapType = "none";
+    sc2.scrollLeft = i * slide_width(root);
+    return requestAnimationFrame((function() {
+      sc2.style.scrollSnapType = "";
+      sc2.scrollLeft = i * slide_width(root);
+      st1.jumping = false;
+      clearTimeout(st1.repaintTimer);
+      return st1.repaintTimer = setTimeout((function() {
+        return repaint_slide_BANG_(slide_at(root, i));
+      }), 120);
+    }));
+  };
+  var go_to_BANG_ = function(root, i) {
+    const st1 = state2(root);
+    const n2 = slide_els(root).length;
+    const i3 = clamp3(0, n2 - 1, i);
+    if (truth_((() => {
+      const and__23442__auto__4 = st1;
+      if (truth_(and__23442__auto__4)) {
+        return not(st1.scrolling) && !_EQ_(i3, st1.index);
+      } else {
+        return and__23442__auto__4;
+      }
+      ;
+    })())) {
+      const dir5 = i3 > st1.index ? 1 : -1;
+      jump_to_BANG_(root, i3);
+      set_index_BANG_(root, i3);
+      if (truth_(reduced_motion_QMARK_3())) {
+        return null;
+      } else {
+        const slide6 = slide_at(root, i3);
+        const target7 = (() => {
+          const or__23426__auto__8 = media_of(slide6);
+          if (truth_(or__23426__auto__8)) {
+            return or__23426__auto__8;
+          } else {
+            return slide6.querySelector(".ui-lightbox-content");
+          }
+          ;
+        })();
+        if (truth_(target7)) {
+          return target7.animate([{ "transform": `${"translateX("}${dir5 * 6}${"%)"}`, "opacity": 0 }, { "transform": "none", "opacity": 1 }], { "duration": fade_ms, "easing": ease_out });
+        }
+        ;
+      }
+      ;
+    }
+    ;
+  };
+  var on_resize = function(root) {
+    const st1 = state2(root);
+    if (truth_(st1)) {
+      st1.resizing = true;
+      fit_all_BANG_(root);
+      jump_to_BANG_(root, st1.index);
+      const temp__23062__auto__2 = viewer_ctx(root);
+      if (truth_(temp__23062__auto__2)) {
+        const ctx3 = temp__23062__auto__2;
+        apply_zoom_BANG_(ctx3, settle(ctx3, zoom_of(get(ctx3, "media"))), null);
+      }
+      ;
+      center_thumb_BANG_(root, false);
+      return requestAnimationFrame((function() {
+        return requestAnimationFrame((function() {
+          return st1.resizing = false;
+        }));
+      }));
+    }
+    ;
+  };
+  var last_trigger = atom(null);
+  var visible_rect = function(el2) {
+    if (truth_((() => {
+      const and__23442__auto__1 = el2;
+      if (truth_(and__23442__auto__1)) {
+        return el2.isConnected;
+      } else {
+        return and__23442__auto__1;
+      }
+      ;
+    })())) {
+      const r2 = el2.getBoundingClientRect();
+      if (truth_(r2.width > 0 && (r2.height > 0 && (r2.top < window.innerHeight && (r2.bottom > 0 && (r2.left < window.innerWidth && r2.right > 0)))))) {
+        return r2;
+      }
+      ;
+    }
+    ;
+  };
+  var source_el = function(root, i) {
+    const slide2 = slide_at(root, i);
+    const k3 = (() => {
+      const G__5604 = slide2;
+      if (G__5604 == null) {
+        return null;
+      } else {
+        return G__5604.getAttribute("data-key");
+      }
+      ;
+    })();
+    const map__15 = deref(last_trigger);
+    const el6 = get(map__15, "el");
+    const t7 = get(map__15, "t");
+    if (truth_((() => {
+      const and__23442__auto__8 = k3;
+      if (truth_(and__23442__auto__8)) {
+        return !_EQ_("", k3);
+      } else {
+        return and__23442__auto__8;
+      }
+      ;
+    })())) {
+      if (truth_((() => {
+        const and__23442__auto__9 = el6;
+        if (truth_(and__23442__auto__9)) {
+          const and__23442__auto__10 = el6.isConnected;
+          if (truth_(and__23442__auto__10)) {
+            return now() - t7 < 2e3 && _EQ_(k3, el6.getAttribute("data-lightbox-key"));
+          } else {
+            return and__23442__auto__10;
+          }
+          ;
+        } else {
+          return and__23442__auto__9;
+        }
+        ;
+      })())) {
+        return el6;
+      } else {
+        return some((function(c) {
+          if (truth_(_EQ_(k3, c.getAttribute("data-lightbox-key")) && not(root.contains(c)))) {
+            return c;
+          }
+          ;
+        }), Array.from(document.querySelectorAll("[data-lightbox-key]")));
+      }
+      ;
+    }
+    ;
+  };
+  var source_for = function(root, i) {
+    const el1 = source_el(root, i);
+    if (truth_((() => {
+      const and__23442__auto__2 = el1;
+      if (truth_(and__23442__auto__2)) {
+        return _EQ_(el1.getAttribute("data-lightbox-key"), slide_at(root, i).getAttribute("data-key"));
+      } else {
+        return and__23442__auto__2;
+      }
+      ;
+    })())) {
+      return el1;
+    }
+    ;
+  };
+  var hide_source_BANG_ = function(root) {
+    const st1 = state2(root);
+    const temp__23062__auto__2 = st1.source;
+    if (truth_(temp__23062__auto__2)) {
+      const old3 = temp__23062__auto__2;
+      old3.removeAttribute("data-lightbox-source");
+    }
+    ;
+    st1.source = null;
+    if (truth_(not(st1.closed) && not(root.hasAttribute("data-contained")))) {
+      const temp__23062__auto__4 = source_for(root, st1.index);
+      if (truth_(temp__23062__auto__4)) {
+        const el5 = temp__23062__auto__4;
+        el5.setAttribute("data-lightbox-source", "");
+        return st1.source = el5;
+      }
+      ;
+    }
+    ;
+  };
+  var thumb_pose = function(d, s, src_el) {
+    const cover_QMARK_1 = !("contain" === getComputedStyle(src_el).objectFit);
+    const k2 = cover_QMARK_1 ? Math.max(s.width / d.width, s.height / d.height) : Math.min(s.width / d.width, s.height / d.height);
+    const tx3 = s.left + s.width / 2 - (d.left + d.width / 2);
+    const ty4 = s.top + s.height / 2 - (d.top + d.height / 2);
+    const ix5 = Math.max(0, (d.width - s.width / k2) / 2);
+    const iy6 = Math.max(0, (d.height - s.height / k2) / 2);
+    const r7 = radius_px(src_el, s.width, s.height) / k2;
+    return { "transform": pose_css({ "s": k2, "tx": tx3, "ty": ty4 }), "clipPath": `${"inset("}${iy6 ?? ""}${"px "}${ix5 ?? ""}${"px round "}${r7 ?? ""}${"px)"}` };
+  };
+  var untransformed_rect = function(m) {
+    const st1 = m.style;
+    const t2 = st1.transform;
+    st1.transform = "none";
+    const r3 = m.getBoundingClientRect();
+    st1.transform = t2;
+    return r3;
+  };
+  var play_open_BANG_ = function(root) {
+    const st1 = state2(root);
+    const i2 = st1.index;
+    const slide3 = slide_at(root, i2);
+    const m4 = media_of(slide3);
+    const backdrop5 = root.querySelector(".ui-lightbox-backdrop");
+    const contained_QMARK_6 = root.hasAttribute("data-contained");
+    const src_el7 = truth_(contained_QMARK_6) ? null : source_for(root, i2);
+    const s8 = visible_rect(src_el7);
+    const d9 = truth_((() => {
+      const and__23442__auto__10 = m4;
+      if (truth_(and__23442__auto__10)) {
+        return !("DIV" === m4.tagName);
+      } else {
+        return and__23442__auto__10;
+      }
+      ;
+    })()) ? m4.getBoundingClientRect() : null;
+    const done11 = (function() {
+      return root.removeAttribute("data-opening");
+    });
+    root.setAttribute("data-ready", "");
+    if (truth_((() => {
+      const or__23426__auto__12 = contained_QMARK_6;
+      if (truth_(or__23426__auto__12)) {
+        return or__23426__auto__12;
+      } else {
+        return reduced_motion_QMARK_3();
+      }
+      ;
+    })())) {
+      done11();
+    } else {
+      if (truth_((() => {
+        const and__23442__auto__13 = s8;
+        if (truth_(and__23442__auto__13)) {
+          const and__23442__auto__14 = d9;
+          if (truth_(and__23442__auto__14)) {
+            return d9.width > 0;
+          } else {
+            return and__23442__auto__14;
+          }
+          ;
+        } else {
+          return and__23442__auto__13;
+        }
+        ;
+      })())) {
+        const dr15 = radius_px(m4, d9.width, d9.height);
+        m4.animate([thumb_pose(d9, s8, src_el7), { "transform": pose_css(identity_zoom), "clipPath": `${"inset(0px 0px round "}${dr15 ?? ""}${"px)"}` }], { "duration": morph_ms, "easing": ease_out });
+        backdrop5.animate([{ "opacity": 0 }, { "opacity": 1 }], { "duration": morph_ms, "easing": ease_out });
+        setTimeout(done11, 0.6 * morph_ms);
+      } else {
+        if ("else") {
+          const target16 = (() => {
+            const or__23426__auto__17 = m4;
+            if (truth_(or__23426__auto__17)) {
+              return or__23426__auto__17;
+            } else {
+              return slide3;
+            }
+            ;
+          })();
+          target16.animate([{ "opacity": 0, "transform": "scale(0.96)" }, { "opacity": 1, "transform": "none" }], { "duration": fade_ms, "easing": ease_out });
+          backdrop5.animate([{ "opacity": 0 }, { "opacity": 1 }], { "duration": fade_ms, "easing": ease_out });
+          setTimeout(done11, 0.5 * fade_ms);
+        } else {
+        }
+      }
+    }
+    ;
+    return hide_source_BANG_(root);
+  };
+  var wait_for_media = function(root) {
+    return new Promise((function(resolve) {
+      const m1 = media_of(active_slide(root));
+      const t02 = now();
+      if (truth_((() => {
+        const or__23426__auto__3 = not(image_QMARK_(m1));
+        if (or__23426__auto__3) {
+          return or__23426__auto__3;
+        } else {
+          return m1.hasAttribute("width");
+        }
+        ;
+      })())) {
+        return resolve(null);
+      } else {
+        const check4 = (function check() {
+          if (truth_((() => {
+            const or__23426__auto__5 = (() => {
+              const and__23442__auto__6 = m1.complete;
+              if (truth_(and__23442__auto__6)) {
+                return m1.naturalWidth > 0;
+              } else {
+                return and__23442__auto__6;
+              }
+              ;
+            })();
+            if (truth_(or__23426__auto__5)) {
+              return or__23426__auto__5;
+            } else {
+              return now() - t02 > open_wait_ms;
+            }
+            ;
+          })())) {
+            fit_BANG_(active_slide(root));
+            return resolve(null);
+          } else {
+            return requestAnimationFrame(check);
+          }
+          ;
+        });
+        return check4();
+      }
+      ;
+    }));
+  };
+  var play_close_BANG_ = function(root, done) {
+    const st1 = state2(root);
+    const i2 = st1.index;
+    const slide3 = slide_at(root, i2);
+    const m4 = media_of(slide3);
+    const backdrop5 = root.querySelector(".ui-lightbox-backdrop");
+    const contained_QMARK_6 = root.hasAttribute("data-contained");
+    const src_el7 = truth_(contained_QMARK_6) ? null : source_for(root, i2);
+    const _8 = truth_((() => {
+      const and__23442__auto__9 = src_el7;
+      if (truth_(and__23442__auto__9)) {
+        return not(visible_rect(src_el7)) && src_el7.isConnected;
+      } else {
+        return and__23442__auto__9;
+      }
+      ;
+    })()) ? src_el7.scrollIntoView({ "block": "nearest", "inline": "nearest" }) : null;
+    const s10 = visible_rect(src_el7);
+    const media_QMARK_11 = (() => {
+      const and__23442__auto__12 = m4;
+      if (truth_(and__23442__auto__12)) {
+        return !("DIV" === m4.tagName) && !("error" === slide3.getAttribute("data-state"));
+      } else {
+        return and__23442__auto__12;
+      }
+      ;
+    })();
+    const from_t13 = truth_(media_QMARK_11) ? truth_(m4["__lbAnim"]) ? (() => {
+      live_pose_BANG_(m4);
+      return m4.style.transform;
+    })() : (() => {
+      const t14 = m4.style.transform;
+      if (_EQ_("", t14)) {
+        return pose_css(identity_zoom);
+      } else {
+        return t14;
+      }
+      ;
+    })() : null;
+    const from_o15 = parseFloat(getComputedStyle(backdrop5).opacity);
+    const finish16 = (() => {
+      const called17 = atom(false);
+      return function() {
+        if (truth_(deref(called17))) {
+          return null;
+        } else {
+          reset_BANG_(called17, true);
+          return done();
+        }
+        ;
+      };
+    })();
+    root.setAttribute("data-closing", "");
+    if (truth_(media_QMARK_11)) {
+      cancel_anim_BANG_(m4);
+    }
+    ;
+    if (truth_((() => {
+      const or__23426__auto__18 = contained_QMARK_6;
+      if (truth_(or__23426__auto__18)) {
+        return or__23426__auto__18;
+      } else {
+        return reduced_motion_QMARK_3();
+      }
+      ;
+    })())) {
+      return finish16();
+    } else {
+      if (truth_((() => {
+        const and__23442__auto__19 = s10;
+        if (truth_(and__23442__auto__19)) {
+          return media_QMARK_11;
+        } else {
+          return and__23442__auto__19;
+        }
+        ;
+      })())) {
+        const d20 = untransformed_rect(m4);
+        const dr21 = radius_px(m4, d20.width, d20.height);
+        const to22 = thumb_pose(d20, s10, src_el7);
+        const a23 = m4.animate([{ "transform": from_t13, "clipPath": `${"inset(0px 0px round "}${dr21 ?? ""}${"px)"}` }, to22], { "duration": morph_ms, "easing": ease_out, "fill": "forwards" });
+        backdrop5.animate([{ "opacity": from_o15 }, { "opacity": 0 }], { "duration": morph_ms, "easing": ease_out, "fill": "forwards" });
+        a23.finished.then(finish16, finish16);
+        return setTimeout(finish16, morph_ms + 120);
+      } else {
+        if ("else") {
+          const target24 = truth_(media_QMARK_11) ? m4 : slide3;
+          const a25 = target24.animate([{ "opacity": 1, "transform": (() => {
+            const or__23426__auto__26 = from_t13;
+            if (truth_(or__23426__auto__26)) {
+              return or__23426__auto__26;
+            } else {
+              return "none";
+            }
+            ;
+          })() }, { "opacity": 0, "transform": `${(() => {
+            const or__23426__auto__27 = from_t13;
+            if (truth_(or__23426__auto__27)) {
+              return or__23426__auto__27;
+            } else {
+              return "";
+            }
+            ;
+          })() ?? ""}${" scale(0.92)"}` }], { "duration": fade_ms, "easing": ease_out, "fill": "forwards" });
+          backdrop5.animate([{ "opacity": from_o15 }, { "opacity": 0 }], { "duration": fade_ms, "easing": ease_out, "fill": "forwards" });
+          a25.finished.then(finish16, finish16);
+          return setTimeout(finish16, fade_ms + 120);
+        } else {
+          return null;
+        }
+      }
+    }
+    ;
+  };
+  var clear_animations_BANG_ = function(root) {
+    for (let G__1 of iterable(root.getAnimations({ "subtree": true }))) {
+      const a2 = G__1;
+      a2.cancel();
+    }
+    return null;
+  };
+  var teardown_BANG_ = function(root) {
+    const temp__23062__auto__1 = state2(root);
+    if (truth_(temp__23062__auto__1)) {
+      const st2 = temp__23062__auto__1;
+      st2.closed = true;
+      clearTimeout(st2.scrollTimer);
+      clearTimeout(st2.repaintTimer);
+      const G__5613 = st2.mo;
+      if (G__5613 == null) {
+      } else {
+        G__5613.disconnect();
+      }
+      ;
+      const G__5624 = st2.ro;
+      if (G__5624 == null) {
+      } else {
+        G__5624.disconnect();
+      }
+      ;
+      const temp__23062__auto__5 = scroller(root);
+      if (truth_(temp__23062__auto__5)) {
+        const sc6 = temp__23062__auto__5;
+        sc6.removeEventListener("scroll", st2.onScroll);
+        sc6.removeEventListener("scrollend", st2.onScrollEnd);
+      }
+      ;
+      const temp__23062__auto__7 = st2.source;
+      if (truth_(temp__23062__auto__7)) {
+        const old8 = temp__23062__auto__7;
+        old8.removeAttribute("data-lightbox-source");
+      }
+      ;
+      for (let G__9 of iterable(slide_els(root))) {
+        const s10 = G__9;
+        const temp__23062__auto__11 = media_of(s10);
+        if (truth_(temp__23062__auto__11)) {
+          const m12 = temp__23062__auto__11;
+          if ("VIDEO" === m12.tagName) {
+            m12.pause();
+          }
+        }
+      }
+      ;
+      root["__lb"] = null;
+      return remove_surface_BANG_(root);
+    }
+    ;
+  };
+  var finish_close_BANG_ = function(root) {
+    const st1 = state2(root);
+    const managed_QMARK_2 = root.hasAttribute("id");
+    const history_QMARK_3 = st1.history;
+    teardown_BANG_(root);
+    for (let G__4 of iterable(["data-ready", "data-closing", "data-opening", "data-zoomed", "data-pulling", "data-panning"])) {
+      const a5 = G__4;
+      root.removeAttribute(a5);
+    }
+    ;
+    root.style.removeProperty("--lightbox-pull-progress");
+    if (truth_((() => {
+      const and__23442__auto__6 = history_QMARK_3;
+      if (truth_(and__23442__auto__6)) {
+        return not(st1.poppedHistory) && (() => {
+          const G__5637 = history;
+          const G__5638 = G__5637 == null ? null : G__5637.state;
+          if (G__5638 == null) {
+            return null;
+          } else {
+            return G__5638["uiLightbox"];
+          }
+          ;
+        })();
+      } else {
+        return and__23442__auto__6;
+      }
+      ;
+    })())) {
+      history.back();
+    }
+    ;
+    if (truth_(st1.managed)) {
+      clear_animations_BANG_(root);
+      for (let G__9 of iterable(slide_els(root))) {
+        const s10 = G__9;
+        const temp__23062__auto__11 = media_of(s10);
+        if (truth_(temp__23062__auto__11)) {
+          const m12 = temp__23062__auto__11;
+          m12["__uiZoom"] = null;
+          m12.style.transform = "";
+        }
+      }
+      ;
+      root.setAttribute("hidden", "");
+    }
+    ;
+    return dispatch_BANG_(root, "close", {});
+  };
+  var close_BANG_ = function(root) {
+    const st1 = state2(root);
+    if (truth_((() => {
+      const and__23442__auto__2 = st1;
+      if (truth_(and__23442__auto__2)) {
+        return not(st1.closing);
+      } else {
+        return and__23442__auto__2;
+      }
+      ;
+    })())) {
+      st1.closing = true;
+      return play_close_BANG_(root, (function() {
+        return finish_close_BANG_(root);
+      }));
+    }
+    ;
+  };
+  var request_close_BANG_ = function(root) {
+    const st1 = state2(root);
+    if (truth_((() => {
+      const and__23442__auto__2 = st1;
+      if (truth_(and__23442__auto__2)) {
+        return not(st1.closing);
+      } else {
+        return and__23442__auto__2;
+      }
+      ;
+    })())) {
+      if (truth_((() => {
+        const and__23442__auto__3 = st1.history;
+        if (truth_(and__23442__auto__3)) {
+          const G__5644 = history;
+          const G__5645 = G__5644 == null ? null : G__5644.state;
+          if (G__5645 == null) {
+            return null;
+          } else {
+            return G__5645["uiLightbox"];
+          }
+          ;
+        } else {
+          return and__23442__auto__3;
+        }
+        ;
+      })())) {
+        st1.poppedHistory = true;
+        return history.back();
+      } else {
+        return close_BANG_(root);
+      }
+      ;
+    }
+    ;
+  };
+  var handoff = atom(null);
+  var handoff_ms = 250;
+  var surface_removed_BANG_ = function(el2) {
+    const temp__23007__auto__1 = state2(el2);
+    if (truth_(temp__23007__auto__1)) {
+      const st2 = temp__23007__auto__1;
+      if (truth_(st2.closing)) {
+      } else {
+        reset_BANG_(handoff, { "t": now(), "history": st2.history, "index": st2.index });
+        setTimeout((function() {
+          const temp__23062__auto__3 = deref(handoff);
+          if (truth_(temp__23062__auto__3)) {
+            const h4 = temp__23062__auto__3;
+            if (truth_((() => {
+              const and__23442__auto__5 = get(h4, "history");
+              if (truth_(and__23442__auto__5)) {
+                return now() - get(h4, "t") > handoff_ms - 1;
+              } else {
+                return and__23442__auto__5;
+              }
+              ;
+            })())) {
+              reset_BANG_(handoff, null);
+              if (truth_(not(some(state2, Array.from(document.querySelectorAll(root_sel)))) && (() => {
+                const G__5656 = history;
+                const G__5657 = G__5656 == null ? null : G__5656.state;
+                if (G__5657 == null) {
+                  return null;
+                } else {
+                  return G__5657["uiLightbox"];
+                }
+                ;
+              })())) {
+                return history.back();
+              }
+              ;
+            }
+            ;
+          }
+          ;
+        }), handoff_ms);
+      }
+      ;
+      return teardown_BANG_(el2);
+    } else {
+      return remove_surface_BANG_(el2);
+    }
+    ;
+  };
+  var open_BANG_ = function(root) {
+    if (truth_(state2(root))) {
+      return null;
+    } else {
+      const pending1 = root["__lbPending"];
+      const n2 = slide_els(root).length;
+      const index3 = clamp3(0, Math.max(0, n2 - 1), (() => {
+        const or__23426__auto__4 = get(pending1, "index");
+        if (truth_(or__23426__auto__4)) {
+          return or__23426__auto__4;
+        } else {
+          const or__23426__auto__5 = parseInt((() => {
+            const or__23426__auto__6 = root.getAttribute("data-index");
+            if (truth_(or__23426__auto__6)) {
+              return or__23426__auto__6;
+            } else {
+              return "0";
+            }
+            ;
+          })(), 10);
+          if (truth_(or__23426__auto__5)) {
+            return or__23426__auto__5;
+          } else {
+            return 0;
+          }
+          ;
+        }
+        ;
+      })());
+      const contained_QMARK_7 = root.hasAttribute("data-contained");
+      const st8 = { "index": index3, "managed": !(pending1 == null) };
+      const h9 = deref(handoff);
+      const continued_QMARK_10 = (() => {
+        const and__23442__auto__11 = h9;
+        if (truth_(and__23442__auto__11)) {
+          return not(pending1) && now() - get(h9, "t") < handoff_ms;
+        } else {
+          return and__23442__auto__11;
+        }
+        ;
+      })();
+      reset_BANG_(handoff, null);
+      root["__lbPending"] = null;
+      const temp__23062__auto__12 = get(pending1, "trigger");
+      if (truth_(temp__23062__auto__12)) {
+        const t13 = temp__23062__auto__12;
+        reset_BANG_(last_trigger, { "el": t13, "t": now() });
+      }
+      ;
+      root["__lb"] = st8;
+      root.setAttribute("data-opening", "");
+      clear_animations_BANG_(root);
+      add_surface_BANG_(root);
+      const sc14 = scroller(root);
+      const on_scroll15 = (function(_) {
+        return on_slides_scroll(root);
+      });
+      const on_end16 = (function(_) {
+        return settle_scroll_BANG_(root);
+      });
+      st8.onScroll = on_scroll15;
+      st8.onScrollEnd = on_end16;
+      sc14.addEventListener("scroll", on_scroll15, { "passive": true });
+      sc14.addEventListener("scrollend", on_end16, { "passive": true });
+      const mo17 = new MutationObserver((function(records) {
+        return on_index_attr(root, records);
+      }));
+      mo17.observe(root, { "attributes": true, "attributeFilter": ["data-index"] });
+      mo17.observe(scroller(root), { "childList": true });
+      st8.mo = mo17;
+      const ro18 = new ResizeObserver((function(_) {
+        return on_resize(root);
+      }));
+      ro18.observe(scroller(root));
+      st8.ro = ro18;
+      if (truth_(continued_QMARK_10)) {
+        st8.history = get(h9, "history");
+      } else {
+        if (truth_((() => {
+          const and__23442__auto__19 = root.hasAttribute("data-history");
+          if (truth_(and__23442__auto__19)) {
+            return not(contained_QMARK_7);
+          } else {
+            return and__23442__auto__19;
+          }
+          ;
+        })())) {
+          history.pushState({ "uiLightbox": true }, "");
+          st8.history = true;
+        }
+      }
+      ;
+      sync_chrome_BANG_(root);
+      load_near_BANG_(root);
+      fit_all_BANG_(root);
+      jump_to_BANG_(root, index3);
+      center_thumb_BANG_(root, false);
+      sync_videos_BANG_(root);
+      if (truth_(continued_QMARK_10)) {
+        root.setAttribute("data-ready", "");
+        root.removeAttribute("data-opening");
+        return hide_source_BANG_(root);
+      } else {
+        return wait_for_media(root).then((function() {
+          if (st8 === state2(root)) {
+            return play_open_BANG_(root);
+          }
+          ;
+        }));
+      }
+      ;
+    }
+    ;
+  };
+  var on_index_attr = function(root, records) {
+    const st1 = state2(root);
+    if (truth_(st1)) {
+      if (truth_(some((function(_PERCENT_1) {
+        return "childList" === _PERCENT_1.type;
+      }), records))) {
+        for (let G__2 of iterable(slide_els(root))) {
+          const s3 = G__2;
+          const temp__23062__auto__4 = media_of(s3);
+          if (truth_(temp__23062__auto__4)) {
+            const m5 = temp__23062__auto__4;
+            if (truth_(m5["__lbLoading"])) {
+              fit_BANG_(s3);
+            }
+          }
+        }
+        ;
+        load_near_BANG_(root);
+        sync_chrome_BANG_(root);
+      }
+      ;
+      if (truth_(some((function(_PERCENT_1) {
+        return "attributes" === _PERCENT_1.type;
+      }), records))) {
+        const i6 = parseInt(root.getAttribute("data-index"), 10);
+        if (truth_(not(isNaN(i6)) && !_EQ_(i6, st1.index))) {
+          if (truth_(st1.scrolling)) {
+            return null;
+          } else {
+            jump_to_BANG_(root, i6);
+            return set_index_BANG_(root, i6);
+          }
+          ;
+        }
+        ;
+      }
+      ;
+    }
+    ;
+  };
+  var open_managed_BANG_ = function(trigger) {
+    const root1 = document.getElementById(trigger.getAttribute("data-lightbox-open"));
+    if (truth_((() => {
+      const and__23442__auto__2 = root1;
+      if (truth_(and__23442__auto__2)) {
+        const and__23442__auto__3 = root1.matches(root_sel);
+        if (truth_(and__23442__auto__3)) {
+          return not(state2(root1));
+        } else {
+          return and__23442__auto__3;
+        }
+        ;
+      } else {
+        return and__23442__auto__2;
+      }
+      ;
+    })())) {
+      root1["__lbPending"] = { "index": parseInt((() => {
+        const or__23426__auto__4 = trigger.getAttribute("data-lightbox-index");
+        if (truth_(or__23426__auto__4)) {
+          return or__23426__auto__4;
+        } else {
+          return "0";
+        }
+        ;
+      })(), 10), "trigger": trigger };
+      root1.removeAttribute("hidden");
+      return requestAnimationFrame((function() {
+        return open_BANG_(root1);
+      }));
+    }
+    ;
+  };
+  var on_animation_start = function(e) {
+    const G__5661 = e.animationName;
+    switch (G__5661) {
+      case "ui-lightbox-mount":
+        const t3 = e.target;
+        if (truth_(t3.matches(root_sel))) {
+          return open_BANG_(t3);
+        }
+        ;
+        break;
+      case "lightbox-in":
+        const t4 = e.target;
+        if (truth_(t4.matches(legacy_sel))) {
+          return add_surface_BANG_(t4);
+        }
+        ;
+        break;
+    }
+    ;
+  };
+  var on_popstate = function(_) {
+    for (let G__1 of iterable(Array.from(document.querySelectorAll(root_sel)))) {
+      const root2 = G__1;
+      const temp__23062__auto__3 = state2(root2);
+      if (truth_(temp__23062__auto__3)) {
+        const st4 = temp__23062__auto__3;
+        if (truth_(st4.history)) {
+          st4.poppedHistory = true;
+          close_BANG_(root2);
+        }
+      }
+    }
+    return null;
+  };
+  var pointers = /* @__PURE__ */ new Map();
+  var gesture = atom(null);
+  var suppress_click_until = atom(0);
+  var last_tap = atom(null);
   var current_points = function() {
     return Array.from(pointers.values());
+  };
+  var midpoint = function(a, b) {
+    return [(get(a, "x") + get(b, "x")) / 2, (get(a, "y") + get(b, "y")) / 2];
+  };
+  var distance = function(a, b) {
+    return Math.hypot(get(a, "x") - get(b, "x"), get(a, "y") - get(b, "y"));
+  };
+  var rel_to = function(p__567, x, y) {
+    const vec__14 = p__567;
+    const cx5 = nth(vec__14, 0, null);
+    const cy6 = nth(vec__14, 1, null);
+    return [x - cx5, y - cy6];
   };
   var rebase_BANG_ = function() {
     const temp__23062__auto__1 = deref(gesture);
     if (truth_(temp__23062__auto__1)) {
       const g2 = temp__23062__auto__1;
       const pts3 = current_points();
-      return reset_BANG_(gesture, assoc(g2, "z0", zoom_of(get(g2, "img")), "pts0", pts3, "max-pointers", Math.max(get(g2, "max-pointers"), pts3.length)));
+      const ctx4 = get(g2, "ctx");
+      return reset_BANG_(gesture, assoc(g2, "z0", truth_(ctx4) ? zoom_of(get(ctx4, "media")) : identity_zoom, "pts0", pts3, "pinch-on", false, "raw-s", truth_(ctx4) ? get(zoom_of(get(ctx4, "media")), "s") : null, "center", truth_(ctx4) ? layout_center(get(ctx4, "media")) : null, "max-pointers", Math.max(get(g2, "max-pointers"), pts3.length)));
     }
     ;
   };
-  var midpoint = function(a, b) {
-    return rel((get(a, "x") + get(b, "x")) / 2, (get(a, "y") + get(b, "y")) / 2);
+  var sample_BANG_ = function(x, y) {
+    return swap_BANG_(gesture, update, "samples", (function(ss) {
+      const t1 = now();
+      const ss2 = conj((() => {
+        const or__23426__auto__3 = ss;
+        if (truth_(or__23426__auto__3)) {
+          return or__23426__auto__3;
+        } else {
+          return [];
+        }
+        ;
+      })(), { "x": x, "y": y, "t": t1 });
+      return vec(filter((function(_PERCENT_1) {
+        return t1 - get(_PERCENT_1, "t") < 100;
+      }), ss2));
+    }));
   };
-  var distance = function(a, b) {
-    return Math.hypot(get(a, "x") - get(b, "x"), get(a, "y") - get(b, "y"));
-  };
-  var track_BANG_ = function() {
-    const map__12 = deref(gesture);
-    const img3 = get(map__12, "img");
-    const z04 = get(map__12, "z0");
-    const pts05 = get(map__12, "pts0");
-    const pts6 = current_points();
-    if (pts6.length >= 2) {
-      const a013 = pts05[0];
-      const b014 = pts05[1];
-      const a15 = pts6[0];
-      const b16 = pts6[1];
-      const vec__717 = midpoint(a013, b014);
-      const mx018 = nth(vec__717, 0, null);
-      const my019 = nth(vec__717, 1, null);
-      const vec__1020 = midpoint(a15, b16);
-      const mx21 = nth(vec__1020, 0, null);
-      const my22 = nth(vec__1020, 1, null);
-      const s23 = clamp3(pinch_min, pinch_max, get(z04, "s") * (distance(a15, b16) / Math.max(1, distance(a013, b014))));
-      const z24 = zoom_at(z04, s23, mx018, my019);
-      return apply_zoom_BANG_(img3, assoc(z24, "tx", get(z24, "tx") + (mx21 - mx018), "ty", get(z24, "ty") + (my22 - my019)), false);
+  var velocity = function(g) {
+    const ss1 = get(g, "samples");
+    if (count(ss1) < 2) {
+      return [0, 0];
     } else {
-      if (get(z04, "s") > 1) {
-        const p025 = pts05[0];
-        const p26 = pts6[0];
-        return apply_zoom_BANG_(img3, assoc(z04, "tx", get(z04, "tx") + (get(p26, "x") - get(p025, "x")), "ty", get(z04, "ty") + (get(p26, "y") - get(p025, "y"))), false);
-      }
+      const a2 = first(ss1);
+      const b3 = last(ss1);
+      const dt4 = Math.max(1, get(b3, "t") - get(a2, "t"));
+      return [(get(b3, "x") - get(a2, "x")) / dt4, (get(b3, "y") - get(a2, "y")) / dt4];
     }
     ;
   };
-  var tap_BANG_ = function(img, x, y) {
-    const now1 = Date.now();
-    const prev2 = deref(last_tap);
+  var pull_threshold = function() {
+    return 0.22 * window.innerHeight;
+  };
+  var set_pull_BANG_ = function(root, m, dx, dy) {
+    const p1 = clamp3(0, 1, Math.abs(dy) / pull_threshold());
+    const k2 = 1 - 0.18 * p1;
+    root.style.setProperty("--lightbox-pull-progress", `${p1 ?? ""}`);
+    if (truth_(m)) {
+      return m.style.transform = pose_css({ "s": k2, "tx": 0.6 * dx, "ty": dy });
+    }
+    ;
+  };
+  var end_pull_BANG_ = function(root, m, dy, vy) {
     if (truth_((() => {
-      const and__23442__auto__3 = prev2;
-      if (truth_(and__23442__auto__3)) {
-        return now1 - get(prev2, "t") < double_tap_ms && Math.hypot(x - get(prev2, "x"), y - get(prev2, "y")) < double_tap_slop_px;
+      const or__23426__auto__1 = Math.abs(dy) >= pull_threshold();
+      if (or__23426__auto__1) {
+        return or__23426__auto__1;
       } else {
-        return and__23442__auto__3;
+        return Math.abs(vy) > 0.5 && (vy * dy > 0 && Math.abs(dy) > 24);
       }
       ;
     })())) {
-      const z7 = zoom_of(img);
-      const vec__48 = rel(x, y);
-      const px9 = nth(vec__48, 0, null);
-      const py10 = nth(vec__48, 1, null);
-      reset_BANG_(last_tap, null);
-      return apply_zoom_BANG_(img, get(z7, "s") > 1 ? identity_zoom : settle(img, zoom_at(z7, double_tap_scale, px9, py10)), true);
+      root.removeAttribute("data-pulling");
+      return request_close_BANG_(root);
     } else {
-      return reset_BANG_(last_tap, { "t": now1, "x": x, "y": y });
+      root.removeAttribute("data-pulling");
+      root.style.setProperty("--lightbox-pull-progress", "0");
+      if (truth_(m)) {
+        const from2 = m.style.transform;
+        m.style.transform = "";
+        if (truth_(!_EQ_("", from2) && not(reduced_motion_QMARK_3()))) {
+          return m["__lbAnim"] = m.animate([{ "transform": from2 }, { "transform": pose_css(identity_zoom) }], { "duration": settle_ms, "easing": ease_out });
+        }
+        ;
+      }
+      ;
     }
     ;
   };
-  var on_pointerdown3 = function(e) {
-    const t1 = e.target;
-    const overlay2 = (() => {
-      const G__5313 = t1;
-      if (G__5313 == null) {
-        return null;
+  var end_swipe_BANG_ = function(root, g, dx, vx) {
+    const sc1 = scroller(root);
+    const st2 = state2(root);
+    const w3 = slide_width(root);
+    const i4 = st2.index;
+    const n5 = slide_els(root).length;
+    const target6 = truth_((() => {
+      const or__23426__auto__7 = dx < -0.2 * w3;
+      if (or__23426__auto__7) {
+        return or__23426__auto__7;
       } else {
-        return G__5313.closest(overlay_sel);
+        return vx < -0.4;
       }
       ;
-    })();
+    })()) ? i4 + 1 : truth_((() => {
+      const or__23426__auto__8 = dx > 0.2 * w3;
+      if (or__23426__auto__8) {
+        return or__23426__auto__8;
+      } else {
+        return vx > 0.4;
+      }
+      ;
+    })()) ? i4 - 1 : "else" ? i4 : null;
+    const target9 = clamp3(0, n5 - 1, target6);
+    sc1.style.scrollSnapType = "";
+    return sc1.scrollTo({ "left": target9 * w3, "behavior": truth_(reduced_motion_QMARK_3()) ? "instant" : "smooth" });
+  };
+  var track_BANG_ = function(e) {
+    const g1 = deref(gesture);
+    const ctx2 = get(g1, "ctx");
+    const root3 = get(g1, "root");
+    const pts4 = current_points();
+    const p5 = pts4[0];
+    const dx6 = get(p5, "x") - get(get(g1, "pts0")[0], "x");
+    const dy7 = get(p5, "y") - get(get(g1, "pts0")[0], "y");
     if (truth_((() => {
-      const and__23442__auto__4 = overlay2;
-      if (truth_(and__23442__auto__4)) {
-        return not(t1.closest(".lightbox-close")) && (() => {
-          const or__23426__auto__5 = !("mouse" === e.pointerType);
-          if (or__23426__auto__5) {
-            return or__23426__auto__5;
+      const and__23442__auto__8 = ctx2;
+      if (truth_(and__23442__auto__8)) {
+        return pts4.length >= 2;
+      } else {
+        return and__23442__auto__8;
+      }
+      ;
+    })())) {
+      const a09 = get(g1, "pts0")[0];
+      const b010 = get(g1, "pts0")[1];
+      const a11 = pts4[0];
+      const b12 = pts4[1];
+      const d013 = Math.max(1, distance(a09, b010));
+      const d14 = distance(a11, b12);
+      if (truth_(not(get(g1, "pinch-on")) && Math.abs(d14 - d013) > pinch_slop_px)) {
+        rebase_BANG_();
+        return swap_BANG_(gesture, assoc, "pinch-on", true);
+      } else {
+        const vec__1524 = midpoint(a09, b010);
+        const mx025 = nth(vec__1524, 0, null);
+        const my026 = nth(vec__1524, 1, null);
+        const vec__1827 = midpoint(a11, b12);
+        const mx28 = nth(vec__1827, 0, null);
+        const my29 = nth(vec__1827, 1, null);
+        const z030 = get(g1, "z0");
+        const raw31 = truth_(get(g1, "pinch-on")) ? get(z030, "s") * (d14 / d013) : get(z030, "s");
+        const s32 = elastic_scale(raw31, max_scale(ctx2));
+        const vec__2133 = rel_to(get(g1, "center"), mx025, my026);
+        const rx34 = nth(vec__2133, 0, null);
+        const ry35 = nth(vec__2133, 1, null);
+        const z36 = zoom_at(z030, s32, rx34, ry35);
+        return apply_zoom_BANG_(ctx2, assoc(z36, "tx", get(z36, "tx") + (mx28 - mx025), "ty", get(z36, "ty") + (my29 - my026)), null);
+      }
+      ;
+    } else {
+      if ("pan" === get(g1, "mode")) {
+        const z040 = get(g1, "z0");
+        const m41 = get(ctx2, "media");
+        const vp42 = viewport_rect(ctx2);
+        const vec__3743 = get(g1, "center");
+        const cx44 = nth(vec__3743, 0, null);
+        const cy45 = nth(vec__3743, 1, null);
+        const s46 = get(z040, "s");
+        const tx47 = elastic_pan(get(z040, "tx") + dx6, axis_range(get(vp42, "left"), get(vp42, "right"), cx44, m41.offsetWidth, s46), get(vp42, "right") - get(vp42, "left"));
+        const ty48 = elastic_pan(get(z040, "ty") + dy7, axis_range(get(vp42, "top"), get(vp42, "bottom"), cy45, m41.offsetHeight, s46), get(vp42, "bottom") - get(vp42, "top"));
+        return apply_zoom_BANG_(ctx2, assoc(z040, "tx", tx47, "ty", ty48), null);
+      } else {
+        if ("pull" === get(g1, "mode")) {
+          return set_pull_BANG_(root3, get(g1, "pull-media"), dx6, dy7);
+        } else {
+          if ("swipe" === get(g1, "mode")) {
+            return scroller(root3).scrollLeft = get(g1, "scroll0") - dx6;
           } else {
-            return e.button === 0;
+            if ("else") {
+              return null;
+            } else {
+              return null;
+            }
           }
-          ;
-        })();
+        }
+      }
+    }
+    ;
+  };
+  var pick_mode_BANG_ = function(e, dx, dy) {
+    const g1 = deref(gesture);
+    const root2 = get(g1, "root");
+    const ctx3 = get(g1, "ctx");
+    const vertical_QMARK_4 = Math.abs(dy) > Math.abs(dx);
+    if (truth_((() => {
+      const and__23442__auto__5 = ctx3;
+      if (truth_(and__23442__auto__5)) {
+        return zoomed_QMARK_(get(ctx3, "media"));
+      } else {
+        return and__23442__auto__5;
+      }
+      ;
+    })())) {
+      swap_BANG_(gesture, assoc, "mode", "pan");
+      if (truth_(root2)) {
+        return root2.setAttribute("data-panning", "");
+      }
+      ;
+    } else {
+      if (truth_(get(ctx3, "legacy?"))) {
+        return null;
+      } else {
+        if (root2 == null) {
+          return null;
+        } else {
+          if (truth_(root2.hasAttribute("data-contained"))) {
+            return null;
+          } else {
+            if (vertical_QMARK_4) {
+              const m6 = media_of(active_slide(root2));
+              if (truth_(m6)) {
+                cancel_anim_BANG_(m6);
+              }
+              ;
+              swap_BANG_(gesture, assoc, "mode", "pull", "pull-media", m6);
+              return root2.setAttribute("data-pulling", "");
+            } else {
+              if (truth_("mouse" === e.pointerType && slide_els(root2).length > 1)) {
+                const sc7 = scroller(root2);
+                sc7.style.scrollSnapType = "none";
+                return swap_BANG_(gesture, assoc, "mode", "swipe", "scroll0", sc7.scrollLeft);
+              } else {
+                if ("else") {
+                  return null;
+                } else {
+                  return null;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    ;
+  };
+  var tap_BANG_ = function(g, x, y) {
+    const t1 = now();
+    const prev2 = deref(last_tap);
+    const ctx3 = get(g, "ctx");
+    if (truth_((() => {
+      const and__23442__auto__4 = prev2;
+      if (truth_(and__23442__auto__4)) {
+        const and__23442__auto__5 = ctx3;
+        if (truth_(and__23442__auto__5)) {
+          return t1 - get(prev2, "t") < double_tap_ms && Math.hypot(x - get(prev2, "x"), y - get(prev2, "y")) < double_tap_slop_px;
+        } else {
+          return and__23442__auto__5;
+        }
+        ;
       } else {
         return and__23442__auto__4;
       }
       ;
     })())) {
-      const temp__23062__auto__6 = overlay2.querySelector(image_sel);
-      if (truth_(temp__23062__auto__6)) {
-        const img7 = temp__23062__auto__6;
-        if (truth_((() => {
-          const or__23426__auto__8 = pointers.size === 0;
+      const m9 = get(ctx3, "media");
+      const z10 = live_pose_BANG_(m9);
+      const vec__611 = rel_to(layout_center(m9), x, y);
+      const px12 = nth(vec__611, 0, null);
+      const py13 = nth(vec__611, 1, null);
+      reset_BANG_(last_tap, null);
+      return apply_zoom_BANG_(ctx3, get(z10, "s") > 1.001 ? identity_zoom : settle(ctx3, zoom_at(z10, Math.min(double_tap_scale, max_scale(ctx3)), px12, py13)), { "ms": settle_ms });
+    } else {
+      return reset_BANG_(last_tap, { "t": t1, "x": x, "y": y });
+    }
+    ;
+  };
+  var on_pointerdown3 = function(e) {
+    const t1 = e.target;
+    const root2 = open_root_of(t1);
+    const surface3 = (() => {
+      const or__23426__auto__4 = root2;
+      if (truth_(or__23426__auto__4)) {
+        return or__23426__auto__4;
+      } else {
+        return closest2(t1, legacy_sel);
+      }
+      ;
+    })();
+    if (truth_(surface3)) {
+    } else {
+      const temp__23062__auto__5 = closest2(t1, "[data-lightbox-key]");
+      if (truth_(temp__23062__auto__5)) {
+        const k6 = temp__23062__auto__5;
+        reset_BANG_(last_trigger, { "el": k6, "t": now() });
+      }
+    }
+    ;
+    if (truth_((() => {
+      const and__23442__auto__7 = surface3;
+      if (truth_(and__23442__auto__7)) {
+        const and__23442__auto__9 = (() => {
+          const or__23426__auto__8 = !("mouse" === e.pointerType);
           if (or__23426__auto__8) {
             return or__23426__auto__8;
           } else {
-            return !_EQ_(img7, get(deref(gesture), "img"));
+            return e.button === 0;
           }
           ;
-        })())) {
-          pointers.clear();
-          reset_BANG_(suppress_click_QMARK_2, false);
-          reset_BANG_(gesture, { "img": img7, "moved": false, "on-image": img7.contains(t1), "max-pointers": 0 });
+        })();
+        if (truth_(and__23442__auto__9)) {
+          return not((() => {
+            const and__23442__auto__10 = root2;
+            if (truth_(and__23442__auto__10)) {
+              return state2(root2).closing;
+            } else {
+              return and__23442__auto__10;
+            }
+            ;
+          })());
+        } else {
+          return and__23442__auto__9;
         }
         ;
-        const x9 = e.clientX;
-        const y10 = e.clientY;
-        pointers.set(e.pointerId, { "x": x9, "y": y10, "x0": x9, "y0": y10 });
-        if ("mouse" === e.pointerType) {
-          e.preventDefault();
+      } else {
+        return and__23442__auto__7;
+      }
+      ;
+    })())) {
+      if (truth_(root2)) {
+        state2(root2).pressTarget = t1;
+      }
+      ;
+      if (truth_(closest2(t1, no_gesture_sel))) {
+        return null;
+      } else {
+        const ctx11 = ctx_at(t1);
+        const blocked_QMARK_12 = (() => {
+          const and__23442__auto__13 = root2;
+          if (truth_(and__23442__auto__13)) {
+            const or__23426__auto__14 = mid_swipe_QMARK_(root2);
+            if (truth_(or__23426__auto__14)) {
+              return or__23426__auto__14;
+            } else {
+              return root2.hasAttribute("data-opening");
+            }
+            ;
+          } else {
+            return and__23442__auto__13;
+          }
+          ;
+        })();
+        if (truth_(blocked_QMARK_12)) {
+          return null;
+        } else {
+          if (truth_((() => {
+            const or__23426__auto__15 = pointers.size === 0;
+            if (or__23426__auto__15) {
+              return or__23426__auto__15;
+            } else {
+              return !(surface3 === get(deref(gesture), "surface"));
+            }
+            ;
+          })())) {
+            pointers.clear();
+            reset_BANG_(suppress_click_until, 0);
+            if (truth_(ctx11)) {
+              live_pose_BANG_(get(ctx11, "media"));
+            }
+            ;
+            reset_BANG_(gesture, { "surface": surface3, "root": root2, "ctx": ctx11, "moved": false, "on-media": (() => {
+              const and__23442__auto__16 = ctx11;
+              if (truth_(and__23442__auto__16)) {
+                return get(ctx11, "media").contains(t1);
+              } else {
+                return and__23442__auto__16;
+              }
+              ;
+            })(), "max-pointers": 0 });
+          }
+          ;
+          const x17 = e.clientX;
+          const y18 = e.clientY;
+          pointers.set(e.pointerId, { "x": x17, "y": y18, "x0": x17, "y0": y18 });
+          sample_BANG_(x17, y18);
+          if ("mouse" === e.pointerType) {
+            e.preventDefault();
+          }
+          ;
+          return rebase_BANG_();
         }
         ;
-        return rebase_BANG_();
       }
       ;
     }
@@ -6076,84 +8123,724 @@
       const p2 = pointers.get(id1);
       const x3 = e.clientX;
       const y4 = e.clientY;
+      const g5 = deref(gesture);
       pointers.set(id1, assoc(p2, "x", x3, "y", y4));
-      if (Math.hypot(x3 - get(p2, "x0"), y4 - get(p2, "y0")) > tap_slop_px) {
+      sample_BANG_(x3, y4);
+      if (truth_(not(get(g5, "moved")) && Math.hypot(x3 - get(p2, "x0"), y4 - get(p2, "y0")) > tap_slop_px)) {
         swap_BANG_(gesture, assoc, "moved", true);
       }
       ;
-      return track_BANG_();
-    }
-    ;
-  };
-  var on_pointer_end2 = function(e) {
-    const id1 = e.pointerId;
-    if (truth_(pointers.has(id1))) {
-      pointers.delete(id1);
-      if (pointers.size > 0) {
-        return rebase_BANG_();
-      } else {
-        const map__23 = deref(gesture);
-        const img4 = get(map__23, "img");
-        const moved5 = get(map__23, "moved");
-        const on_image6 = get(map__23, "on-image");
-        const max_pointers7 = get(map__23, "max-pointers");
-        reset_BANG_(gesture, null);
-        if (truth_(moved5)) {
-          reset_BANG_(suppress_click_QMARK_2, true);
+      const g6 = deref(gesture);
+      if (truth_(get(g6, "mode") == null && (1 === pointers.size && (1 === get(g6, "max-pointers") && Math.hypot(x3 - get(p2, "x0"), y4 - get(p2, "y0")) > axis_lock_px)))) {
+        pick_mode_BANG_(e, x3 - get(p2, "x0"), y4 - get(p2, "y0"));
+      }
+      ;
+      const g7 = deref(gesture);
+      if (truth_((() => {
+        const or__23426__auto__8 = get(g7, "mode");
+        if (truth_(or__23426__auto__8)) {
+          return or__23426__auto__8;
+        } else {
+          return pointers.size >= 2;
         }
         ;
-        if (truth_(not(moved5) && (() => {
-          const and__23442__auto__8 = on_image6;
-          if (truth_(and__23442__auto__8)) {
-            return 1 === max_pointers7 && "pointerup" === e.type;
+      })())) {
+        if (truth_(pointers.size >= 2 && (() => {
+          const or__23426__auto__9 = "pull" === get(g7, "mode");
+          if (or__23426__auto__9) {
+            return or__23426__auto__9;
           } else {
-            return and__23442__auto__8;
+            return "swipe" === get(g7, "mode");
           }
           ;
         })())) {
-          return tap_BANG_(img4, e.clientX, e.clientY);
+          return null;
         } else {
-          return apply_zoom_BANG_(img4, settle(img4, zoom_of(img4)), true);
+          return track_BANG_(e);
         }
         ;
+      }
+      ;
+    }
+    ;
+  };
+  var end_zoom_gesture_BANG_ = function(g) {
+    const ctx4 = get(g, "ctx");
+    const m5 = get(ctx4, "media");
+    const z6 = zoom_of(m5);
+    const mx7 = max_scale(ctx4);
+    const out_QMARK_8 = (() => {
+      const or__23426__auto__9 = get(z6, "s") > mx7 + 0.01;
+      if (or__23426__auto__9) {
+        return or__23426__auto__9;
+      } else {
+        return get(z6, "s") < 0.99;
+      }
+      ;
+    })();
+    const vec__110 = velocity(g);
+    const vx11 = nth(vec__110, 0, null);
+    const vy12 = nth(vec__110, 1, null);
+    const coast_QMARK_13 = "pan" === get(g, "mode") && (Math.hypot(vx11, vy12) > 0.15 && not(get(ctx4, "legacy?")));
+    const target14 = settle(ctx4, truth_(coast_QMARK_13) ? assoc(z6, "tx", get(z6, "tx") + vx11 * 260, "ty", get(z6, "ty") + vy12 * 260) : z6);
+    if (truth_(out_QMARK_8)) {
+      vibrate_BANG_(8);
+    }
+    ;
+    return apply_zoom_BANG_(ctx4, target14, { "ms": truth_(coast_QMARK_13) ? coast_ms : settle_ms, "easing": truth_(coast_QMARK_13) ? ease_coast : ease_out });
+  };
+  var on_pointer_end2 = function(e) {
+    const id1 = e.pointerId;
+    const last_p2 = pointers.get(id1);
+    if (truth_(pointers.has(id1))) {
+      pointers.delete(id1);
+      if (pointers.size > 0) {
+        const g3 = deref(gesture);
+        if (truth_((() => {
+          const and__23442__auto__4 = get(g3, "ctx");
+          if (truth_(and__23442__auto__4)) {
+            return get(g3, "max-pointers") >= 2;
+          } else {
+            return and__23442__auto__4;
+          }
+          ;
+        })())) {
+          swap_BANG_(gesture, assoc, "mode", truth_(zoomed_QMARK_(get(get(g3, "ctx"), "media"))) ? "pan" : null, "pinch-on", false);
+        }
+        ;
+        return rebase_BANG_();
+      } else {
+        const g9 = deref(gesture);
+        const map__510 = g9;
+        const root11 = get(map__510, "root");
+        const ctx12 = get(map__510, "ctx");
+        const moved13 = get(map__510, "moved");
+        const on_media14 = get(map__510, "on-media");
+        const max_pointers15 = get(map__510, "max-pointers");
+        const mode16 = get(map__510, "mode");
+        const vec__617 = velocity(g9);
+        const vx18 = nth(vec__617, 0, null);
+        const vy19 = nth(vec__617, 1, null);
+        reset_BANG_(gesture, null);
+        if (truth_(root11)) {
+          root11.removeAttribute("data-panning");
+        }
+        ;
+        if (truth_(moved13)) {
+          reset_BANG_(suppress_click_until, now() + 400);
+        }
+        ;
+        if ("pull" === mode16) {
+          return end_pull_BANG_(root11, get(g9, "pull-media"), get(last_p2, "y") - get(get(g9, "pts0")[0], "y"), vy19);
+        } else {
+          if ("swipe" === mode16) {
+            return end_swipe_BANG_(root11, g9, get(last_p2, "x") - get(get(g9, "pts0")[0], "x"), vx18);
+          } else {
+            if (truth_(not(moved13) && (() => {
+              const and__23442__auto__20 = on_media14;
+              if (truth_(and__23442__auto__20)) {
+                return 1 === max_pointers15 && "pointerup" === e.type;
+              } else {
+                return and__23442__auto__20;
+              }
+              ;
+            })())) {
+              return tap_BANG_(g9, e.clientX, e.clientY);
+            } else {
+              if (truth_(ctx12)) {
+                return end_zoom_gesture_BANG_(g9);
+              } else {
+                if ("else") {
+                  return null;
+                } else {
+                  return null;
+                }
+              }
+            }
+          }
+        }
+        ;
+      }
+      ;
+    }
+    ;
+  };
+  var ctrl_held_QMARK_ = atom(false);
+  var wheel_pinch = atom(null);
+  var safari_pinch = atom(null);
+  var wheel_zoom_BANG_ = function(ctx, e, k, elastic_QMARK_) {
+    const m4 = get(ctx, "media");
+    const z5 = live_pose_BANG_(m4);
+    const mx6 = max_scale(ctx);
+    const vec__17 = rel_to(layout_center(m4), e.clientX, e.clientY);
+    const px8 = nth(vec__17, 0, null);
+    const py9 = nth(vec__17, 1, null);
+    if (truth_(elastic_QMARK_)) {
+      const wp10 = (() => {
+        const or__23426__auto__11 = deref(wheel_pinch);
+        if (truth_(or__23426__auto__11)) {
+          return or__23426__auto__11;
+        } else {
+          return { "raw": get(z5, "s") };
+        }
+        ;
+      })();
+      const raw12 = get(wp10, "raw") * k;
+      const s13 = elastic_scale(raw12, mx6);
+      clearTimeout(get(wp10, "timer"));
+      apply_zoom_BANG_(ctx, zoom_at(z5, s13, px8, py9), null);
+      return reset_BANG_(wheel_pinch, { "raw": raw12, "timer": setTimeout((function() {
+        reset_BANG_(wheel_pinch, null);
+        const z14 = zoom_of(m4);
+        if (truth_((() => {
+          const or__23426__auto__15 = get(z14, "s") > mx6;
+          if (or__23426__auto__15) {
+            return or__23426__auto__15;
+          } else {
+            return get(z14, "s") < 1;
+          }
+          ;
+        })())) {
+          vibrate_BANG_(8);
+        }
+        ;
+        return apply_zoom_BANG_(ctx, settle(ctx, z14), { "ms": settle_ms });
+      }), wheel_idle_ms) });
+    } else {
+      return apply_zoom_BANG_(ctx, settle(ctx, zoom_at(z5, clamp3(1, mx6, get(z5, "s") * k), px8, py9)), null);
+    }
+    ;
+  };
+  var wheel_pull_BANG_ = function(root, e) {
+    const st1 = state2(root);
+    const wp2 = (() => {
+      const or__23426__auto__3 = st1.wheelPull;
+      if (truth_(or__23426__auto__3)) {
+        return or__23426__auto__3;
+      } else {
+        return { "offset": 0 };
+      }
+      ;
+    })();
+    const m4 = media_of(active_slide(root));
+    if (truth_(wp2.committed)) {
+      return null;
+    } else {
+      st1.wheelPull = wp2;
+      wp2.offset = wp2.offset - e.deltaY;
+      root.setAttribute("data-pulling", "");
+      if (truth_(m4)) {
+        cancel_anim_BANG_(m4);
+      }
+      ;
+      set_pull_BANG_(root, m4, 0, wp2.offset);
+      clearTimeout(wp2.timer);
+      if (Math.abs(wp2.offset) >= 1.4 * pull_threshold()) {
+        wp2.committed = true;
+        return end_pull_BANG_(root, m4, wp2.offset, 0);
+      } else {
+        return wp2.timer = setTimeout((function() {
+          st1.wheelPull = null;
+          return end_pull_BANG_(root, m4, wp2.offset, 0);
+        }), wheel_idle_ms);
       }
       ;
     }
     ;
   };
   var on_wheel = function(e) {
-    const temp__23062__auto__1 = (() => {
-      const G__5322 = e.target;
-      if (G__5322 == null) {
-        return null;
-      } else {
-        return G__5322.closest(overlay_sel);
+    const t1 = e.target;
+    const root2 = open_root_of(t1);
+    const legacy3 = truth_(root2) ? null : closest2(t1, legacy_sel);
+    const ctx4 = truth_(root2) ? viewer_ctx(root2) : truth_(legacy3) ? ctx_at(t1) : null;
+    const dy5 = e.deltaY * (1 === e.deltaMode ? 16 : 1);
+    const dx6 = e.deltaX * (1 === e.deltaMode ? 16 : 1);
+    const prevent_BANG_7 = (function() {
+      if (truth_((() => {
+        const and__23442__auto__8 = e.cancelable;
+        if (truth_(and__23442__auto__8)) {
+          return not(webkit_QMARK_);
+        } else {
+          return and__23442__auto__8;
+        }
+        ;
+      })())) {
+        return e.preventDefault();
       }
       ;
-    })();
-    if (truth_(temp__23062__auto__1)) {
-      const overlay3 = temp__23062__auto__1;
-      const temp__23062__auto__4 = overlay3.querySelector(image_sel);
-      if (truth_(temp__23062__auto__4)) {
-        const img5 = temp__23062__auto__4;
-        e.preventDefault();
-        const z9 = zoom_of(img5);
-        const dy10 = e.deltaY * (1 === e.deltaMode ? 16 : 1);
-        const k11 = Math.exp(-dy10 * (truth_(e.ctrlKey) ? 0.01 : 2e-3));
-        const vec__612 = rel(e.clientX, e.clientY);
-        const px13 = nth(vec__612, 0, null);
-        const py14 = nth(vec__612, 1, null);
-        return apply_zoom_BANG_(img5, settle(img5, zoom_at(z9, clamp3(1, max_scale, get(z9, "s") * k11), px13, py14)), false);
+    });
+    if (truth_((() => {
+      const or__23426__auto__9 = root2;
+      if (truth_(or__23426__auto__9)) {
+        return or__23426__auto__9;
+      } else {
+        return legacy3;
+      }
+      ;
+    })())) {
+      if (truth_((() => {
+        const and__23442__auto__10 = root2;
+        if (truth_(and__23442__auto__10)) {
+          const or__23426__auto__11 = state2(root2).closing;
+          if (truth_(or__23426__auto__11)) {
+            return or__23426__auto__11;
+          } else {
+            return root2.hasAttribute("data-opening");
+          }
+          ;
+        } else {
+          return and__23442__auto__10;
+        }
+        ;
+      })())) {
+        return prevent_BANG_7();
+      } else {
+        if (truth_(closest2(t1, ".ui-lightbox-content, .ui-lightbox-thumbs"))) {
+          return null;
+        } else {
+          if (truth_((() => {
+            const or__23426__auto__12 = e.ctrlKey;
+            if (truth_(or__23426__auto__12)) {
+              return or__23426__auto__12;
+            } else {
+              return e.metaKey;
+            }
+            ;
+          })())) {
+            prevent_BANG_7();
+            if (truth_((() => {
+              const and__23442__auto__13 = ctx4;
+              if (truth_(and__23442__auto__13)) {
+                return not(deref(safari_pinch));
+              } else {
+                return and__23442__auto__13;
+              }
+              ;
+            })())) {
+              return wheel_zoom_BANG_(ctx4, e, Math.exp(-dy5 * 0.01), (() => {
+                const and__23442__auto__14 = e.ctrlKey;
+                if (truth_(and__23442__auto__14)) {
+                  return not(deref(ctrl_held_QMARK_));
+                } else {
+                  return and__23442__auto__14;
+                }
+                ;
+              })());
+            }
+            ;
+          } else {
+            if (truth_((() => {
+              const and__23442__auto__15 = ctx4;
+              if (truth_(and__23442__auto__15)) {
+                return zoomed_QMARK_(get(ctx4, "media"));
+              } else {
+                return and__23442__auto__15;
+              }
+              ;
+            })())) {
+              prevent_BANG_7();
+              if (truth_(get(ctx4, "legacy?"))) {
+                return wheel_zoom_BANG_(ctx4, e, Math.exp(-dy5 * 2e-3), false);
+              } else {
+                const z16 = live_pose_BANG_(get(ctx4, "media"));
+                return apply_zoom_BANG_(ctx4, settle(ctx4, assoc(z16, "tx", get(z16, "tx") - dx6, "ty", get(z16, "ty") - dy5)), null);
+              }
+              ;
+            } else {
+              if (truth_((() => {
+                const or__23426__auto__17 = legacy3;
+                if (truth_(or__23426__auto__17)) {
+                  return or__23426__auto__17;
+                } else {
+                  return root2.hasAttribute("data-wheel-zoom");
+                }
+                ;
+              })())) {
+                prevent_BANG_7();
+                if (truth_(ctx4)) {
+                  return wheel_zoom_BANG_(ctx4, e, Math.exp(-dy5 * 2e-3), false);
+                }
+                ;
+              } else {
+                if (truth_(Math.abs(dy5) > Math.abs(dx6) && (not(root2.hasAttribute("data-contained")) && not(mid_swipe_QMARK_(root2))))) {
+                  prevent_BANG_7();
+                  return wheel_pull_BANG_(root2, e);
+                } else {
+                  if ("else") {
+                    return null;
+                  } else {
+                    return null;
+                  }
+                }
+              }
+            }
+          }
+        }
       }
       ;
     }
     ;
   };
+  var on_gesture_start = function(e) {
+    const ctx1 = ctx_at(e.target);
+    if (truth_(ctx1)) {
+      e.preventDefault();
+      return reset_BANG_(safari_pinch, { "ctx": ctx1, "z0": live_pose_BANG_(get(ctx1, "media")) });
+    }
+    ;
+  };
+  var on_gesture_change = function(e) {
+    const temp__23062__auto__1 = deref(safari_pinch);
+    if (truth_(temp__23062__auto__1)) {
+      const map__23 = temp__23062__auto__1;
+      const ctx4 = get(map__23, "ctx");
+      const z05 = get(map__23, "z0");
+      e.preventDefault();
+      const m9 = get(ctx4, "media");
+      const s10 = elastic_scale(get(z05, "s") * e.scale, max_scale(ctx4));
+      const vec__611 = rel_to(layout_center(m9), e.clientX, e.clientY);
+      const px12 = nth(vec__611, 0, null);
+      const py13 = nth(vec__611, 1, null);
+      return apply_zoom_BANG_(ctx4, zoom_at(zoom_of(m9), s10, px12, py13), null);
+    }
+    ;
+  };
+  var on_gesture_end = function(e) {
+    const temp__23062__auto__1 = deref(safari_pinch);
+    if (truth_(temp__23062__auto__1)) {
+      const map__23 = temp__23062__auto__1;
+      const ctx4 = get(map__23, "ctx");
+      e.preventDefault();
+      reset_BANG_(safari_pinch, null);
+      return apply_zoom_BANG_(ctx4, settle(ctx4, zoom_of(get(ctx4, "media"))), { "ms": settle_ms });
+    }
+    ;
+  };
+  var top_root = function() {
+    const open1 = filter((function(r) {
+      const and__23442__auto__2 = state2(r);
+      if (truth_(and__23442__auto__2)) {
+        return not(r.hasAttribute("data-contained")) && !("off" === r.getAttribute("data-keyboard"));
+      } else {
+        return and__23442__auto__2;
+      }
+      ;
+    }), Array.from(document.querySelectorAll(root_sel)));
+    return last(open1);
+  };
+  var typing_target_QMARK_ = function(t) {
+    return !(closest2(t, "input, textarea, select, [contenteditable]") == null);
+  };
+  var on_keydown3 = function(e) {
+    if ("Control" === e.key) {
+      reset_BANG_(ctrl_held_QMARK_, true);
+    }
+    ;
+    const temp__23062__auto__1 = top_root();
+    if (truth_(temp__23062__auto__1)) {
+      const root2 = temp__23062__auto__1;
+      const k3 = e.key;
+      const t4 = e.target;
+      const mod_QMARK_5 = (() => {
+        const or__23426__auto__6 = e.ctrlKey;
+        if (truth_(or__23426__auto__6)) {
+          return or__23426__auto__6;
+        } else {
+          const or__23426__auto__7 = e.metaKey;
+          if (truth_(or__23426__auto__7)) {
+            return or__23426__auto__7;
+          } else {
+            return e.altKey;
+          }
+          ;
+        }
+        ;
+      })();
+      const st8 = state2(root2);
+      const ctx9 = viewer_ctx(root2);
+      const zoomed10 = (() => {
+        const and__23442__auto__11 = ctx9;
+        if (truth_(and__23442__auto__11)) {
+          return zoomed_QMARK_(get(ctx9, "media"));
+        } else {
+          return and__23442__auto__11;
+        }
+        ;
+      })();
+      const step12 = 0.1 * window.innerWidth;
+      const handled13 = truth_((() => {
+        const or__23426__auto__14 = mod_QMARK_5;
+        if (truth_(or__23426__auto__14)) {
+          return or__23426__auto__14;
+        } else {
+          return st8.closing;
+        }
+        ;
+      })()) ? null : (() => {
+        const G__56815 = k3;
+        switch (G__56815) {
+          case "Escape":
+            request_close_BANG_(root2);
+            return true;
+            break;
+          case "ArrowLeft":
+            if (truth_((() => {
+              const or__23426__auto__17 = typing_target_QMARK_(t4);
+              if (truth_(or__23426__auto__17)) {
+                return or__23426__auto__17;
+              } else {
+                return closest2(t4, "video");
+              }
+              ;
+            })())) {
+              return null;
+            } else {
+              if (truth_(zoomed10)) {
+                pan_by_BANG_(root2, step12, 0);
+              } else {
+                go_to_BANG_(root2, st8.index - 1);
+              }
+              ;
+              return true;
+            }
+            ;
+            break;
+          case "ArrowRight":
+            if (truth_((() => {
+              const or__23426__auto__18 = typing_target_QMARK_(t4);
+              if (truth_(or__23426__auto__18)) {
+                return or__23426__auto__18;
+              } else {
+                return closest2(t4, "video");
+              }
+              ;
+            })())) {
+              return null;
+            } else {
+              if (truth_(zoomed10)) {
+                pan_by_BANG_(root2, -step12, 0);
+              } else {
+                go_to_BANG_(root2, st8.index + 1);
+              }
+              ;
+              return true;
+            }
+            ;
+            break;
+          case "ArrowUp":
+            if (truth_((() => {
+              const and__23442__auto__19 = zoomed10;
+              if (truth_(and__23442__auto__19)) {
+                return not(typing_target_QMARK_(t4));
+              } else {
+                return and__23442__auto__19;
+              }
+              ;
+            })())) {
+              pan_by_BANG_(root2, 0, step12);
+              return true;
+            }
+            ;
+            break;
+          case "ArrowDown":
+            if (truth_((() => {
+              const and__23442__auto__20 = zoomed10;
+              if (truth_(and__23442__auto__20)) {
+                return not(typing_target_QMARK_(t4));
+              } else {
+                return and__23442__auto__20;
+              }
+              ;
+            })())) {
+              pan_by_BANG_(root2, 0, -step12);
+              return true;
+            }
+            ;
+            break;
+          case "Home":
+            if (truth_(typing_target_QMARK_(t4))) {
+              return null;
+            } else {
+              go_to_BANG_(root2, 0);
+              return true;
+            }
+            ;
+            break;
+          case "End":
+            if (truth_(typing_target_QMARK_(t4))) {
+              return null;
+            } else {
+              go_to_BANG_(root2, 1e9);
+              return true;
+            }
+            ;
+            break;
+          case "+":
+            if (truth_((() => {
+              const and__23442__auto__21 = ctx9;
+              if (truth_(and__23442__auto__21)) {
+                return not(typing_target_QMARK_(t4));
+              } else {
+                return and__23442__auto__21;
+              }
+              ;
+            })())) {
+              zoom_by_BANG_(root2, 2);
+              return true;
+            }
+            ;
+            break;
+          case "=":
+            if (truth_((() => {
+              const and__23442__auto__22 = ctx9;
+              if (truth_(and__23442__auto__22)) {
+                return not(typing_target_QMARK_(t4));
+              } else {
+                return and__23442__auto__22;
+              }
+              ;
+            })())) {
+              zoom_by_BANG_(root2, 2);
+              return true;
+            }
+            ;
+            break;
+          case "-":
+            if (truth_((() => {
+              const and__23442__auto__23 = ctx9;
+              if (truth_(and__23442__auto__23)) {
+                return not(typing_target_QMARK_(t4));
+              } else {
+                return and__23442__auto__23;
+              }
+              ;
+            })())) {
+              zoom_by_BANG_(root2, 0.5);
+              return true;
+            }
+            ;
+            break;
+          case "_":
+            if (truth_((() => {
+              const and__23442__auto__24 = ctx9;
+              if (truth_(and__23442__auto__24)) {
+                return not(typing_target_QMARK_(t4));
+              } else {
+                return and__23442__auto__24;
+              }
+              ;
+            })())) {
+              zoom_by_BANG_(root2, 0.5);
+              return true;
+            }
+            ;
+            break;
+          case "0":
+            if (truth_((() => {
+              const and__23442__auto__25 = ctx9;
+              if (truth_(and__23442__auto__25)) {
+                return not(typing_target_QMARK_(t4));
+              } else {
+                return and__23442__auto__25;
+              }
+              ;
+            })())) {
+              zoom_by_BANG_(root2, null);
+              return true;
+            }
+            ;
+            break;
+        }
+        ;
+      })();
+      if (truth_(handled13)) {
+        e.preventDefault();
+        return e.stopPropagation();
+      }
+      ;
+    }
+    ;
+  };
+  var on_keyup2 = function(e) {
+    if ("Control" === e.key) {
+      return reset_BANG_(ctrl_held_QMARK_, false);
+    }
+    ;
+  };
   var on_click_capture2 = function(e) {
-    if (truth_(deref(suppress_click_QMARK_2))) {
-      reset_BANG_(suppress_click_QMARK_2, false);
+    if (now() < deref(suppress_click_until)) {
+      reset_BANG_(suppress_click_until, 0);
       e.preventDefault();
       return e.stopPropagation();
+    } else {
+      const t1 = e.target;
+      const root2 = open_root_of(t1);
+      if (truth_(root2)) {
+        const st3 = state2(root2);
+        const action_el4 = closest2(t1, "[data-lightbox-action]");
+        const press5 = st3.pressTarget;
+        if (truth_(action_el4)) {
+          const a6 = action_el4.getAttribute("data-lightbox-action");
+          e.stopPropagation();
+          const G__5697 = a6;
+          switch (G__5697) {
+            case "close":
+              return request_close_BANG_(root2);
+              break;
+            case "prev":
+              return go_to_BANG_(root2, st3.index - 1);
+              break;
+            case "next":
+              return go_to_BANG_(root2, st3.index + 1);
+              break;
+            case "zoom-in":
+              return zoom_by_BANG_(root2, 2);
+              break;
+            case "zoom-out":
+              return zoom_by_BANG_(root2, 0.5);
+              break;
+            case "go":
+              return go_to_BANG_(root2, parseInt(action_el4.getAttribute("data-index"), 10));
+              break;
+          }
+          ;
+        } else {
+          if (truth_((() => {
+            const and__23442__auto__9 = t1.matches(".ui-lightbox-slide, .ui-lightbox-backdrop, .ui-lightbox-slides");
+            if (truth_(and__23442__auto__9)) {
+              return press5 === t1 && not(root2.hasAttribute("data-contained"));
+            } else {
+              return and__23442__auto__9;
+            }
+            ;
+          })())) {
+            return request_close_BANG_(root2);
+          } else {
+            if ("else") {
+              return null;
+            } else {
+              return null;
+            }
+          }
+        }
+        ;
+      } else {
+        if ("else") {
+          const temp__23062__auto__10 = closest2(t1, "[data-lightbox-open]");
+          if (truth_(temp__23062__auto__10)) {
+            const trigger11 = temp__23062__auto__10;
+            if (truth_(document.getElementById(trigger11.getAttribute("data-lightbox-open")))) {
+              e.preventDefault();
+              return open_managed_BANG_(trigger11);
+            }
+            ;
+          }
+          ;
+        } else {
+          return null;
+        }
+      }
+      ;
     }
     ;
   };
@@ -6162,24 +8849,9 @@
     if (truth_((() => {
       const and__23442__auto__2 = t1.matches;
       if (truth_(and__23442__auto__2)) {
-        return t1.matches(image_sel);
-      } else {
-        return and__23442__auto__2;
-      }
-      ;
-    })())) {
-      return reset_zoom_BANG_(t1);
-    }
-    ;
-  };
-  var on_dragstart = function(e) {
-    const t1 = e.target;
-    if (truth_((() => {
-      const and__23442__auto__2 = t1;
-      if (truth_(and__23442__auto__2)) {
-        const and__23442__auto__3 = t1.closest;
+        const and__23442__auto__3 = t1.matches(legacy_image_sel);
         if (truth_(and__23442__auto__3)) {
-          return t1.closest(overlay_sel);
+          return closest2(t1, legacy_sel);
         } else {
           return and__23442__auto__3;
         }
@@ -6189,9 +8861,32 @@
       }
       ;
     })())) {
+      t1["__uiZoom"] = null;
+      t1.style.transform = "";
+      return t1.removeAttribute("data-zoomed");
+    }
+    ;
+  };
+  var on_dragstart = function(e) {
+    if (truth_((() => {
+      const or__23426__auto__1 = open_root_of(e.target);
+      if (truth_(or__23426__auto__1)) {
+        return or__23426__auto__1;
+      } else {
+        return closest2(e.target, legacy_sel);
+      }
+      ;
+    })())) {
       return e.preventDefault();
     }
     ;
+  };
+  var scan_BANG_2 = function() {
+    for (let G__1 of iterable(Array.from(document.querySelectorAll(`${root_sel ?? ""}${":not([hidden])"}`)))) {
+      const r2 = G__1;
+      open_BANG_(r2);
+    }
+    return null;
   };
   if (truth_(window["__uiLightboxZoom"])) {
   } else {
@@ -6201,9 +8896,36 @@
     document.addEventListener("pointerup", on_pointer_end2, true);
     document.addEventListener("pointercancel", on_pointer_end2, true);
     document.addEventListener("click", on_click_capture2, true);
-    document.addEventListener("wheel", on_wheel, { "capture": true, "passive": false });
+    document.addEventListener("keydown", on_keydown3, true);
+    document.addEventListener("keyup", on_keyup2, true);
+    window.addEventListener("blur", (function(_) {
+      return reset_BANG_(ctrl_held_QMARK_, false);
+    }));
+    document.addEventListener("animationstart", on_animation_start, true);
     document.addEventListener("load", on_load_capture, true);
     document.addEventListener("dragstart", on_dragstart, true);
+    window.addEventListener("popstate", on_popstate);
+    if ("loading" === document.readyState) {
+      document.addEventListener("DOMContentLoaded", scan_BANG_2);
+    } else {
+      scan_BANG_2();
+    }
+    ;
+    window["__uiLightbox"] = { "close": (function(el2) {
+      let temp__23062__auto__570 = closest2(el2, root_sel);
+      if (truth_(temp__23062__auto__570)) {
+        const r1 = temp__23062__auto__570;
+        return request_close_BANG_(r1);
+      }
+      ;
+    }), "go": (function(el2, i) {
+      let temp__23062__auto__571 = closest2(el2, root_sel);
+      if (truth_(temp__23062__auto__571)) {
+        const r2 = temp__23062__auto__571;
+        return go_to_BANG_(r2, i);
+      }
+      ;
+    }) };
   }
 
   // .compiled/masonry.mjs
@@ -6318,11 +9040,11 @@
   };
   var class_attrs = function(class_list, class$, attrs) {
     return merge({ "class": (() => {
-      const G__10101 = join(" ", class_list);
+      const G__10581 = join(" ", class_list);
       if (truth_(class$)) {
-        return `${G__10101 ?? ""}${" "}${class$ ?? ""}`;
+        return `${G__10581 ?? ""}${" "}${class$ ?? ""}`;
       } else {
-        return G__10101;
+        return G__10581;
       }
       ;
     })() }, attrs);
@@ -6333,16 +9055,16 @@
   var filled_icon_paths = { "play": [["path", { "d": "M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z" }]], "pause": [["rect", { "x": "14", "y": "4", "width": "4", "height": "16", "rx": "1" }], ["rect", { "x": "6", "y": "4", "width": "4", "height": "16", "rx": "1" }]], "skip-back": [["path", { "d": "M17.971 4.285A2 2 0 0 1 21 6v12a2 2 0 0 1-3.029 1.715l-9.997-5.998a2 2 0 0 1-.003-3.432z" }], ["rect", { "x": "2", "y": "4", "width": "2", "height": "16", "rx": "1" }]], "skip-forward": [["rect", { "x": "20", "y": "4", "width": "2", "height": "16", "rx": "1" }], ["path", { "d": "M6.029 4.285A2 2 0 0 0 3 6v12a2 2 0 0 0 3.029 1.715l9.997-5.998a2 2 0 0 0 .003-3.432z" }]], "repeat": [["path", { "d": "m17 2 4 4-4 4z" }], ["path", { "d": "M3 11v-1a4 4 0 0 1 4-4h14", "fill": "none", "stroke": "currentColor", "stroke-width": "2" }], ["path", { "d": "m7 22-4-4 4-4z" }], ["path", { "d": "M21 13v1a4 4 0 0 1-4 4H3", "fill": "none", "stroke": "currentColor", "stroke-width": "2" }]], "volume-2": [["path", { "d": "M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z" }], ["path", { "d": "M16 9a5 5 0 0 1 0 6", "fill": "none", "stroke": "currentColor", "stroke-width": "2" }], ["path", { "d": "M19.364 18.364a9 9 0 0 0 0-12.728", "fill": "none", "stroke": "currentColor", "stroke-width": "2" }]] };
   var icon_names = set(keys(icon_paths));
   var default_size = "md";
-  var icon_class_list = function(p__506) {
-    const map__12 = p__506;
+  var icon_class_list = function(p__530) {
+    const map__12 = p__530;
     const size3 = get(map__12, "size");
     const s4 = (() => {
       const or__23426__auto__5 = (() => {
-        const G__5076 = size3;
-        if (G__5076 == null) {
+        const G__5316 = size3;
+        if (G__5316 == null) {
           return null;
         } else {
-          return kw_name(G__5076);
+          return kw_name(G__5316);
         }
         ;
       })();
@@ -6353,19 +9075,19 @@
       }
       ;
     })();
-    const G__5087 = ["icon"];
+    const G__5327 = ["icon"];
     if (!(s4 === "md")) {
-      return conj(G__5087, `icon-${s4 ?? ""}`);
+      return conj(G__5327, `icon-${s4 ?? ""}`);
     } else {
-      return G__5087;
+      return G__5327;
     }
     ;
   };
   var icon_classes = function(opts) {
     return join(" ", icon_class_list(opts));
   };
-  var icon = function(p__509) {
-    const map__12 = p__509;
+  var icon = function(p__533) {
+    const map__12 = p__533;
     const _props3 = map__12;
     const icon_name4 = get(map__12, "icon-name");
     const size5 = get(map__12, "size");
@@ -6385,11 +9107,11 @@
     })() : get(icon_paths, kw10);
     if (truth_(paths11)) {
       const classes13 = (() => {
-        const G__51014 = icon_classes({ "size": size5 });
+        const G__53414 = icon_classes({ "size": size5 });
         if (truth_(class$6)) {
-          return `${G__51014 ?? ""}${" "}${class$6 ?? ""}`;
+          return `${G__53414 ?? ""}${" "}${class$6 ?? ""}`;
         } else {
-          return G__51014;
+          return G__53414;
         }
         ;
       })();
@@ -6401,16 +9123,16 @@
 
   // .compiled/ui/spinner.mjs
   var default_size2 = "md";
-  var spinner_class_list = function(p__891) {
-    const map__12 = p__891;
+  var spinner_class_list = function(p__939) {
+    const map__12 = p__939;
     const size3 = get(map__12, "size");
     const s4 = (() => {
       const or__23426__auto__5 = (() => {
-        const G__8926 = size3;
-        if (G__8926 == null) {
+        const G__9406 = size3;
+        if (G__9406 == null) {
           return null;
         } else {
-          return kw_name(G__8926);
+          return kw_name(G__9406);
         }
         ;
       })();
@@ -6421,31 +9143,31 @@
       }
       ;
     })();
-    const G__8937 = ["spinner"];
-    const G__8938 = s4 === "xs" ? conj(G__8937, "spinner-xs") : G__8937;
-    const G__8939 = s4 === "sm" ? conj(G__8938, "spinner-sm") : G__8938;
+    const G__9417 = ["spinner"];
+    const G__9418 = s4 === "xs" ? conj(G__9417, "spinner-xs") : G__9417;
+    const G__9419 = s4 === "sm" ? conj(G__9418, "spinner-sm") : G__9418;
     if (s4 === "lg") {
-      return conj(G__8939, "spinner-lg");
+      return conj(G__9419, "spinner-lg");
     } else {
-      return G__8939;
+      return G__9419;
     }
     ;
   };
   var spinner_classes = function(opts) {
     return join(" ", spinner_class_list(opts));
   };
-  var spinner = function(p__894) {
-    const map__12 = p__894;
+  var spinner = function(p__942) {
+    const map__12 = p__942;
     const _props3 = map__12;
     const size4 = get(map__12, "size");
     const class$5 = get(map__12, "class");
     const attrs6 = get(map__12, "attrs");
     const classes7 = (() => {
-      const G__8958 = spinner_classes({ "size": size4 });
+      const G__9438 = spinner_classes({ "size": size4 });
       if (truth_(class$5)) {
-        return `${G__8958 ?? ""}${" "}${class$5 ?? ""}`;
+        return `${G__9438 ?? ""}${" "}${class$5 ?? ""}`;
       } else {
-        return G__8958;
+        return G__9438;
       }
       ;
     })();
@@ -6456,8 +9178,8 @@
   // .compiled/ui/button.mjs
   var default_variant = "secondary";
   var default_size3 = "md";
-  var button_class_list = function(p__99) {
-    const map__12 = p__99;
+  var button_class_list = function(p__114) {
+    const map__12 = p__114;
     const variant3 = get(map__12, "variant");
     const size4 = get(map__12, "size");
     const loud5 = get(map__12, "loud");
@@ -6466,11 +9188,11 @@
     const loading8 = get(map__12, "loading");
     const v9 = (() => {
       const or__23426__auto__10 = (() => {
-        const G__10011 = variant3;
-        if (G__10011 == null) {
+        const G__11511 = variant3;
+        if (G__11511 == null) {
           return null;
         } else {
-          return kw_name(G__10011);
+          return kw_name(G__11511);
         }
         ;
       })();
@@ -6483,11 +9205,11 @@
     })();
     const s12 = (() => {
       const or__23426__auto__13 = (() => {
-        const G__10114 = size4;
-        if (G__10114 == null) {
+        const G__11614 = size4;
+        if (G__11614 == null) {
           return null;
         } else {
-          return kw_name(G__10114);
+          return kw_name(G__11614);
         }
         ;
       })();
@@ -6498,11 +9220,11 @@
       }
       ;
     })();
-    const G__10215 = ["btn", `btn-${v9 ?? ""}`];
-    const G__10216 = truth_(loud5) ? conj(G__10215, "btn-loud") : G__10215;
-    const G__10217 = !(s12 === "md") ? conj(G__10216, `btn-${s12 ?? ""}`) : G__10216;
-    const G__10218 = truth_(icon6) ? conj(G__10217, "btn-icon") : G__10217;
-    const G__10219 = truth_((() => {
+    const G__11715 = ["btn", `btn-${v9 ?? ""}`];
+    const G__11716 = truth_(loud5) ? conj(G__11715, "btn-loud") : G__11715;
+    const G__11717 = !(s12 === "md") ? conj(G__11716, `btn-${s12 ?? ""}`) : G__11716;
+    const G__11718 = truth_(icon6) ? conj(G__11717, "btn-icon") : G__11717;
+    const G__11719 = truth_((() => {
       const and__23442__auto__20 = icon6;
       if (truth_(and__23442__auto__20)) {
         return round7;
@@ -6510,11 +9232,11 @@
         return and__23442__auto__20;
       }
       ;
-    })()) ? conj(G__10218, "btn-icon-round") : G__10218;
+    })()) ? conj(G__11718, "btn-icon-round") : G__11718;
     if (truth_(loading8)) {
-      return conj(G__10219, "btn-loading");
+      return conj(G__11719, "btn-loading");
     } else {
-      return G__10219;
+      return G__11719;
     }
     ;
   };
@@ -6522,26 +9244,26 @@
     return join(" ", button_class_list(opts));
   };
   var button = (() => {
-    const f103 = (function(var_args) {
-      const args1041 = [];
+    const f118 = (function(var_args) {
+      const args1191 = [];
       const len__23321__auto__2 = arguments.length;
-      let i1053 = 0;
+      let i1203 = 0;
       while (true) {
-        if (i1053 < len__23321__auto__2) {
-          args1041.push(arguments[i1053]);
-          let G__4 = i1053 + 1;
-          i1053 = G__4;
+        if (i1203 < len__23321__auto__2) {
+          args1191.push(arguments[i1203]);
+          let G__4 = i1203 + 1;
+          i1203 = G__4;
           continue;
         }
         ;
         break;
       }
       ;
-      const argseq__23513__auto__5 = 1 < args1041.length ? args1041.slice(1) : null;
-      return f103.cljs$core$IFn$_invoke$arity$variadic(arguments[0], argseq__23513__auto__5);
+      const argseq__23513__auto__5 = 1 < args1191.length ? args1191.slice(1) : null;
+      return f118.cljs$core$IFn$_invoke$arity$variadic(arguments[0], argseq__23513__auto__5);
     });
-    f103.cljs$core$IFn$_invoke$arity$variadic = (function(p__107, children) {
-      const map__67 = p__107;
+    f118.cljs$core$IFn$_invoke$arity$variadic = (function(p__122, children) {
+      const map__67 = p__122;
       const _props8 = map__67;
       const href9 = get(map__67, "href");
       const icon_left10 = get(map__67, "icon-left");
@@ -6557,7 +9279,7 @@
       const class$20 = get(map__67, "class");
       const attrs21 = get(map__67, "attrs");
       const icon_size22 = (() => {
-        const G__10823 = kw_name((() => {
+        const G__12323 = kw_name((() => {
           const or__23426__auto__24 = size15;
           if (truth_(or__23426__auto__24)) {
             return or__23426__auto__24;
@@ -6566,7 +9288,7 @@
           }
           ;
         })());
-        switch (G__10823) {
+        switch (G__12323) {
           case "sm":
             return "sm";
             break;
@@ -6598,30 +9320,30 @@
       })()) ? "xs" : "sm" }) : null;
       const tag30 = truth_(href9) ? "a" : "button";
       const classes31 = (() => {
-        const G__10932 = button_classes({ "variant": variant11, "size": size15, "loud": loud17, "icon": icon13, "round": round16, "loading": loading19 });
+        const G__12432 = button_classes({ "variant": variant11, "size": size15, "loud": loud17, "icon": icon13, "round": round16, "loading": loading19 });
         if (truth_(class$20)) {
-          return `${G__10932 ?? ""}${" "}${class$20 ?? ""}`;
+          return `${G__12432 ?? ""}${" "}${class$20 ?? ""}`;
         } else {
-          return G__10932;
+          return G__12432;
         }
         ;
       })();
       const base_attrs33 = (() => {
-        const G__11034 = merge({ "class": classes31 }, attrs21);
-        const G__11035 = truth_(href9) ? assoc(G__11034, "href", href9) : G__11034;
+        const G__12534 = merge({ "class": classes31 }, attrs21);
+        const G__12535 = truth_(href9) ? assoc(G__12534, "href", href9) : G__12534;
         if (truth_(disabled26)) {
-          return assoc(G__11035, "disabled", true);
+          return assoc(G__12535, "disabled", true);
         } else {
-          return G__11035;
+          return G__12535;
         }
         ;
       })();
       const base_attrs36 = (() => {
-        const G__11137 = base_attrs33;
+        const G__12637 = base_attrs33;
         if (truth_(on_click14)) {
-          return assoc(G__11137, "on-click", on_click14);
+          return assoc(G__12637, "on-click", on_click14);
         } else {
-          return G__11137;
+          return G__12637;
         }
         ;
       })();
@@ -6629,9 +9351,9 @@
         return [tag30, base_attrs36, truth_(loading19) ? spinner_el28 : icon({ "icon-name": icon13, "size": icon_size22 })];
       } else {
         return into([tag30, base_attrs36], (() => {
-          const G__11238 = [];
-          const G__11239 = truth_(loading19) ? conj(G__11238, spinner_el28) : G__11238;
-          const G__11240 = truth_((() => {
+          const G__12738 = [];
+          const G__12739 = truth_(loading19) ? conj(G__12738, spinner_el28) : G__12738;
+          const G__12740 = truth_((() => {
             const and__23442__auto__41 = icon_left10;
             if (truth_(and__23442__auto__41)) {
               return not(loading19);
@@ -6639,20 +9361,20 @@
               return and__23442__auto__41;
             }
             ;
-          })()) ? conj(G__11239, icon({ "icon-name": icon_left10, "size": icon_size22 })) : G__11239;
-          const G__11242 = true ? into(G__11240, children) : G__11240;
+          })()) ? conj(G__12739, icon({ "icon-name": icon_left10, "size": icon_size22 })) : G__12739;
+          const G__12742 = true ? into(G__12740, children) : G__12740;
           if (truth_(icon_right18)) {
-            return conj(G__11242, icon({ "icon-name": icon_right18, "size": icon_size22 }));
+            return conj(G__12742, icon({ "icon-name": icon_right18, "size": icon_size22 }));
           } else {
-            return G__11242;
+            return G__12742;
           }
           ;
         })());
       }
       ;
     });
-    f103.cljs$lang$maxFixedArity = 1;
-    return f103;
+    f118.cljs$lang$maxFixedArity = 1;
+    return f118;
   })();
 
   // .compiled/ui/notification.mjs
@@ -6665,11 +9387,11 @@
   var default_hotkey = ["altKey", "KeyT"];
   var infinity = Infinity;
   var kw = function(x) {
-    const G__6071 = x;
-    if (G__6071 == null) {
+    const G__6551 = x;
+    if (G__6551 == null) {
       return null;
     } else {
-      return kw_name(G__6071);
+      return kw_name(G__6551);
     }
     ;
   };
@@ -6685,37 +9407,37 @@
     return s;
   };
   var classes = (() => {
-    const f608 = (function(var_args) {
-      const args6091 = [];
+    const f656 = (function(var_args) {
+      const args6571 = [];
       const len__23321__auto__2 = arguments.length;
-      let i6103 = 0;
+      let i6583 = 0;
       while (true) {
-        if (i6103 < len__23321__auto__2) {
-          args6091.push(arguments[i6103]);
-          let G__4 = i6103 + 1;
-          i6103 = G__4;
+        if (i6583 < len__23321__auto__2) {
+          args6571.push(arguments[i6583]);
+          let G__4 = i6583 + 1;
+          i6583 = G__4;
           continue;
         }
         ;
         break;
       }
       ;
-      const argseq__23513__auto__5 = 0 < args6091.length ? args6091.slice(0) : null;
-      return f608.cljs$core$IFn$_invoke$arity$variadic(argseq__23513__auto__5);
+      const argseq__23513__auto__5 = 0 < args6571.length ? args6571.slice(0) : null;
+      return f656.cljs$core$IFn$_invoke$arity$variadic(argseq__23513__auto__5);
     });
-    f608.cljs$core$IFn$_invoke$arity$variadic = (function(tokens) {
+    f656.cljs$core$IFn$_invoke$arity$variadic = (function(tokens) {
       const ts6 = remove(nil_QMARK_, tokens);
       return join(" ", ts6);
     });
-    f608.cljs$lang$maxFixedArity = 0;
-    return f608;
+    f656.cljs$lang$maxFixedArity = 0;
+    return f656;
   })();
   var type_icons = { "success": "check", "info": "info", "warning": "alert-triangle", "error": "x" };
-  var notification_class_list = function(p__612) {
-    const map__12 = p__612;
+  var notification_class_list = function(p__660) {
+    const map__12 = p__660;
     const type3 = get(map__12, "type");
     const multiline4 = get(map__12, "multiline");
-    const G__6135 = ["notification", `notification-${(() => {
+    const G__6615 = ["notification", `notification-${(() => {
       const or__23426__auto__6 = kw(type3);
       if (truth_(or__23426__auto__6)) {
         return or__23426__auto__6;
@@ -6725,9 +9447,9 @@
       ;
     })() ?? ""}`];
     if (truth_(multiline4)) {
-      return conj(G__6135, "notification-multiline");
+      return conj(G__6615, "notification-multiline");
     } else {
-      return G__6135;
+      return G__6615;
     }
     ;
   };
@@ -6742,8 +9464,8 @@
     }
     ;
   };
-  var icon_el = function(p__614, icons, class_name) {
-    const map__12 = p__614;
+  var icon_el = function(p__662, icons, class_name) {
+    const map__12 = p__662;
     const type3 = get(map__12, "type");
     const icon4 = get(map__12, "icon");
     const promise5 = get(map__12, "promise");
@@ -6777,8 +9499,8 @@
         }
         ;
       })())) {
-        const G__61513 = ["span", { "class": classes("notification-icon", class_name), "data-icon": "" }];
-        const G__61514 = truth_((() => {
+        const G__66313 = ["span", { "class": classes("notification-icon", class_name), "data-icon": "" }];
+        const G__66314 = truth_((() => {
           const or__23426__auto__15 = loading_QMARK_8;
           if (or__23426__auto__15) {
             return or__23426__auto__15;
@@ -6786,7 +9508,7 @@
             return promise5;
           }
           ;
-        })()) ? conj(G__61513, loader(loading_QMARK_8)) : G__61513;
+        })()) ? conj(G__66313, loader(loading_QMARK_8)) : G__66313;
         if (truth_((() => {
           const and__23442__auto__16 = shown10;
           if (truth_(and__23442__auto__16)) {
@@ -6796,9 +9518,9 @@
           }
           ;
         })())) {
-          return conj(G__61514, ["span", { "class": "notification-glyph" }, shown10]);
+          return conj(G__66314, ["span", { "class": "notification-glyph" }, shown10]);
         } else {
-          return G__61514;
+          return G__66314;
         }
         ;
       }
@@ -6815,16 +9537,16 @@
       const on_click42 = get(map__12, "on-click");
       const attrs5 = get(map__12, "attrs");
       return button((() => {
-        const G__6166 = { "size": "sm", "variant": kind === "action" ? "secondary" : "ghost", "class": class_name, "attrs": merge((() => {
-          const G__6177 = {};
-          G__6177["data-button"] = "";
-          G__6177[__GT_kw(`data-${kind ?? ""}`)] = "";
-          return G__6177;
+        const G__6646 = { "size": "sm", "variant": kind === "action" ? "secondary" : "ghost", "class": class_name, "attrs": merge((() => {
+          const G__6657 = {};
+          G__6657["data-button"] = "";
+          G__6657[__GT_kw(`data-${kind ?? ""}`)] = "";
+          return G__6657;
         })(), attrs5) };
         if (truth_(on_click42)) {
-          return { ...G__6166, "on-click": on_click42 };
+          return { ...G__6646, "on-click": on_click42 };
         } else {
-          return G__6166;
+          return G__6646;
         }
         ;
       })(), label3);
@@ -6842,20 +9564,20 @@
       ;
     })(), "data-close-button": "", "data-disabled": flag(disabled_QMARK_3) }, icon({ "icon-name": "x", "size": "sm" })];
   };
-  var loading_locked_QMARK_ = function(p__618) {
-    const map__12 = p__618;
+  var loading_locked_QMARK_ = function(p__666) {
+    const map__12 = p__666;
     const type3 = get(map__12, "type");
     const dismissible4 = get(map__12, "dismissible");
     return "loading" === kw(type3) && not(true_QMARK_(dismissible4));
   };
-  var swipable_QMARK_ = function(p__619) {
-    const map__12 = p__619;
+  var swipable_QMARK_ = function(p__667) {
+    const map__12 = p__667;
     const item3 = map__12;
     const dismissible4 = get(map__12, "dismissible");
     return not(false_QMARK_(dismissible4)) && not(loading_locked_QMARK_(item3));
   };
-  var card_children = function(p__620, icons, class_names, extra) {
-    const map__12 = p__620;
+  var card_children = function(p__668, icons, class_names, extra) {
+    const map__12 = p__668;
     const item3 = map__12;
     const title4 = get(map__12, "title");
     const description5 = get(map__12, "description");
@@ -6874,8 +9596,8 @@
       }
       ;
     })();
-    const G__62114 = [];
-    const G__62115 = truth_((() => {
+    const G__66914 = [];
+    const G__66915 = truth_((() => {
       const and__23442__auto__16 = close_button9;
       if (truth_(and__23442__auto__16)) {
         return not(loading_locked_QMARK_(item3));
@@ -6883,18 +9605,18 @@
         return and__23442__auto__16;
       }
       ;
-    })()) ? conj(G__62114, close_el(close_label10, false_QMARK_(dismissible11), get(cn12, "close-button"))) : G__62114;
-    const G__62117 = true ? conj(G__62115, icon_el(item3, icons, get(cn12, "icon"))) : G__62115;
-    const G__62118 = true ? conj(G__62117, (() => {
-      const G__62219 = ["div", { "class": classes("notification-text", get(cn12, "content")), "data-content": "" }, ["p", { "class": classes("notification-title", get(cn12, "title")), "data-title": "" }, title4]];
-      const G__62220 = truth_(description5) ? conj(G__62219, ["div", { "class": classes("notification-description", get(cn12, "description")), "data-description": "" }, description5]) : G__62219;
+    })()) ? conj(G__66914, close_el(close_label10, false_QMARK_(dismissible11), get(cn12, "close-button"))) : G__66914;
+    const G__66917 = true ? conj(G__66915, icon_el(item3, icons, get(cn12, "icon"))) : G__66915;
+    const G__66918 = true ? conj(G__66917, (() => {
+      const G__67019 = ["div", { "class": classes("notification-text", get(cn12, "content")), "data-content": "" }, ["p", { "class": classes("notification-title", get(cn12, "title")), "data-title": "" }, title4]];
+      const G__67020 = truth_(description5) ? conj(G__67019, ["div", { "class": classes("notification-description", get(cn12, "description")), "data-description": "" }, description5]) : G__67019;
       if (truth_(meta6)) {
-        return conj(G__62220, ["div", { "class": "notification-meta" }, meta6]);
+        return conj(G__67020, ["div", { "class": "notification-meta" }, meta6]);
       } else {
-        return G__62220;
+        return G__67020;
       }
       ;
-    })()) : G__62117;
+    })()) : G__66917;
     if (truth_((() => {
       const or__23426__auto__21 = cancel8;
       if (truth_(or__23426__auto__21)) {
@@ -6910,43 +9632,43 @@
       }
       ;
     })())) {
-      return conj(G__62118, (() => {
-        const G__62323 = ["div", { "class": "notification-actions" }];
-        const G__62324 = truth_(cancel8) ? conj(G__62323, button_el("cancel", cancel8, get(cn12, "cancel-button"))) : G__62323;
-        const G__62325 = truth_(action7) ? conj(G__62324, button_el("action", action7, get(cn12, "action-button"))) : G__62324;
+      return conj(G__66918, (() => {
+        const G__67123 = ["div", { "class": "notification-actions" }];
+        const G__67124 = truth_(cancel8) ? conj(G__67123, button_el("cancel", cancel8, get(cn12, "cancel-button"))) : G__67123;
+        const G__67125 = truth_(action7) ? conj(G__67124, button_el("action", action7, get(cn12, "action-button"))) : G__67124;
         if (truth_(seq(extra))) {
-          return into(G__62325, extra);
+          return into(G__67125, extra);
         } else {
-          return G__62325;
+          return G__67125;
         }
         ;
       })());
     } else {
-      return G__62118;
+      return G__66918;
     }
     ;
   };
   var notification = (() => {
-    const f624 = (function(var_args) {
-      const args6251 = [];
+    const f672 = (function(var_args) {
+      const args6731 = [];
       const len__23321__auto__2 = arguments.length;
-      let i6263 = 0;
+      let i6743 = 0;
       while (true) {
-        if (i6263 < len__23321__auto__2) {
-          args6251.push(arguments[i6263]);
-          let G__4 = i6263 + 1;
-          i6263 = G__4;
+        if (i6743 < len__23321__auto__2) {
+          args6731.push(arguments[i6743]);
+          let G__4 = i6743 + 1;
+          i6743 = G__4;
           continue;
         }
         ;
         break;
       }
       ;
-      const argseq__23513__auto__5 = 1 < args6251.length ? args6251.slice(1) : null;
-      return f624.cljs$core$IFn$_invoke$arity$variadic(arguments[0], argseq__23513__auto__5);
+      const argseq__23513__auto__5 = 1 < args6731.length ? args6731.slice(1) : null;
+      return f672.cljs$core$IFn$_invoke$arity$variadic(arguments[0], argseq__23513__auto__5);
     });
-    f624.cljs$core$IFn$_invoke$arity$variadic = (function(p__628, children) {
-      const map__67 = p__628;
+    f672.cljs$core$IFn$_invoke$arity$variadic = (function(p__676, children) {
+      const map__67 = p__676;
       const item8 = map__67;
       const class_names9 = get(map__67, "class-names");
       const invert10 = get(map__67, "invert");
@@ -6982,8 +9704,8 @@
         ;
       })(), "data-styled": flag(not(unstyled13)), "data-rich-colors": flag(rich_colors19), "data-invert": flag(invert10) }, attrs22))], card_children(item8, null, class_names9, remove(nil_QMARK_, children)));
     });
-    f624.cljs$lang$maxFixedArity = 1;
-    return f624;
+    f672.cljs$lang$maxFixedArity = 1;
+    return f672;
   })();
   var position_parts = function(position) {
     return split((() => {
@@ -7000,11 +9722,11 @@
     const vec__14 = position_parts(position);
     const y5 = nth(vec__14, 0, null);
     const x6 = nth(vec__14, 1, null);
-    const G__6297 = [y5];
+    const G__6777 = [y5];
     if (!(x6 === "center")) {
-      return conj(G__6297, x6);
+      return conj(G__6777, x6);
     } else {
-      return G__6297;
+      return G__6777;
     }
     ;
   };
@@ -7063,8 +9785,8 @@
     }
     ;
   };
-  var toast_el = function(p__630, p__631) {
-    const map__13 = p__630;
+  var toast_el = function(p__678, p__679) {
+    const map__13 = p__678;
     const item4 = map__13;
     const class_names5 = get(map__13, "class-names");
     const invert6 = get(map__13, "invert");
@@ -7079,7 +9801,7 @@
     const class$15 = get(map__13, "class");
     const removed_at16 = get(map__13, "removed-at");
     const attrs17 = get(map__13, "attrs");
-    const map__218 = p__631;
+    const map__218 = p__679;
     const x19 = get(map__218, "x");
     const y20 = get(map__218, "y");
     const index21 = get(map__218, "index");
@@ -7099,11 +9821,11 @@
       ;
     })();
     const item30 = (() => {
-      const G__63231 = item4;
+      const G__68031 = item4;
       if (get(item4, "close-button") == null) {
-        return assoc(G__63231, "close-button", close_button22);
+        return assoc(G__68031, "close-button", close_button22);
       } else {
-        return G__63231;
+        return G__68031;
       }
       ;
     })();
@@ -7126,21 +9848,21 @@
     })()), "data-x-position": x19, "data-ui-notification": "", "data-promise": flag(promise10) }, {}, attrs17))], card_children(item30, icons24, class_names5, null));
   };
   var event_attrs = function(on_dismiss, on_pause) {
-    const G__6331 = {};
-    const G__6332 = truth_(on_dismiss) ? { ...G__6331, "on-notificationdismiss": (function(e) {
+    const G__6811 = {};
+    const G__6812 = truth_(on_dismiss) ? { ...G__6811, "on-notificationdismiss": (function(e) {
       return on_dismiss(e.detail.id, e.detail.reason);
-    }) } : G__6331;
+    }) } : G__6811;
     if (truth_(on_pause)) {
-      return assoc(G__6332, "on-notificationpause", (function(e) {
+      return assoc(G__6812, "on-notificationpause", (function(e) {
         return on_pause(e.detail.paused);
       }));
     } else {
-      return G__6332;
+      return G__6812;
     }
     ;
   };
-  var notification_toaster = function(p__634) {
-    const map__12 = p__634;
+  var notification_toaster = function(p__682) {
+    const map__12 = p__682;
     const items3 = get(map__12, "items");
     const on_dismiss4 = get(map__12, "on-dismiss");
     const on_pause5 = get(map__12, "on-pause");
@@ -7192,11 +9914,11 @@
       return kw(get(i, "position"));
     }), items3)));
     return into(["section", class_attrs((() => {
-      const G__63530 = ["notification-toaster"];
+      const G__68330 = ["notification-toaster"];
       if (truth_(contained15)) {
-        return conj(G__63530, "notification-toaster-contained");
+        return conj(G__68330, "notification-toaster-contained");
       } else {
-        return G__63530;
+        return G__68330;
       }
       ;
     })(), class$18, merge({ "data-ui-notification-toaster": "", "tabindex": "-1", "aria-label": `${(() => {
@@ -7253,25 +9975,25 @@
     return { "items": [], "muted": /* @__PURE__ */ new Set([]), "paused-at": null, "seq": 0 };
   };
   var lifetime = (() => {
-    const f636 = (function(...args637) {
-      const G__6381 = args637.length;
-      switch (G__6381) {
+    const f684 = (function(...args685) {
+      const G__6861 = args685.length;
+      switch (G__6861) {
         case 1:
-          return f636.cljs$core$IFn$_invoke$arity$1(args637[0]);
+          return f684.cljs$core$IFn$_invoke$arity$1(args685[0]);
           break;
         case 2:
-          return f636.cljs$core$IFn$_invoke$arity$2(args637[0], args637[1]);
+          return f684.cljs$core$IFn$_invoke$arity$2(args685[0], args685[1]);
           break;
         default:
-          throw new Error(`${"Invalid arity: "}${args637.length ?? ""}`);
+          throw new Error(`${"Invalid arity: "}${args685.length ?? ""}`);
       }
       ;
     });
-    f636.cljs$core$IFn$_invoke$arity$1 = (function(item) {
+    f684.cljs$core$IFn$_invoke$arity$1 = (function(item) {
       return lifetime(item, default_duration2);
     });
-    f636.cljs$core$IFn$_invoke$arity$2 = (function(p__639, default$) {
-      const map__34 = p__639;
+    f684.cljs$core$IFn$_invoke$arity$2 = (function(p__687, default$) {
+      const map__34 = p__687;
       const type5 = get(map__34, "type");
       const duration6 = get(map__34, "duration");
       if ("loading" === kw(type5)) {
@@ -7309,52 +10031,52 @@
       }
       ;
     });
-    f636.cljs$lang$maxFixedArity = 2;
-    return f636;
+    f684.cljs$lang$maxFixedArity = 2;
+    return f684;
   })();
-  var stamp = function(item, now3, paused_at, default$) {
+  var stamp = function(item, now4, paused_at, default$) {
     const ms1 = lifetime(item, default$);
     return assoc(dissoc(item, "removed-at", "closed"), "expires-at", truth_(ms1) ? (() => {
       const or__23426__auto__2 = paused_at;
       if (truth_(or__23426__auto__2)) {
         return or__23426__auto__2;
       } else {
-        return now3;
+        return now4;
       }
       ;
     })() + ms1 : null);
   };
-  var close2 = function(item, now3, reason) {
+  var close2 = function(item, now4, reason) {
     if (truth_(get(item, "removed-at"))) {
       return item;
     } else {
-      return assoc(item, "removed-at", now3, "closed", reason);
+      return assoc(item, "removed-at", now4, "closed", reason);
     }
     ;
   };
   var post = (() => {
-    const f640 = (function(...args641) {
-      const G__6421 = args641.length;
-      switch (G__6421) {
+    const f688 = (function(...args689) {
+      const G__6901 = args689.length;
+      switch (G__6901) {
         case 3:
-          return f640.cljs$core$IFn$_invoke$arity$3(args641[0], args641[1], args641[2]);
+          return f688.cljs$core$IFn$_invoke$arity$3(args689[0], args689[1], args689[2]);
           break;
         case 4:
-          return f640.cljs$core$IFn$_invoke$arity$4(args641[0], args641[1], args641[2], args641[3]);
+          return f688.cljs$core$IFn$_invoke$arity$4(args689[0], args689[1], args689[2], args689[3]);
           break;
         default:
-          throw new Error(`${"Invalid arity: "}${args641.length ?? ""}`);
+          throw new Error(`${"Invalid arity: "}${args689.length ?? ""}`);
       }
       ;
     });
-    f640.cljs$core$IFn$_invoke$arity$3 = (function(state3, item, now3) {
-      return post(state3, item, now3, null);
+    f688.cljs$core$IFn$_invoke$arity$3 = (function(state4, item, now4) {
+      return post(state4, item, now4, null);
     });
-    f640.cljs$core$IFn$_invoke$arity$4 = (function(state3, item, now3, p__643) {
-      const map__34 = p__643;
+    f688.cljs$core$IFn$_invoke$arity$4 = (function(state4, item, now4, p__691) {
+      const map__34 = p__691;
       const duration5 = get(map__34, "duration");
       const limit6 = get(map__34, "limit");
-      const map__78 = state3;
+      const map__78 = state4;
       const items9 = get(map__78, "items");
       const paused_at10 = get(map__78, "paused-at");
       const dur11 = (() => {
@@ -7374,7 +10096,7 @@
         ;
       }), items9) : null;
       const fresh15 = (function(i) {
-        return stamp(i, now3, paused_at10, dur11);
+        return stamp(i, now4, paused_at10, dur11);
       });
       if (truth_((() => {
         const and__23442__auto__16 = old14;
@@ -7385,7 +10107,7 @@
         }
         ;
       })())) {
-        return assoc(state3, "items", mapv((function(i) {
+        return assoc(state4, "items", mapv((function(i) {
           if (_EQ_(id13, get(i, "id"))) {
             return fresh15(item);
           } else {
@@ -7395,14 +10117,14 @@
         }), items9));
       } else {
         if (truth_(old14)) {
-          return assoc(state3, "items", mapv((function(i) {
+          return assoc(state4, "items", mapv((function(i) {
             if (_EQ_(id13, get(i, "id"))) {
               return fresh15((() => {
-                const G__64417 = merge(i, item);
+                const G__69217 = merge(i, item);
                 if ("loading" === kw(get(i, "type"))) {
-                  return assoc(G__64417, "promise", true);
+                  return assoc(G__69217, "promise", true);
                 } else {
-                  return G__64417;
+                  return G__69217;
                 }
                 ;
               })());
@@ -7414,7 +10136,7 @@
         } else {
           if ("else") {
             const n18 = (() => {
-              const or__23426__auto__19 = get(state3, "seq");
+              const or__23426__auto__19 = get(state4, "seq");
               if (truth_(or__23426__auto__19)) {
                 return or__23426__auto__19;
               } else {
@@ -7423,15 +10145,15 @@
               ;
             })() + 1;
             const item20 = fresh15((() => {
-              const G__64521 = item;
+              const G__69321 = item;
               if (id13 == null) {
-                return assoc(G__64521, "id", `notification-${n18 ?? ""}`);
+                return assoc(G__69321, "id", `notification-${n18 ?? ""}`);
               } else {
-                return G__64521;
+                return G__69321;
               }
               ;
             })());
-            return assoc(state3, "seq", n18, "items", vec(take((() => {
+            return assoc(state4, "seq", n18, "items", vec(take((() => {
               const or__23426__auto__22 = limit6;
               if (truth_(or__23426__auto__22)) {
                 return or__23426__auto__22;
@@ -7447,60 +10169,60 @@
       }
       ;
     });
-    f640.cljs$lang$maxFixedArity = 4;
-    return f640;
+    f688.cljs$lang$maxFixedArity = 4;
+    return f688;
   })();
   var dismiss = (() => {
-    const f646 = (function(...args647) {
-      const G__6481 = args647.length;
-      switch (G__6481) {
+    const f694 = (function(...args695) {
+      const G__6961 = args695.length;
+      switch (G__6961) {
         case 3:
-          return f646.cljs$core$IFn$_invoke$arity$3(args647[0], args647[1], args647[2]);
+          return f694.cljs$core$IFn$_invoke$arity$3(args695[0], args695[1], args695[2]);
           break;
         case 4:
-          return f646.cljs$core$IFn$_invoke$arity$4(args647[0], args647[1], args647[2], args647[3]);
+          return f694.cljs$core$IFn$_invoke$arity$4(args695[0], args695[1], args695[2], args695[3]);
           break;
         default:
-          throw new Error(`${"Invalid arity: "}${args647.length ?? ""}`);
+          throw new Error(`${"Invalid arity: "}${args695.length ?? ""}`);
       }
       ;
     });
-    f646.cljs$core$IFn$_invoke$arity$3 = (function(state3, id, now3) {
-      return dismiss(state3, id, now3, "dismiss");
+    f694.cljs$core$IFn$_invoke$arity$3 = (function(state4, id, now4) {
+      return dismiss(state4, id, now4, "dismiss");
     });
-    f646.cljs$core$IFn$_invoke$arity$4 = (function(state3, id, now3, reason) {
-      return assoc(state3, "items", mapv((function(i) {
+    f694.cljs$core$IFn$_invoke$arity$4 = (function(state4, id, now4, reason) {
+      return assoc(state4, "items", mapv((function(i) {
         if (_EQ_(id, get(i, "id"))) {
-          return close2(i, now3, reason);
+          return close2(i, now4, reason);
         } else {
           return i;
         }
         ;
-      }), get(state3, "items")));
+      }), get(state4, "items")));
     });
-    f646.cljs$lang$maxFixedArity = 4;
-    return f646;
+    f694.cljs$lang$maxFixedArity = 4;
+    return f694;
   })();
-  var dismiss_all = function(state3, now3) {
-    return assoc(state3, "items", mapv((function(i) {
-      return close2(i, now3, "dismiss");
-    }), get(state3, "items")));
+  var dismiss_all = function(state4, now4) {
+    return assoc(state4, "items", mapv((function(i) {
+      return close2(i, now4, "dismiss");
+    }), get(state4, "items")));
   };
-  var pause = function(state3, now3) {
-    if (truth_(get(state3, "paused-at"))) {
-      return state3;
+  var pause = function(state4, now4) {
+    if (truth_(get(state4, "paused-at"))) {
+      return state4;
     } else {
-      return assoc(state3, "paused-at", now3);
+      return assoc(state4, "paused-at", now4);
     }
     ;
   };
-  var resume = function(state3, now3) {
-    const temp__23007__auto__1 = get(state3, "paused-at");
+  var resume = function(state4, now4) {
+    const temp__23007__auto__1 = get(state4, "paused-at");
     if (truth_(temp__23007__auto__1)) {
       const paused_at2 = temp__23007__auto__1;
-      const d3 = now3 - paused_at2;
-      return assoc(state3, "paused-at", null, "items", mapv((function(i) {
-        const G__6494 = i;
+      const d3 = now4 - paused_at2;
+      return assoc(state4, "paused-at", null, "items", mapv((function(i) {
+        const G__6974 = i;
         if (truth_((() => {
           const and__23442__auto__5 = get(i, "expires-at");
           if (truth_(and__23442__auto__5)) {
@@ -7510,35 +10232,35 @@
           }
           ;
         })())) {
-          return assoc(G__6494, "expires-at", get(i, "expires-at") + d3);
+          return assoc(G__6974, "expires-at", get(i, "expires-at") + d3);
         } else {
-          return G__6494;
+          return G__6974;
         }
         ;
-      }), get(state3, "items")));
+      }), get(state4, "items")));
     } else {
-      return state3;
+      return state4;
     }
     ;
   };
-  var expire = function(state3, now3) {
-    const paused_QMARK_1 = get(state3, "paused-at");
-    return assoc(state3, "items", into([], keep((function(i) {
+  var expire = function(state4, now4) {
+    const paused_QMARK_1 = get(state4, "paused-at");
+    return assoc(state4, "items", into([], keep((function(i) {
       if (truth_(get(i, "removed-at"))) {
-        if (now3 < get(i, "removed-at") + remove_delay) {
+        if (now4 < get(i, "removed-at") + remove_delay) {
           return i;
         }
       } else {
         if (truth_(not(paused_QMARK_1) && (() => {
           const and__23442__auto__2 = get(i, "expires-at");
           if (truth_(and__23442__auto__2)) {
-            return get(i, "expires-at") <= now3;
+            return get(i, "expires-at") <= now4;
           } else {
             return and__23442__auto__2;
           }
           ;
         })())) {
-          return close2(i, now3, "auto");
+          return close2(i, now4, "auto");
         } else {
           if ("else") {
             return i;
@@ -7548,10 +10270,10 @@
         }
       }
       ;
-    })), get(state3, "items")));
+    })), get(state4, "items")));
   };
-  var next_due = function(state3) {
-    const paused_QMARK_1 = get(state3, "paused-at");
+  var next_due = function(state4) {
+    const paused_QMARK_1 = get(state4, "paused-at");
     const ts2 = keep((function(i) {
       const temp__23007__auto__3 = get(i, "removed-at");
       if (truth_(temp__23007__auto__3)) {
@@ -7565,7 +10287,7 @@
         }
       }
       ;
-    }), get(state3, "items"));
+    }), get(state4, "items"));
     if (truth_(seq(ts2))) {
       return apply(min, ts2);
     }
@@ -7588,9 +10310,9 @@
       ;
     }), get(after, "items"));
   };
-  var visible = function(state3) {
+  var visible = function(state4) {
     const muted1 = (() => {
-      const or__23426__auto__2 = get(state3, "muted");
+      const or__23426__auto__2 = get(state4, "muted");
       if (truth_(or__23426__auto__2)) {
         return or__23426__auto__2;
       } else {
@@ -7600,12 +10322,12 @@
     })();
     return filterv((function(i) {
       return not(contains_QMARK_(muted1, get(i, "source")));
-    }), get(state3, "items"));
+    }), get(state4, "items"));
   };
-  var active = function(state3) {
+  var active = function(state4) {
     return filterv((function(i) {
       return not(get(i, "removed-at"));
-    }), visible(state3));
+    }), visible(state4));
   };
 
   // .compiled/notification.mjs
@@ -7791,7 +10513,7 @@
     style1.height = h02;
     return h3;
   };
-  var state2 = function(toaster) {
+  var state3 = function(toaster) {
     const or__23426__auto__1 = toaster["__uiN"];
     if (truth_(or__23426__auto__1)) {
       return or__23426__auto__1;
@@ -7803,7 +10525,7 @@
     ;
   };
   var update_pause_BANG_ = function(toaster) {
-    const s1 = state2(toaster);
+    const s1 = state3(toaster);
     const paused2 = boolean$((() => {
       const or__23426__auto__3 = s1["expanded"];
       if (truth_(or__23426__auto__3)) {
@@ -7826,7 +10548,7 @@
     ;
   };
   var set_expanded_BANG_ = function(toaster, expanded_QMARK_) {
-    const s1 = state2(toaster);
+    const s1 = state3(toaster);
     if (!_EQ_(expanded_QMARK_, s1["expanded"])) {
       s1["expanded"] = expanded_QMARK_;
       sync_toaster_BANG_(toaster);
@@ -7873,7 +10595,7 @@
     const total8 = count(items1);
     const expand_QMARK_9 = "true" === attr(ol, "data-expand");
     const expanded_QMARK_10 = (() => {
-      const and__23442__auto__11 = state2(toaster)["expanded"];
+      const and__23442__auto__11 = state3(toaster)["expanded"];
       if (truth_(and__23442__auto__11)) {
         return count(live4) > 1;
       } else {
@@ -7937,7 +10659,7 @@
           requestAnimationFrame((function() {
             li26.setAttribute("data-mounted", "true");
             return set_attr_BANG_(li26, "data-expanded", truth_((() => {
-              const or__23426__auto__33 = state2(toaster)["expanded"];
+              const or__23426__auto__33 = state3(toaster)["expanded"];
               if (truth_(or__23426__auto__33)) {
                 return or__23426__auto__33;
               } else {
@@ -7955,11 +10677,11 @@
     const ol1 = li.closest("[data-ui-notification-list]");
     return (() => {
       const or__23426__auto__2 = (() => {
-        const G__5333 = ol1;
-        if (G__5333 == null) {
+        const G__5723 = ol1;
+        if (G__5723 == null) {
           return null;
         } else {
-          return attr(G__5333, "data-swipe-directions");
+          return attr(G__5723, "data-swipe-directions");
         }
         ;
       })();
@@ -8095,11 +10817,11 @@
     ;
   };
   var not_dismissible_target_QMARK_ = function(e) {
-    const G__5341 = e.target;
-    if (G__5341 == null) {
+    const G__5731 = e.target;
+    if (G__5731 == null) {
       return null;
     } else {
-      return G__5341.closest("[data-dismissible='false']");
+      return G__5731.closest("[data-dismissible='false']");
     }
     ;
   };
@@ -8108,7 +10830,7 @@
       return null;
     } else {
       ol["__uiNBound"] = true;
-      const s1 = state2(toaster);
+      const s1 = state3(toaster);
       ol.addEventListener("mouseenter", (function(_) {
         return set_expanded_BANG_(toaster, true);
       }));
@@ -8195,8 +10917,8 @@
     if (reduce(_PLUS_, 0, map((function(ol) {
       return count(filter(live_QMARK_, toasts(ol)));
     }), lists(toaster))) <= 1) {
-      if (truth_(state2(toaster)["expanded"])) {
-        state2(toaster)["expanded"] = false;
+      if (truth_(state3(toaster)["expanded"])) {
+        state3(toaster)["expanded"] = false;
         return update_pause_BANG_(toaster);
       }
       ;
@@ -8228,11 +10950,11 @@
       return null;
     } else {
       const temp__23062__auto__1 = (() => {
-        const G__5352 = e.target;
-        if (G__5352 == null) {
+        const G__5742 = e.target;
+        if (G__5742 == null) {
           return null;
         } else {
-          return G__5352.closest("[data-ui-notification]");
+          return G__5742.closest("[data-ui-notification]");
         }
         ;
       })();
@@ -8261,7 +10983,7 @@
       ;
     }), keys2);
   };
-  var on_keydown3 = function(e) {
+  var on_keydown4 = function(e) {
     for (let G__1 of iterable(Array.from(document.querySelectorAll("[data-ui-notification-toaster]")))) {
       const t2 = G__1;
       const keys3 = (() => {
@@ -8275,10 +10997,10 @@
       })().split("+");
       if (truth_(hotkey_pressed_QMARK_(e, keys3))) {
         set_expanded_BANG_(t2, true);
-        const G__5365 = first(lists(t2));
-        if (G__5365 == null) {
+        const G__5755 = first(lists(t2));
+        if (G__5755 == null) {
         } else {
-          G__5365.focus();
+          G__5755.focus();
         }
       }
       ;
@@ -8358,24 +11080,24 @@
     return null;
   };
   var dom = (() => {
-    const f537 = (function(...args538) {
-      const G__5391 = args538.length;
-      switch (G__5391) {
+    const f576 = (function(...args577) {
+      const G__5781 = args577.length;
+      switch (G__5781) {
         case 1:
-          return f537.cljs$core$IFn$_invoke$arity$1(args538[0]);
+          return f576.cljs$core$IFn$_invoke$arity$1(args577[0]);
           break;
         case 2:
-          return f537.cljs$core$IFn$_invoke$arity$2(args538[0], args538[1]);
+          return f576.cljs$core$IFn$_invoke$arity$2(args577[0], args577[1]);
           break;
         default:
-          throw new Error(`${"Invalid arity: "}${args538.length ?? ""}`);
+          throw new Error(`${"Invalid arity: "}${args577.length ?? ""}`);
       }
       ;
     });
-    f537.cljs$core$IFn$_invoke$arity$1 = (function(h) {
+    f576.cljs$core$IFn$_invoke$arity$1 = (function(h) {
       return dom(h, false);
     });
-    f537.cljs$core$IFn$_invoke$arity$2 = (function(h, svg_QMARK_) {
+    f576.cljs$core$IFn$_invoke$arity$2 = (function(h, svg_QMARK_) {
       if (h == null) {
         return null;
       } else {
@@ -8454,8 +11176,8 @@
       }
       ;
     });
-    f537.cljs$lang$maxFixedArity = 2;
-    return f537;
+    f576.cljs$lang$maxFixedArity = 2;
+    return f576;
   })();
   var patch_attrs_BANG_ = function(el2, attrs) {
     const keep12 = /* @__PURE__ */ new Set();
@@ -8613,8 +11335,8 @@
     }));
   };
   var props = function(o) {
-    const m1 = Object.fromEntries(map((function(p__540) {
-      const vec__25 = p__540;
+    const m1 = Object.fromEntries(map((function(p__579) {
+      const vec__25 = p__579;
       const k6 = nth(vec__25, 0, null);
       const v7 = nth(vec__25, 1, null);
       return [kebab(k6), v7];
@@ -8637,7 +11359,7 @@
     return m1;
   };
   var api = { "queue": queue(), "options": {}, "root": null, "timer": null };
-  var now = function() {
+  var now2 = function() {
     return Date.now();
   };
   var fire_closed_BANG_ = function(before, after) {
@@ -8660,33 +11382,33 @@
     return null;
   };
   var update_queue_BANG_ = (() => {
-    const f541 = (function(var_args) {
-      const args5421 = [];
+    const f580 = (function(var_args) {
+      const args5811 = [];
       const len__23321__auto__2 = arguments.length;
-      let i5433 = 0;
+      let i5823 = 0;
       while (true) {
-        if (i5433 < len__23321__auto__2) {
-          args5421.push(arguments[i5433]);
-          let G__4 = i5433 + 1;
-          i5433 = G__4;
+        if (i5823 < len__23321__auto__2) {
+          args5811.push(arguments[i5823]);
+          let G__4 = i5823 + 1;
+          i5823 = G__4;
           continue;
         }
         ;
         break;
       }
       ;
-      const argseq__23513__auto__5 = 1 < args5421.length ? args5421.slice(1) : null;
-      return f541.cljs$core$IFn$_invoke$arity$variadic(arguments[0], argseq__23513__auto__5);
+      const argseq__23513__auto__5 = 1 < args5811.length ? args5811.slice(1) : null;
+      return f580.cljs$core$IFn$_invoke$arity$variadic(arguments[0], argseq__23513__auto__5);
     });
-    f541.cljs$core$IFn$_invoke$arity$variadic = (function(f, args) {
+    f580.cljs$core$IFn$_invoke$arity$variadic = (function(f, args) {
       const before6 = api["queue"];
       const after7 = apply(f, before6, args);
       api["queue"] = after7;
       fire_closed_BANG_(before6, after7);
       return render_BANG_();
     });
-    f541.cljs$lang$maxFixedArity = 1;
-    return f541;
+    f580.cljs$lang$maxFixedArity = 1;
+    return f580;
   })();
   var schedule_expire_BANG_ = function() {
     const temp__23062__auto__1 = api["timer"];
@@ -8700,8 +11422,8 @@
       if (truth_(temp__23062__auto__3)) {
         const due4 = temp__23062__auto__3;
         return setTimeout((function() {
-          return update_queue_BANG_(expire, now());
-        }), max(0, due4 - now()));
+          return update_queue_BANG_(expire, now2());
+        }), max(0, due4 - now2()));
       }
       ;
     })();
@@ -8713,10 +11435,10 @@
     } else {
       const el2 = dom(notification_toaster(props(api["options"])));
       el2.addEventListener("notificationdismiss", (function(e) {
-        return update_queue_BANG_(dismiss, e.detail.id, now(), e.detail.reason);
+        return update_queue_BANG_(dismiss, e.detail.id, now2(), e.detail.reason);
       }));
       el2.addEventListener("notificationpause", (function(e) {
-        api["queue"] = (truth_(e.detail.paused) ? pause : resume)(api["queue"], now());
+        api["queue"] = (truth_(e.detail.paused) ? pause : resume)(api["queue"], now2());
         return schedule_expire_BANG_();
       }));
       document.body.appendChild(el2);
@@ -8734,7 +11456,7 @@
   };
   var create_BANG_ = function(message, type, opts) {
     const item1 = assoc(props(opts), "title", message, "type", type);
-    update_queue_BANG_(post, item1, now(), { "duration": api["options"]["duration"] });
+    update_queue_BANG_(post, item1, now2(), { "duration": api["options"]["duration"] });
     const or__23426__auto__2 = get(item1, "id");
     if (truth_(or__23426__auto__2)) {
       return or__23426__auto__2;
@@ -8761,7 +11483,7 @@
       if (truth_(or__23426__auto__4)) {
         return or__23426__auto__4;
       } else {
-        return `promise-${now() ?? ""}`;
+        return `promise-${now2() ?? ""}`;
       }
       ;
     })())) : null;
@@ -8780,11 +11502,11 @@
           }
           ;
         })(), kind === "success" ? "success" : "error", (() => {
-          const G__54511 = assoc(base8, "id", id2);
+          const G__58411 = assoc(base8, "id", id2);
           if (!(desc9 == null)) {
-            return assoc(G__54511, "description", truth_(fn_QMARK_(desc9)) ? desc9(v) : desc9);
+            return assoc(G__58411, "description", truth_(fn_QMARK_(desc9)) ? desc9(v) : desc9);
           } else {
-            return G__54511;
+            return G__58411;
           }
           ;
         })());
@@ -8796,7 +11518,7 @@
         return settle5("success", v);
       } else {
         if (truth_(id2)) {
-          return update_queue_BANG_(dismiss, id2, now());
+          return update_queue_BANG_(dismiss, id2, now2());
         }
       }
       ;
@@ -8805,7 +11527,7 @@
         return settle5("error", err);
       } else {
         if (truth_(id2)) {
-          return update_queue_BANG_(dismiss, id2, now());
+          return update_queue_BANG_(dismiss, id2, now2());
         }
       }
       ;
@@ -8825,11 +11547,11 @@
       const ds3 = el2.dataset;
       el2.remove();
       create_BANG_(ds3["uiNotify"], ds3["type"], { "id": ds3["id"], "description": ds3["description"], "duration": (() => {
-        const G__5464 = ds3["duration"];
-        if (G__5464 == null) {
+        const G__5854 = ds3["duration"];
+        if (G__5854 == null) {
           return null;
         } else {
-          return parseFloat(G__5464);
+          return parseFloat(G__5854);
         }
         ;
       })() });
@@ -8838,9 +11560,9 @@
   };
   var notify_api = Object.assign(notify, { "promise": promise_BANG_, "dismiss": (function(id) {
     if (!(id == null)) {
-      return update_queue_BANG_(dismiss, id, now());
+      return update_queue_BANG_(dismiss, id, now2());
     } else {
-      return update_queue_BANG_(dismiss_all, now());
+      return update_queue_BANG_(dismiss_all, now2());
     }
     ;
   }), "toaster": (function(o) {
@@ -8869,11 +11591,11 @@
     const t1 = r.target;
     const el2 = 1 === t1.nodeType ? t1 : t1.parentElement;
     const or__23426__auto__3 = (() => {
-      const G__5474 = el2;
-      if (G__5474 == null) {
+      const G__5864 = el2;
+      if (G__5864 == null) {
         return null;
       } else {
-        return G__5474.closest("[data-ui-notification-toaster]");
+        return G__5864.closest("[data-ui-notification-toaster]");
       }
       ;
     })();
@@ -8898,7 +11620,7 @@
     sync_all_BANG_();
     consume_markers_BANG_();
     document.addEventListener("click", on_click3);
-    document.addEventListener("keydown", on_keydown3);
+    document.addEventListener("keydown", on_keydown4);
     document.addEventListener("visibilitychange", (function() {
       for (let G__1 of iterable(Array.from(document.querySelectorAll("[data-ui-notification-toaster]")))) {
         const t2 = G__1;
@@ -8973,12 +11695,12 @@
       const max_STAR_6 = !_EQ_("", input.max) ? num(input.max, null) : null;
       const next7 = round6(cur4 + dir * step3);
       const next8 = (() => {
-        const G__5489 = next7;
-        const G__54810 = !(min_STAR_5 == null) ? Math.max(G__5489, min_STAR_5) : G__5489;
+        const G__5879 = next7;
+        const G__58710 = !(min_STAR_5 == null) ? Math.max(G__5879, min_STAR_5) : G__5879;
         if (!(max_STAR_6 == null)) {
-          return Math.min(G__54810, max_STAR_6);
+          return Math.min(G__58710, max_STAR_6);
         } else {
-          return G__54810;
+          return G__58710;
         }
         ;
       })();
@@ -9058,7 +11780,7 @@
   var round2 = function(v) {
     return Math.round(v * 100) / 100;
   };
-  var reduced_motion_QMARK_3 = function() {
+  var reduced_motion_QMARK_4 = function() {
     return matchMedia("(prefers-reduced-motion: reduce)").matches;
   };
   var has_attr_QMARK_ = function(el2, attr2) {
@@ -9212,14 +11934,14 @@
     }
     ;
   };
-  var jump_size_BANG_ = function(panel, px2) {
-    return panel.el.style[extent_key(panel.group)] = `${px2 ?? ""}px`;
+  var jump_size_BANG_ = function(panel, px3) {
+    return panel.el.style[extent_key(panel.group)] = `${px3 ?? ""}px`;
   };
-  var jump_content_BANG_ = function(panel, px2) {
+  var jump_content_BANG_ = function(panel, px3) {
     const temp__23062__auto__1 = panel.content;
     if (truth_(temp__23062__auto__1)) {
       const content2 = temp__23062__auto__1;
-      return content2.style[extent_key(panel.group)] = `${px2 ?? ""}px`;
+      return content2.style[extent_key(panel.group)] = `${px3 ?? ""}px`;
     }
     ;
   };
@@ -9349,7 +12071,7 @@
     }
     ;
     if (truth_((() => {
-      const or__23426__auto__9 = reduced_motion_QMARK_3();
+      const or__23426__auto__9 = reduced_motion_QMARK_4();
       if (truth_(or__23426__auto__9)) {
         return or__23426__auto__9;
       } else {
@@ -9414,9 +12136,9 @@
     }
     ;
   };
-  var apply_size_BANG_ = function(panel, px2) {
+  var apply_size_BANG_ = function(panel, px3) {
     const b1 = bounds(panel);
-    const v2 = clamp4(px2, b1.min, b1.max);
+    const v2 = clamp4(px3, b1.min, b1.max);
     const total3 = group_extent(panel.group);
     if (truth_((() => {
       const and__23442__auto__4 = panel.collapsed;
@@ -9550,12 +12272,12 @@
       if (truth_(s1.sessionCollapsed)) {
         persist_BANG_(panel);
       } else {
-        const px2 = current_extent(panel);
+        const px22 = current_extent(panel);
         const total3 = group_extent(panel.group);
         if (truth_(panel.pct)) {
-          panel["value"] = total3 > 0 ? round2(100 * (px2 / total3)) : 0;
+          panel["value"] = total3 > 0 ? round2(100 * (px22 / total3)) : 0;
         } else {
-          panel["value"] = px2;
+          panel["value"] = px22;
         }
         ;
         panel["target"] = measure(panel);
@@ -9934,7 +12656,7 @@
     }
     ;
   };
-  var scan_BANG_2 = function() {
+  var scan_BANG_3 = function() {
     return Array.from(document.querySelectorAll("[data-ui-panels-group]")).forEach((function(gel) {
       return init_group_BANG_(gel);
     }));
@@ -9944,14 +12666,14 @@
     if (deref(scan_scheduled) == null) {
       return reset_BANG_(scan_scheduled, requestAnimationFrame((function() {
         reset_BANG_(scan_scheduled, null);
-        return scan_BANG_2();
+        return scan_BANG_3();
       })));
     }
     ;
   };
-  window["__uiPanels"] = scan_BANG_2;
+  window["__uiPanels"] = scan_BANG_3;
   var start_BANG_ = function() {
-    scan_BANG_2();
+    scan_BANG_3();
     const mo1 = new MutationObserver((function(_) {
       return schedule_scan_BANG_();
     }));
@@ -10086,7 +12808,7 @@
 
   // .compiled/rating.mjs
   var pressed = atom(null);
-  var closest2 = function(el2, sel) {
+  var closest3 = function(el2, sel) {
     if (truth_((() => {
       const and__23442__auto__1 = el2;
       if (truth_(and__23442__auto__1)) {
@@ -10101,7 +12823,7 @@
     ;
   };
   var root_of = function(el2) {
-    return closest2(el2, "[data-ui-rating]");
+    return closest3(el2, "[data-ui-rating]");
   };
   var disabled_QMARK_2 = function(root) {
     return root.classList.contains("rating--disabled");
@@ -10127,7 +12849,7 @@
   };
   var on_pointerdown4 = function(e) {
     return reset_BANG_(pressed, (() => {
-      const temp__23062__auto__1 = closest2(e.target, ".rating-hit");
+      const temp__23062__auto__1 = closest3(e.target, ".rating-hit");
       if (truth_(temp__23062__auto__1)) {
         const hit2 = temp__23062__auto__1;
         const input3 = hit2.querySelector(".rating-input");
@@ -10148,7 +12870,7 @@
     })());
   };
   var on_click5 = function(e) {
-    const temp__23062__auto__1 = closest2(e.target, ".rating-hit");
+    const temp__23062__auto__1 = closest3(e.target, ".rating-hit");
     if (truth_(temp__23062__auto__1)) {
       const hit2 = temp__23062__auto__1;
       const root3 = root_of(hit2);
@@ -10202,7 +12924,7 @@
     }
     ;
   };
-  var on_keydown4 = function(e) {
+  var on_keydown5 = function(e) {
     const t1 = e.target;
     const k2 = e.key;
     if (truth_((() => {
@@ -10253,11 +12975,11 @@
     if (truth_(temp__23062__auto__2)) {
       const root3 = temp__23062__auto__2;
       if (_EQ_(t1, (() => {
-        const G__5494 = root3.querySelector(".rating-stars");
-        if (G__5494 == null) {
+        const G__5884 = root3.querySelector(".rating-stars");
+        if (G__5884 == null) {
           return null;
         } else {
-          return G__5494.lastElementChild;
+          return G__5884.lastElementChild;
         }
         ;
       })())) {
@@ -10271,7 +12993,7 @@
     document.addEventListener("pointerdown", on_pointerdown4, true);
     document.addEventListener("click", on_click5, true);
     document.addEventListener("change", on_change3);
-    document.addEventListener("keydown", on_keydown4);
+    document.addEventListener("keydown", on_keydown5);
     return document.addEventListener("animationend", on_animationend);
   };
   init_BANG_8();
@@ -10400,25 +13122,25 @@
     ;
   };
   var open_select = (() => {
-    const f550 = (function(var_args) {
-      const args5511 = [];
+    const f589 = (function(var_args) {
+      const args5901 = [];
       const len__23321__auto__2 = arguments.length;
-      let i5523 = 0;
+      let i5913 = 0;
       while (true) {
-        if (i5523 < len__23321__auto__2) {
-          args5511.push(arguments[i5523]);
-          let G__4 = i5523 + 1;
-          i5523 = G__4;
+        if (i5913 < len__23321__auto__2) {
+          args5901.push(arguments[i5913]);
+          let G__4 = i5913 + 1;
+          i5913 = G__4;
           continue;
         }
         ;
         break;
       }
       ;
-      const argseq__23513__auto__5 = 1 < args5511.length ? args5511.slice(1) : null;
-      return f550.cljs$core$IFn$_invoke$arity$variadic(arguments[0], argseq__23513__auto__5);
+      const argseq__23513__auto__5 = 1 < args5901.length ? args5901.slice(1) : null;
+      return f589.cljs$core$IFn$_invoke$arity$variadic(arguments[0], argseq__23513__auto__5);
     });
-    f550.cljs$core$IFn$_invoke$arity$variadic = (function(trigger, args) {
+    f589.cljs$core$IFn$_invoke$arity$variadic = (function(trigger, args) {
       dismiss_BANG_2();
       const options6 = (() => {
         const passed7 = first(args);
@@ -10513,8 +13235,8 @@
       }
       ;
     });
-    f550.cljs$lang$maxFixedArity = 1;
-    return f550;
+    f589.cljs$lang$maxFixedArity = 1;
+    return f589;
   })();
   window["__uiSelect"] = open_select;
 
@@ -10547,8 +13269,8 @@
     return window.matchMedia("(prefers-color-scheme: dark)").matches;
   };
   var resolve_effective = function(mode) {
-    const G__5541 = mode;
-    switch (G__5541) {
+    const G__5931 = mode;
+    switch (G__5931) {
       case "light":
         return "light";
         break;
@@ -10577,8 +13299,8 @@
   var apply_theme_BANG_ = function(mode) {
     const el1 = document.documentElement;
     suppress_transitions_BANG_();
-    const G__5552 = mode;
-    switch (G__5552) {
+    const G__5942 = mode;
+    switch (G__5942) {
       case "light":
         return el1.setAttribute("data-theme", "light");
         break;
@@ -10653,8 +13375,8 @@
   var toggle_BANG_ = function() {
     const current1 = get_mode();
     const next_mode2 = (() => {
-      const G__5563 = current1;
-      switch (G__5563) {
+      const G__5953 = current1;
+      switch (G__5953) {
         case "auto":
           return "light";
           break;
@@ -10777,7 +13499,7 @@
       ;
     })(), "duration": truth_(dur2) ? parseInt(dur2, 10) : null });
   };
-  var scan_BANG_3 = function() {
+  var scan_BANG_4 = function() {
     for (let G__1 of iterable(Array.from(document.querySelectorAll("[data-ui-toast]")))) {
       const el2 = G__1;
       consume_BANG_(el2);
@@ -10785,9 +13507,9 @@
     return null;
   };
   var init_BANG_10 = function() {
-    scan_BANG_3();
+    scan_BANG_4();
     const obs1 = new MutationObserver((function(_, _2) {
-      return scan_BANG_3();
+      return scan_BANG_4();
     }));
     return obs1.observe(document.body, { "childList": true, "subtree": true });
   };
@@ -10818,7 +13540,7 @@
     }
     ;
   };
-  var now2 = function() {
+  var now3 = function() {
     return performance.now();
   };
   var trigger_of = function(node) {
@@ -10973,8 +13695,8 @@
     ;
   };
   var opposite = function(side) {
-    const G__5571 = side;
-    switch (G__5571) {
+    const G__5961 = side;
+    switch (G__5961) {
       case "top":
         return "bottom";
         break;
@@ -11009,8 +13731,8 @@
     ;
   };
   var room = function(side, tr, vw, vh) {
-    const G__5581 = side;
-    switch (G__5581) {
+    const G__5971 = side;
+    switch (G__5971) {
       case "bottom":
         return vh - tr.bottom - gap2 - edge2;
         break;
@@ -11090,8 +13812,8 @@
     const cx8 = tr3.left + tr3.width / 2;
     const cy9 = tr3.top + tr3.height / 2;
     const left10 = clamp6((() => {
-      const G__55911 = side6;
-      switch (G__55911) {
+      const G__59811 = side6;
+      switch (G__59811) {
         case "left":
           return tr3.left - gap2 - w4;
           break;
@@ -11104,8 +13826,8 @@
       ;
     })(), edge2, vw1 - w4 - edge2);
     const top13 = clamp6((() => {
-      const G__56014 = side6;
-      switch (G__56014) {
+      const G__59914 = side6;
+      switch (G__59914) {
         case "top":
           return tr3.top - gap2 - h5;
           break;
@@ -11148,11 +13870,11 @@
     return s1.pending = null;
   };
   var unwatch_BANG_ = function() {
-    const G__5611 = get_state3().observer;
-    if (G__5611 == null) {
+    const G__6001 = get_state3().observer;
+    if (G__6001 == null) {
       return null;
     } else {
-      return G__5611.disconnect();
+      return G__6001.disconnect();
     }
     ;
   };
@@ -11166,7 +13888,7 @@
       unwatch_BANG_();
       describe_BANG_(t3, false);
       s1.open = null;
-      s1.lastClose = now2();
+      s1.lastClose = now3();
       return s1.layer.classList.remove("tooltip-layer--open", "tooltip-layer--instant");
     }
     ;
@@ -11320,7 +14042,7 @@
     if (truth_(or__23426__auto__1)) {
       return or__23426__auto__1;
     } else {
-      return now2() - s.lastClose < skip_ms;
+      return now3() - s.lastClose < skip_ms;
     }
     ;
   };
@@ -11586,14 +14308,14 @@
       ;
     })().split(","))));
     const override_keys4 = set(map(first, viewport_overrides));
-    const kept5 = remove((function(p__562) {
-      const vec__69 = p__562;
+    const kept5 = remove((function(p__601) {
+      const vec__69 = p__601;
       const k10 = nth(vec__69, 0, null);
       const _11 = nth(vec__69, 1, null);
       return contains_QMARK_(override_keys4, k10);
     }), entries1);
-    return join(", ", map((function(p__563) {
-      const vec__1215 = p__563;
+    return join(", ", map((function(p__602) {
+      const vec__1215 = p__602;
       const k16 = nth(vec__1215, 0, null);
       const v17 = nth(vec__1215, 1, null);
       if (v17 == null) {
@@ -11743,8 +14465,8 @@
     ;
   };
   var builtin_options = function(p, id) {
-    const G__5641 = id;
-    switch (G__5641) {
+    const G__6031 = id;
+    switch (G__6031) {
       case "quality":
         const lv3 = levels(p);
         const h4 = p.hls;
@@ -11805,8 +14527,8 @@
     ;
   };
   var builtin_value = function(p, id) {
-    const G__5651 = id;
-    switch (G__5651) {
+    const G__6041 = id;
+    switch (G__6041) {
       case "quality":
         const h3 = p.hls;
         if (truth_((() => {
@@ -11834,8 +14556,8 @@
     ;
   };
   var builtin_summary = function(p, id) {
-    const G__5661 = id;
-    switch (G__5661) {
+    const G__6051 = id;
+    switch (G__6051) {
       case "quality":
         const h3 = p.hls;
         const cur4 = truth_(h3) ? levels(p)[h3.currentLevel] : null;
@@ -11874,8 +14596,8 @@
     ;
   };
   var builtin_select_BANG_ = function(p, id, v) {
-    const G__5671 = id;
-    switch (G__5671) {
+    const G__6061 = id;
+    switch (G__6061) {
       case "quality":
         const temp__23062__auto__3 = p.hls;
         if (truth_(temp__23062__auto__3)) {
@@ -12296,9 +15018,9 @@
       scrub5.setAttribute("aria-valuenow", Math.round(t4));
       scrub5.setAttribute("aria-valuetext", `${fmt(t4) ?? ""}${" of "}${fmt(d3) ?? ""}`);
       const b11 = v2.buffered;
-      const n56812 = b11.length;
+      const n60712 = b11.length;
       let i13 = 0;
-      for (; i13 < n56812; i13++) {
+      for (; i13 < n60712; i13++) {
         b11.start(i13) <= t4 + 0.5 ? scrub5.style.setProperty("--vp-buffered", b11.end(i13) / d3) : null;
       }
       ;
@@ -12455,8 +15177,8 @@
   };
   var act_BANG_ = function(p, a) {
     const v1 = p.video;
-    const G__5692 = a;
-    switch (G__5692) {
+    const G__6082 = a;
+    switch (G__6082) {
       case "play":
         toggle_play_BANG_(p);
         break;
@@ -12628,8 +15350,8 @@
     scrub.addEventListener("pointerup", end7);
     scrub.addEventListener("pointercancel", end7);
     return scrub.addEventListener("keydown", (function(e) {
-      const G__5709 = e.key;
-      switch (G__5709) {
+      const G__6099 = e.key;
+      switch (G__6099) {
         case "ArrowLeft":
           e.preventDefault();
           e.stopPropagation();
@@ -13215,7 +15937,7 @@
     sync_BANG_3(p2);
     return tick_BANG_(p2);
   };
-  var teardown_BANG_ = function(root) {
+  var teardown_BANG_2 = function(root) {
     const temp__23062__auto__1 = players.get(root);
     if (truth_(temp__23062__auto__1)) {
       const p2 = temp__23062__auto__1;
@@ -13228,7 +15950,7 @@
     }
     ;
   };
-  var scan_BANG_4 = function() {
+  var scan_BANG_5 = function() {
     qa(document, "[data-video-player]").forEach((function(root) {
       const temp__23007__auto__1 = players.get(root);
       if (truth_(temp__23007__auto__1)) {
@@ -13255,13 +15977,13 @@
       if (truth_(root.isConnected)) {
         return null;
       } else {
-        return teardown_BANG_(root);
+        return teardown_BANG_2(root);
       }
       ;
     }));
   };
   var boot_BANG_ = function() {
-    scan_BANG_4();
+    scan_BANG_5();
     document.addEventListener("keydown", on_document_key);
     document.addEventListener("fullscreenchange", (function() {
       return players.forEach((function(p) {
@@ -13287,7 +16009,7 @@
       } else {
         return reset_BANG_(raf1, requestAnimationFrame((function() {
           reset_BANG_(raf1, null);
-          return scan_BANG_4();
+          return scan_BANG_5();
         })));
       }
       ;
@@ -13295,9 +16017,9 @@
     return obs2.observe(document.body, { "childList": true, "subtree": true, "attributes": true, "attributeFilter": ["data-src"] });
   };
   window["__uiVideoPlayer"] = (function(root) {
-    let temp__23062__auto__571 = players.get(root);
-    if (truth_(temp__23062__auto__571)) {
-      const p1 = temp__23062__auto__571;
+    let temp__23062__auto__610 = players.get(root);
+    if (truth_(temp__23062__auto__610)) {
+      const p1 = temp__23062__auto__610;
       return { "video": p1.video, "play": (function() {
         return autoplay_BANG_(p1);
       }), "pause": (function() {

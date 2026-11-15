@@ -1,4 +1,481 @@
-/* ── Lightbox overlay ─────────────────────────────────────────────── */
+/* ── Lightbox viewer (ui.lightbox/lightbox) ─────────────────────────
+   Markup from ui.lightbox, behaviour from the ui.js.lightbox runtime
+   (swipe, zoom, pull to dismiss, morph, keyboard). State the runtime
+   writes on .ui-lightbox: data-zoomed, data-pulling, data-opening,
+   data-closing, data-active-type, --lightbox-pull-progress (0 → 1). */
+
+.ui-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  color: white;
+  overscroll-behavior: contain;
+  -webkit-tap-highlight-color: transparent;
+  --lightbox-pull-progress: 0;
+  --lightbox-chrome-top: calc(var(--size-16) + env(safe-area-inset-top, 0px));
+  --lightbox-chrome-bottom: calc(var(--size-14) + env(safe-area-inset-bottom, 0px));
+  --lightbox-thumb-size: var(--size-12);
+}
+
+/* The runtime hears this animation start, so it notices every lightbox
+   that mounts or unhides without watching the whole document. */
+.ui-lightbox:not([hidden]) {
+  animation: ui-lightbox-mount 1ms; /* lint-allow */
+}
+
+@keyframes ui-lightbox-mount {
+  from { outline-color: transparent; }
+  to { outline-color: transparent; }
+}
+
+.ui-lightbox[hidden] {
+  display: none;
+}
+
+/* a preview inside its parent (docs, examples): no page-level effects */
+.ui-lightbox--contained {
+  position: absolute;
+  z-index: auto;
+}
+
+/* Until the runtime has placed the first slide (and started the morph),
+   nothing paints. */
+.ui-lightbox:not([data-ready]) {
+  visibility: hidden;
+}
+
+.ui-lightbox-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.96);
+  opacity: calc(1 - var(--lightbox-pull-progress) * 0.85);
+  transition: opacity var(--duration-standard) var(--ease-standard);
+}
+
+.ui-lightbox[data-pulling] .ui-lightbox-backdrop {
+  transition: none;
+}
+
+/* ── Slides: a native scroll-snap strip ── */
+
+.ui-lightbox-slides {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior: contain;
+  overflow-anchor: none;
+  scrollbar-width: none;
+  /* horizontal swipes are native scrolling; pinch and vertical pulls
+     reach the runtime as pointer events */
+  touch-action: pan-x;
+}
+
+.ui-lightbox-slides::-webkit-scrollbar {
+  display: none;
+}
+
+.ui-lightbox[data-zoomed] .ui-lightbox-slides,
+.ui-lightbox[data-pulling] .ui-lightbox-slides,
+.ui-lightbox[data-count="1"] .ui-lightbox-slides {
+  overflow-x: hidden;
+  touch-action: none;
+}
+
+.ui-lightbox-slide {
+  position: relative;
+  flex: 0 0 100%;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding:
+    var(--lightbox-chrome-top)
+    calc(var(--size-16) + env(safe-area-inset-right, 0px))
+    var(--lightbox-chrome-bottom)
+    calc(var(--size-16) + env(safe-area-inset-left, 0px));
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
+}
+
+.ui-lightbox[data-thumbnails] .ui-lightbox-slide {
+  padding-bottom: calc(var(--lightbox-chrome-bottom) + var(--lightbox-thumb-size));
+}
+
+.ui-lightbox-media {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  /* a placeholder or a width/height hint whose ratio is a hair off
+     crops instead of stretching */
+  object-fit: cover;
+  border-radius: var(--radius-surface);
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-user-drag: none;
+  -webkit-touch-callout: none;
+}
+
+img.ui-lightbox-media {
+  cursor: zoom-in;
+}
+
+.ui-lightbox[data-zoomed] img.ui-lightbox-media {
+  cursor: grab;
+}
+
+.ui-lightbox[data-panning] img.ui-lightbox-media {
+  cursor: grabbing;
+}
+
+video.ui-lightbox-media {
+  object-fit: contain;
+  background: black;
+  -webkit-user-select: auto;
+  user-select: auto;
+}
+
+.ui-lightbox-content {
+  max-width: 100%;
+  max-height: 100%;
+  overflow: auto;
+  touch-action: pan-x pan-y;
+  color: var(--fg-0);
+}
+
+/* ── Loading and errors ── */
+
+.ui-lightbox-slide[data-state="loading"]::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--size-8);
+  height: var(--size-8);
+  margin: calc(var(--size-4) * -1) 0 0 calc(var(--size-4) * -1);
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  border-top-color: white;
+  opacity: 0;
+  animation:
+    ui-lightbox-spin 0.8s linear infinite, /* lint-allow */
+    ui-lightbox-fade-in var(--duration-fast) var(--ease-enter) var(--duration-considered) forwards;
+}
+
+@keyframes ui-lightbox-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes ui-lightbox-fade-in {
+  to { opacity: 1; }
+}
+
+.ui-lightbox-error {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--size-3);
+  padding: var(--size-6);
+  border-radius: var(--radius-surface);
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.8);
+  font-size: var(--font-sm);
+  text-align: center;
+}
+
+.ui-lightbox-error a {
+  color: white;
+}
+
+.ui-lightbox-slide[data-state="error"] .ui-lightbox-error {
+  display: flex;
+}
+
+.ui-lightbox-slide[data-state="error"] .ui-lightbox-media {
+  display: none;
+}
+
+/* ── Chrome ── */
+
+.ui-lightbox-chrome {
+  transition: opacity var(--duration-standard) var(--ease-standard);
+}
+
+.ui-lightbox[data-opening] .ui-lightbox-chrome,
+.ui-lightbox[data-closing] .ui-lightbox-chrome,
+.ui-lightbox[data-pulling] .ui-lightbox-chrome {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ui-lightbox-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--size-2);
+  padding:
+    calc(var(--size-3) + env(safe-area-inset-top, 0px))
+    calc(var(--size-3) + env(safe-area-inset-right, 0px))
+    var(--size-3)
+    calc(var(--size-3) + env(safe-area-inset-left, 0px));
+  background: linear-gradient(rgba(0, 0, 0, 0.4), transparent);
+  pointer-events: none;
+}
+
+.ui-lightbox-top > * {
+  pointer-events: auto;
+}
+
+.ui-lightbox-counter {
+  padding-inline: var(--size-2);
+  font-size: var(--font-sm);
+  font-variant-numeric: tabular-nums;
+  color: rgba(255, 255, 255, 0.85);
+  pointer-events: none;
+}
+
+.ui-lightbox-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--size-2);
+  margin-left: auto;
+}
+
+.ui-lightbox-button {
+  flex: 0 0 auto;
+  width: var(--control-lg);
+  height: var(--control-lg);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.45);
+  color: white;
+  text-decoration: none;
+  cursor: pointer;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  transition:
+    background var(--duration-fast) var(--ease-standard),
+    opacity var(--duration-fast) var(--ease-standard),
+    transform var(--duration-fast) var(--ease-standard);
+}
+
+.ui-lightbox-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.ui-lightbox-button:active {
+  transform: scale(0.94);
+}
+
+.ui-lightbox-button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.ui-lightbox-button:focus-visible {
+  outline: var(--focus-outline);
+  outline-offset: 2px;
+}
+
+.ui-lightbox-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.ui-lightbox-nav:active {
+  transform: translateY(-50%) scale(0.94);
+}
+
+.ui-lightbox-prev {
+  left: calc(var(--size-3) + env(safe-area-inset-left, 0px));
+}
+
+.ui-lightbox-next {
+  right: calc(var(--size-3) + env(safe-area-inset-right, 0px));
+}
+
+.ui-lightbox-nav:disabled {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ui-lightbox[data-count="1"] .ui-lightbox-nav,
+.ui-lightbox[data-count="1"] .ui-lightbox-counter,
+.ui-lightbox[data-count="1"] .ui-lightbox-thumbs {
+  display: none;
+}
+
+/* zoom buttons only for images, and only where there is a mouse */
+.ui-lightbox:not([data-active-type="image"]) .ui-lightbox-zoom-button {
+  display: none;
+}
+
+/* touch screens swipe and pinch: the buttons would only cover the photo */
+html.clj-ui-touch .ui-lightbox-nav,
+html.clj-ui-touch .ui-lightbox-zoom-button {
+  display: none;
+}
+
+.ui-lightbox-caption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding:
+    var(--size-6)
+    calc(var(--size-4) + env(safe-area-inset-right, 0px))
+    calc(var(--size-4) + env(safe-area-inset-bottom, 0px))
+    calc(var(--size-4) + env(safe-area-inset-left, 0px));
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.55));
+  color: rgba(255, 255, 255, 0.92);
+  font-size: var(--font-sm);
+  line-height: var(--leading-body);
+  text-align: center;
+}
+
+.ui-lightbox[data-thumbnails] .ui-lightbox-caption {
+  bottom: calc(var(--lightbox-thumb-size) + var(--size-4));
+  background: none;
+}
+
+.ui-lightbox[data-zoomed] .ui-lightbox-caption,
+.ui-lightbox[data-zoomed] .ui-lightbox-thumbs,
+.ui-lightbox[data-zoomed] .ui-lightbox-footer {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ui-lightbox-footer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  padding:
+    var(--size-3)
+    calc(var(--size-3) + env(safe-area-inset-right, 0px))
+    calc(var(--size-3) + env(safe-area-inset-bottom, 0px))
+    calc(var(--size-3) + env(safe-area-inset-left, 0px));
+}
+
+.ui-lightbox[data-thumbnails] .ui-lightbox-footer {
+  bottom: calc(var(--lightbox-thumb-size) + var(--size-4));
+}
+
+/* ── Thumbnail strip ── */
+
+.ui-lightbox-thumbs {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  gap: var(--size-1);
+  overflow-x: auto;
+  scrollbar-width: none;
+  /* half a strip of padding lets the first and last thumb center too */
+  padding:
+    var(--size-2)
+    calc(50% - var(--lightbox-thumb-size) / 2)
+    calc(var(--size-2) + env(safe-area-inset-bottom, 0px));
+  touch-action: pan-x;
+}
+
+.ui-lightbox-thumbs::-webkit-scrollbar {
+  display: none;
+}
+
+.ui-lightbox-thumb-button {
+  flex: 0 0 auto;
+  width: var(--lightbox-thumb-size);
+  height: var(--lightbox-thumb-size);
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.1);
+  opacity: 0.5;
+  cursor: pointer;
+  transition:
+    opacity var(--duration-fast) var(--ease-standard),
+    box-shadow var(--duration-fast) var(--ease-standard);
+}
+
+.ui-lightbox-thumb-button:hover {
+  opacity: 0.8;
+}
+
+.ui-lightbox-thumb-button[aria-current="true"] {
+  opacity: 1;
+  box-shadow: inset 0 0 0 2px white;
+}
+
+.ui-lightbox-thumb-button:focus-visible {
+  outline: var(--focus-outline);
+  outline-offset: 2px;
+}
+
+.ui-lightbox-thumb-button img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+/* ── Phones: edge to edge, chrome over the photo ── */
+
+@media (max-width: 640px) {
+  .ui-lightbox-slide {
+    padding:
+      env(safe-area-inset-top, 0px)
+      env(safe-area-inset-right, 0px)
+      env(safe-area-inset-bottom, 0px)
+      env(safe-area-inset-left, 0px);
+  }
+
+  .ui-lightbox[data-thumbnails] .ui-lightbox-slide {
+    padding-bottom: calc(var(--lightbox-thumb-size) + var(--size-4) + env(safe-area-inset-bottom, 0px));
+  }
+
+  .ui-lightbox-media {
+    border-radius: 0;
+  }
+}
+
+/* ── The page behind an open lightbox ── */
+
+html[data-lightbox-open] {
+  overflow: hidden;
+  padding-right: var(--lightbox-scrollbar, 0px);
+}
+
+html[data-lightbox-open] body {
+  overflow: hidden;
+}
+
+/* iOS starts a text selection on the page behind during a zoomed tap and pan */
+html.clj-ui-touch[data-lightbox-open] {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* ── Legacy overlay (hand-built markup in apps not yet on ui.lightbox) ── */
 
 .lightbox-overlay {
   position: fixed;
@@ -48,8 +525,8 @@
   background: rgba(0, 0, 0, 0.5);
   border: none;
   border-radius: 50%;
-  width: 36px;
-  height: 36px;
+  width: var(--control-lg);
+  height: var(--control-lg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -64,6 +541,12 @@
 }
 
 /* ── Thumbnail ───────────────────────────────────────────────────── */
+
+/* the thumbnail an open lightbox morphed out of: the photo is "in" the
+   viewer, so its slot stays empty until the close morph lands */
+[data-lightbox-source] {
+  visibility: hidden !important;
+}
 
 .lightbox-thumb {
   cursor: pointer;

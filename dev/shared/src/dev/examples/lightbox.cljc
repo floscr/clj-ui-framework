@@ -1,17 +1,34 @@
 (ns dev.examples.lightbox
-  (:require [dev.example :refer [example sx row]]
+  (:require [dev.example :refer [example sx row note]]
             [dev.examples.sample :as sample]
             [ui.lightbox :as lightbox]))
 
 (def examples
-  [(example :thumbnails "Thumbnails (sized by the host with a class)"
+  [(example :gallery "Gallery: thumbnails open a managed lightbox"
      (fn []
-       (apply row
-              (map (fn [{:keys [src alt]}] (lightbox/image-thumbnail {:src src :alt alt :class "example-thumb"}))
-                   sample/images))))
+       [:div
+        (note "Click a photo. Swipe or use the arrows, pinch / ctrl-scroll / double-click to zoom, drag down or flick a trackpad up or down to close.")
+        (apply row
+               (map-indexed (fn [i {:keys [src alt]}]
+                              (lightbox/image-thumbnail {:src src :alt alt :class "example-thumb"
+                                                         :lightbox "example-lightbox-gallery" :index i}))
+                            sample/photos))
+        (lightbox/lightbox {:id "example-lightbox-gallery"
+                            :open false
+                            :items sample/photos
+                            :thumbnails true
+                            :actions [(lightbox/action {:icon-name :download :label "Download"
+                                                        :href (:src (first sample/photos)) :download true})]})]))
 
-   (example :overlay "Overlay (contained preview)"
+   (example :single "One image"
      (fn []
-       [:div {:class "example-contained"
-              :style (sx {:position "relative" :height "300px" :border-radius "var(--radius-panel)" :overflow "hidden"})}
-        (lightbox/lightbox {:src (:src (first sample/images)) :alt "Indigo"})]))])
+       (let [{:keys [src alt]} (first sample/images)]
+         [:div
+          (row (lightbox/image-thumbnail {:src src :alt alt :class "example-thumb"
+                                          :lightbox "example-lightbox-single" :index 0}))
+          (lightbox/lightbox {:id "example-lightbox-single" :open false :src src :alt alt})])))
+
+   (example :overlay "Contained preview"
+     (fn []
+       [:div {:style (sx {:position "relative" :height "360px" :border-radius "var(--radius-panel)" :overflow "hidden"})}
+        (lightbox/lightbox {:contained true :items sample/photos :index 1})]))])

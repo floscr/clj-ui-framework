@@ -310,7 +310,7 @@
 
 (def !cal-state (atom {:year 2026 :month 3 :selected-date nil}))
 
-(def !lightbox-state (atom {:src nil}))
+(def !lightbox-state (atom {:index nil}))
 
 (def sample-calendar-events
   [{:title "Team standup"     :date "2026-03-29" :time-start "09:00" :time-end "09:30" :color "accent"}
@@ -412,23 +412,31 @@
     :alt "Orange"}])
 
 (defn lightbox-demo []
-  (let [{:keys [src]} @!lightbox-state]
+  (let [{:keys [index]} @!lightbox-state]
     (section "Lightbox"
       [:p {:style {"color" "var(--fg-2)" "font-size" "var(--font-sm)"}}
-       "Click a thumbnail to open the fullscreen lightbox overlay. Pinch, double-tap or scroll to zoom; drag to pan."]
+       "Click a thumbnail. Swipe or use the arrows; pinch, ctrl-scroll or double-click to zoom; drag down to close."]
       (into [:div {:style {"display" "flex" "gap" "0.75rem" "flex-wrap" "wrap"}}]
-            (map (fn [{img-src :src img-alt :alt}]
-                   (lightbox/image-thumbnail
-                     {:src img-src
-                      :alt img-alt
-                      :on-click (fn []
-                                  (swap! !lightbox-state assoc :src img-src)
-                                  (render!))}))
-                 sample-images))
-      (lightbox/lightbox {:src src
-                          :on-close (fn []
-                                      (swap! !lightbox-state assoc :src nil)
-                                      (render!))}))))
+            (map-indexed (fn [i {img-src :src img-alt :alt}]
+                           (lightbox/image-thumbnail
+                             {:src img-src
+                              :alt img-alt
+                              :on-click (fn []
+                                          (swap! !lightbox-state assoc :index i)
+                                          (render!))}))
+                         sample-images))
+      ;; host-controlled: mounted while open, the index tracked through
+      ;; :on-change, unmounted in :on-close (after the close morph)
+      (when (some? index)
+        (lightbox/lightbox {:items sample-images
+                            :index index
+                            :thumbnails true
+                            :on-change (fn [i]
+                                         (swap! !lightbox-state assoc :index i)
+                                         (render!))
+                            :on-close (fn []
+                                        (swap! !lightbox-state assoc :index nil)
+                                        (render!))})))))
 
 ;; ── DialKit Demo ────────────────────────────────────────────────────
 

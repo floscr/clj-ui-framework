@@ -106,7 +106,7 @@ Refines capability via enumerateDevices in secure contexts.
 ## Related
 
 - [Drop zone](drop-zone.md): A generous target for dropping or picking files, with a full-page overlay variant and a click-to-add label.
-- [Lightbox](lightbox.md): A fullscreen image overlay with pinch, wheel and double-tap zoom and drag to pan, plus a clickable thumbnail.
+- [Lightbox](lightbox.md): A fullscreen viewer for one image or a gallery: swipe, pinch and wheel zoom, pull to dismiss, and a morph out of and back into the thumbnail.
 - [Form](form.md): Labeled fields, inputs, textareas, checkboxes, radios, file and range inputs, joined groups and a search bar.
 
 ## Guidance for AI tools
