@@ -23,7 +23,8 @@
    which :on-change / :on-close listen to."
   (:require [clojure.string :as str]
             [ui.icon :as icon]
-            [ui.util :as util]))
+            [ui.util :as util]
+            [ui.video-player :as vp]))
 
 (def default-labels
   {:dialog        "Image viewer"
@@ -147,18 +148,22 @@
         cls ["ui-lightbox-media" (:class item)]]
     (case t
       "video"
-      [(el :video {:class cls
-                   :data-src src
-                   :poster (or poster thumb)
-                   :width width
-                   :height height
-                   :controls true
-                   :playsinline true
-                   :webkit-playsinline true
-                   :preload "none"
-                   :loop (when (:loop item) true)
-                   :data-autoplay (when (:autoplay item) "")
-                   :data-muted (when (:muted item) "")})]
+      ;; ui.video-player, sized to the video's aspect by the runtime. It
+      ;; renders without a source; the lightbox runtime hands it
+      ;; data-lightbox-src when the slide is shown, so a gallery of videos
+      ;; doesn't buffer them all at once
+      [(el :div {:class ["ui-lightbox-media" "ui-lightbox-player" (:class item)]
+                 :data-width (some-> width str)
+                 :data-height (some-> height str)
+                 :data-autoplay (when (:autoplay item) "")
+                 :data-muted (when (:muted item) "")
+                 :data-loop (when (:loop item) "")}
+           (vp/video-player (merge {:poster (or poster thumb)}
+                                   (:player item)
+                                   {:src ""
+                                    :fit :fill
+                                    :attrs (merge (:attrs (:player item))
+                                                  {:data-lightbox-src src})})))]
 
       "content"
       [(el :div {:class ["ui-lightbox-content" (:class item)]} content)]
@@ -210,9 +215,12 @@
    Props:
      :items          - [{:src :thumb :alt :caption :width :height :key
                          :type :poster :content :href :class
-                         :autoplay :loop :muted} …]
+                         :autoplay :loop :muted :player} …]
                        :type :image (default), :video, or :content
-                       (with :content hiccup, no zoom)
+                       (with :content hiccup, no zoom). A video plays in
+                       ui.video-player; :player passes its props through
+                       (:title :tracks :segments :buttons :controls
+                       :variant :on-select …). It loads only once shown.
      :src / :alt     - shorthand for a single image
      :index          - the item shown (default 0)
      :id             - element id, for managed thumbnails (:lightbox id)

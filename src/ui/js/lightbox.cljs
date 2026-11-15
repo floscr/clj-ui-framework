@@ -56,7 +56,7 @@
   (str "button, a, input, textarea, select, label, video, audio, [contenteditable],"
        " .ui-lightbox-content, .ui-lightbox-top, .ui-lightbox-footer,"
        " .ui-lightbox-thumbs, .ui-lightbox-caption, .ui-lightbox-error,"
-       " [data-lightbox-no-gesture], .lightbox-close, .lightbox-caption"))
+       " .video-player, [data-lightbox-no-gesture], .lightbox-close, .lightbox-caption"))
 
 (def ^:private ease-out "cubic-bezier(0.32, 0.72, 0, 1)")
 (def ^:private ease-coast "cubic-bezier(0.2, 0.8, 0.2, 1)")
@@ -229,6 +229,25 @@
 (defn- image? [media]
   (and media (= "IMG" (.-tagName media))))
 
+(defn- player-of
+  "The ui.video-player root inside a video slide's media box."
+  [media]
+  (when (and media (.contains (.-classList media) "ui-lightbox-player"))
+    (.querySelector media "[data-video-player]")))
+
+(defn- controller
+  "The video-player runtime's controller for a media box, once it exists."
+  [media]
+  (when-let [p (player-of media)]
+    (when-let [f (aget js/window "__uiVideoPlayer")]
+      (f p))))
+
+(defn- inner-video [media]
+  (cond
+    (nil? media) nil
+    (= "VIDEO" (.-tagName media)) media
+    :else (.querySelector media "video")))
+
 (defn- active-slide [root]
   (slide-at root (.-index (state root))))
 
@@ -251,20 +270,23 @@
    cap), else the full image's natural size once loaded (a cap), else
    the thumbnail's (no cap: the full image is bigger)."
   [m]
-  (let [hw (js/parseFloat (.getAttribute m "width"))
-        hh (js/parseFloat (.getAttribute m "height"))]
+  (let [hw (js/parseFloat (or (.getAttribute m "width") (.getAttribute m "data-width")))
+        hh (js/parseFloat (or (.getAttribute m "height") (.getAttribute m "data-height")))
+        v (when-not (image? m) (inner-video m))]
     (cond
       (and (pos? hw) (pos? hh)) [hw hh true]
       (image? m)
       (when (pos? (.-naturalWidth m))
         [(.-naturalWidth m) (.-naturalHeight m) (= "full" (aget m "__lbShown"))])
-      :else
-      (when (pos? (.-videoWidth m))
-        [(.-videoWidth m) (.-videoHeight m) false]))))
+      (and v (pos? (.-videoWidth v)))
+      [(.-videoWidth v) (.-videoHeight v) false]
+      ;; a player before its metadata: 16:9 until the video says otherwise
+      (player-of m) [1600 900 false]
+      :else nil)))
 
 (defn- fit! [slide]
   (let [m (media-of slide)]
-    (when (and m (not= "DIV" (.-tagName m)))
+    (when m
       (when-let [[nw nh cap?] (natural-size m)]
         (let [{:keys [w h]} (content-box slide)
               k (js/Math.min (/ w nw) (/ h nh) (if cap? 1 js/Infinity))]
@@ -320,6 +342,12 @@
                 (set! (.-onerror m) (fn [] (set-slide-state! slide "error")))
                 (show-src! slide m full "full")))
           (fit! slide))
+
+        (player-of m)
+        ;; the source itself waits for the slide to be shown (sync-videos!)
+        (do (when-let [v (inner-video m)]
+              (.addEventListener v "loadedmetadata" (fn [_] (fit! slide))))
+            (fit! slide))
 
         (= "VIDEO" (.-tagName m))
         (do (set! (.-onloadedmetadata m) (fn [] (fit! slide)))
@@ -535,18 +563,54 @@
 
 (declare hide-source! request-close!)
 
-(defn- sync-videos! [root]
-  (let [i (.-index (state root))]
+(defn- start-player!
+  "Hand a shown video slide's player its source, then autoplay it when
+   the item asks."
+  [m]
+  (let [p (player-of m)
+        v (inner-video m)
+        autoplay? (.hasAttribute m "data-autoplay")
+        first-show? (and p (= "" (or (.getAttribute p "data-src") "")))]
+    (when v
+      (when (.hasAttribute m "data-loop") (set! (.-loop v) true))
+      ;; iOS only autoplays a video that is muted, as a property, when
+      ;; play() is called
+      (when (.hasAttribute m "data-muted") (set! (.-muted v) true)))
+    (if first-show?
+      (do
+        ;; the player autoplays once its source has loaded (and falls back
+        ;; to muted when the browser refuses sound); play() now would run
+        ;; before there is anything to play
+        (when autoplay? (.setAttribute p "data-autoplay" "true"))
+        ;; the video-player runtime loads on this attribute change
+        (.setAttribute p "data-src" (.getAttribute p "data-lightbox-src")))
+      (when (and autoplay? v)
+        (if-let [c (controller m)]
+          ((.-play c))
+          (.catch (.play v) (fn [_] nil)))))))
+
+(defn- pause-media! [m]
+  (if-let [c (controller m)]
+    ((.-pause c))
+    (when-let [v (inner-video m)]
+      (when-not (.-paused v) (.pause v)))))
+
+(defn- sync-videos!
+  "Only the shown slide's video plays."
+  [root]
+  (let [st (state root)
+        i (.-index st)]
     (doseq [[j s] (map-indexed vector (slide-els root))]
       (let [m (media-of s)]
-        (when (and m (= "VIDEO" (.-tagName m)))
-          (if (not= i j)
-            (when-not (.-paused m) (.pause m))
-            (when (.hasAttribute m "data-autoplay")
-              ;; iOS only autoplays a video that is muted, as a property,
-              ;; when play() is called
-              (when (.hasAttribute m "data-muted") (set! (.-muted m) true))
-              (.catch (.play m) (fn [_] nil)))))))))
+        (when (and m (inner-video m))
+          (if (= i j)
+            (when-not (.hasAttribute root "data-opening")
+              (if (player-of m)
+                (start-player! m)
+                (when (.hasAttribute m "data-autoplay")
+                  (when (.hasAttribute m "data-muted") (set! (.-muted m) true))
+                  (.catch (.play m) (fn [_] nil)))))
+            (pause-media! m)))))))
 
 (defn- center-thumb! [root smooth?]
   (let [strip (.querySelector root ".ui-lightbox-thumbs")
@@ -775,8 +839,11 @@
         contained? (.hasAttribute root "data-contained")
         src-el (when-not contained? (source-for root i))
         s (visible-rect src-el)
-        d (when (and m (not= "DIV" (.-tagName m))) (.getBoundingClientRect m))
-        done (fn [] (.removeAttribute root "data-opening"))]
+        d (when m (.getBoundingClientRect m))
+        done (fn []
+               (.removeAttribute root "data-opening")
+               ;; a video starts once it has landed
+               (sync-videos! root))]
     (.setAttribute root "data-ready" "")
     (cond
       (or contained? (reduced-motion?))
@@ -832,7 +899,7 @@
             ;; (behind the overlay, so the jump is never seen)
             (.scrollIntoView src-el {:block "nearest" :inline "nearest"}))
         s (visible-rect src-el)
-        media? (and m (not= "DIV" (.-tagName m)) (not= "error" (.getAttribute slide "data-state")))
+        media? (and m (not= "error" (.getAttribute slide "data-state")))
         from-t (when media?
                  (if (aget m "__lbAnim")
                    (do (live-pose! m) (.-transform (.-style m)))
@@ -889,7 +956,7 @@
     (when-let [old (.-source st)] (.removeAttribute old "data-lightbox-source"))
     (doseq [s (slide-els root)]
       (when-let [m (media-of s)]
-        (when (= "VIDEO" (.-tagName m)) (.pause m))))
+        (when (inner-video m) (pause-media! m))))
     (aset root "__lb" nil)
     (remove-surface! root)))
 
@@ -1010,7 +1077,8 @@
         ;; the same viewer, re-created by the host: no second morph
         (do (.setAttribute root "data-ready" "")
             (.removeAttribute root "data-opening")
-            (hide-source! root))
+            (hide-source! root)
+            (sync-videos! root))
         (.then (wait-for-media root)
                (fn []
                  (when (identical? st (state root))
@@ -1493,10 +1561,14 @@
           ctx (viewer-ctx root)
           zoomed (and ctx (zoomed? (:media ctx)))
           step (* 0.1 js/window.innerWidth)
+          ;; a focused video player keeps its own keys (seek, volume)
+          in-player? (some? (closest t ".video-player"))
           handled
-          (when-not (or mod? (.-closing st))
+          (when-not (or mod? (.-closing st) (and in-player? (not= "Escape" k)))
             (case k
-              "Escape" (do (request-close! root) true)
+              "Escape" (when-not (.querySelector root ".video-player[data-panel-open]")
+                         (request-close! root)
+                         true)
               "ArrowLeft" (when-not (or (typing-target? t) (closest t "video"))
                             (if zoomed (pan-by! root step 0) (go-to! root (dec (.-index st)))) true)
               "ArrowRight" (when-not (or (typing-target? t) (closest t "video"))

@@ -3527,7 +3527,7 @@ The viewer. Renders nothing without :src or :items. The runtime owns everything 
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `:items` | `vector` | – | Maps of :src :thumb :alt :caption :width :height :key :type (:image, :video, :content) :poster :content :href :class :autoplay :loop :muted. |
+| `:items` | `vector` | – | Maps of :src :thumb :alt :caption :width :height :key :type (:image, :video, :content) :poster :content :href :class :autoplay :loop :muted :player. Videos play in ui.video-player (:player passes its props through) and load only once shown. |
 | `:src` | `string` | – | Shorthand for one image. |
 | `:alt` | `string` | `"image"` | Alt text with :src. |
 | `:index` | `number` | `0` | The item shown on open; changing it navigates. |

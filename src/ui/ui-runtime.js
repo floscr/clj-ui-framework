@@ -5906,7 +5906,7 @@
   var root_sel = ".ui-lightbox[data-lightbox]";
   var legacy_sel = ".lightbox-overlay";
   var legacy_image_sel = ".lightbox-image";
-  var no_gesture_sel = `${"button, a, input, textarea, select, label, video, audio, [contenteditable],"}${" .ui-lightbox-content, .ui-lightbox-top, .ui-lightbox-footer,"}${" .ui-lightbox-thumbs, .ui-lightbox-caption, .ui-lightbox-error,"}${" [data-lightbox-no-gesture], .lightbox-close, .lightbox-caption"}`;
+  var no_gesture_sel = `${"button, a, input, textarea, select, label, video, audio, [contenteditable],"}${" .ui-lightbox-content, .ui-lightbox-top, .ui-lightbox-footer,"}${" .ui-lightbox-thumbs, .ui-lightbox-caption, .ui-lightbox-error,"}${" .video-player, [data-lightbox-no-gesture], .lightbox-close, .lightbox-caption"}`;
   var ease_out = "cubic-bezier(0.32, 0.72, 0, 1)";
   var ease_coast = "cubic-bezier(0.2, 0.8, 0.2, 1)";
   var morph_ms = 340;
@@ -6173,6 +6173,49 @@
     }
     ;
   };
+  var player_of = function(media) {
+    if (truth_((() => {
+      const and__23442__auto__1 = media;
+      if (truth_(and__23442__auto__1)) {
+        return media.classList.contains("ui-lightbox-player");
+      } else {
+        return and__23442__auto__1;
+      }
+      ;
+    })())) {
+      return media.querySelector("[data-video-player]");
+    }
+    ;
+  };
+  var controller2 = function(media) {
+    const temp__23062__auto__1 = player_of(media);
+    if (truth_(temp__23062__auto__1)) {
+      const p2 = temp__23062__auto__1;
+      const temp__23062__auto__3 = window["__uiVideoPlayer"];
+      if (truth_(temp__23062__auto__3)) {
+        const f4 = temp__23062__auto__3;
+        return f4(p2);
+      }
+      ;
+    }
+    ;
+  };
+  var inner_video = function(media) {
+    if (media == null) {
+      return null;
+    } else {
+      if ("VIDEO" === media.tagName) {
+        return media;
+      } else {
+        if ("else") {
+          return media.querySelector("video");
+        } else {
+          return null;
+        }
+      }
+    }
+    ;
+  };
   var active_slide = function(root) {
     return slide_at(root, state2(root).index);
   };
@@ -6184,22 +6227,53 @@
     return { "w": slide.clientWidth - parseFloat(cs1.paddingLeft) - parseFloat(cs1.paddingRight), "h": slide.clientHeight - parseFloat(cs1.paddingTop) - parseFloat(cs1.paddingBottom) };
   };
   var natural_size = function(m) {
-    const hw1 = parseFloat(m.getAttribute("width"));
-    const hh2 = parseFloat(m.getAttribute("height"));
-    if (truth_(hw1 > 0 && hh2 > 0)) {
-      return [hw1, hh2, true];
+    const hw1 = parseFloat((() => {
+      const or__23426__auto__2 = m.getAttribute("width");
+      if (truth_(or__23426__auto__2)) {
+        return or__23426__auto__2;
+      } else {
+        return m.getAttribute("data-width");
+      }
+      ;
+    })());
+    const hh3 = parseFloat((() => {
+      const or__23426__auto__4 = m.getAttribute("height");
+      if (truth_(or__23426__auto__4)) {
+        return or__23426__auto__4;
+      } else {
+        return m.getAttribute("data-height");
+      }
+      ;
+    })());
+    const v5 = truth_(image_QMARK_(m)) ? null : inner_video(m);
+    if (truth_(hw1 > 0 && hh3 > 0)) {
+      return [hw1, hh3, true];
     } else {
       if (truth_(image_QMARK_(m))) {
         if (m.naturalWidth > 0) {
           return [m.naturalWidth, m.naturalHeight, "full" === m["__lbShown"]];
         }
       } else {
-        if ("else") {
-          if (m.videoWidth > 0) {
-            return [m.videoWidth, m.videoHeight, false];
+        if (truth_((() => {
+          const and__23442__auto__6 = v5;
+          if (truth_(and__23442__auto__6)) {
+            return v5.videoWidth > 0;
+          } else {
+            return and__23442__auto__6;
           }
+          ;
+        })())) {
+          return [v5.videoWidth, v5.videoHeight, false];
         } else {
-          return null;
+          if (truth_(player_of(m))) {
+            return [1600, 900, false];
+          } else {
+            if ("else") {
+              return null;
+            } else {
+              return null;
+            }
+          }
         }
       }
     }
@@ -6207,28 +6281,20 @@
   };
   var fit_BANG_ = function(slide) {
     const m1 = media_of(slide);
-    if (truth_((() => {
-      const and__23442__auto__2 = m1;
-      if (truth_(and__23442__auto__2)) {
-        return !("DIV" === m1.tagName);
-      } else {
-        return and__23442__auto__2;
-      }
-      ;
-    })())) {
-      const temp__23062__auto__3 = natural_size(m1);
-      if (truth_(temp__23062__auto__3)) {
-        const vec__47 = temp__23062__auto__3;
-        const nw8 = nth(vec__47, 0, null);
-        const nh9 = nth(vec__47, 1, null);
-        const cap_QMARK_10 = nth(vec__47, 2, null);
-        const map__1112 = content_box(slide);
-        const w13 = get(map__1112, "w");
-        const h14 = get(map__1112, "h");
-        const k15 = Math.min(w13 / nw8, h14 / nh9, truth_(cap_QMARK_10) ? 1 : Infinity);
-        if (truth_(w13 > 0 && h14 > 0)) {
-          m1.style.width = px2(Math.round(nw8 * k15));
-          return m1.style.height = px2(Math.round(nh9 * k15));
+    if (truth_(m1)) {
+      const temp__23062__auto__2 = natural_size(m1);
+      if (truth_(temp__23062__auto__2)) {
+        const vec__36 = temp__23062__auto__2;
+        const nw7 = nth(vec__36, 0, null);
+        const nh8 = nth(vec__36, 1, null);
+        const cap_QMARK_9 = nth(vec__36, 2, null);
+        const map__1011 = content_box(slide);
+        const w12 = get(map__1011, "w");
+        const h13 = get(map__1011, "h");
+        const k14 = Math.min(w12 / nw7, h13 / nh8, truth_(cap_QMARK_9) ? 1 : Infinity);
+        if (truth_(w12 > 0 && h13 > 0)) {
+          m1.style.width = px2(Math.round(nw7 * k14));
+          return m1.style.height = px2(Math.round(nh8 * k14));
         }
         ;
       }
@@ -6312,15 +6378,27 @@
           ;
           return fit_BANG_(slide);
         } else {
-          if ("VIDEO" === m2.tagName) {
-            m2.onloadedmetadata = (function() {
-              return fit_BANG_(slide);
-            });
-            m2.preload = "metadata";
-            m2.src = m2.getAttribute("data-src");
+          if (truth_(player_of(m2))) {
+            const temp__23062__auto__6 = inner_video(m2);
+            if (truth_(temp__23062__auto__6)) {
+              const v7 = temp__23062__auto__6;
+              v7.addEventListener("loadedmetadata", (function(_) {
+                return fit_BANG_(slide);
+              }));
+            }
+            ;
             return fit_BANG_(slide);
           } else {
-            return null;
+            if ("VIDEO" === m2.tagName) {
+              m2.onloadedmetadata = (function() {
+                return fit_BANG_(slide);
+              });
+              m2.preload = "metadata";
+              m2.src = m2.getAttribute("data-src");
+              return fit_BANG_(slide);
+            } else {
+              return null;
+            }
           }
         }
         ;
@@ -6657,37 +6735,123 @@
     }
     ;
   };
-  var sync_videos_BANG_ = function(root) {
-    const i1 = state2(root).index;
-    for (let G__2 of iterable(map_indexed(vector, slide_els(root)))) {
-      const vec__36 = G__2;
-      const j7 = nth(vec__36, 0, null);
-      const s8 = nth(vec__36, 1, null);
-      const m9 = media_of(s8);
+  var start_player_BANG_ = function(m) {
+    const p1 = player_of(m);
+    const v2 = inner_video(m);
+    const autoplay_QMARK_3 = m.hasAttribute("data-autoplay");
+    const first_show_QMARK_4 = (() => {
+      const and__23442__auto__5 = p1;
+      if (truth_(and__23442__auto__5)) {
+        return _EQ_("", (() => {
+          const or__23426__auto__6 = p1.getAttribute("data-src");
+          if (truth_(or__23426__auto__6)) {
+            return or__23426__auto__6;
+          } else {
+            return "";
+          }
+          ;
+        })());
+      } else {
+        return and__23442__auto__5;
+      }
+      ;
+    })();
+    if (truth_(v2)) {
+      if (truth_(m.hasAttribute("data-loop"))) {
+        v2.loop = true;
+      }
+      ;
+      if (truth_(m.hasAttribute("data-muted"))) {
+        v2.muted = true;
+      }
+    }
+    ;
+    if (truth_(first_show_QMARK_4)) {
+      if (truth_(autoplay_QMARK_3)) {
+        p1.setAttribute("data-autoplay", "true");
+      }
+      ;
+      return p1.setAttribute("data-src", p1.getAttribute("data-lightbox-src"));
+    } else {
       if (truth_((() => {
-        const and__23442__auto__10 = m9;
-        if (truth_(and__23442__auto__10)) {
-          return "VIDEO" === m9.tagName;
+        const and__23442__auto__7 = autoplay_QMARK_3;
+        if (truth_(and__23442__auto__7)) {
+          return v2;
         } else {
-          return and__23442__auto__10;
+          return and__23442__auto__7;
         }
         ;
       })())) {
-        if (!_EQ_(i1, j7)) {
-          if (truth_(m9.paused)) {
+        const temp__23007__auto__8 = controller2(m);
+        if (truth_(temp__23007__auto__8)) {
+          const c9 = temp__23007__auto__8;
+          return c9.play();
+        } else {
+          return v2.play().catch((function(_) {
+            return null;
+          }));
+        }
+        ;
+      }
+    }
+    ;
+  };
+  var pause_media_BANG_ = function(m) {
+    const temp__23007__auto__1 = controller2(m);
+    if (truth_(temp__23007__auto__1)) {
+      const c2 = temp__23007__auto__1;
+      return c2.pause();
+    } else {
+      const temp__23062__auto__3 = inner_video(m);
+      if (truth_(temp__23062__auto__3)) {
+        const v4 = temp__23062__auto__3;
+        if (truth_(v4.paused)) {
+          return null;
+        } else {
+          return v4.pause();
+        }
+        ;
+      }
+      ;
+    }
+    ;
+  };
+  var sync_videos_BANG_ = function(root) {
+    const st1 = state2(root);
+    const i2 = st1.index;
+    for (let G__3 of iterable(map_indexed(vector, slide_els(root)))) {
+      const vec__47 = G__3;
+      const j8 = nth(vec__47, 0, null);
+      const s9 = nth(vec__47, 1, null);
+      const m10 = media_of(s9);
+      if (truth_((() => {
+        const and__23442__auto__11 = m10;
+        if (truth_(and__23442__auto__11)) {
+          return inner_video(m10);
+        } else {
+          return and__23442__auto__11;
+        }
+        ;
+      })())) {
+        if (_EQ_(i2, j8)) {
+          if (truth_(root.hasAttribute("data-opening"))) {
           } else {
-            m9.pause();
+            if (truth_(player_of(m10))) {
+              start_player_BANG_(m10);
+            } else {
+              if (truth_(m10.hasAttribute("data-autoplay"))) {
+                if (truth_(m10.hasAttribute("data-muted"))) {
+                  m10.muted = true;
+                }
+                ;
+                m10.play().catch((function(_) {
+                  return null;
+                }));
+              }
+            }
           }
         } else {
-          if (truth_(m9.hasAttribute("data-autoplay"))) {
-            if (truth_(m9.hasAttribute("data-muted"))) {
-              m9.muted = true;
-            }
-            ;
-            m9.play().catch((function(_) {
-              return null;
-            }));
-          }
+          pause_media_BANG_(m10);
         }
       }
     }
@@ -7066,63 +7230,56 @@
     const contained_QMARK_6 = root.hasAttribute("data-contained");
     const src_el7 = truth_(contained_QMARK_6) ? null : source_for(root, i2);
     const s8 = visible_rect(src_el7);
-    const d9 = truth_((() => {
-      const and__23442__auto__10 = m4;
-      if (truth_(and__23442__auto__10)) {
-        return !("DIV" === m4.tagName);
-      } else {
-        return and__23442__auto__10;
-      }
-      ;
-    })()) ? m4.getBoundingClientRect() : null;
-    const done11 = (function() {
-      return root.removeAttribute("data-opening");
+    const d9 = truth_(m4) ? m4.getBoundingClientRect() : null;
+    const done10 = (function() {
+      root.removeAttribute("data-opening");
+      return sync_videos_BANG_(root);
     });
     root.setAttribute("data-ready", "");
     if (truth_((() => {
-      const or__23426__auto__12 = contained_QMARK_6;
-      if (truth_(or__23426__auto__12)) {
-        return or__23426__auto__12;
+      const or__23426__auto__11 = contained_QMARK_6;
+      if (truth_(or__23426__auto__11)) {
+        return or__23426__auto__11;
       } else {
         return reduced_motion_QMARK_3();
       }
       ;
     })())) {
-      done11();
+      done10();
     } else {
       if (truth_((() => {
-        const and__23442__auto__13 = s8;
-        if (truth_(and__23442__auto__13)) {
-          const and__23442__auto__14 = d9;
-          if (truth_(and__23442__auto__14)) {
+        const and__23442__auto__12 = s8;
+        if (truth_(and__23442__auto__12)) {
+          const and__23442__auto__13 = d9;
+          if (truth_(and__23442__auto__13)) {
             return d9.width > 0;
           } else {
-            return and__23442__auto__14;
+            return and__23442__auto__13;
           }
           ;
         } else {
-          return and__23442__auto__13;
+          return and__23442__auto__12;
         }
         ;
       })())) {
-        const dr15 = radius_px(m4, d9.width, d9.height);
-        m4.animate([thumb_pose(d9, s8, src_el7), { "transform": pose_css(identity_zoom), "clipPath": `${"inset(0px 0px round "}${dr15 ?? ""}${"px)"}` }], { "duration": morph_ms, "easing": ease_out });
+        const dr14 = radius_px(m4, d9.width, d9.height);
+        m4.animate([thumb_pose(d9, s8, src_el7), { "transform": pose_css(identity_zoom), "clipPath": `${"inset(0px 0px round "}${dr14 ?? ""}${"px)"}` }], { "duration": morph_ms, "easing": ease_out });
         backdrop5.animate([{ "opacity": 0 }, { "opacity": 1 }], { "duration": morph_ms, "easing": ease_out });
-        setTimeout(done11, 0.6 * morph_ms);
+        setTimeout(done10, 0.6 * morph_ms);
       } else {
         if ("else") {
-          const target16 = (() => {
-            const or__23426__auto__17 = m4;
-            if (truth_(or__23426__auto__17)) {
-              return or__23426__auto__17;
+          const target15 = (() => {
+            const or__23426__auto__16 = m4;
+            if (truth_(or__23426__auto__16)) {
+              return or__23426__auto__16;
             } else {
               return slide3;
             }
             ;
           })();
-          target16.animate([{ "opacity": 0, "transform": "scale(0.96)" }, { "opacity": 1, "transform": "none" }], { "duration": fade_ms, "easing": ease_out });
+          target15.animate([{ "opacity": 0, "transform": "scale(0.96)" }, { "opacity": 1, "transform": "none" }], { "duration": fade_ms, "easing": ease_out });
           backdrop5.animate([{ "opacity": 0 }, { "opacity": 1 }], { "duration": fade_ms, "easing": ease_out });
-          setTimeout(done11, 0.5 * fade_ms);
+          setTimeout(done10, 0.5 * fade_ms);
         } else {
         }
       }
@@ -7196,7 +7353,7 @@
     const media_QMARK_11 = (() => {
       const and__23442__auto__12 = m4;
       if (truth_(and__23442__auto__12)) {
-        return !("DIV" === m4.tagName) && !("error" === slide3.getAttribute("data-state"));
+        return !("error" === slide3.getAttribute("data-state"));
       } else {
         return and__23442__auto__12;
       }
@@ -7333,8 +7490,8 @@
         const temp__23062__auto__11 = media_of(s10);
         if (truth_(temp__23062__auto__11)) {
           const m12 = temp__23062__auto__11;
-          if ("VIDEO" === m12.tagName) {
-            m12.pause();
+          if (truth_(inner_video(m12))) {
+            pause_media_BANG_(m12);
           }
         }
       }
@@ -7597,7 +7754,8 @@
       if (truth_(continued_QMARK_10)) {
         root.setAttribute("data-ready", "");
         root.removeAttribute("data-opening");
-        return hide_source_BANG_(root);
+        hide_source_BANG_(root);
+        return sync_videos_BANG_(root);
       } else {
         return wait_for_media(root).then((function() {
           if (st8 === state2(root)) {
@@ -8572,26 +8730,38 @@
         ;
       })();
       const step12 = 0.1 * window.innerWidth;
-      const handled13 = truth_((() => {
-        const or__23426__auto__14 = mod_QMARK_5;
-        if (truth_(or__23426__auto__14)) {
-          return or__23426__auto__14;
+      const in_player_QMARK_13 = !(closest2(t4, ".video-player") == null);
+      const handled14 = truth_((() => {
+        const or__23426__auto__15 = mod_QMARK_5;
+        if (truth_(or__23426__auto__15)) {
+          return or__23426__auto__15;
         } else {
-          return st8.closing;
+          const or__23426__auto__16 = st8.closing;
+          if (truth_(or__23426__auto__16)) {
+            return or__23426__auto__16;
+          } else {
+            return in_player_QMARK_13 && !("Escape" === k3);
+          }
+          ;
         }
         ;
       })()) ? null : (() => {
-        const G__56815 = k3;
-        switch (G__56815) {
+        const G__56817 = k3;
+        switch (G__56817) {
           case "Escape":
-            request_close_BANG_(root2);
-            return true;
+            if (truth_(root2.querySelector(".video-player[data-panel-open]"))) {
+              return null;
+            } else {
+              request_close_BANG_(root2);
+              return true;
+            }
+            ;
             break;
           case "ArrowLeft":
             if (truth_((() => {
-              const or__23426__auto__17 = typing_target_QMARK_(t4);
-              if (truth_(or__23426__auto__17)) {
-                return or__23426__auto__17;
+              const or__23426__auto__19 = typing_target_QMARK_(t4);
+              if (truth_(or__23426__auto__19)) {
+                return or__23426__auto__19;
               } else {
                 return closest2(t4, "video");
               }
@@ -8611,9 +8781,9 @@
             break;
           case "ArrowRight":
             if (truth_((() => {
-              const or__23426__auto__18 = typing_target_QMARK_(t4);
-              if (truth_(or__23426__auto__18)) {
-                return or__23426__auto__18;
+              const or__23426__auto__20 = typing_target_QMARK_(t4);
+              if (truth_(or__23426__auto__20)) {
+                return or__23426__auto__20;
               } else {
                 return closest2(t4, "video");
               }
@@ -8633,11 +8803,11 @@
             break;
           case "ArrowUp":
             if (truth_((() => {
-              const and__23442__auto__19 = zoomed10;
-              if (truth_(and__23442__auto__19)) {
+              const and__23442__auto__21 = zoomed10;
+              if (truth_(and__23442__auto__21)) {
                 return not(typing_target_QMARK_(t4));
               } else {
-                return and__23442__auto__19;
+                return and__23442__auto__21;
               }
               ;
             })())) {
@@ -8648,11 +8818,11 @@
             break;
           case "ArrowDown":
             if (truth_((() => {
-              const and__23442__auto__20 = zoomed10;
-              if (truth_(and__23442__auto__20)) {
+              const and__23442__auto__22 = zoomed10;
+              if (truth_(and__23442__auto__22)) {
                 return not(typing_target_QMARK_(t4));
               } else {
-                return and__23442__auto__20;
+                return and__23442__auto__22;
               }
               ;
             })())) {
@@ -8681,11 +8851,11 @@
             break;
           case "+":
             if (truth_((() => {
-              const and__23442__auto__21 = ctx9;
-              if (truth_(and__23442__auto__21)) {
+              const and__23442__auto__23 = ctx9;
+              if (truth_(and__23442__auto__23)) {
                 return not(typing_target_QMARK_(t4));
               } else {
-                return and__23442__auto__21;
+                return and__23442__auto__23;
               }
               ;
             })())) {
@@ -8696,11 +8866,11 @@
             break;
           case "=":
             if (truth_((() => {
-              const and__23442__auto__22 = ctx9;
-              if (truth_(and__23442__auto__22)) {
+              const and__23442__auto__24 = ctx9;
+              if (truth_(and__23442__auto__24)) {
                 return not(typing_target_QMARK_(t4));
               } else {
-                return and__23442__auto__22;
+                return and__23442__auto__24;
               }
               ;
             })())) {
@@ -8711,11 +8881,11 @@
             break;
           case "-":
             if (truth_((() => {
-              const and__23442__auto__23 = ctx9;
-              if (truth_(and__23442__auto__23)) {
+              const and__23442__auto__25 = ctx9;
+              if (truth_(and__23442__auto__25)) {
                 return not(typing_target_QMARK_(t4));
               } else {
-                return and__23442__auto__23;
+                return and__23442__auto__25;
               }
               ;
             })())) {
@@ -8726,11 +8896,11 @@
             break;
           case "_":
             if (truth_((() => {
-              const and__23442__auto__24 = ctx9;
-              if (truth_(and__23442__auto__24)) {
+              const and__23442__auto__26 = ctx9;
+              if (truth_(and__23442__auto__26)) {
                 return not(typing_target_QMARK_(t4));
               } else {
-                return and__23442__auto__24;
+                return and__23442__auto__26;
               }
               ;
             })())) {
@@ -8741,11 +8911,11 @@
             break;
           case "0":
             if (truth_((() => {
-              const and__23442__auto__25 = ctx9;
-              if (truth_(and__23442__auto__25)) {
+              const and__23442__auto__27 = ctx9;
+              if (truth_(and__23442__auto__27)) {
                 return not(typing_target_QMARK_(t4));
               } else {
-                return and__23442__auto__25;
+                return and__23442__auto__27;
               }
               ;
             })())) {
@@ -8757,7 +8927,7 @@
         }
         ;
       })();
-      if (truth_(handled13)) {
+      if (truth_(handled14)) {
         e.preventDefault();
         return e.stopPropagation();
       }
@@ -9044,11 +9214,11 @@
   };
   var class_attrs = function(class_list, class$, attrs) {
     return merge({ "class": (() => {
-      const G__10581 = join(" ", class_list);
+      const G__10601 = join(" ", class_list);
       if (truth_(class$)) {
-        return `${G__10581 ?? ""}${" "}${class$ ?? ""}`;
+        return `${G__10601 ?? ""}${" "}${class$ ?? ""}`;
       } else {
-        return G__10581;
+        return G__10601;
       }
       ;
     })() }, attrs);
@@ -9127,16 +9297,16 @@
 
   // .compiled/ui/spinner.mjs
   var default_size2 = "md";
-  var spinner_class_list = function(p__939) {
-    const map__12 = p__939;
+  var spinner_class_list = function(p__941) {
+    const map__12 = p__941;
     const size3 = get(map__12, "size");
     const s4 = (() => {
       const or__23426__auto__5 = (() => {
-        const G__9406 = size3;
-        if (G__9406 == null) {
+        const G__9426 = size3;
+        if (G__9426 == null) {
           return null;
         } else {
-          return kw_name(G__9406);
+          return kw_name(G__9426);
         }
         ;
       })();
@@ -9147,31 +9317,31 @@
       }
       ;
     })();
-    const G__9417 = ["spinner"];
-    const G__9418 = s4 === "xs" ? conj(G__9417, "spinner-xs") : G__9417;
-    const G__9419 = s4 === "sm" ? conj(G__9418, "spinner-sm") : G__9418;
+    const G__9437 = ["spinner"];
+    const G__9438 = s4 === "xs" ? conj(G__9437, "spinner-xs") : G__9437;
+    const G__9439 = s4 === "sm" ? conj(G__9438, "spinner-sm") : G__9438;
     if (s4 === "lg") {
-      return conj(G__9419, "spinner-lg");
+      return conj(G__9439, "spinner-lg");
     } else {
-      return G__9419;
+      return G__9439;
     }
     ;
   };
   var spinner_classes = function(opts) {
     return join(" ", spinner_class_list(opts));
   };
-  var spinner = function(p__942) {
-    const map__12 = p__942;
+  var spinner = function(p__944) {
+    const map__12 = p__944;
     const _props3 = map__12;
     const size4 = get(map__12, "size");
     const class$5 = get(map__12, "class");
     const attrs6 = get(map__12, "attrs");
     const classes7 = (() => {
-      const G__9438 = spinner_classes({ "size": size4 });
+      const G__9458 = spinner_classes({ "size": size4 });
       if (truth_(class$5)) {
-        return `${G__9438 ?? ""}${" "}${class$5 ?? ""}`;
+        return `${G__9458 ?? ""}${" "}${class$5 ?? ""}`;
       } else {
-        return G__9438;
+        return G__9458;
       }
       ;
     })();
@@ -9391,11 +9561,11 @@
   var default_hotkey = ["altKey", "KeyT"];
   var infinity = Infinity;
   var kw = function(x) {
-    const G__6551 = x;
-    if (G__6551 == null) {
+    const G__6571 = x;
+    if (G__6571 == null) {
       return null;
     } else {
-      return kw_name(G__6551);
+      return kw_name(G__6571);
     }
     ;
   };
@@ -9411,37 +9581,37 @@
     return s;
   };
   var classes = (() => {
-    const f656 = (function(var_args) {
-      const args6571 = [];
+    const f658 = (function(var_args) {
+      const args6591 = [];
       const len__23321__auto__2 = arguments.length;
-      let i6583 = 0;
+      let i6603 = 0;
       while (true) {
-        if (i6583 < len__23321__auto__2) {
-          args6571.push(arguments[i6583]);
-          let G__4 = i6583 + 1;
-          i6583 = G__4;
+        if (i6603 < len__23321__auto__2) {
+          args6591.push(arguments[i6603]);
+          let G__4 = i6603 + 1;
+          i6603 = G__4;
           continue;
         }
         ;
         break;
       }
       ;
-      const argseq__23513__auto__5 = 0 < args6571.length ? args6571.slice(0) : null;
-      return f656.cljs$core$IFn$_invoke$arity$variadic(argseq__23513__auto__5);
+      const argseq__23513__auto__5 = 0 < args6591.length ? args6591.slice(0) : null;
+      return f658.cljs$core$IFn$_invoke$arity$variadic(argseq__23513__auto__5);
     });
-    f656.cljs$core$IFn$_invoke$arity$variadic = (function(tokens) {
+    f658.cljs$core$IFn$_invoke$arity$variadic = (function(tokens) {
       const ts6 = remove(nil_QMARK_, tokens);
       return join(" ", ts6);
     });
-    f656.cljs$lang$maxFixedArity = 0;
-    return f656;
+    f658.cljs$lang$maxFixedArity = 0;
+    return f658;
   })();
   var type_icons = { "success": "check", "info": "info", "warning": "alert-triangle", "error": "x" };
-  var notification_class_list = function(p__660) {
-    const map__12 = p__660;
+  var notification_class_list = function(p__662) {
+    const map__12 = p__662;
     const type3 = get(map__12, "type");
     const multiline4 = get(map__12, "multiline");
-    const G__6615 = ["notification", `notification-${(() => {
+    const G__6635 = ["notification", `notification-${(() => {
       const or__23426__auto__6 = kw(type3);
       if (truth_(or__23426__auto__6)) {
         return or__23426__auto__6;
@@ -9451,9 +9621,9 @@
       ;
     })() ?? ""}`];
     if (truth_(multiline4)) {
-      return conj(G__6615, "notification-multiline");
+      return conj(G__6635, "notification-multiline");
     } else {
-      return G__6615;
+      return G__6635;
     }
     ;
   };
@@ -9468,8 +9638,8 @@
     }
     ;
   };
-  var icon_el = function(p__662, icons, class_name) {
-    const map__12 = p__662;
+  var icon_el = function(p__664, icons, class_name) {
+    const map__12 = p__664;
     const type3 = get(map__12, "type");
     const icon4 = get(map__12, "icon");
     const promise5 = get(map__12, "promise");
@@ -9503,8 +9673,8 @@
         }
         ;
       })())) {
-        const G__66313 = ["span", { "class": classes("notification-icon", class_name), "data-icon": "" }];
-        const G__66314 = truth_((() => {
+        const G__66513 = ["span", { "class": classes("notification-icon", class_name), "data-icon": "" }];
+        const G__66514 = truth_((() => {
           const or__23426__auto__15 = loading_QMARK_8;
           if (or__23426__auto__15) {
             return or__23426__auto__15;
@@ -9512,7 +9682,7 @@
             return promise5;
           }
           ;
-        })()) ? conj(G__66313, loader(loading_QMARK_8)) : G__66313;
+        })()) ? conj(G__66513, loader(loading_QMARK_8)) : G__66513;
         if (truth_((() => {
           const and__23442__auto__16 = shown10;
           if (truth_(and__23442__auto__16)) {
@@ -9522,9 +9692,9 @@
           }
           ;
         })())) {
-          return conj(G__66314, ["span", { "class": "notification-glyph" }, shown10]);
+          return conj(G__66514, ["span", { "class": "notification-glyph" }, shown10]);
         } else {
-          return G__66314;
+          return G__66514;
         }
         ;
       }
@@ -9541,16 +9711,16 @@
       const on_click42 = get(map__12, "on-click");
       const attrs5 = get(map__12, "attrs");
       return button((() => {
-        const G__6646 = { "size": "sm", "variant": kind === "action" ? "secondary" : "ghost", "class": class_name, "attrs": merge((() => {
-          const G__6657 = {};
-          G__6657["data-button"] = "";
-          G__6657[__GT_kw(`data-${kind ?? ""}`)] = "";
-          return G__6657;
+        const G__6666 = { "size": "sm", "variant": kind === "action" ? "secondary" : "ghost", "class": class_name, "attrs": merge((() => {
+          const G__6677 = {};
+          G__6677["data-button"] = "";
+          G__6677[__GT_kw(`data-${kind ?? ""}`)] = "";
+          return G__6677;
         })(), attrs5) };
         if (truth_(on_click42)) {
-          return { ...G__6646, "on-click": on_click42 };
+          return { ...G__6666, "on-click": on_click42 };
         } else {
-          return G__6646;
+          return G__6666;
         }
         ;
       })(), label3);
@@ -9568,20 +9738,20 @@
       ;
     })(), "data-close-button": "", "data-disabled": flag(disabled_QMARK_3) }, icon({ "icon-name": "x", "size": "sm" })];
   };
-  var loading_locked_QMARK_ = function(p__666) {
-    const map__12 = p__666;
+  var loading_locked_QMARK_ = function(p__668) {
+    const map__12 = p__668;
     const type3 = get(map__12, "type");
     const dismissible4 = get(map__12, "dismissible");
     return "loading" === kw(type3) && not(true_QMARK_(dismissible4));
   };
-  var swipable_QMARK_ = function(p__667) {
-    const map__12 = p__667;
+  var swipable_QMARK_ = function(p__669) {
+    const map__12 = p__669;
     const item3 = map__12;
     const dismissible4 = get(map__12, "dismissible");
     return not(false_QMARK_(dismissible4)) && not(loading_locked_QMARK_(item3));
   };
-  var card_children = function(p__668, icons, class_names, extra) {
-    const map__12 = p__668;
+  var card_children = function(p__670, icons, class_names, extra) {
+    const map__12 = p__670;
     const item3 = map__12;
     const title4 = get(map__12, "title");
     const description5 = get(map__12, "description");
@@ -9600,8 +9770,8 @@
       }
       ;
     })();
-    const G__66914 = [];
-    const G__66915 = truth_((() => {
+    const G__67114 = [];
+    const G__67115 = truth_((() => {
       const and__23442__auto__16 = close_button9;
       if (truth_(and__23442__auto__16)) {
         return not(loading_locked_QMARK_(item3));
@@ -9609,18 +9779,18 @@
         return and__23442__auto__16;
       }
       ;
-    })()) ? conj(G__66914, close_el(close_label10, false_QMARK_(dismissible11), get(cn12, "close-button"))) : G__66914;
-    const G__66917 = true ? conj(G__66915, icon_el(item3, icons, get(cn12, "icon"))) : G__66915;
-    const G__66918 = true ? conj(G__66917, (() => {
-      const G__67019 = ["div", { "class": classes("notification-text", get(cn12, "content")), "data-content": "" }, ["p", { "class": classes("notification-title", get(cn12, "title")), "data-title": "" }, title4]];
-      const G__67020 = truth_(description5) ? conj(G__67019, ["div", { "class": classes("notification-description", get(cn12, "description")), "data-description": "" }, description5]) : G__67019;
+    })()) ? conj(G__67114, close_el(close_label10, false_QMARK_(dismissible11), get(cn12, "close-button"))) : G__67114;
+    const G__67117 = true ? conj(G__67115, icon_el(item3, icons, get(cn12, "icon"))) : G__67115;
+    const G__67118 = true ? conj(G__67117, (() => {
+      const G__67219 = ["div", { "class": classes("notification-text", get(cn12, "content")), "data-content": "" }, ["p", { "class": classes("notification-title", get(cn12, "title")), "data-title": "" }, title4]];
+      const G__67220 = truth_(description5) ? conj(G__67219, ["div", { "class": classes("notification-description", get(cn12, "description")), "data-description": "" }, description5]) : G__67219;
       if (truth_(meta6)) {
-        return conj(G__67020, ["div", { "class": "notification-meta" }, meta6]);
+        return conj(G__67220, ["div", { "class": "notification-meta" }, meta6]);
       } else {
-        return G__67020;
+        return G__67220;
       }
       ;
-    })()) : G__66917;
+    })()) : G__67117;
     if (truth_((() => {
       const or__23426__auto__21 = cancel8;
       if (truth_(or__23426__auto__21)) {
@@ -9636,43 +9806,43 @@
       }
       ;
     })())) {
-      return conj(G__66918, (() => {
-        const G__67123 = ["div", { "class": "notification-actions" }];
-        const G__67124 = truth_(cancel8) ? conj(G__67123, button_el("cancel", cancel8, get(cn12, "cancel-button"))) : G__67123;
-        const G__67125 = truth_(action7) ? conj(G__67124, button_el("action", action7, get(cn12, "action-button"))) : G__67124;
+      return conj(G__67118, (() => {
+        const G__67323 = ["div", { "class": "notification-actions" }];
+        const G__67324 = truth_(cancel8) ? conj(G__67323, button_el("cancel", cancel8, get(cn12, "cancel-button"))) : G__67323;
+        const G__67325 = truth_(action7) ? conj(G__67324, button_el("action", action7, get(cn12, "action-button"))) : G__67324;
         if (truth_(seq(extra))) {
-          return into(G__67125, extra);
+          return into(G__67325, extra);
         } else {
-          return G__67125;
+          return G__67325;
         }
         ;
       })());
     } else {
-      return G__66918;
+      return G__67118;
     }
     ;
   };
   var notification = (() => {
-    const f672 = (function(var_args) {
-      const args6731 = [];
+    const f674 = (function(var_args) {
+      const args6751 = [];
       const len__23321__auto__2 = arguments.length;
-      let i6743 = 0;
+      let i6763 = 0;
       while (true) {
-        if (i6743 < len__23321__auto__2) {
-          args6731.push(arguments[i6743]);
-          let G__4 = i6743 + 1;
-          i6743 = G__4;
+        if (i6763 < len__23321__auto__2) {
+          args6751.push(arguments[i6763]);
+          let G__4 = i6763 + 1;
+          i6763 = G__4;
           continue;
         }
         ;
         break;
       }
       ;
-      const argseq__23513__auto__5 = 1 < args6731.length ? args6731.slice(1) : null;
-      return f672.cljs$core$IFn$_invoke$arity$variadic(arguments[0], argseq__23513__auto__5);
+      const argseq__23513__auto__5 = 1 < args6751.length ? args6751.slice(1) : null;
+      return f674.cljs$core$IFn$_invoke$arity$variadic(arguments[0], argseq__23513__auto__5);
     });
-    f672.cljs$core$IFn$_invoke$arity$variadic = (function(p__676, children) {
-      const map__67 = p__676;
+    f674.cljs$core$IFn$_invoke$arity$variadic = (function(p__678, children) {
+      const map__67 = p__678;
       const item8 = map__67;
       const class_names9 = get(map__67, "class-names");
       const invert10 = get(map__67, "invert");
@@ -9708,8 +9878,8 @@
         ;
       })(), "data-styled": flag(not(unstyled13)), "data-rich-colors": flag(rich_colors19), "data-invert": flag(invert10) }, attrs22))], card_children(item8, null, class_names9, remove(nil_QMARK_, children)));
     });
-    f672.cljs$lang$maxFixedArity = 1;
-    return f672;
+    f674.cljs$lang$maxFixedArity = 1;
+    return f674;
   })();
   var position_parts = function(position) {
     return split((() => {
@@ -9726,11 +9896,11 @@
     const vec__14 = position_parts(position);
     const y5 = nth(vec__14, 0, null);
     const x6 = nth(vec__14, 1, null);
-    const G__6777 = [y5];
+    const G__6797 = [y5];
     if (!(x6 === "center")) {
-      return conj(G__6777, x6);
+      return conj(G__6797, x6);
     } else {
-      return G__6777;
+      return G__6797;
     }
     ;
   };
@@ -9789,8 +9959,8 @@
     }
     ;
   };
-  var toast_el = function(p__678, p__679) {
-    const map__13 = p__678;
+  var toast_el = function(p__680, p__681) {
+    const map__13 = p__680;
     const item4 = map__13;
     const class_names5 = get(map__13, "class-names");
     const invert6 = get(map__13, "invert");
@@ -9805,7 +9975,7 @@
     const class$15 = get(map__13, "class");
     const removed_at16 = get(map__13, "removed-at");
     const attrs17 = get(map__13, "attrs");
-    const map__218 = p__679;
+    const map__218 = p__681;
     const x19 = get(map__218, "x");
     const y20 = get(map__218, "y");
     const index21 = get(map__218, "index");
@@ -9825,11 +9995,11 @@
       ;
     })();
     const item30 = (() => {
-      const G__68031 = item4;
+      const G__68231 = item4;
       if (get(item4, "close-button") == null) {
-        return assoc(G__68031, "close-button", close_button22);
+        return assoc(G__68231, "close-button", close_button22);
       } else {
-        return G__68031;
+        return G__68231;
       }
       ;
     })();
@@ -9852,21 +10022,21 @@
     })()), "data-x-position": x19, "data-ui-notification": "", "data-promise": flag(promise10) }, {}, attrs17))], card_children(item30, icons24, class_names5, null));
   };
   var event_attrs = function(on_dismiss, on_pause) {
-    const G__6811 = {};
-    const G__6812 = truth_(on_dismiss) ? { ...G__6811, "on-notificationdismiss": (function(e) {
+    const G__6831 = {};
+    const G__6832 = truth_(on_dismiss) ? { ...G__6831, "on-notificationdismiss": (function(e) {
       return on_dismiss(e.detail.id, e.detail.reason);
-    }) } : G__6811;
+    }) } : G__6831;
     if (truth_(on_pause)) {
-      return assoc(G__6812, "on-notificationpause", (function(e) {
+      return assoc(G__6832, "on-notificationpause", (function(e) {
         return on_pause(e.detail.paused);
       }));
     } else {
-      return G__6812;
+      return G__6832;
     }
     ;
   };
-  var notification_toaster = function(p__682) {
-    const map__12 = p__682;
+  var notification_toaster = function(p__684) {
+    const map__12 = p__684;
     const items3 = get(map__12, "items");
     const on_dismiss4 = get(map__12, "on-dismiss");
     const on_pause5 = get(map__12, "on-pause");
@@ -9918,11 +10088,11 @@
       return kw(get(i, "position"));
     }), items3)));
     return into(["section", class_attrs((() => {
-      const G__68330 = ["notification-toaster"];
+      const G__68530 = ["notification-toaster"];
       if (truth_(contained15)) {
-        return conj(G__68330, "notification-toaster-contained");
+        return conj(G__68530, "notification-toaster-contained");
       } else {
-        return G__68330;
+        return G__68530;
       }
       ;
     })(), class$18, merge({ "data-ui-notification-toaster": "", "tabindex": "-1", "aria-label": `${(() => {
@@ -9979,25 +10149,25 @@
     return { "items": [], "muted": /* @__PURE__ */ new Set([]), "paused-at": null, "seq": 0 };
   };
   var lifetime = (() => {
-    const f684 = (function(...args685) {
-      const G__6861 = args685.length;
-      switch (G__6861) {
+    const f686 = (function(...args687) {
+      const G__6881 = args687.length;
+      switch (G__6881) {
         case 1:
-          return f684.cljs$core$IFn$_invoke$arity$1(args685[0]);
+          return f686.cljs$core$IFn$_invoke$arity$1(args687[0]);
           break;
         case 2:
-          return f684.cljs$core$IFn$_invoke$arity$2(args685[0], args685[1]);
+          return f686.cljs$core$IFn$_invoke$arity$2(args687[0], args687[1]);
           break;
         default:
-          throw new Error(`${"Invalid arity: "}${args685.length ?? ""}`);
+          throw new Error(`${"Invalid arity: "}${args687.length ?? ""}`);
       }
       ;
     });
-    f684.cljs$core$IFn$_invoke$arity$1 = (function(item) {
+    f686.cljs$core$IFn$_invoke$arity$1 = (function(item) {
       return lifetime(item, default_duration2);
     });
-    f684.cljs$core$IFn$_invoke$arity$2 = (function(p__687, default$) {
-      const map__34 = p__687;
+    f686.cljs$core$IFn$_invoke$arity$2 = (function(p__689, default$) {
+      const map__34 = p__689;
       const type5 = get(map__34, "type");
       const duration6 = get(map__34, "duration");
       if ("loading" === kw(type5)) {
@@ -10035,8 +10205,8 @@
       }
       ;
     });
-    f684.cljs$lang$maxFixedArity = 2;
-    return f684;
+    f686.cljs$lang$maxFixedArity = 2;
+    return f686;
   })();
   var stamp = function(item, now4, paused_at, default$) {
     const ms1 = lifetime(item, default$);
@@ -10059,25 +10229,25 @@
     ;
   };
   var post = (() => {
-    const f688 = (function(...args689) {
-      const G__6901 = args689.length;
-      switch (G__6901) {
+    const f690 = (function(...args691) {
+      const G__6921 = args691.length;
+      switch (G__6921) {
         case 3:
-          return f688.cljs$core$IFn$_invoke$arity$3(args689[0], args689[1], args689[2]);
+          return f690.cljs$core$IFn$_invoke$arity$3(args691[0], args691[1], args691[2]);
           break;
         case 4:
-          return f688.cljs$core$IFn$_invoke$arity$4(args689[0], args689[1], args689[2], args689[3]);
+          return f690.cljs$core$IFn$_invoke$arity$4(args691[0], args691[1], args691[2], args691[3]);
           break;
         default:
-          throw new Error(`${"Invalid arity: "}${args689.length ?? ""}`);
+          throw new Error(`${"Invalid arity: "}${args691.length ?? ""}`);
       }
       ;
     });
-    f688.cljs$core$IFn$_invoke$arity$3 = (function(state4, item, now4) {
+    f690.cljs$core$IFn$_invoke$arity$3 = (function(state4, item, now4) {
       return post(state4, item, now4, null);
     });
-    f688.cljs$core$IFn$_invoke$arity$4 = (function(state4, item, now4, p__691) {
-      const map__34 = p__691;
+    f690.cljs$core$IFn$_invoke$arity$4 = (function(state4, item, now4, p__693) {
+      const map__34 = p__693;
       const duration5 = get(map__34, "duration");
       const limit6 = get(map__34, "limit");
       const map__78 = state4;
@@ -10124,11 +10294,11 @@
           return assoc(state4, "items", mapv((function(i) {
             if (_EQ_(id13, get(i, "id"))) {
               return fresh15((() => {
-                const G__69217 = merge(i, item);
+                const G__69417 = merge(i, item);
                 if ("loading" === kw(get(i, "type"))) {
-                  return assoc(G__69217, "promise", true);
+                  return assoc(G__69417, "promise", true);
                 } else {
-                  return G__69217;
+                  return G__69417;
                 }
                 ;
               })());
@@ -10149,11 +10319,11 @@
               ;
             })() + 1;
             const item20 = fresh15((() => {
-              const G__69321 = item;
+              const G__69521 = item;
               if (id13 == null) {
-                return assoc(G__69321, "id", `notification-${n18 ?? ""}`);
+                return assoc(G__69521, "id", `notification-${n18 ?? ""}`);
               } else {
-                return G__69321;
+                return G__69521;
               }
               ;
             })());
@@ -10173,28 +10343,28 @@
       }
       ;
     });
-    f688.cljs$lang$maxFixedArity = 4;
-    return f688;
+    f690.cljs$lang$maxFixedArity = 4;
+    return f690;
   })();
   var dismiss = (() => {
-    const f694 = (function(...args695) {
-      const G__6961 = args695.length;
-      switch (G__6961) {
+    const f696 = (function(...args697) {
+      const G__6981 = args697.length;
+      switch (G__6981) {
         case 3:
-          return f694.cljs$core$IFn$_invoke$arity$3(args695[0], args695[1], args695[2]);
+          return f696.cljs$core$IFn$_invoke$arity$3(args697[0], args697[1], args697[2]);
           break;
         case 4:
-          return f694.cljs$core$IFn$_invoke$arity$4(args695[0], args695[1], args695[2], args695[3]);
+          return f696.cljs$core$IFn$_invoke$arity$4(args697[0], args697[1], args697[2], args697[3]);
           break;
         default:
-          throw new Error(`${"Invalid arity: "}${args695.length ?? ""}`);
+          throw new Error(`${"Invalid arity: "}${args697.length ?? ""}`);
       }
       ;
     });
-    f694.cljs$core$IFn$_invoke$arity$3 = (function(state4, id, now4) {
+    f696.cljs$core$IFn$_invoke$arity$3 = (function(state4, id, now4) {
       return dismiss(state4, id, now4, "dismiss");
     });
-    f694.cljs$core$IFn$_invoke$arity$4 = (function(state4, id, now4, reason) {
+    f696.cljs$core$IFn$_invoke$arity$4 = (function(state4, id, now4, reason) {
       return assoc(state4, "items", mapv((function(i) {
         if (_EQ_(id, get(i, "id"))) {
           return close2(i, now4, reason);
@@ -10204,8 +10374,8 @@
         ;
       }), get(state4, "items")));
     });
-    f694.cljs$lang$maxFixedArity = 4;
-    return f694;
+    f696.cljs$lang$maxFixedArity = 4;
+    return f696;
   })();
   var dismiss_all = function(state4, now4) {
     return assoc(state4, "items", mapv((function(i) {
@@ -10226,7 +10396,7 @@
       const paused_at2 = temp__23007__auto__1;
       const d3 = now4 - paused_at2;
       return assoc(state4, "paused-at", null, "items", mapv((function(i) {
-        const G__6974 = i;
+        const G__6994 = i;
         if (truth_((() => {
           const and__23442__auto__5 = get(i, "expires-at");
           if (truth_(and__23442__auto__5)) {
@@ -10236,9 +10406,9 @@
           }
           ;
         })())) {
-          return assoc(G__6974, "expires-at", get(i, "expires-at") + d3);
+          return assoc(G__6994, "expires-at", get(i, "expires-at") + d3);
         } else {
-          return G__6974;
+          return G__6994;
         }
         ;
       }), get(state4, "items")));

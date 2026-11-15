@@ -135,6 +135,20 @@ img.ui-lightbox-media {
   cursor: grabbing;
 }
 
+/* a video slide: ui.video-player filling a box the runtime sizes to the
+   video's aspect */
+.ui-lightbox-player {
+  position: relative;
+  overflow: hidden;
+  background: black;
+}
+
+.ui-lightbox-player > .video-player {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+}
+
 video.ui-lightbox-media {
   object-fit: contain;
   background: black;

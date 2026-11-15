@@ -1136,6 +1136,14 @@ What the runtime does:
   finger mid-scroll), a plain wheel pans when zoomed (`:scroll-to-zoom`
   makes it zoom), `+ - 0` keys and buttons. Bounds are measured against
   the slide, not the window; max zoom = the image's own resolution (2×–8×).
+- **video:** a `:type :video` item renders `ui.video-player` (`:fit :fill`)
+  in a box sized to the video's aspect (`:width`/`:height`, else its
+  metadata, else 16:9). The player gets its source (`data-src`, from
+  `data-lightbox-src`) only when its slide is shown; leaving the slide
+  pauses it; `:autoplay` / `:muted` / `:loop` apply on show. `:player`
+  passes video-player props through. Presses on the player never start a
+  lightbox gesture, and with focus inside it, arrows / Home / End / zoom
+  keys are the player's; Escape closes an open player menu first.
 - **pull to dismiss:** vertical drag (touch, pen, mouse) or a vertical
   trackpad / wheel flick at 1×; `--lightbox-pull-progress` (0 → 1) on the
   root drives the backdrop; past 22% of the height or a flick closes.

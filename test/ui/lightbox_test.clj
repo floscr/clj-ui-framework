@@ -78,16 +78,23 @@
         (is (= 4000 (:width (attrs img))))
         (is (= "First" (text (first (by-class (first slides) "ui-lightbox-caption")))))
         (is (seq (by-class (first slides) "ui-lightbox-error")))))
-    (testing "video"
-      (let [v (first (by-class (second slides) "ui-lightbox-media"))]
-        (is (= :video (first v)))
-        (is (= "b.mp4" (:data-src (attrs v))))
-        (is (= "b.jpg" (:poster (attrs v))))
-        (is (= "none" (:preload (attrs v))))
-        (is (true? (:playsinline (attrs v))))
-        (is (true? (:loop (attrs v))))
-        (is (= "" (:data-autoplay (attrs v))))
-        (is (= "" (:data-muted (attrs v))))))
+    (testing "video: a ui.video-player that gets its source only when shown"
+      (let [box (first (by-class (second slides) "ui-lightbox-player"))
+            player (first (by-attr box :data-video-player ""))]
+        (is (contains? (classes box) "ui-lightbox-media"))
+        (is (= "" (:data-autoplay (attrs box))))
+        (is (= "" (:data-muted (attrs box))))
+        (is (= "" (:data-loop (attrs box))))
+        (is (= "" (:data-src (attrs player))))
+        (is (= "b.mp4" (:data-lightbox-src (attrs player))))
+        (is (contains? (classes player) "video-player-fill"))
+        (is (= "b.jpg" (:poster (attrs (first (filter #(= :video (first %)) (nodes box)))))))))
+    (testing "video-player props pass through :player"
+      (let [tree (lb/lightbox {:items [{:type :video :src "v.mp4" :player {:title "Clip" :attrs {:id "p"}}}]})
+            player (first (by-attr tree :data-video-player ""))]
+        (is (= "Clip" (:aria-label (attrs player))))
+        (is (= "p" (:id (attrs player))))
+        (is (= "v.mp4" (:data-lightbox-src (attrs player))))))
     (testing "content"
       (is (= "Hello" (text (first (by-class (nth slides 2) "ui-lightbox-content"))))))))
 

@@ -23,7 +23,7 @@
  :api
  [{:fn "lightbox"
    :doc "The viewer. Renders nothing without :src or :items. The runtime owns everything that moves and reports back through :on-change and :on-close (non-bubbling `change` and `close` events on the root)."
-   :props [{:name :items :type "vector" :doc "Maps of :src :thumb :alt :caption :width :height :key :type (:image, :video, :content) :poster :content :href :class :autoplay :loop :muted."}
+   :props [{:name :items :type "vector" :doc "Maps of :src :thumb :alt :caption :width :height :key :type (:image, :video, :content) :poster :content :href :class :autoplay :loop :muted :player. Videos play in ui.video-player (:player passes its props through) and load only once shown."}
            {:name :src :type "string" :doc "Shorthand for one image."}
            {:name :alt :type "string" :default "\"image\"" :doc "Alt text with :src."}
            {:name :index :type "number" :default "0" :doc "The item shown on open; changing it navigates."}
