@@ -261,26 +261,28 @@ video.ui-lightbox-media {
 .ui-lightbox-actions {
   display: flex;
   align-items: center;
-  gap: var(--size-2);
+  gap: var(--size-1);
   margin-left: auto;
 }
 
+/* bare icons, like the photo apps: no fill, a soft shadow keeps them
+   readable over a bright photo; the tap area is a control height (36px,
+   44px on touch screens) */
 .ui-lightbox-button {
   flex: 0 0 auto;
-  width: var(--control-lg);
-  height: var(--control-lg);
+  width: var(--control-md);
+  height: var(--control-md);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   padding: 0;
   border: none;
-  border-radius: 50%;
-  background: rgba(0, 0, 0, 0.45);
+  border-radius: var(--radius-control);
+  background: transparent;
   color: white;
   text-decoration: none;
   cursor: pointer;
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.55));
   transition:
     background var(--duration-fast) var(--ease-standard),
     opacity var(--duration-fast) var(--ease-standard),
@@ -288,7 +290,7 @@ video.ui-lightbox-media {
 }
 
 .ui-lightbox-button:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.12);
 }
 
 .ui-lightbox-button:active {
