@@ -309,7 +309,7 @@ out/deploy.
    host is whatever `hosts/home-services.nix` `host` points at; since
    Oct 2026 that is thinknixx1 = `100.64.0.4`, before it was the pi4 at
    `100.64.0.3`). Then verify over tailscale `http://100.64.0.4:<port>`
-   (NOT the LAN alias): xi 7474, media 8096, music 8097, photos 8100,
+   (NOT the LAN alias): xi 1414, media 8096, music 8097, photos 8100,
    ebook 8101, editor 8102, willhaben 8113, share 8114, service-theme
    8116, streaks 8121. Poll until every port returns 200 (services take
    1 to 2 min to restart while they fetch the new sha), then grep a served
