@@ -125,6 +125,71 @@
     (when s
       (if (and e (> e s)) (- e s) 60))))
 
+(defn timed-layout
+  "Where each of one day's timed events goes across the day column, so
+   overlapping ones stay readable (Google Calendar's way). Events overlap in
+   their drawn extent, at least `min-minutes` (default 30: a short card is
+   drawn taller than its slot). Events that start within `min-minutes` of
+   each other and overlap form a row and share its width side by side. An
+   event starting later than that is laid over the deepest one it overlaps,
+   indented a fifth of that one's width and to its right edge: the one under
+   it keeps its title line whole. For each event, in the order given,
+   {:left :right :stacked?}, :left / :right as fractions of the column and
+   :stacked? when it lies over another one."
+  ([evts] (timed-layout evts 30))
+  ([evts min-minutes]
+   (let [items  (vec (map-indexed
+                      (fn [i e]
+                        (let [s (hhmm->minutes (:time-start e))]
+                          {:i i :s s :e (+ s (max min-minutes (or (event-duration-minutes e) 0)))}))
+                      evts))
+         ;; by start, the longer first at the same start (sort-by is stable)
+         sorted (sort-by :s (sort-by (fn [it] (- (:e it))) items))
+         hits?  (fn [a b] (and (< (:s a) (:e b)) (< (:s b) (:e a))))
+         split  (fn [placed {:keys [l r members]}]
+                  (let [n (count members)]
+                    (reduce (fn [pl [k j]]
+                              (assoc pl j (assoc (nth pl j)
+                                                 :left  (+ l (/ (* k (- r l)) n))
+                                                 :right (+ l (/ (* (inc k) (- r l)) n)))))
+                            placed
+                            (map-indexed vector members))))
+         step   (fn [{:keys [rows placed]} it]
+                  (let [j    (count placed)
+                        row  (first (filter (fn [ri]
+                                              (let [rw (nth rows ri)]
+                                                (and (< (:s it) (+ (:start rw) min-minutes))
+                                                     (some #(hits? it (nth placed %)) (:members rw)))))
+                                            (reverse (range (count rows)))))]
+                    (if (some? row)
+                      (let [rw (update (nth rows row) :members conj j)]
+                        {:rows   (assoc rows row rw)
+                         :placed (split (conj placed (assoc it :stacked? (:stacked? (nth placed (first (:members rw))))))
+                                        rw)})
+                      (let [under  (filter #(hits? it %) placed)
+                            parent (when (seq under) (reduce (fn [a b] (if (>= (:left b) (:left a)) b a)) under))
+                            l      (if parent (+ (:left parent) (/ (- (:right parent) (:left parent)) 5)) 0)
+                            r      (if parent (:right parent) 1)
+                            rw     {:start (:s it) :l l :r r :members [j]}]
+                        {:rows   (conj rows rw)
+                         :placed (conj placed (assoc it :left l :right r :stacked? (some? parent)))}))))
+         placed (:placed (reduce step {:rows [] :placed []} sorted))]
+     (reduce (fn [acc p] (assoc acc (:i p) {:left (:left p) :right (:right p) :stacked? (:stacked? p)}))
+             (vec (repeat (count items) nil))
+             placed))))
+
+(defn timed-layout-style
+  "Inline left / width (CSS lengths) for a {:left :right} from timed-layout,
+   keeping the 2px inset at the day column's edges and a 2px gap between
+   neighbours. Nil for an event with the column to itself."
+  [{:keys [left right]}]
+  (when (and left (or (pos? left) (< right 1)))
+    (let [pct (fn [x] (str (/ (round* (* 10000 x)) 100.0) "%"))
+          li  (if (pos? left) 1 2)
+          ri  (if (< right 1) 1 2)]
+      {:left  (str "calc(" (pct left) " + " li "px)")
+       :width (str "calc(" (pct (- right left)) " - " (+ li ri) "px)")})))
+
 (defn format-duration
   "Format a minute count as '1h', '1h 30m' or '45m'."
   [mins]
@@ -1144,12 +1209,15 @@
                             (map (fn [d]
                                    (into [:div {:class (str "cal-week-daycol"
                                                            (when (= (:date d) today-str) " is-today"))}]
-                                         (map (fn [evt]
+                                         (map (fn [[evt place]]
                                                 (let [s   (hhmm->minutes (:time-start evt))
-                                                      dur (event-duration-minutes evt)]
-                                                  [:div {:class (str "cal-week-event " (event-color-class (:color evt)))
-                                                         :style {"top" (str (px (- s start-off)) "px")
-                                                                 "height" (str (px dur) "px")}
+                                                      dur (event-duration-minutes evt)
+                                                      col (timed-layout-style place)]
+                                                  [:div {:class (str "cal-week-event " (event-color-class (:color evt))
+                                                                     (when (:stacked? place) " is-stacked"))
+                                                         :style (cond-> {"top" (str (px (- s start-off)) "px")
+                                                                         "height" (str (px dur) "px")}
+                                                                  col (assoc "left" (:left col) "width" (:width col)))
                                                          :on-click (when on-event-click (fn [_e] (on-event-click evt)))
                                                          :on-contextmenu (when on-event-context-menu
                                                                            (fn [e]
@@ -1160,7 +1228,8 @@
                                                     [:span {:class "cal-week-event-title"} (:title evt)]
                                                     (when-let [dd (format-duration dur)]
                                                       [:span {:class "cal-week-event-dur"} dd])]]))
-                                              (events-for-date timed (:date d)))))
+                                              (let [day-evts (events-for-date timed (:date d))]
+                                                (map vector day-evts (timed-layout day-evts))))))
                                  days))
              now-node (when show-now?
                         [:div {:class "cal-week-now" :style {"top" (str now-px "px")}}
@@ -1219,12 +1288,15 @@
              day-cols (into [:div {:class ["cal-week-daycols"]}]
                             (map (fn [d]
                                    (into [:div {:class ["cal-week-daycol" (when (= (:date d) today-str) "is-today")]}]
-                                         (map (fn [evt]
+                                         (map (fn [[evt place]]
                                                 (let [s   (hhmm->minutes (:time-start evt))
-                                                      dur (event-duration-minutes evt)]
-                                                  [:div {:class ["cal-week-event" (event-color-class (:color evt))]
-                                                         :style {:top (str (px (- s start-off)) "px")
-                                                                 :height (str (px dur) "px")}
+                                                      dur (event-duration-minutes evt)
+                                                      col (timed-layout-style place)]
+                                                  [:div {:class ["cal-week-event" (event-color-class (:color evt))
+                                                                 (when (:stacked? place) "is-stacked")]
+                                                         :style (cond-> {:top (str (px (- s start-off)) "px")
+                                                                         :height (str (px dur) "px")}
+                                                                  col (merge col))
                                                          :on (cond-> {}
                                                                on-event-click (assoc :click (fn [_e] (on-event-click evt)))
                                                                on-event-context-menu (assoc :contextmenu
@@ -1236,7 +1308,8 @@
                                                     [:span {:class ["cal-week-event-title"]} (:title evt)]
                                                     (when-let [dd (format-duration dur)]
                                                       [:span {:class ["cal-week-event-dur"]} dd])]]))
-                                              (events-for-date timed (:date d)))))
+                                              (let [day-evts (events-for-date timed (:date d))]
+                                                (map vector day-evts (timed-layout day-evts))))))
                                  days))
              now-node (when show-now?
                         [:div {:class ["cal-week-now"] :style {:top (str now-px "px")}}
@@ -1291,16 +1364,20 @@
                             (map (fn [d]
                                    (into [:div {:class (str "cal-week-daycol"
                                                            (when (= (:date d) today-str) " is-today"))}]
-                                         (map (fn [evt]
+                                         (map (fn [[evt place]]
                                                 (let [s   (hhmm->minutes (:time-start evt))
-                                                      dur (event-duration-minutes evt)]
-                                                  [:div {:class (str "cal-week-event " (event-color-class (:color evt)))
-                                                         :style (str "top: " (px (- s start-off)) "px; height: " (px dur) "px")}
+                                                      dur (event-duration-minutes evt)
+                                                      col (timed-layout-style place)]
+                                                  [:div {:class (str "cal-week-event " (event-color-class (:color evt))
+                                                                     (when (:stacked? place) " is-stacked"))
+                                                         :style (str "top: " (px (- s start-off)) "px; height: " (px dur) "px"
+                                                                     (when col (str "; left: " (:left col) "; width: " (:width col))))}
                                                    [:div {:class "cal-week-event-head"}
                                                     [:span {:class "cal-week-event-title"} (:title evt)]
                                                     (when-let [dd (format-duration dur)]
                                                       [:span {:class "cal-week-event-dur"} dd])]]))
-                                              (events-for-date timed (:date d)))))
+                                              (let [day-evts (events-for-date timed (:date d))]
+                                                (map vector day-evts (timed-layout day-evts))))))
                                  days))
              now-node (when show-now?
                         [:div {:class "cal-week-now" :style (str "top: " now-px "px")}

@@ -50,12 +50,14 @@
   {:fn "day-timeline" :doc "One day on an hour axis with positioned event blocks and a now line."
    :props [{:name :events :type "vector"} {:name :date :type "string"} {:name :today-str :type "string"} {:name :now-minutes :type "int"}
            {:name :on-event-click :type "fn"} {:name :on-event-context-menu :type "fn"} {:name :hour-height :type "px"} {:name :class :type "string"} {:name :attrs :type "map"}]}
-  {:fn "week-timeline" :doc "Seven day columns on a shared hour axis."
+  {:fn "week-timeline" :doc "Seven day columns on a shared hour axis. Overlapping events go by timed-layout: side by side when they start together, else the later one over the earlier, indented (.is-stacked)."
    :props [{:name :days :type "vector of day maps"} {:name :events :type "vector"} {:name :today-str :type "string"} {:name :now-minutes :type "int"}
            {:name :on-event-click :type "fn"} {:name :on-event-context-menu :type "fn"} {:name :hour-height :type "px"} {:name :class :type "string"} {:name :attrs :type "map"}]}
   {:fn "events-for-date" :doc "Events whose :date matches."}
   {:fn "cell-events" :doc "A date's events in day-cell order: by time, done ones last (first into +N more)."}
-  {:fn "event-duration-minutes" :doc "Minutes between :time-start and :time-end."}]
+  {:fn "event-duration-minutes" :doc "Minutes between :time-start and :time-end."}
+  {:fn "timed-layout" :doc "One day's timed events placed across the column: {:left :right :stacked?} fractions per event, in the order given."}
+  {:fn "timed-layout-style" :doc "Inline :left / :width for a timed-layout placement; nil for a card with the column to itself."}]
 
  :keyboard [["Tab" "Day cells and event pills are buttons."] ["Enter" "Opens the focused event or day."]]
 

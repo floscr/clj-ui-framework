@@ -310,3 +310,46 @@
     (testing "a cell lists done and cancelled last"
       (is (= ["active" "todo" "event" "waiting" "timed" "cancelled" "done"]
              (map :title (cal-events/cell-events evts "2026-03-29")))))))
+
+(defn- ev [start end] {:time-start start :time-end end})
+
+(deftest timed-layout-test
+  (testing "events that don't overlap each have the whole width"
+    (is (= [{:left 0 :right 1 :stacked? false} {:left 0 :right 1 :stacked? false}]
+           (cal-events/timed-layout [(ev "09:00" "10:00") (ev "10:00" "11:00")]))))
+  (testing "one starting 30 min or more later lies over the first, indented a fifth"
+    (is (= [{:left 0 :right 1 :stacked? false} {:left 1/5 :right 1 :stacked? true}]
+           (cal-events/timed-layout [(ev "09:30" "10:30") (ev "10:00" "10:30")]))))
+  (testing "events starting together share the width, the longer first, in the order given"
+    (is (= [{:left 1/2 :right 1 :stacked? false} {:left 0 :right 1/2 :stacked? false}]
+           (cal-events/timed-layout [(ev "09:00" "09:30") (ev "09:00" "11:00")])))
+    (is (= [1/3 2/3] (map :left (rest (cal-events/timed-layout [(ev "09:00" "10:00") (ev "09:00" "09:30") (ev "09:15" "10:15")]))))))
+  (testing "a short card overlaps by its drawn height (30 min at least)"
+    (is (= 1/2 (:right (first (cal-events/timed-layout [(ev "09:00" "09:10") (ev "09:20" "10:00")])))))
+    (is (= 1 (:right (first (cal-events/timed-layout [(ev "09:00" "09:10") (ev "09:30" "10:00")]))))))
+  (testing "a later event lies over the deepest one it overlaps"
+    ;; A 9-12 whole; B 9:00-10:30 beside it; C 10-11 over B (the right half)
+    (is (= [{:left 0 :right 1/2 :stacked? false}
+            {:left 1/2 :right 1 :stacked? false}
+            {:left 3/5 :right 1 :stacked? true}]
+           (cal-events/timed-layout [(ev "09:00" "12:00") (ev "09:00" "10:30") (ev "10:00" "11:00")])))))
+
+(deftest timed-layout-style-test
+  (is (nil? (cal-events/timed-layout-style {:left 0 :right 1})))
+  (is (= {:left "calc(0.0% + 2px)" :width "calc(50.0% - 3px)"}
+         (cal-events/timed-layout-style {:left 0 :right 1/2})))
+  (is (= {:left "calc(20.0% + 1px)" :width "calc(80.0% - 3px)"}
+         (cal-events/timed-layout-style {:left 1/5 :right 1})))
+  (is (= {:left "calc(33.33% + 1px)" :width "calc(33.33% - 2px)"}
+         (cal-events/timed-layout-style {:left 1/3 :right 2/3}))))
+
+(deftest week-timeline-overlap-test
+  (let [days  (mapv (fn [i] {:date (str "2026-11-" (+ 16 i)) :day (+ 16 i) :dow i}) (range 7))
+        html  (str (cal-events/week-timeline
+                    {:days days
+                     :events [{:title "Fußpflege" :date "2026-11-17" :time-start "09:30" :time-end "10:30"}
+                              {:title "Weekly" :date "2026-11-17" :time-start "10:00" :time-end "10:30"}
+                              {:title "Alone" :date "2026-11-16" :time-start "10:40" :time-end "11:25"}]}))]
+    (is (re-find #"cal-week-event[^\"]* is-stacked" html))
+    (is (re-find #"left: calc\(20.0% \+ 1px\); width: calc\(80.0% - 3px\)" html))
+    (is (= 1 (count (re-seq #"left: calc" html))) "the others keep the stylesheet's inset")))

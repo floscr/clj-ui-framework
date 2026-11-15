@@ -1452,6 +1452,12 @@
   filter: brightness(0.97);
 }
 
+/* Laid over an earlier event it overlaps (timed-layout): a ring in the
+   page colour parts the two cards. */
+.cal-week-event.is-stacked {
+  box-shadow: 0 0 0 1px var(--bg-0);
+}
+
 .cal-week-event-head {
   display: flex;
   align-items: baseline;
