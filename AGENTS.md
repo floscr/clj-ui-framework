@@ -314,8 +314,9 @@ out/deploy.
    8116, streaks 8121. Poll until every port returns 200 (services take
    1 to 2 min to restart while they fetch the new sha), then grep a served
    page / `theme.css` / bundle for a marker string from the change to
-   confirm the new version is actually live. ebook-reader pins its own sha
-   and does not move with server-lib.
+   confirm the new version is actually live. No bb-service pins its own
+   sha any more (ebook-reader, lights and desktop-remote-control dropped
+   theirs 2026-11-15): every one moves with server-lib.
 
    **xi has uncommitted work?** The full deploy rebuilds xi from its
    working tree and would ship that work. Deploy only the bb-services
