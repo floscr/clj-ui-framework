@@ -84,6 +84,12 @@
   [year month day]
   (str year "-" (pad2 month) "-" (pad2 day)))
 
+(defn display-date
+  "A YYYY-MM-DD date as it is shown to people: DD.MM.YYYY."
+  [date]
+  (let [[y m d] (str/split (str date) #"-")]
+    (if d (str d "." m "." y) (str date))))
+
 (defn month-name
   "Get full month name (1-indexed)."
   [month]

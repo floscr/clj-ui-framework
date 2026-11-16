@@ -140,7 +140,9 @@
                                                 :label "Today"
                                                 :events sample-events})]
       (is (some? result))
-      (is (= :div (first result)))))
+      (is (= :div (first result)))
+      (is (= "2026-03-29" (:data-date (second result))))
+      (is (re-find #"\"29\.03\.2026\"" (pr-str result)))))
   (testing "returns nil for date with no events"
     (let [result (cal-events/agenda-day-group {:date "2026-04-01"
                                                 :label "Wed"

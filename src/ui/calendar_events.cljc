@@ -893,10 +893,10 @@
         today?   (and today-str (= date today-str))]
     (when (or (seq day-evts) today?)
       #?(:squint
-         [:div {:class (str/join " " (agenda-day-group-class-list {:today? today?}))}
+         [:div {:class (str/join " " (agenda-day-group-class-list {:today? today?})) :data-date date}
           [:div {:class "cal-agenda-day-header"}
            [:span {:class "cal-agenda-day-label"} label]
-           [:span {:class "cal-agenda-day-date"} (str/replace date "-" "/")]]
+           [:span {:class "cal-agenda-day-date"} (cal/display-date date)]]
           (if (seq day-evts)
             (into [:div {:class "cal-agenda-day-events"}]
                   (map (fn [evt]
@@ -907,10 +907,10 @@
             (agenda-day-empty {:date date :title empty-title :hint empty-hint :on-add on-add-event}))]
 
          :cljs
-         [:div {:class (agenda-day-group-class-list {:today? today?})}
+         [:div {:class (agenda-day-group-class-list {:today? today?}) :data-date date}
           [:div {:class ["cal-agenda-day-header"]}
            [:span {:class ["cal-agenda-day-label"]} label]
-           [:span {:class ["cal-agenda-day-date"]} (str/replace date "-" "/")]]
+           [:span {:class ["cal-agenda-day-date"]} (cal/display-date date)]]
           (if (seq day-evts)
             (into [:div {:class ["cal-agenda-day-events"]}]
                   (map (fn [evt]
@@ -921,10 +921,10 @@
             (agenda-day-empty {:date date :title empty-title :hint empty-hint :on-add on-add-event}))]
 
          :clj
-         [:div {:class (str/join " " (agenda-day-group-class-list {:today? today?}))}
+         [:div {:class (str/join " " (agenda-day-group-class-list {:today? today?})) :data-date date}
           [:div {:class "cal-agenda-day-header"}
            [:span {:class "cal-agenda-day-label"} label]
-           [:span {:class "cal-agenda-day-date"} (str/replace date "-" "/")]]
+           [:span {:class "cal-agenda-day-date"} (cal/display-date date)]]
           (if (seq day-evts)
             (into [:div {:class "cal-agenda-day-events"}]
                   (map (fn [evt]

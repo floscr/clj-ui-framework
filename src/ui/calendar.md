@@ -136,7 +136,9 @@ Vertical list of events grouped by day. Days without events are dropped —
 except today when `:today-str` is passed: today's group is always shown,
 highlighted (`.cal-agenda-day-today`, accent edge + label), and renders an
 `agenda-day-empty` card ("Nothing scheduled / A clear day") when it has no
-events. Pass `:on-add-event` to give that card an **Add** button.
+events. Pass `:on-add-event` to give that card an **Add** button. A day's
+header shows its date as `18.11.2026`; the group carries the ISO date as
+`data-date` for hosts that read it back.
 
 ```clojure
 (cal-events/agenda-list
@@ -208,6 +210,8 @@ All date math is pure (no JS Date dependency) and works on all targets:
 - `(calendar-days year month)` — full grid including prev/next month padding
 - `(prev-month year month)` / `(next-month year month)` — returns `[year month]`
 - `(date-str year month day)` — formats as `"YYYY-MM-DD"`
+- `(display-date "2026-11-18")` — `"18.11.2026"`, how a date is shown to
+  people (the agenda's day headers use it)
 
 ## CSS Classes
 

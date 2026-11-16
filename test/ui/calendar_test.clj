@@ -197,3 +197,10 @@
       (is (= [:span {:class "cal-weekday-dot"}] (nth thu 2)))
       (is (= "Thu" (nth thu 3)))
       (is (= "cal-weekday" (get-in (first cols) [1 :class]))))))
+
+(deftest display-date-test
+  (is (= "18.11.2026" (cal/display-date "2026-11-18")))
+  (is (= "03.01.2027" (cal/display-date "2027-01-03")))
+  (testing "anything that isn't YYYY-MM-DD passes through"
+    (is (= "" (cal/display-date nil)))
+    (is (= "soon" (cal/display-date "soon")))))
