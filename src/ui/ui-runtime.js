@@ -13703,12 +13703,14 @@
   var edge2 = 8;
   var focusable2 = "a[href],button,input,select,textarea,summary,[tabindex]";
   var interactive = "a[href],button,input,select,textarea,summary,label";
+  var text_input = "textarea,input:not([type=button],[type=submit],[type=reset],[type=checkbox],[type=radio],[type=range],[type=color],[type=file],[type=image])";
+  var non_typing_keys = /* @__PURE__ */ new Set(["Alt", "Tab", "Control", "Fn", "Escape", "AltGraph", "CapsLock", "Meta", "OS", "Shift"]);
   var get_state3 = function() {
     const or__23426__auto__1 = window["__uiTooltipState"];
     if (truth_(or__23426__auto__1)) {
       return or__23426__auto__1;
     } else {
-      const s2 = { "open": null, "lastClose": -1e5, "pending": null, "bubble": null, "layer": null, "pointer": "mouse", "hideTimer": null, "showTimer": null, "suppressed": null, "observer": null };
+      const s2 = { "y": null, "open": null, "lastClose": -1e5, "pending": null, "bubble": null, "layer": null, "pointer": "mouse", "hideTimer": null, "showTimer": null, "typing": false, "suppressed": null, "x": null, "observer": null };
       window["__uiTooltipState"] = s2;
       return s2;
     }
@@ -14224,15 +14226,21 @@
     const s1 = get_state3();
     clearTimeout(s1.hideTimer);
     if (truth_((() => {
-      const or__23426__auto__2 = s1.open === trigger;
-      if (or__23426__auto__2) {
+      const or__23426__auto__2 = s1.typing;
+      if (truth_(or__23426__auto__2)) {
         return or__23426__auto__2;
       } else {
-        const or__23426__auto__3 = s1.pending === trigger;
+        const or__23426__auto__3 = s1.open === trigger;
         if (or__23426__auto__3) {
           return or__23426__auto__3;
         } else {
-          return s1.suppressed === trigger;
+          const or__23426__auto__4 = s1.pending === trigger;
+          if (or__23426__auto__4) {
+            return or__23426__auto__4;
+          } else {
+            return s1.suppressed === trigger;
+          }
+          ;
         }
         ;
       }
@@ -14241,16 +14249,16 @@
       return null;
     } else {
       clear_pending_BANG_();
-      const d4 = delay_of(trigger);
+      const d5 = delay_of(trigger);
       if (truth_(warm_QMARK_(s1))) {
         return show_BANG_2(trigger, true);
       } else {
         if (truth_((() => {
-          const or__23426__auto__5 = immediate_QMARK_;
-          if (truth_(or__23426__auto__5)) {
-            return or__23426__auto__5;
+          const or__23426__auto__6 = immediate_QMARK_;
+          if (truth_(or__23426__auto__6)) {
+            return or__23426__auto__6;
           } else {
-            return d4 <= 0;
+            return d5 <= 0;
           }
           ;
         })())) {
@@ -14260,7 +14268,7 @@
             s1.pending = trigger;
             return s1.showTimer = setTimeout((function() {
               return show_BANG_2(trigger, false);
-            }), d4);
+            }), d5);
           } else {
             return null;
           }
@@ -14321,6 +14329,46 @@
     }
     ;
   };
+  var stop_typing_BANG_ = function(s, e) {
+    s.typing = false;
+    const temp__23062__auto__1 = trigger_of(e.target);
+    if (truth_(temp__23062__auto__1)) {
+      const t2 = temp__23062__auto__1;
+      return enter_BANG_(t2, false);
+    }
+    ;
+  };
+  var on_pointer_move = function(e) {
+    if (!(e.pointerType === "touch")) {
+      const s1 = get_state3();
+      const x2 = e.clientX;
+      const y3 = e.clientY;
+      const moved4 = !(s1.x == null) && (() => {
+        const or__23426__auto__5 = !_EQ_(x2, s1.x);
+        if (or__23426__auto__5) {
+          return or__23426__auto__5;
+        } else {
+          return !_EQ_(y3, s1.y);
+        }
+        ;
+      })();
+      s1.x = x2;
+      s1.y = y3;
+      if (truth_((() => {
+        const and__23442__auto__6 = moved4;
+        if (truth_(and__23442__auto__6)) {
+          return s1.typing;
+        } else {
+          return and__23442__auto__6;
+        }
+        ;
+      })())) {
+        return stop_typing_BANG_(s1, e);
+      }
+      ;
+    }
+    ;
+  };
   var on_pointer_out = function(e) {
     if (!(e.pointerType === "touch")) {
       const temp__23062__auto__1 = trigger_of(e.target);
@@ -14339,6 +14387,7 @@
     const s1 = get_state3();
     const t2 = trigger_of(e.target);
     s1.pointer = e.pointerType;
+    s1.typing = false;
     if (truth_((() => {
       const and__23442__auto__3 = t2;
       if (truth_(and__23442__auto__3)) {
@@ -14405,7 +14454,33 @@
     }
     ;
   };
+  var typing_target_QMARK_2 = function(node) {
+    const and__23442__auto__1 = node;
+    if (truth_(and__23442__auto__1)) {
+      const and__23442__auto__2 = node.matches;
+      if (truth_(and__23442__auto__2)) {
+        const or__23426__auto__3 = node.isContentEditable;
+        if (truth_(or__23426__auto__3)) {
+          return or__23426__auto__3;
+        } else {
+          return node.matches(text_input);
+        }
+        ;
+      } else {
+        return and__23442__auto__2;
+      }
+      ;
+    } else {
+      return and__23442__auto__1;
+    }
+    ;
+  };
   var on_focus_in = function(e) {
+    if (truth_(typing_target_QMARK_2(e.target))) {
+    } else {
+      get_state3().typing = false;
+    }
+    ;
     const temp__23062__auto__1 = trigger_of(e.target);
     if (truth_(temp__23062__auto__1)) {
       const t2 = temp__23062__auto__1;
@@ -14433,6 +14508,21 @@
       const t2 = s1.open;
       hide_BANG_();
       return s1.suppressed = t2;
+    } else {
+      if (truth_((() => {
+        const and__23442__auto__3 = typing_target_QMARK_2(e.target);
+        if (truth_(and__23442__auto__3)) {
+          return not(contains_QMARK_(non_typing_keys, e.key));
+        } else {
+          return and__23442__auto__3;
+        }
+        ;
+      })())) {
+        s1.typing = true;
+        return hide_BANG_();
+      } else {
+        return null;
+      }
     }
     ;
   };
@@ -14443,6 +14533,7 @@
       window["__uiTooltipInit"] = true;
       document.addEventListener("pointerover", on_pointer_over);
       document.addEventListener("pointerout", on_pointer_out);
+      document.addEventListener("pointermove", on_pointer_move, { "passive": true });
       document.addEventListener("pointerdown", on_pointer_down, true);
       document.addEventListener("click", on_click6);
       document.addEventListener("focusin", on_focus_in);

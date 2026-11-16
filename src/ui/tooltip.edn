@@ -54,7 +54,8 @@
    :doc "The data attributes the runtime reads off the trigger wrapper."}]
 
  :keyboard [["Tab" "Keyboard focus opens the tooltip at once, without the delay."]
-            ["Escape" "Closes it until the pointer or focus leaves the trigger."]]
+            ["Escape" "Closes it until the pointer or focus leaves the trigger."]
+            ["Typing in a field" "Closes the open tooltip; none opens until the pointer moves, a click or Tab."]]
 
  :accessibility
  ["The shared layer has role=\"tooltip\" and the trigger's control gets aria-describedby while it is open."

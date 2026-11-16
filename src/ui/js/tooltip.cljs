@@ -13,7 +13,11 @@
 
    The bubble inverts the page under its trigger (ink on light, white on
    dark) unless `data-tooltip-theme` on it or an ancestor says light or dark.
-   It takes the first side with room: preferred, opposite, perpendicular.")
+   It takes the first side with room: preferred, opposite, perpendicular.
+
+   Typing in a text field closes the open tooltip and keeps new ones shut
+   until the pointer really moves, so controls that shift under a resting
+   cursor while the text grows don't pop theirs.")
 
 (def ^:private default-delay 500)
 (def ^:private skip-ms 400)
@@ -25,12 +29,19 @@
 (def ^:private focusable "a[href],button,input,select,textarea,summary,[tabindex]")
 ;; triggers whose tap does something else: touch never toggles their tooltip
 (def ^:private interactive "a[href],button,input,select,textarea,summary,label")
+;; inputs whose keys type text, as opposed to toggles and pickers
+(def ^:private text-input
+  "textarea,input:not([type=button],[type=submit],[type=reset],[type=checkbox],[type=radio],[type=range],[type=color],[type=file],[type=image])")
+;; keys that don't type: navigating or dismissing keeps tooltips available
+(def ^:private non-typing-keys
+  #{"Tab" "Escape" "Shift" "Control" "Alt" "Meta" "AltGraph" "CapsLock" "Fn" "OS"})
 
 (defn- get-state []
   (or (aget js/window "__uiTooltipState")
       (let [s #js {:layer nil :bubble nil :open nil :pending nil
                    :showTimer nil :hideTimer nil :lastClose -100000
-                   :suppressed nil :pointer "mouse" :observer nil}]
+                   :suppressed nil :pointer "mouse" :observer nil
+                   :typing false :x nil :y nil}]
         (aset js/window "__uiTooltipState" s)
         s)))
 
@@ -304,7 +315,8 @@
 (defn- enter! [trigger immediate?]
   (let [s (get-state)]
     (js/clearTimeout (.-hideTimer s))
-    (when-not (or (identical? (.-open s) trigger)
+    (when-not (or (.-typing s)
+                  (identical? (.-open s) trigger)
                   (identical? (.-pending s) trigger)
                   (identical? (.-suppressed s) trigger))
       (clear-pending!)
@@ -341,6 +353,25 @@
     (when-let [t (trigger-of (.-target e))]
       (enter! t false))))
 
+(defn- stop-typing! [s e]
+  (set! (.-typing s) false)
+  (when-let [t (trigger-of (.-target e))]
+    (enter! t false)))
+
+(defn- on-pointer-move
+  "Ends typing mode on real movement only: browsers replay pointer events at
+   the same coordinates when the layout shifts under a resting cursor."
+  [e]
+  (when (not= (.-pointerType e) "touch")
+    (let [s     (get-state)
+          x     (.-clientX e)
+          y     (.-clientY e)
+          moved (and (some? (.-x s)) (or (not= x (.-x s)) (not= y (.-y s))))]
+      (set! (.-x s) x)
+      (set! (.-y s) y)
+      (when (and moved (.-typing s))
+        (stop-typing! s e)))))
+
 (defn- on-pointer-out [e]
   (when (not= (.-pointerType e) "touch")
     (when-let [t (trigger-of (.-target e))]
@@ -350,6 +381,7 @@
   (let [s (get-state)
         t (trigger-of (.-target e))]
     (set! (.-pointer s) (.-pointerType e))
+    (set! (.-typing s) false)
     (cond
       ;; pressing a control closes its tooltip until the pointer leaves
       (and t (not= (.-pointerType e) "touch")
@@ -367,7 +399,14 @@
         (when-not (or (.matches t interactive) (.querySelector t interactive))
           (if (identical? (.-open s) t) (hide!) (enter! t true)))))))
 
+(defn- typing-target? [node]
+  (and node (.-matches node)
+       (or (.-isContentEditable node) (.matches node text-input))))
+
 (defn- on-focus-in [e]
+  ;; keyboard focus on a control (Tab out of a field) shows tooltips again
+  (when-not (typing-target? (.-target e))
+    (set! (.-typing (get-state)) false))
   (when-let [t (trigger-of (.-target e))]
     (when (and (not= (.-pointer (get-state)) "touch")
                (.matches (.-target e) ":focus-visible"))
@@ -379,16 +418,23 @@
 
 (defn- on-key-down [e]
   (let [s (get-state)]
-    (when (and (= (.-key e) "Escape") (.-open s))
+    (cond
+      (and (= (.-key e) "Escape") (.-open s))
       (let [t (.-open s)]
         (hide!)
-        (set! (.-suppressed s) t)))))
+        (set! (.-suppressed s) t))
+
+      (and (typing-target? (.-target e))
+           (not (contains? non-typing-keys (.-key e))))
+      (do (set! (.-typing s) true)
+          (hide!)))))
 
 (defn init! []
   (when-not (aget js/window "__uiTooltipInit")
     (aset js/window "__uiTooltipInit" true)
     (.addEventListener js/document "pointerover" on-pointer-over)
     (.addEventListener js/document "pointerout" on-pointer-out)
+    (.addEventListener js/document "pointermove" on-pointer-move #js {:passive true})
     (.addEventListener js/document "pointerdown" on-pointer-down true)
     (.addEventListener js/document "click" on-click)
     (.addEventListener js/document "focusin" on-focus-in)

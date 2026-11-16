@@ -120,6 +120,7 @@ The data attributes the runtime reads off the trigger wrapper.
 | --- | --- |
 | Tab | Keyboard focus opens the tooltip at once, without the delay. |
 | Escape | Closes it until the pointer or focus leaves the trigger. |
+| Typing in a field | Closes the open tooltip; none opens until the pointer moves, a click or Tab. |
 
 ## Accessibility
 
