@@ -145,6 +145,7 @@
               [ui.metric-test]
               [ui.day-grid-test]
               [ui.list-row-test]
+              [ui.comment-test]
               [ui.notification-test]
               [ui.video-player-test]
               [ui.lightbox-test]
@@ -203,6 +204,7 @@
                                       'ui.metric-test
                                       'ui.day-grid-test
                                       'ui.list-row-test
+                                      'ui.comment-test
                                       'ui.notification-test
                                       'ui.video-player-test
                                       'ui.lightbox-test

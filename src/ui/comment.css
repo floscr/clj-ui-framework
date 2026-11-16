@@ -1,0 +1,296 @@
+/* ── Comments ───────────────────────────────────────────────────
+   A thread is one rail with a marker per comment. Replies fold into one
+   line under their comment (a native <details>) and open as a flat branch:
+   an answer to a reply stays on the branch and names who it answers, so
+   nothing indents past one level and a narrow pane holds a deep discussion.
+
+   --comment-surface is the color under the thread (default --bg-0): the
+   markers and the dots on a folded line cut their gap out of it. Set it on
+   the thread when it sits on another surface. */
+
+.comment,
+.comment-reply {
+  --comment-dot: var(--size-2);
+  --comment-line: color-mix(in oklch, var(--fg-2) 26%, var(--comment-surface, var(--bg-0)));
+  position: relative;
+  min-width: 0;
+  color: var(--fg-0);
+}
+
+.comment-thread {
+  display: flex;
+  flex-direction: column;
+}
+
+/* The rail: every comment draws its own stretch of it, the first from its
+   marker down, the last down to its marker. */
+.comment-thread > .comment {
+  padding-left: var(--size-6);
+  padding-bottom: var(--size-5);
+}
+
+.comment-thread > .comment:last-child {
+  padding-bottom: 0;
+}
+
+.comment-thread > .comment::before {
+  content: "";
+  position: absolute;
+  left: calc(var(--comment-dot) / 2 - 0.5px);
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--comment-line);
+}
+
+.comment-thread > .comment:first-child::before {
+  top: calc(var(--size-5) / 2);
+}
+
+.comment-thread > .comment:last-child::before {
+  bottom: auto;
+  height: calc(var(--size-5) / 2);
+}
+
+.comment-thread > .comment:only-child::before {
+  display: none;
+}
+
+/* The marker, centered on the head line. */
+.comment-thread > .comment::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: calc((var(--size-5) - var(--comment-dot)) / 2);
+  width: var(--comment-dot);
+  height: var(--comment-dot);
+  border-radius: var(--radius-pill);
+  background: var(--fg-2);
+  box-shadow: 0 0 0 3px var(--comment-surface, var(--bg-0));
+}
+
+/* ── Head and body ── */
+
+.comment-head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  column-gap: var(--size-2);
+  font-size: var(--font-sm);
+  line-height: var(--size-5);
+  color: var(--fg-2);
+}
+
+.comment-author {
+  font-weight: var(--weight-medium);
+  color: var(--fg-0);
+}
+
+.comment-badge {
+  font-weight: var(--weight-medium);
+  color: var(--accent);
+}
+
+.comment-meta {
+  font-variant-numeric: tabular-nums;
+}
+
+.comment-body {
+  margin-top: 2px;
+  font-size: var(--font-base);
+  line-height: calc(var(--size-5) + 2px);
+  overflow-wrap: anywhere;
+}
+
+.comment-body p,
+.comment-body pre {
+  margin: 0;
+}
+
+.comment-body p + p,
+.comment-body p + pre,
+.comment-body pre + p {
+  margin-top: var(--size-2);
+}
+
+.comment-body a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.comment-body a:hover {
+  text-decoration: underline;
+}
+
+.comment-body pre {
+  padding: var(--size-2) var(--size-3);
+  border-radius: var(--radius-sm);
+  background: var(--bg-2);
+  font-family: var(--font-mono);
+  font-size: var(--font-sm);
+  overflow-x: auto;
+}
+
+/* ── Replies: one line, then a flat branch ── */
+
+.comment-replies {
+  margin-top: var(--size-1);
+}
+
+.comment-fold {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--size-2);
+  min-height: var(--control-sm);
+  margin-left: calc(-1 * var(--size-1));
+  padding: 0 var(--size-2) 0 var(--size-1);
+  border-radius: var(--radius-pill);
+  list-style: none;
+  cursor: pointer;
+  user-select: none;
+  font-size: var(--font-sm);
+  font-weight: var(--weight-medium);
+  color: var(--fg-1);
+  transition: background-color var(--duration-fast) var(--ease-standard),
+              color var(--duration-fast) var(--ease-standard),
+              transform var(--duration-fast) var(--ease-standard);
+}
+
+.comment-fold::-webkit-details-marker {
+  display: none;
+}
+
+.comment-fold:hover {
+  background: var(--bg-2);
+  color: var(--fg-0);
+}
+
+.comment-fold:active {
+  transform: scale(0.97);
+}
+
+.comment-fold:focus-visible {
+  outline: var(--focus-outline);
+  outline-offset: 2px;
+}
+
+.comment-fold .icon {
+  color: var(--fg-2);
+  transition: transform var(--duration-fast) var(--ease-standard);
+}
+
+.comment-replies[open] > .comment-fold .icon {
+  transform: rotate(90deg);
+}
+
+/* Who answered: one dot per person, overlapping; gone once the branch is
+   open and the names are there to read. */
+.comment-faces {
+  display: inline-flex;
+}
+
+.comment-replies[open] > .comment-fold .comment-faces {
+  display: none;
+}
+
+.comment-face {
+  width: var(--size-4);
+  height: var(--size-4);
+  margin-left: calc(-1 * var(--size-1));
+  border: 2px solid var(--comment-surface, var(--bg-0));
+  border-radius: var(--radius-pill);
+  background: var(--fg-2);
+}
+
+.comment-face:first-child {
+  margin-left: 0;
+}
+
+.comment-face-1 { background: var(--accent); }
+.comment-face-2 { background: var(--teal); }
+.comment-face-3 { background: var(--orange); }
+.comment-face-4 { background: var(--success); }
+.comment-face-5 { background: var(--warning); }
+
+.comment-branch {
+  display: grid;
+  gap: var(--size-3);
+  margin: var(--size-1) 0 0 var(--size-1);
+  border-left: 1px solid var(--comment-line);
+}
+
+.comment-reply {
+  padding-left: var(--size-5);
+}
+
+/* The tick from the branch to a reply's head line. */
+.comment-reply::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: calc(var(--size-5) / 2);
+  width: var(--size-3);
+  height: 1px;
+  background: var(--comment-line);
+}
+
+/* An opened branch arrives reply by reply. */
+@keyframes comment-in {
+  from {
+    opacity: 0;
+    transform: translateY(calc(-1 * var(--size-1)));
+  }
+}
+
+.comment-replies[open] > .comment-branch > .comment-reply {
+  animation: comment-in var(--duration-standard) var(--ease-enter) both;
+}
+
+.comment-replies[open] > .comment-branch > .comment-reply:nth-child(2) {
+  animation-delay: calc(var(--duration-fast) / 4);
+}
+
+.comment-replies[open] > .comment-branch > .comment-reply:nth-child(3) {
+  animation-delay: calc(var(--duration-fast) / 2);
+}
+
+.comment-replies[open] > .comment-branch > .comment-reply:nth-child(n + 4) {
+  animation-delay: calc(var(--duration-fast) * 0.75);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .comment-replies[open] > .comment-branch > .comment-reply { animation: none; }
+  .comment-fold,
+  .comment-fold .icon { transition: none; }
+}
+
+/* ── States ── */
+
+/* The comment a link pointed at: a tint, and its marker in the accent. */
+.comment-target > .comment-body {
+  margin-inline: calc(-1 * var(--size-2));
+  padding: var(--size-1) var(--size-2);
+  border-radius: var(--radius-sm);
+  background: var(--accent-subtle);
+}
+
+.comment-thread > .comment-target::after {
+  background: var(--accent);
+  box-shadow: 0 0 0 3px var(--comment-surface, var(--bg-0)), 0 0 0 5px var(--accent-subtle);
+}
+
+/* A removed comment that stays for its replies. */
+.comment-deleted > .comment-head .comment-author {
+  font-weight: var(--weight-regular);
+  color: var(--fg-2);
+}
+
+.comment-deleted > .comment-body {
+  color: var(--fg-2);
+  font-style: italic;
+}
+
+.comment-thread > .comment-deleted::after {
+  background: var(--comment-surface, var(--bg-0));
+  box-shadow: inset 0 0 0 1px var(--fg-2), 0 0 0 3px var(--comment-surface, var(--bg-0));
+}

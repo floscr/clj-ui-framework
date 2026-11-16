@@ -1,0 +1,99 @@
+{:id :comment
+ :title "Comment"
+ :summary "Comments as markers on one rail, each with its replies folded into a line that opens in place as a flat branch, so a deep discussion stays readable in a narrow pane."
+ :category :data
+ :group "Conversation"
+ :keywords ["comment" "comments" "thread" "replies" "discussion" "comment tree" "review" "notes" "hacker news" "feedback"]
+
+ :when-to-use
+ ["The discussion under an article, a post or a story, in a pane or a page."
+  "Review notes or feedback attached to one record, where each note may have a few answers."
+  "A single remark with an author and a time, on its own (comment-item without a thread)."]
+
+ :when-not-to-use
+ ["Use chat for a live back-and-forth with a composer, where every message is a bubble."
+  "Use list-row for records that open a detail view and have no body text."
+  "Use accordion for a few collapsible sections of content that are not answers to one another."
+  "This component shows two levels. When the exact shape of a deep tree matters (who answered whom, six levels down), render the nesting yourself; flat-replies is the opposite choice."]
+
+ :usage "(require '[ui.comment :as comment])\n\n(comment/comment-thread {}\n  (comment/comment-item {:author \"marrow\" :time \"5h\" :meta \"42 points\"\n                         :replies (comment/comment-replies {:people [\"dunlin\" \"sorenb\"]}\n                                    (comment/comment-reply {:author \"dunlin\" :time \"4h\"}\n                                      \"It only works because the rotation isn't random.\")\n                                    (comment/comment-reply {:author \"sorenb\" :badge \"author\" :time \"3h\" :to \"dunlin\"}\n                                      \"It never picks the variant it used last.\"))}\n    \"The contextual alternates are the whole trick.\")\n  (comment/comment-item {:author \"tessellate\" :time \"5h\"}\n    \"Printed a page next to my actual handwriting.\"))"
+
+ :examples
+ [{:title "From a reply tree: flat-replies turns nesting into :to"
+   :code "(let [replies (comment/flat-replies story-comment)]\n  (comment/comment-item {:author (:author story-comment) :time (:time story-comment)\n                         :replies (when (seq replies)\n                                    (apply comment/comment-replies\n                                           {:people (map :author replies)}\n                                           (for [{:keys [author time to text]} replies]\n                                             (comment/comment-reply {:author author :time time :to to} text))))}\n    (:text story-comment)))"}
+  {:title "The comment a link pointed at, and a deleted one kept for its replies"
+   :code "(comment/comment-thread {}\n  (comment/comment-item {:author \"tessellate\" :time \"5h\" :target true} \"My partner picked the font as the real one.\")\n  (comment/comment-item {:deleted true :time \"4h\"\n                         :replies (comment/comment-replies {}\n                                    (comment/comment-reply {:author \"greyscale\" :time \"4h\"} \"The parent asked about licensing. It is OFL.\"))}\n    \"This comment was deleted.\"))"}
+  {:title "Loading and empty"
+   :code ";; while the thread loads\n(skeleton/skeleton {:variant :line})\n\n;; a thread with nothing in it\n(empty-state/empty-state {:icon :inbox} \"No comments yet.\")"}]
+
+ :api
+ [{:fn "comment-thread"
+   :doc "The rail: its comments are markers on one hairline, 20px apart from the next comment. Set --comment-surface on it when the thread sits on a surface other than --bg-0, so the markers and dots cut their gap out of the right color."
+   :children "comment-item elements."
+   :props [{:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "comment-item"
+   :doc "One comment, an <article>: a head line (author, badge, time, meta), the body, then its folded replies. In a comment-thread it gets a marker on the rail; outside one it is a plain block."
+   :children "The body: text or hiccup. Paragraphs, links and pre blocks are styled."
+   :props [{:name :author :type "string | hiccup" :doc "Who wrote it. A deleted comment without one reads \"deleted\"."}
+           {:name :badge :type "string" :doc "A short accent word after the author: \"author\", \"maintainer\"."}
+           {:name :time :type "string" :doc "When, already formatted: \"5h\", \"12 Nov\"."}
+           {:name :meta :type "string | hiccup" :doc "Trailing muted text: \"42 points\", \"edited\"."}
+           {:name :target :type "boolean" :doc "The comment a link pointed at: its body is tinted and its marker takes the accent."}
+           {:name :deleted :type "boolean" :doc "A removed comment kept for its replies: muted, italic, a hollow marker."}
+           {:name :replies :type "hiccup" :doc "A comment-replies element, shown under the body."}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "comment-replies"
+   :doc "The replies of one comment behind a line: a dot per person who answered, the count and a chevron. A native <details>: a click, Enter or Space opens the branch in place, and the replies arrive one after the other."
+   :children "comment-reply elements."
+   :props [{:name :label :type "string" :default "\"N replies\" from the children" :doc "The line's text. Pass it when the count is not the number of children (replies loaded later)."}
+           {:name :people :type "seq of strings" :doc "Names of the people who answered. Up to four distinct ones become dots; a name always gets the same color."}
+           {:name :open :type "boolean" :default "false" :doc "Opened from the start."}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "comment-reply"
+   :doc "One reply on an opened branch, tied to it by a tick. Replies never nest: an answer to a reply sits on the same branch and says whom it answers."
+   :children "The body: text or hiccup."
+   :props [{:name :author :type "string | hiccup"}
+           {:name :badge :type "string"}
+           {:name :time :type "string"}
+           {:name :to :type "string" :doc "Whom it answers, when that is another reply; shown as \"to marrow\". Leave it out for a direct reply to the comment."}
+           {:name :meta :type "string | hiccup"}
+           {:name :target :type "boolean"}
+           {:name :deleted :type "boolean"}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "flat-replies"
+   :doc "A comment's reply tree as the flat branch shown here: every reply at any depth in reading order, without its nested replies, and with :to (the author it answers) on answers to replies. Takes a map with :replies and :author; opts {:replies-key :author-key} name other keys."}
+  {:fn "replies-label" :doc "\"1 reply\", \"3 replies\"."}
+  {:fn "person-tone" :doc "A stable number from 1 to 5 for a name, the color class of that person's dot (comment-face-N)."}
+  {:fn "comment-classes" :doc "Class string for {:reply :target :deleted}."}
+  {:fn "comment-class-list" :doc "Vector form of comment-classes."}]
+
+ :keyboard [["Tab" "Moves to the next replies line, then into links inside comments."]
+            ["Enter / Space" "Opens or closes the branch of the focused replies line."]]
+
+ :accessibility
+ ["Each comment is an <article>; the replies line is a native <summary>, so it is focusable, announces expanded or collapsed and needs no script."
+  "The dots on a folded line are decorative (aria-hidden); the count is text."
+  "State is never color alone: a linked comment is tinted and its marker ringed, a deleted one is italic and its marker hollow."]
+
+ :motion
+ ["Opening a branch fades and drops its replies in one after the other (duration-standard, ease-enter); the chevron turns over duration-fast."
+  "The replies line fills on hover and scales to 0.97 on press."
+  "With reduced motion the replies appear at once and nothing transitions."]
+
+ :responsive
+ ["Nothing indents past one level, so a 320px pane loses 44px to the rail and the branch however deep the discussion is."
+  "The replies line is 28px tall, 36px on touch. Head lines wrap; long words and links in a body break."]
+
+ :targets
+ {:clj "Static markup; the fold works without JS. Body HTML from a server must be sanitized by the caller."
+  :cljs "The fold is uncontrolled: the browser owns <details> open. :class may be a vector."
+  :squint "Same as :cljs; no handlers are attached."}
+
+ :notes-for-ai
+ ["Build a thread as comment-thread > comment-item, with the replies passed as :replies (a comment-replies element holding comment-reply children). Do not nest comment-item inside comment-item."
+  "For data that is a tree, call flat-replies on each top-level comment and pass :to through to comment-reply; do not indent replies yourself."
+  "Pass :people (the reply authors) to comment-replies so the folded line shows who answered."
+  "Leave long threads folded; open the first one or the one that holds the :target reply."
+  "Use skeleton while a thread loads and empty-state when it has no comments."]
+
+ :related [:chat :accordion :list-row :skeleton :empty-state :badge]}

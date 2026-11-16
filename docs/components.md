@@ -4,7 +4,7 @@
 > See `AGENTS.md` for conventions, per-target pitfalls, and how to
 > add new components and icons. Agents: start at `docs/llms.txt`.
 
-## Components (54)
+## Components (55)
 
 ### Actions
 
@@ -64,6 +64,7 @@
 | [Calendar events](components/calendar-events.md) | `ui.calendar-events` | Event-aware calendar views: month grids with pills, a day ticker, an agenda list and day and week timelines, all from plain event maps. | `event-color-class`, `events-for-date`, `cell-events`, `more-label`, `format-time`, `event-time-display`, `parse-int*`, `round*`, `hhmm->minutes`, `event-duration-minutes`, `timed-layout`, `timed-layout-style`, `format-duration`, `format-hour-label`, `event-pill-class-list`, `event-pill-classes`, `ticker-day-class-list`, `ticker-day-classes`, `agenda-event-class-list`, `agenda-event-classes`, `task-check-class-list`, `task-check`, `event-task-check`, `event-pill`, `event-day-cell`, `calendar-event-grid`, `month-grid`, `ticker-dot`, `ticker-day-item`, `ticker-strip`, `agenda-event-row`, `agenda-day-group-class-list`, `agenda-day-empty`, `agenda-day-group`, `agenda-list`, `day-timeline`, `week-timeline` |
 | [Card](components/card.md) | `ui.card` | A bordered surface that groups related content and actions, plus a divided list variant. | `card-class-list`, `card-classes`, `card`, `card-header`, `card-body`, `card-footer`, `card-list-class-list`, `card-list-classes`, `card-list`, `card-list-item` |
 | [Chat](components/chat.md) | `ui.chat` | Conversation building blocks: a message log, user and assistant bubbles, a thinking indicator, a toolbar and an auto-growing composer. | `chat-bubble-class-list`, `chat-bubble-classes`, `chat-log`, `chat-bubble`, `chat-thinking`, `chat-toolbar`, `chat-input` |
+| [Comment](components/comment.md) | `ui.comment` | Comments as markers on one rail, each with its replies folded into a line that opens in place as a flat branch, so a deep discussion stays readable in a narrow pane. | `replies-label`, `person-tone`, `flat-replies`, `comment-class-list`, `comment-classes`, `comment-thread`, `comment-item`, `comment-reply`, `comment-replies` |
 | [Day grid](components/day-grid.md) | `ui.day-grid` | One square per day in rows of seven under a weekday header, colored by what happened: the record of a habit or a countdown under its streak numbers. | `day-grid-class-list`, `day-grid-classes`, `day-cell-class-list`, `day-cell-classes`, `day-grid` |
 | [File browser](components/file-browser.md) | `ui.file-browser` | Grid tiles and a sortable list or table of files and folders with type icons, selection and per-item context menus. | `file-type->icon`, `file-type-icon`, `file-view-toggle`, `file-item-grid`, `col-name`, `col-size`, `col-modified`, `col-type`, `file-table`, `file-list-header`, `file-item-list` |
 | [Icon](components/icon.md) | `ui.icon` | Inline Lucide-style SVG icons in four sizes, outlined by default with filled variants for media controls. | `icon-class-list`, `icon-classes`, `icon` |
