@@ -1419,8 +1419,8 @@
     const g3 = rgb1[1];
     const b4 = rgb1[2];
     const translucent_QMARK_5 = a < 0.999;
-    const G__5356 = fmt2;
-    switch (G__5356) {
+    const G__5666 = fmt2;
+    switch (G__5666) {
       case "oklch":
         const lch8 = rgb__GT_oklch(r2, g3, b4);
         const c9 = lch8[1];
@@ -2143,24 +2143,24 @@
     return dialog.querySelector(".command-item--active");
   };
   var set_active_BANG_ = (() => {
-    const f536 = (function(...args537) {
-      const G__5381 = args537.length;
-      switch (G__5381) {
+    const f567 = (function(...args568) {
+      const G__5691 = args568.length;
+      switch (G__5691) {
         case 2:
-          return f536.cljs$core$IFn$_invoke$arity$2(args537[0], args537[1]);
+          return f567.cljs$core$IFn$_invoke$arity$2(args568[0], args568[1]);
           break;
         case 3:
-          return f536.cljs$core$IFn$_invoke$arity$3(args537[0], args537[1], args537[2]);
+          return f567.cljs$core$IFn$_invoke$arity$3(args568[0], args568[1], args568[2]);
           break;
         default:
-          throw new Error(`${"Invalid arity: "}${args537.length ?? ""}`);
+          throw new Error(`${"Invalid arity: "}${args568.length ?? ""}`);
       }
       ;
     });
-    f536.cljs$core$IFn$_invoke$arity$2 = (function(dialog, el2) {
+    f567.cljs$core$IFn$_invoke$arity$2 = (function(dialog, el2) {
       return set_active_BANG_(dialog, el2, true);
     });
-    f536.cljs$core$IFn$_invoke$arity$3 = (function(dialog, el2, scroll_QMARK_) {
+    f567.cljs$core$IFn$_invoke$arity$3 = (function(dialog, el2, scroll_QMARK_) {
       const prev3 = active_item(dialog);
       if (truth_(prev3)) {
         prev3.classList.remove("command-item--active");
@@ -2183,8 +2183,8 @@
       }
       ;
     });
-    f536.cljs$lang$maxFixedArity = 3;
-    return f536;
+    f567.cljs$lang$maxFixedArity = 3;
+    return f567;
   })();
   var move_active_BANG_ = function(dialog, dir) {
     const vis1 = visible_items(dialog);
@@ -3340,25 +3340,25 @@
     ;
   };
   var open_context_menu = (() => {
-    const f539 = (function(var_args) {
-      const args5401 = [];
+    const f570 = (function(var_args) {
+      const args5711 = [];
       const len__23321__auto__2 = arguments.length;
-      let i5413 = 0;
+      let i5723 = 0;
       while (true) {
-        if (i5413 < len__23321__auto__2) {
-          args5401.push(arguments[i5413]);
-          let G__4 = i5413 + 1;
-          i5413 = G__4;
+        if (i5723 < len__23321__auto__2) {
+          args5711.push(arguments[i5723]);
+          let G__4 = i5723 + 1;
+          i5723 = G__4;
           continue;
         }
         ;
         break;
       }
       ;
-      const argseq__23513__auto__5 = 1 < args5401.length ? args5401.slice(1) : null;
-      return f539.cljs$core$IFn$_invoke$arity$variadic(arguments[0], argseq__23513__auto__5);
+      const argseq__23513__auto__5 = 1 < args5711.length ? args5711.slice(1) : null;
+      return f570.cljs$core$IFn$_invoke$arity$variadic(arguments[0], argseq__23513__auto__5);
     });
-    f539.cljs$core$IFn$_invoke$arity$variadic = (function(event, args) {
+    f570.cljs$core$IFn$_invoke$arity$variadic = (function(event, args) {
       dismiss_BANG_();
       const trigger6 = event.currentTarget;
       const items7 = (() => {
@@ -3451,8 +3451,8 @@
       window.addEventListener("resize", on_resize18);
       return state12.cleanup = cleanup19;
     });
-    f539.cljs$lang$maxFixedArity = 1;
-    return f539;
+    f570.cljs$lang$maxFixedArity = 1;
+    return f570;
   })();
   window["__uiContextMenu"] = open_context_menu;
 
@@ -3507,25 +3507,25 @@
     return e1;
   };
   var add_BANG_ = (() => {
-    const f543 = (function(var_args) {
-      const args5441 = [];
+    const f574 = (function(var_args) {
+      const args5751 = [];
       const len__23321__auto__2 = arguments.length;
-      let i5453 = 0;
+      let i5763 = 0;
       while (true) {
-        if (i5453 < len__23321__auto__2) {
-          args5441.push(arguments[i5453]);
-          let G__4 = i5453 + 1;
-          i5453 = G__4;
+        if (i5763 < len__23321__auto__2) {
+          args5751.push(arguments[i5763]);
+          let G__4 = i5763 + 1;
+          i5763 = G__4;
           continue;
         }
         ;
         break;
       }
       ;
-      const argseq__23513__auto__5 = 1 < args5441.length ? args5441.slice(1) : null;
-      return f543.cljs$core$IFn$_invoke$arity$variadic(arguments[0], argseq__23513__auto__5);
+      const argseq__23513__auto__5 = 1 < args5751.length ? args5751.slice(1) : null;
+      return f574.cljs$core$IFn$_invoke$arity$variadic(arguments[0], argseq__23513__auto__5);
     });
-    f543.cljs$core$IFn$_invoke$arity$variadic = (function(parent, children) {
+    f574.cljs$core$IFn$_invoke$arity$variadic = (function(parent, children) {
       for (let G__6 of iterable(children)) {
         const c7 = G__6;
         if (truth_(c7)) {
@@ -3535,8 +3535,8 @@
       ;
       return parent;
     });
-    f543.cljs$lang$maxFixedArity = 1;
-    return f543;
+    f574.cljs$lang$maxFixedArity = 1;
+    return f574;
   })();
   var txt_BANG_ = function(e, s) {
     e.textContent = `${s ?? ""}`;
@@ -4597,9 +4597,9 @@
       ctx13.beginPath();
       const v17 = cur9();
       const mode18 = get_mode10();
-      const n54719 = 61;
+      const n57819 = 61;
       let i20 = 0;
-      for (; i20 < n54719; i20++) {
+      for (; i20 < n57819; i20++) {
         (() => {
           const t21 = i20 / 60;
           const y22 = mode18 === "easing" ? (() => {
@@ -5689,24 +5689,24 @@
     return null;
   };
   var play = (() => {
-    const f548 = (function(...args549) {
-      const G__5501 = args549.length;
-      switch (G__5501) {
+    const f579 = (function(...args580) {
+      const G__5811 = args580.length;
+      switch (G__5811) {
         case 1:
-          return f548.cljs$core$IFn$_invoke$arity$1(args549[0]);
+          return f579.cljs$core$IFn$_invoke$arity$1(args580[0]);
           break;
         case 2:
-          return f548.cljs$core$IFn$_invoke$arity$2(args549[0], args549[1]);
+          return f579.cljs$core$IFn$_invoke$arity$2(args580[0], args580[1]);
           break;
         default:
-          throw new Error(`${"Invalid arity: "}${args549.length ?? ""}`);
+          throw new Error(`${"Invalid arity: "}${args580.length ?? ""}`);
       }
       ;
     });
-    f548.cljs$core$IFn$_invoke$arity$1 = (function(snap) {
+    f579.cljs$core$IFn$_invoke$arity$1 = (function(snap) {
       return play(snap, null);
     });
-    f548.cljs$core$IFn$_invoke$arity$2 = (function(snap, opts) {
+    f579.cljs$core$IFn$_invoke$arity$2 = (function(snap, opts) {
       if (truth_(reduced_motion_QMARK_2())) {
       } else {
         const opts3 = (() => {
@@ -5744,34 +5744,34 @@
       ;
       return null;
     });
-    f548.cljs$lang$maxFixedArity = 2;
-    return f548;
+    f579.cljs$lang$maxFixedArity = 2;
+    return f579;
   })();
   var wrap = (() => {
-    const f551 = (function(...args552) {
-      const G__5531 = args552.length;
-      switch (G__5531) {
+    const f582 = (function(...args583) {
+      const G__5841 = args583.length;
+      switch (G__5841) {
         case 2:
-          return f551.cljs$core$IFn$_invoke$arity$2(args552[0], args552[1]);
+          return f582.cljs$core$IFn$_invoke$arity$2(args583[0], args583[1]);
           break;
         case 3:
-          return f551.cljs$core$IFn$_invoke$arity$3(args552[0], args552[1], args552[2]);
+          return f582.cljs$core$IFn$_invoke$arity$3(args583[0], args583[1], args583[2]);
           break;
         default:
-          throw new Error(`${"Invalid arity: "}${args552.length ?? ""}`);
+          throw new Error(`${"Invalid arity: "}${args583.length ?? ""}`);
       }
       ;
     });
-    f551.cljs$core$IFn$_invoke$arity$2 = (function(target, mutate) {
+    f582.cljs$core$IFn$_invoke$arity$2 = (function(target, mutate) {
       return wrap(target, mutate, null);
     });
-    f551.cljs$core$IFn$_invoke$arity$3 = (function(target, mutate, opts) {
+    f582.cljs$core$IFn$_invoke$arity$3 = (function(target, mutate, opts) {
       const snap3 = capture(target);
       mutate();
       return play(snap3, opts);
     });
-    f551.cljs$lang$maxFixedArity = 3;
-    return f551;
+    f582.cljs$lang$maxFixedArity = 3;
+    return f582;
   })();
   window.__uiFlip = { "capture": capture, "play": play, "wrap": wrap };
 
@@ -5818,11 +5818,11 @@
     clear_held_BANG_();
     if (e.pointerType === "touch") {
       const temp__23062__auto__1 = (() => {
-        const G__5542 = e.target;
-        if (G__5542 == null) {
+        const G__5852 = e.target;
+        if (G__5852 == null) {
           return null;
         } else {
-          return G__5542.closest(selector);
+          return G__5852.closest(selector);
         }
         ;
       })();
@@ -5973,8 +5973,8 @@
   var px2 = function(v) {
     return `${v ?? ""}px`;
   };
-  var pose_css = function(p__555) {
-    const map__12 = p__555;
+  var pose_css = function(p__586) {
+    const map__12 = p__586;
     const s3 = get(map__12, "s");
     const tx4 = get(map__12, "tx");
     const ty5 = get(map__12, "ty");
@@ -6450,8 +6450,8 @@
     }
     ;
   };
-  var viewport_rect = function(p__556) {
-    const map__12 = p__556;
+  var viewport_rect = function(p__587) {
+    const map__12 = p__587;
     const legacy_QMARK_3 = get(map__12, "legacy?");
     const stage4 = get(map__12, "stage");
     if (truth_(legacy_QMARK_3)) {
@@ -6467,8 +6467,8 @@
     const z2 = zoom_of(m);
     return [r1.left + r1.width / 2 - get(z2, "tx"), r1.top + r1.height / 2 - get(z2, "ty")];
   };
-  var max_scale = function(p__557) {
-    const map__12 = p__557;
+  var max_scale = function(p__588) {
+    const map__12 = p__588;
     const legacy_QMARK_3 = get(map__12, "legacy?");
     const root4 = get(map__12, "root");
     const media5 = get(map__12, "media");
@@ -6529,8 +6529,8 @@
   var rubber = function(x, d) {
     return (1 - 1 / (1 + x * 0.55 / Math.max(1, d))) * d;
   };
-  var elastic_pan = function(t, p__558, d) {
-    const vec__14 = p__558;
+  var elastic_pan = function(t, p__589, d) {
+    const vec__14 = p__589;
     const lo5 = nth(vec__14, 0, null);
     const hi6 = nth(vec__14, 1, null);
     const fit_QMARK_7 = nth(vec__14, 2, null);
@@ -6912,11 +6912,11 @@
     ;
     root.setAttribute("data-active-type", (() => {
       const or__23426__auto__13 = (() => {
-        const G__55914 = slide4;
-        if (G__55914 == null) {
+        const G__59014 = slide4;
+        if (G__59014 == null) {
           return null;
         } else {
-          return G__55914.getAttribute("data-type");
+          return G__59014.getAttribute("data-type");
         }
         ;
       })();
@@ -7120,11 +7120,11 @@
   var source_el = function(root, i) {
     const slide2 = slide_at(root, i);
     const k3 = (() => {
-      const G__5604 = slide2;
-      if (G__5604 == null) {
+      const G__5914 = slide2;
+      if (G__5914 == null) {
         return null;
       } else {
-        return G__5604.getAttribute("data-key");
+        return G__5914.getAttribute("data-key");
       }
       ;
     })();
@@ -7460,16 +7460,16 @@
       st2.closed = true;
       clearTimeout(st2.scrollTimer);
       clearTimeout(st2.repaintTimer);
-      const G__5613 = st2.mo;
-      if (G__5613 == null) {
+      const G__5923 = st2.mo;
+      if (G__5923 == null) {
       } else {
-        G__5613.disconnect();
+        G__5923.disconnect();
       }
       ;
-      const G__5624 = st2.ro;
-      if (G__5624 == null) {
+      const G__5934 = st2.ro;
+      if (G__5934 == null) {
       } else {
-        G__5624.disconnect();
+        G__5934.disconnect();
       }
       ;
       const temp__23062__auto__5 = scroller(root);
@@ -7516,12 +7516,12 @@
       const and__23442__auto__6 = history_QMARK_3;
       if (truth_(and__23442__auto__6)) {
         return not(st1.poppedHistory) && (() => {
-          const G__5637 = history;
-          const G__5638 = G__5637 == null ? null : G__5637.state;
-          if (G__5638 == null) {
+          const G__5947 = history;
+          const G__5948 = G__5947 == null ? null : G__5947.state;
+          if (G__5948 == null) {
             return null;
           } else {
-            return G__5638["uiLightbox"];
+            return G__5948["uiLightbox"];
           }
           ;
         })();
@@ -7582,12 +7582,12 @@
       if (truth_((() => {
         const and__23442__auto__3 = st1.history;
         if (truth_(and__23442__auto__3)) {
-          const G__5644 = history;
-          const G__5645 = G__5644 == null ? null : G__5644.state;
-          if (G__5645 == null) {
+          const G__5954 = history;
+          const G__5955 = G__5954 == null ? null : G__5954.state;
+          if (G__5955 == null) {
             return null;
           } else {
-            return G__5645["uiLightbox"];
+            return G__5955["uiLightbox"];
           }
           ;
         } else {
@@ -7628,12 +7628,12 @@
             })())) {
               reset_BANG_(handoff, null);
               if (truth_(not(some(state2, Array.from(document.querySelectorAll(root_sel)))) && (() => {
-                const G__5656 = history;
-                const G__5657 = G__5656 == null ? null : G__5656.state;
-                if (G__5657 == null) {
+                const G__5966 = history;
+                const G__5967 = G__5966 == null ? null : G__5966.state;
+                if (G__5967 == null) {
                   return null;
                 } else {
-                  return G__5657["uiLightbox"];
+                  return G__5967["uiLightbox"];
                 }
                 ;
               })())) {
@@ -7842,8 +7842,8 @@
     ;
   };
   var on_animation_start = function(e) {
-    const G__5661 = e.animationName;
-    switch (G__5661) {
+    const G__5971 = e.animationName;
+    switch (G__5971) {
       case "ui-lightbox-mount":
         const t3 = e.target;
         if (truth_(t3.matches(root_sel))) {
@@ -7888,8 +7888,8 @@
   var distance = function(a, b) {
     return Math.hypot(get(a, "x") - get(b, "x"), get(a, "y") - get(b, "y"));
   };
-  var rel_to = function(p__567, x, y) {
-    const vec__14 = p__567;
+  var rel_to = function(p__598, x, y) {
+    const vec__14 = p__598;
     const cx5 = nth(vec__14, 0, null);
     const cy6 = nth(vec__14, 1, null);
     return [x - cx5, y - cy6];
@@ -8746,8 +8746,8 @@
         }
         ;
       })()) ? null : (() => {
-        const G__56817 = k3;
-        switch (G__56817) {
+        const G__59917 = k3;
+        switch (G__59917) {
           case "Escape":
             if (truth_(root2.querySelector(".video-player[data-panel-open]"))) {
               return null;
@@ -8956,8 +8956,8 @@
         if (truth_(action_el4)) {
           const a6 = action_el4.getAttribute("data-lightbox-action");
           e.stopPropagation();
-          const G__5697 = a6;
-          switch (G__5697) {
+          const G__6007 = a6;
+          switch (G__6007) {
             case "close":
               return request_close_BANG_(root2);
               break;
@@ -9086,16 +9086,16 @@
     }
     ;
     window["__uiLightbox"] = { "close": (function(el2) {
-      let temp__23062__auto__570 = closest2(el2, root_sel);
-      if (truth_(temp__23062__auto__570)) {
-        const r1 = temp__23062__auto__570;
+      let temp__23062__auto__601 = closest2(el2, root_sel);
+      if (truth_(temp__23062__auto__601)) {
+        const r1 = temp__23062__auto__601;
         return request_close_BANG_(r1);
       }
       ;
     }), "go": (function(el2, i) {
-      let temp__23062__auto__571 = closest2(el2, root_sel);
-      if (truth_(temp__23062__auto__571)) {
-        const r2 = temp__23062__auto__571;
+      let temp__23062__auto__602 = closest2(el2, root_sel);
+      if (truth_(temp__23062__auto__602)) {
+        const r2 = temp__23062__auto__602;
         return go_to_BANG_(r2, i);
       }
       ;
@@ -9214,11 +9214,11 @@
   };
   var class_attrs = function(class_list, class$, attrs) {
     return merge({ "class": (() => {
-      const G__10601 = join(" ", class_list);
+      const G__10911 = join(" ", class_list);
       if (truth_(class$)) {
-        return `${G__10601 ?? ""}${" "}${class$ ?? ""}`;
+        return `${G__10911 ?? ""}${" "}${class$ ?? ""}`;
       } else {
-        return G__10601;
+        return G__10911;
       }
       ;
     })() }, attrs);
@@ -9229,16 +9229,16 @@
   var filled_icon_paths = { "play": [["path", { "d": "M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z" }]], "pause": [["rect", { "x": "14", "y": "4", "width": "4", "height": "16", "rx": "1" }], ["rect", { "x": "6", "y": "4", "width": "4", "height": "16", "rx": "1" }]], "skip-back": [["path", { "d": "M17.971 4.285A2 2 0 0 1 21 6v12a2 2 0 0 1-3.029 1.715l-9.997-5.998a2 2 0 0 1-.003-3.432z" }], ["rect", { "x": "2", "y": "4", "width": "2", "height": "16", "rx": "1" }]], "skip-forward": [["rect", { "x": "20", "y": "4", "width": "2", "height": "16", "rx": "1" }], ["path", { "d": "M6.029 4.285A2 2 0 0 0 3 6v12a2 2 0 0 0 3.029 1.715l9.997-5.998a2 2 0 0 0 .003-3.432z" }]], "repeat": [["path", { "d": "m17 2 4 4-4 4z" }], ["path", { "d": "M3 11v-1a4 4 0 0 1 4-4h14", "fill": "none", "stroke": "currentColor", "stroke-width": "2" }], ["path", { "d": "m7 22-4-4 4-4z" }], ["path", { "d": "M21 13v1a4 4 0 0 1-4 4H3", "fill": "none", "stroke": "currentColor", "stroke-width": "2" }]], "volume-2": [["path", { "d": "M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z" }], ["path", { "d": "M16 9a5 5 0 0 1 0 6", "fill": "none", "stroke": "currentColor", "stroke-width": "2" }], ["path", { "d": "M19.364 18.364a9 9 0 0 0 0-12.728", "fill": "none", "stroke": "currentColor", "stroke-width": "2" }]] };
   var icon_names = set(keys(icon_paths));
   var default_size = "md";
-  var icon_class_list = function(p__530) {
-    const map__12 = p__530;
+  var icon_class_list = function(p__561) {
+    const map__12 = p__561;
     const size3 = get(map__12, "size");
     const s4 = (() => {
       const or__23426__auto__5 = (() => {
-        const G__5316 = size3;
-        if (G__5316 == null) {
+        const G__5626 = size3;
+        if (G__5626 == null) {
           return null;
         } else {
-          return kw_name(G__5316);
+          return kw_name(G__5626);
         }
         ;
       })();
@@ -9249,19 +9249,19 @@
       }
       ;
     })();
-    const G__5327 = ["icon"];
+    const G__5637 = ["icon"];
     if (!(s4 === "md")) {
-      return conj(G__5327, `icon-${s4 ?? ""}`);
+      return conj(G__5637, `icon-${s4 ?? ""}`);
     } else {
-      return G__5327;
+      return G__5637;
     }
     ;
   };
   var icon_classes = function(opts) {
     return join(" ", icon_class_list(opts));
   };
-  var icon = function(p__533) {
-    const map__12 = p__533;
+  var icon = function(p__564) {
+    const map__12 = p__564;
     const _props3 = map__12;
     const icon_name4 = get(map__12, "icon-name");
     const size5 = get(map__12, "size");
@@ -9281,11 +9281,11 @@
     })() : get(icon_paths, kw10);
     if (truth_(paths11)) {
       const classes13 = (() => {
-        const G__53414 = icon_classes({ "size": size5 });
+        const G__56514 = icon_classes({ "size": size5 });
         if (truth_(class$6)) {
-          return `${G__53414 ?? ""}${" "}${class$6 ?? ""}`;
+          return `${G__56514 ?? ""}${" "}${class$6 ?? ""}`;
         } else {
-          return G__53414;
+          return G__56514;
         }
         ;
       })();
@@ -9297,16 +9297,16 @@
 
   // .compiled/ui/spinner.mjs
   var default_size2 = "md";
-  var spinner_class_list = function(p__941) {
-    const map__12 = p__941;
+  var spinner_class_list = function(p__972) {
+    const map__12 = p__972;
     const size3 = get(map__12, "size");
     const s4 = (() => {
       const or__23426__auto__5 = (() => {
-        const G__9426 = size3;
-        if (G__9426 == null) {
+        const G__9736 = size3;
+        if (G__9736 == null) {
           return null;
         } else {
-          return kw_name(G__9426);
+          return kw_name(G__9736);
         }
         ;
       })();
@@ -9317,31 +9317,31 @@
       }
       ;
     })();
-    const G__9437 = ["spinner"];
-    const G__9438 = s4 === "xs" ? conj(G__9437, "spinner-xs") : G__9437;
-    const G__9439 = s4 === "sm" ? conj(G__9438, "spinner-sm") : G__9438;
+    const G__9747 = ["spinner"];
+    const G__9748 = s4 === "xs" ? conj(G__9747, "spinner-xs") : G__9747;
+    const G__9749 = s4 === "sm" ? conj(G__9748, "spinner-sm") : G__9748;
     if (s4 === "lg") {
-      return conj(G__9439, "spinner-lg");
+      return conj(G__9749, "spinner-lg");
     } else {
-      return G__9439;
+      return G__9749;
     }
     ;
   };
   var spinner_classes = function(opts) {
     return join(" ", spinner_class_list(opts));
   };
-  var spinner = function(p__944) {
-    const map__12 = p__944;
+  var spinner = function(p__975) {
+    const map__12 = p__975;
     const _props3 = map__12;
     const size4 = get(map__12, "size");
     const class$5 = get(map__12, "class");
     const attrs6 = get(map__12, "attrs");
     const classes7 = (() => {
-      const G__9458 = spinner_classes({ "size": size4 });
+      const G__9768 = spinner_classes({ "size": size4 });
       if (truth_(class$5)) {
-        return `${G__9458 ?? ""}${" "}${class$5 ?? ""}`;
+        return `${G__9768 ?? ""}${" "}${class$5 ?? ""}`;
       } else {
-        return G__9458;
+        return G__9768;
       }
       ;
     })();
@@ -9561,11 +9561,11 @@
   var default_hotkey = ["altKey", "KeyT"];
   var infinity = Infinity;
   var kw = function(x) {
-    const G__6571 = x;
-    if (G__6571 == null) {
+    const G__6881 = x;
+    if (G__6881 == null) {
       return null;
     } else {
-      return kw_name(G__6571);
+      return kw_name(G__6881);
     }
     ;
   };
@@ -9581,37 +9581,37 @@
     return s;
   };
   var classes = (() => {
-    const f658 = (function(var_args) {
-      const args6591 = [];
+    const f689 = (function(var_args) {
+      const args6901 = [];
       const len__23321__auto__2 = arguments.length;
-      let i6603 = 0;
+      let i6913 = 0;
       while (true) {
-        if (i6603 < len__23321__auto__2) {
-          args6591.push(arguments[i6603]);
-          let G__4 = i6603 + 1;
-          i6603 = G__4;
+        if (i6913 < len__23321__auto__2) {
+          args6901.push(arguments[i6913]);
+          let G__4 = i6913 + 1;
+          i6913 = G__4;
           continue;
         }
         ;
         break;
       }
       ;
-      const argseq__23513__auto__5 = 0 < args6591.length ? args6591.slice(0) : null;
-      return f658.cljs$core$IFn$_invoke$arity$variadic(argseq__23513__auto__5);
+      const argseq__23513__auto__5 = 0 < args6901.length ? args6901.slice(0) : null;
+      return f689.cljs$core$IFn$_invoke$arity$variadic(argseq__23513__auto__5);
     });
-    f658.cljs$core$IFn$_invoke$arity$variadic = (function(tokens) {
+    f689.cljs$core$IFn$_invoke$arity$variadic = (function(tokens) {
       const ts6 = remove(nil_QMARK_, tokens);
       return join(" ", ts6);
     });
-    f658.cljs$lang$maxFixedArity = 0;
-    return f658;
+    f689.cljs$lang$maxFixedArity = 0;
+    return f689;
   })();
   var type_icons = { "success": "check", "info": "info", "warning": "alert-triangle", "error": "x" };
-  var notification_class_list = function(p__662) {
-    const map__12 = p__662;
+  var notification_class_list = function(p__693) {
+    const map__12 = p__693;
     const type3 = get(map__12, "type");
     const multiline4 = get(map__12, "multiline");
-    const G__6635 = ["notification", `notification-${(() => {
+    const G__6945 = ["notification", `notification-${(() => {
       const or__23426__auto__6 = kw(type3);
       if (truth_(or__23426__auto__6)) {
         return or__23426__auto__6;
@@ -9621,9 +9621,9 @@
       ;
     })() ?? ""}`];
     if (truth_(multiline4)) {
-      return conj(G__6635, "notification-multiline");
+      return conj(G__6945, "notification-multiline");
     } else {
-      return G__6635;
+      return G__6945;
     }
     ;
   };
@@ -9638,8 +9638,8 @@
     }
     ;
   };
-  var icon_el = function(p__664, icons, class_name) {
-    const map__12 = p__664;
+  var icon_el = function(p__695, icons, class_name) {
+    const map__12 = p__695;
     const type3 = get(map__12, "type");
     const icon4 = get(map__12, "icon");
     const promise5 = get(map__12, "promise");
@@ -9673,8 +9673,8 @@
         }
         ;
       })())) {
-        const G__66513 = ["span", { "class": classes("notification-icon", class_name), "data-icon": "" }];
-        const G__66514 = truth_((() => {
+        const G__69613 = ["span", { "class": classes("notification-icon", class_name), "data-icon": "" }];
+        const G__69614 = truth_((() => {
           const or__23426__auto__15 = loading_QMARK_8;
           if (or__23426__auto__15) {
             return or__23426__auto__15;
@@ -9682,7 +9682,7 @@
             return promise5;
           }
           ;
-        })()) ? conj(G__66513, loader(loading_QMARK_8)) : G__66513;
+        })()) ? conj(G__69613, loader(loading_QMARK_8)) : G__69613;
         if (truth_((() => {
           const and__23442__auto__16 = shown10;
           if (truth_(and__23442__auto__16)) {
@@ -9692,9 +9692,9 @@
           }
           ;
         })())) {
-          return conj(G__66514, ["span", { "class": "notification-glyph" }, shown10]);
+          return conj(G__69614, ["span", { "class": "notification-glyph" }, shown10]);
         } else {
-          return G__66514;
+          return G__69614;
         }
         ;
       }
@@ -9711,16 +9711,16 @@
       const on_click42 = get(map__12, "on-click");
       const attrs5 = get(map__12, "attrs");
       return button((() => {
-        const G__6666 = { "size": "sm", "variant": kind === "action" ? "secondary" : "ghost", "class": class_name, "attrs": merge((() => {
-          const G__6677 = {};
-          G__6677["data-button"] = "";
-          G__6677[__GT_kw(`data-${kind ?? ""}`)] = "";
-          return G__6677;
+        const G__6976 = { "size": "sm", "variant": kind === "action" ? "secondary" : "ghost", "class": class_name, "attrs": merge((() => {
+          const G__6987 = {};
+          G__6987["data-button"] = "";
+          G__6987[__GT_kw(`data-${kind ?? ""}`)] = "";
+          return G__6987;
         })(), attrs5) };
         if (truth_(on_click42)) {
-          return { ...G__6666, "on-click": on_click42 };
+          return { ...G__6976, "on-click": on_click42 };
         } else {
-          return G__6666;
+          return G__6976;
         }
         ;
       })(), label3);
@@ -9738,20 +9738,20 @@
       ;
     })(), "data-close-button": "", "data-disabled": flag(disabled_QMARK_3) }, icon({ "icon-name": "x", "size": "sm" })];
   };
-  var loading_locked_QMARK_ = function(p__668) {
-    const map__12 = p__668;
+  var loading_locked_QMARK_ = function(p__699) {
+    const map__12 = p__699;
     const type3 = get(map__12, "type");
     const dismissible4 = get(map__12, "dismissible");
     return "loading" === kw(type3) && not(true_QMARK_(dismissible4));
   };
-  var swipable_QMARK_ = function(p__669) {
-    const map__12 = p__669;
+  var swipable_QMARK_ = function(p__700) {
+    const map__12 = p__700;
     const item3 = map__12;
     const dismissible4 = get(map__12, "dismissible");
     return not(false_QMARK_(dismissible4)) && not(loading_locked_QMARK_(item3));
   };
-  var card_children = function(p__670, icons, class_names, extra) {
-    const map__12 = p__670;
+  var card_children = function(p__701, icons, class_names, extra) {
+    const map__12 = p__701;
     const item3 = map__12;
     const title4 = get(map__12, "title");
     const description5 = get(map__12, "description");
@@ -9770,8 +9770,8 @@
       }
       ;
     })();
-    const G__67114 = [];
-    const G__67115 = truth_((() => {
+    const G__70214 = [];
+    const G__70215 = truth_((() => {
       const and__23442__auto__16 = close_button9;
       if (truth_(and__23442__auto__16)) {
         return not(loading_locked_QMARK_(item3));
@@ -9779,18 +9779,18 @@
         return and__23442__auto__16;
       }
       ;
-    })()) ? conj(G__67114, close_el(close_label10, false_QMARK_(dismissible11), get(cn12, "close-button"))) : G__67114;
-    const G__67117 = true ? conj(G__67115, icon_el(item3, icons, get(cn12, "icon"))) : G__67115;
-    const G__67118 = true ? conj(G__67117, (() => {
-      const G__67219 = ["div", { "class": classes("notification-text", get(cn12, "content")), "data-content": "" }, ["p", { "class": classes("notification-title", get(cn12, "title")), "data-title": "" }, title4]];
-      const G__67220 = truth_(description5) ? conj(G__67219, ["div", { "class": classes("notification-description", get(cn12, "description")), "data-description": "" }, description5]) : G__67219;
+    })()) ? conj(G__70214, close_el(close_label10, false_QMARK_(dismissible11), get(cn12, "close-button"))) : G__70214;
+    const G__70217 = true ? conj(G__70215, icon_el(item3, icons, get(cn12, "icon"))) : G__70215;
+    const G__70218 = true ? conj(G__70217, (() => {
+      const G__70319 = ["div", { "class": classes("notification-text", get(cn12, "content")), "data-content": "" }, ["p", { "class": classes("notification-title", get(cn12, "title")), "data-title": "" }, title4]];
+      const G__70320 = truth_(description5) ? conj(G__70319, ["div", { "class": classes("notification-description", get(cn12, "description")), "data-description": "" }, description5]) : G__70319;
       if (truth_(meta6)) {
-        return conj(G__67220, ["div", { "class": "notification-meta" }, meta6]);
+        return conj(G__70320, ["div", { "class": "notification-meta" }, meta6]);
       } else {
-        return G__67220;
+        return G__70320;
       }
       ;
-    })()) : G__67117;
+    })()) : G__70217;
     if (truth_((() => {
       const or__23426__auto__21 = cancel8;
       if (truth_(or__23426__auto__21)) {
@@ -9806,43 +9806,43 @@
       }
       ;
     })())) {
-      return conj(G__67118, (() => {
-        const G__67323 = ["div", { "class": "notification-actions" }];
-        const G__67324 = truth_(cancel8) ? conj(G__67323, button_el("cancel", cancel8, get(cn12, "cancel-button"))) : G__67323;
-        const G__67325 = truth_(action7) ? conj(G__67324, button_el("action", action7, get(cn12, "action-button"))) : G__67324;
+      return conj(G__70218, (() => {
+        const G__70423 = ["div", { "class": "notification-actions" }];
+        const G__70424 = truth_(cancel8) ? conj(G__70423, button_el("cancel", cancel8, get(cn12, "cancel-button"))) : G__70423;
+        const G__70425 = truth_(action7) ? conj(G__70424, button_el("action", action7, get(cn12, "action-button"))) : G__70424;
         if (truth_(seq(extra))) {
-          return into(G__67325, extra);
+          return into(G__70425, extra);
         } else {
-          return G__67325;
+          return G__70425;
         }
         ;
       })());
     } else {
-      return G__67118;
+      return G__70218;
     }
     ;
   };
   var notification = (() => {
-    const f674 = (function(var_args) {
-      const args6751 = [];
+    const f705 = (function(var_args) {
+      const args7061 = [];
       const len__23321__auto__2 = arguments.length;
-      let i6763 = 0;
+      let i7073 = 0;
       while (true) {
-        if (i6763 < len__23321__auto__2) {
-          args6751.push(arguments[i6763]);
-          let G__4 = i6763 + 1;
-          i6763 = G__4;
+        if (i7073 < len__23321__auto__2) {
+          args7061.push(arguments[i7073]);
+          let G__4 = i7073 + 1;
+          i7073 = G__4;
           continue;
         }
         ;
         break;
       }
       ;
-      const argseq__23513__auto__5 = 1 < args6751.length ? args6751.slice(1) : null;
-      return f674.cljs$core$IFn$_invoke$arity$variadic(arguments[0], argseq__23513__auto__5);
+      const argseq__23513__auto__5 = 1 < args7061.length ? args7061.slice(1) : null;
+      return f705.cljs$core$IFn$_invoke$arity$variadic(arguments[0], argseq__23513__auto__5);
     });
-    f674.cljs$core$IFn$_invoke$arity$variadic = (function(p__678, children) {
-      const map__67 = p__678;
+    f705.cljs$core$IFn$_invoke$arity$variadic = (function(p__709, children) {
+      const map__67 = p__709;
       const item8 = map__67;
       const class_names9 = get(map__67, "class-names");
       const invert10 = get(map__67, "invert");
@@ -9878,8 +9878,8 @@
         ;
       })(), "data-styled": flag(not(unstyled13)), "data-rich-colors": flag(rich_colors19), "data-invert": flag(invert10) }, attrs22))], card_children(item8, null, class_names9, remove(nil_QMARK_, children)));
     });
-    f674.cljs$lang$maxFixedArity = 1;
-    return f674;
+    f705.cljs$lang$maxFixedArity = 1;
+    return f705;
   })();
   var position_parts = function(position) {
     return split((() => {
@@ -9896,11 +9896,11 @@
     const vec__14 = position_parts(position);
     const y5 = nth(vec__14, 0, null);
     const x6 = nth(vec__14, 1, null);
-    const G__6797 = [y5];
+    const G__7107 = [y5];
     if (!(x6 === "center")) {
-      return conj(G__6797, x6);
+      return conj(G__7107, x6);
     } else {
-      return G__6797;
+      return G__7107;
     }
     ;
   };
@@ -9959,8 +9959,8 @@
     }
     ;
   };
-  var toast_el = function(p__680, p__681) {
-    const map__13 = p__680;
+  var toast_el = function(p__711, p__712) {
+    const map__13 = p__711;
     const item4 = map__13;
     const class_names5 = get(map__13, "class-names");
     const invert6 = get(map__13, "invert");
@@ -9975,7 +9975,7 @@
     const class$15 = get(map__13, "class");
     const removed_at16 = get(map__13, "removed-at");
     const attrs17 = get(map__13, "attrs");
-    const map__218 = p__681;
+    const map__218 = p__712;
     const x19 = get(map__218, "x");
     const y20 = get(map__218, "y");
     const index21 = get(map__218, "index");
@@ -9995,11 +9995,11 @@
       ;
     })();
     const item30 = (() => {
-      const G__68231 = item4;
+      const G__71331 = item4;
       if (get(item4, "close-button") == null) {
-        return assoc(G__68231, "close-button", close_button22);
+        return assoc(G__71331, "close-button", close_button22);
       } else {
-        return G__68231;
+        return G__71331;
       }
       ;
     })();
@@ -10022,21 +10022,21 @@
     })()), "data-x-position": x19, "data-ui-notification": "", "data-promise": flag(promise10) }, {}, attrs17))], card_children(item30, icons24, class_names5, null));
   };
   var event_attrs = function(on_dismiss, on_pause) {
-    const G__6831 = {};
-    const G__6832 = truth_(on_dismiss) ? { ...G__6831, "on-notificationdismiss": (function(e) {
+    const G__7141 = {};
+    const G__7142 = truth_(on_dismiss) ? { ...G__7141, "on-notificationdismiss": (function(e) {
       return on_dismiss(e.detail.id, e.detail.reason);
-    }) } : G__6831;
+    }) } : G__7141;
     if (truth_(on_pause)) {
-      return assoc(G__6832, "on-notificationpause", (function(e) {
+      return assoc(G__7142, "on-notificationpause", (function(e) {
         return on_pause(e.detail.paused);
       }));
     } else {
-      return G__6832;
+      return G__7142;
     }
     ;
   };
-  var notification_toaster = function(p__684) {
-    const map__12 = p__684;
+  var notification_toaster = function(p__715) {
+    const map__12 = p__715;
     const items3 = get(map__12, "items");
     const on_dismiss4 = get(map__12, "on-dismiss");
     const on_pause5 = get(map__12, "on-pause");
@@ -10088,11 +10088,11 @@
       return kw(get(i, "position"));
     }), items3)));
     return into(["section", class_attrs((() => {
-      const G__68530 = ["notification-toaster"];
+      const G__71630 = ["notification-toaster"];
       if (truth_(contained15)) {
-        return conj(G__68530, "notification-toaster-contained");
+        return conj(G__71630, "notification-toaster-contained");
       } else {
-        return G__68530;
+        return G__71630;
       }
       ;
     })(), class$18, merge({ "data-ui-notification-toaster": "", "tabindex": "-1", "aria-label": `${(() => {
@@ -10149,25 +10149,25 @@
     return { "items": [], "muted": /* @__PURE__ */ new Set([]), "paused-at": null, "seq": 0 };
   };
   var lifetime = (() => {
-    const f686 = (function(...args687) {
-      const G__6881 = args687.length;
-      switch (G__6881) {
+    const f717 = (function(...args718) {
+      const G__7191 = args718.length;
+      switch (G__7191) {
         case 1:
-          return f686.cljs$core$IFn$_invoke$arity$1(args687[0]);
+          return f717.cljs$core$IFn$_invoke$arity$1(args718[0]);
           break;
         case 2:
-          return f686.cljs$core$IFn$_invoke$arity$2(args687[0], args687[1]);
+          return f717.cljs$core$IFn$_invoke$arity$2(args718[0], args718[1]);
           break;
         default:
-          throw new Error(`${"Invalid arity: "}${args687.length ?? ""}`);
+          throw new Error(`${"Invalid arity: "}${args718.length ?? ""}`);
       }
       ;
     });
-    f686.cljs$core$IFn$_invoke$arity$1 = (function(item) {
+    f717.cljs$core$IFn$_invoke$arity$1 = (function(item) {
       return lifetime(item, default_duration2);
     });
-    f686.cljs$core$IFn$_invoke$arity$2 = (function(p__689, default$) {
-      const map__34 = p__689;
+    f717.cljs$core$IFn$_invoke$arity$2 = (function(p__720, default$) {
+      const map__34 = p__720;
       const type5 = get(map__34, "type");
       const duration6 = get(map__34, "duration");
       if ("loading" === kw(type5)) {
@@ -10205,8 +10205,8 @@
       }
       ;
     });
-    f686.cljs$lang$maxFixedArity = 2;
-    return f686;
+    f717.cljs$lang$maxFixedArity = 2;
+    return f717;
   })();
   var stamp = function(item, now4, paused_at, default$) {
     const ms1 = lifetime(item, default$);
@@ -10229,25 +10229,25 @@
     ;
   };
   var post = (() => {
-    const f690 = (function(...args691) {
-      const G__6921 = args691.length;
-      switch (G__6921) {
+    const f721 = (function(...args722) {
+      const G__7231 = args722.length;
+      switch (G__7231) {
         case 3:
-          return f690.cljs$core$IFn$_invoke$arity$3(args691[0], args691[1], args691[2]);
+          return f721.cljs$core$IFn$_invoke$arity$3(args722[0], args722[1], args722[2]);
           break;
         case 4:
-          return f690.cljs$core$IFn$_invoke$arity$4(args691[0], args691[1], args691[2], args691[3]);
+          return f721.cljs$core$IFn$_invoke$arity$4(args722[0], args722[1], args722[2], args722[3]);
           break;
         default:
-          throw new Error(`${"Invalid arity: "}${args691.length ?? ""}`);
+          throw new Error(`${"Invalid arity: "}${args722.length ?? ""}`);
       }
       ;
     });
-    f690.cljs$core$IFn$_invoke$arity$3 = (function(state4, item, now4) {
+    f721.cljs$core$IFn$_invoke$arity$3 = (function(state4, item, now4) {
       return post(state4, item, now4, null);
     });
-    f690.cljs$core$IFn$_invoke$arity$4 = (function(state4, item, now4, p__693) {
-      const map__34 = p__693;
+    f721.cljs$core$IFn$_invoke$arity$4 = (function(state4, item, now4, p__724) {
+      const map__34 = p__724;
       const duration5 = get(map__34, "duration");
       const limit6 = get(map__34, "limit");
       const map__78 = state4;
@@ -10294,11 +10294,11 @@
           return assoc(state4, "items", mapv((function(i) {
             if (_EQ_(id13, get(i, "id"))) {
               return fresh15((() => {
-                const G__69417 = merge(i, item);
+                const G__72517 = merge(i, item);
                 if ("loading" === kw(get(i, "type"))) {
-                  return assoc(G__69417, "promise", true);
+                  return assoc(G__72517, "promise", true);
                 } else {
-                  return G__69417;
+                  return G__72517;
                 }
                 ;
               })());
@@ -10319,11 +10319,11 @@
               ;
             })() + 1;
             const item20 = fresh15((() => {
-              const G__69521 = item;
+              const G__72621 = item;
               if (id13 == null) {
-                return assoc(G__69521, "id", `notification-${n18 ?? ""}`);
+                return assoc(G__72621, "id", `notification-${n18 ?? ""}`);
               } else {
-                return G__69521;
+                return G__72621;
               }
               ;
             })());
@@ -10343,28 +10343,28 @@
       }
       ;
     });
-    f690.cljs$lang$maxFixedArity = 4;
-    return f690;
+    f721.cljs$lang$maxFixedArity = 4;
+    return f721;
   })();
   var dismiss = (() => {
-    const f696 = (function(...args697) {
-      const G__6981 = args697.length;
-      switch (G__6981) {
+    const f727 = (function(...args728) {
+      const G__7291 = args728.length;
+      switch (G__7291) {
         case 3:
-          return f696.cljs$core$IFn$_invoke$arity$3(args697[0], args697[1], args697[2]);
+          return f727.cljs$core$IFn$_invoke$arity$3(args728[0], args728[1], args728[2]);
           break;
         case 4:
-          return f696.cljs$core$IFn$_invoke$arity$4(args697[0], args697[1], args697[2], args697[3]);
+          return f727.cljs$core$IFn$_invoke$arity$4(args728[0], args728[1], args728[2], args728[3]);
           break;
         default:
-          throw new Error(`${"Invalid arity: "}${args697.length ?? ""}`);
+          throw new Error(`${"Invalid arity: "}${args728.length ?? ""}`);
       }
       ;
     });
-    f696.cljs$core$IFn$_invoke$arity$3 = (function(state4, id, now4) {
+    f727.cljs$core$IFn$_invoke$arity$3 = (function(state4, id, now4) {
       return dismiss(state4, id, now4, "dismiss");
     });
-    f696.cljs$core$IFn$_invoke$arity$4 = (function(state4, id, now4, reason) {
+    f727.cljs$core$IFn$_invoke$arity$4 = (function(state4, id, now4, reason) {
       return assoc(state4, "items", mapv((function(i) {
         if (_EQ_(id, get(i, "id"))) {
           return close2(i, now4, reason);
@@ -10374,8 +10374,8 @@
         ;
       }), get(state4, "items")));
     });
-    f696.cljs$lang$maxFixedArity = 4;
-    return f696;
+    f727.cljs$lang$maxFixedArity = 4;
+    return f727;
   })();
   var dismiss_all = function(state4, now4) {
     return assoc(state4, "items", mapv((function(i) {
@@ -10396,7 +10396,7 @@
       const paused_at2 = temp__23007__auto__1;
       const d3 = now4 - paused_at2;
       return assoc(state4, "paused-at", null, "items", mapv((function(i) {
-        const G__6994 = i;
+        const G__7304 = i;
         if (truth_((() => {
           const and__23442__auto__5 = get(i, "expires-at");
           if (truth_(and__23442__auto__5)) {
@@ -10406,9 +10406,9 @@
           }
           ;
         })())) {
-          return assoc(G__6994, "expires-at", get(i, "expires-at") + d3);
+          return assoc(G__7304, "expires-at", get(i, "expires-at") + d3);
         } else {
-          return G__6994;
+          return G__7304;
         }
         ;
       }), get(state4, "items")));
@@ -10851,11 +10851,11 @@
     const ol1 = li.closest("[data-ui-notification-list]");
     return (() => {
       const or__23426__auto__2 = (() => {
-        const G__5723 = ol1;
-        if (G__5723 == null) {
+        const G__6033 = ol1;
+        if (G__6033 == null) {
           return null;
         } else {
-          return attr(G__5723, "data-swipe-directions");
+          return attr(G__6033, "data-swipe-directions");
         }
         ;
       })();
@@ -10991,11 +10991,11 @@
     ;
   };
   var not_dismissible_target_QMARK_ = function(e) {
-    const G__5731 = e.target;
-    if (G__5731 == null) {
+    const G__6041 = e.target;
+    if (G__6041 == null) {
       return null;
     } else {
-      return G__5731.closest("[data-dismissible='false']");
+      return G__6041.closest("[data-dismissible='false']");
     }
     ;
   };
@@ -11124,11 +11124,11 @@
       return null;
     } else {
       const temp__23062__auto__1 = (() => {
-        const G__5742 = e.target;
-        if (G__5742 == null) {
+        const G__6052 = e.target;
+        if (G__6052 == null) {
           return null;
         } else {
-          return G__5742.closest("[data-ui-notification]");
+          return G__6052.closest("[data-ui-notification]");
         }
         ;
       })();
@@ -11171,10 +11171,10 @@
       })().split("+");
       if (truth_(hotkey_pressed_QMARK_(e, keys3))) {
         set_expanded_BANG_(t2, true);
-        const G__5755 = first(lists(t2));
-        if (G__5755 == null) {
+        const G__6065 = first(lists(t2));
+        if (G__6065 == null) {
         } else {
-          G__5755.focus();
+          G__6065.focus();
         }
       }
       ;
@@ -11254,24 +11254,24 @@
     return null;
   };
   var dom = (() => {
-    const f576 = (function(...args577) {
-      const G__5781 = args577.length;
-      switch (G__5781) {
+    const f607 = (function(...args608) {
+      const G__6091 = args608.length;
+      switch (G__6091) {
         case 1:
-          return f576.cljs$core$IFn$_invoke$arity$1(args577[0]);
+          return f607.cljs$core$IFn$_invoke$arity$1(args608[0]);
           break;
         case 2:
-          return f576.cljs$core$IFn$_invoke$arity$2(args577[0], args577[1]);
+          return f607.cljs$core$IFn$_invoke$arity$2(args608[0], args608[1]);
           break;
         default:
-          throw new Error(`${"Invalid arity: "}${args577.length ?? ""}`);
+          throw new Error(`${"Invalid arity: "}${args608.length ?? ""}`);
       }
       ;
     });
-    f576.cljs$core$IFn$_invoke$arity$1 = (function(h) {
+    f607.cljs$core$IFn$_invoke$arity$1 = (function(h) {
       return dom(h, false);
     });
-    f576.cljs$core$IFn$_invoke$arity$2 = (function(h, svg_QMARK_) {
+    f607.cljs$core$IFn$_invoke$arity$2 = (function(h, svg_QMARK_) {
       if (h == null) {
         return null;
       } else {
@@ -11350,8 +11350,8 @@
       }
       ;
     });
-    f576.cljs$lang$maxFixedArity = 2;
-    return f576;
+    f607.cljs$lang$maxFixedArity = 2;
+    return f607;
   })();
   var patch_attrs_BANG_ = function(el2, attrs) {
     const keep12 = /* @__PURE__ */ new Set();
@@ -11509,8 +11509,8 @@
     }));
   };
   var props = function(o) {
-    const m1 = Object.fromEntries(map((function(p__579) {
-      const vec__25 = p__579;
+    const m1 = Object.fromEntries(map((function(p__610) {
+      const vec__25 = p__610;
       const k6 = nth(vec__25, 0, null);
       const v7 = nth(vec__25, 1, null);
       return [kebab(k6), v7];
@@ -11556,33 +11556,33 @@
     return null;
   };
   var update_queue_BANG_ = (() => {
-    const f580 = (function(var_args) {
-      const args5811 = [];
+    const f611 = (function(var_args) {
+      const args6121 = [];
       const len__23321__auto__2 = arguments.length;
-      let i5823 = 0;
+      let i6133 = 0;
       while (true) {
-        if (i5823 < len__23321__auto__2) {
-          args5811.push(arguments[i5823]);
-          let G__4 = i5823 + 1;
-          i5823 = G__4;
+        if (i6133 < len__23321__auto__2) {
+          args6121.push(arguments[i6133]);
+          let G__4 = i6133 + 1;
+          i6133 = G__4;
           continue;
         }
         ;
         break;
       }
       ;
-      const argseq__23513__auto__5 = 1 < args5811.length ? args5811.slice(1) : null;
-      return f580.cljs$core$IFn$_invoke$arity$variadic(arguments[0], argseq__23513__auto__5);
+      const argseq__23513__auto__5 = 1 < args6121.length ? args6121.slice(1) : null;
+      return f611.cljs$core$IFn$_invoke$arity$variadic(arguments[0], argseq__23513__auto__5);
     });
-    f580.cljs$core$IFn$_invoke$arity$variadic = (function(f, args) {
+    f611.cljs$core$IFn$_invoke$arity$variadic = (function(f, args) {
       const before6 = api["queue"];
       const after7 = apply(f, before6, args);
       api["queue"] = after7;
       fire_closed_BANG_(before6, after7);
       return render_BANG_();
     });
-    f580.cljs$lang$maxFixedArity = 1;
-    return f580;
+    f611.cljs$lang$maxFixedArity = 1;
+    return f611;
   })();
   var schedule_expire_BANG_ = function() {
     const temp__23062__auto__1 = api["timer"];
@@ -11676,11 +11676,11 @@
           }
           ;
         })(), kind === "success" ? "success" : "error", (() => {
-          const G__58411 = assoc(base8, "id", id2);
+          const G__61511 = assoc(base8, "id", id2);
           if (!(desc9 == null)) {
-            return assoc(G__58411, "description", truth_(fn_QMARK_(desc9)) ? desc9(v) : desc9);
+            return assoc(G__61511, "description", truth_(fn_QMARK_(desc9)) ? desc9(v) : desc9);
           } else {
-            return G__58411;
+            return G__61511;
           }
           ;
         })());
@@ -11721,11 +11721,11 @@
       const ds3 = el2.dataset;
       el2.remove();
       create_BANG_(ds3["uiNotify"], ds3["type"], { "id": ds3["id"], "description": ds3["description"], "duration": (() => {
-        const G__5854 = ds3["duration"];
-        if (G__5854 == null) {
+        const G__6164 = ds3["duration"];
+        if (G__6164 == null) {
           return null;
         } else {
-          return parseFloat(G__5854);
+          return parseFloat(G__6164);
         }
         ;
       })() });
@@ -11765,11 +11765,11 @@
     const t1 = r.target;
     const el2 = 1 === t1.nodeType ? t1 : t1.parentElement;
     const or__23426__auto__3 = (() => {
-      const G__5864 = el2;
-      if (G__5864 == null) {
+      const G__6174 = el2;
+      if (G__6174 == null) {
         return null;
       } else {
-        return G__5864.closest("[data-ui-notification-toaster]");
+        return G__6174.closest("[data-ui-notification-toaster]");
       }
       ;
     })();
@@ -11869,12 +11869,12 @@
       const max_STAR_6 = !_EQ_("", input.max) ? num(input.max, null) : null;
       const next7 = round6(cur4 + dir * step3);
       const next8 = (() => {
-        const G__5879 = next7;
-        const G__58710 = !(min_STAR_5 == null) ? Math.max(G__5879, min_STAR_5) : G__5879;
+        const G__6189 = next7;
+        const G__61810 = !(min_STAR_5 == null) ? Math.max(G__6189, min_STAR_5) : G__6189;
         if (!(max_STAR_6 == null)) {
-          return Math.min(G__58710, max_STAR_6);
+          return Math.min(G__61810, max_STAR_6);
         } else {
-          return G__58710;
+          return G__61810;
         }
         ;
       })();
@@ -13149,11 +13149,11 @@
     if (truth_(temp__23062__auto__2)) {
       const root3 = temp__23062__auto__2;
       if (_EQ_(t1, (() => {
-        const G__5884 = root3.querySelector(".rating-stars");
-        if (G__5884 == null) {
+        const G__6194 = root3.querySelector(".rating-stars");
+        if (G__6194 == null) {
           return null;
         } else {
-          return G__5884.lastElementChild;
+          return G__6194.lastElementChild;
         }
         ;
       })())) {
@@ -13296,25 +13296,25 @@
     ;
   };
   var open_select = (() => {
-    const f589 = (function(var_args) {
-      const args5901 = [];
+    const f620 = (function(var_args) {
+      const args6211 = [];
       const len__23321__auto__2 = arguments.length;
-      let i5913 = 0;
+      let i6223 = 0;
       while (true) {
-        if (i5913 < len__23321__auto__2) {
-          args5901.push(arguments[i5913]);
-          let G__4 = i5913 + 1;
-          i5913 = G__4;
+        if (i6223 < len__23321__auto__2) {
+          args6211.push(arguments[i6223]);
+          let G__4 = i6223 + 1;
+          i6223 = G__4;
           continue;
         }
         ;
         break;
       }
       ;
-      const argseq__23513__auto__5 = 1 < args5901.length ? args5901.slice(1) : null;
-      return f589.cljs$core$IFn$_invoke$arity$variadic(arguments[0], argseq__23513__auto__5);
+      const argseq__23513__auto__5 = 1 < args6211.length ? args6211.slice(1) : null;
+      return f620.cljs$core$IFn$_invoke$arity$variadic(arguments[0], argseq__23513__auto__5);
     });
-    f589.cljs$core$IFn$_invoke$arity$variadic = (function(trigger, args) {
+    f620.cljs$core$IFn$_invoke$arity$variadic = (function(trigger, args) {
       dismiss_BANG_2();
       const options6 = (() => {
         const passed7 = first(args);
@@ -13409,8 +13409,8 @@
       }
       ;
     });
-    f589.cljs$lang$maxFixedArity = 1;
-    return f589;
+    f620.cljs$lang$maxFixedArity = 1;
+    return f620;
   })();
   window["__uiSelect"] = open_select;
 
@@ -13443,8 +13443,8 @@
     return window.matchMedia("(prefers-color-scheme: dark)").matches;
   };
   var resolve_effective = function(mode) {
-    const G__5931 = mode;
-    switch (G__5931) {
+    const G__6241 = mode;
+    switch (G__6241) {
       case "light":
         return "light";
         break;
@@ -13473,8 +13473,8 @@
   var apply_theme_BANG_ = function(mode) {
     const el1 = document.documentElement;
     suppress_transitions_BANG_();
-    const G__5942 = mode;
-    switch (G__5942) {
+    const G__6252 = mode;
+    switch (G__6252) {
       case "light":
         return el1.setAttribute("data-theme", "light");
         break;
@@ -13549,8 +13549,8 @@
   var toggle_BANG_ = function() {
     const current1 = get_mode();
     const next_mode2 = (() => {
-      const G__5953 = current1;
-      switch (G__5953) {
+      const G__6263 = current1;
+      switch (G__6263) {
         case "auto":
           return "light";
           break;
@@ -13871,8 +13871,8 @@
     ;
   };
   var opposite = function(side) {
-    const G__5961 = side;
-    switch (G__5961) {
+    const G__6271 = side;
+    switch (G__6271) {
       case "top":
         return "bottom";
         break;
@@ -13907,8 +13907,8 @@
     ;
   };
   var room = function(side, tr, vw, vh) {
-    const G__5971 = side;
-    switch (G__5971) {
+    const G__6281 = side;
+    switch (G__6281) {
       case "bottom":
         return vh - tr.bottom - gap2 - edge2;
         break;
@@ -13988,8 +13988,8 @@
     const cx8 = tr3.left + tr3.width / 2;
     const cy9 = tr3.top + tr3.height / 2;
     const left10 = clamp6((() => {
-      const G__59811 = side6;
-      switch (G__59811) {
+      const G__62911 = side6;
+      switch (G__62911) {
         case "left":
           return tr3.left - gap2 - w4;
           break;
@@ -14002,8 +14002,8 @@
       ;
     })(), edge2, vw1 - w4 - edge2);
     const top13 = clamp6((() => {
-      const G__59914 = side6;
-      switch (G__59914) {
+      const G__63014 = side6;
+      switch (G__63014) {
         case "top":
           return tr3.top - gap2 - h5;
           break;
@@ -14046,11 +14046,11 @@
     return s1.pending = null;
   };
   var unwatch_BANG_ = function() {
-    const G__6001 = get_state3().observer;
-    if (G__6001 == null) {
+    const G__6311 = get_state3().observer;
+    if (G__6311 == null) {
       return null;
     } else {
-      return G__6001.disconnect();
+      return G__6311.disconnect();
     }
     ;
   };
@@ -14573,14 +14573,14 @@
       ;
     })().split(","))));
     const override_keys4 = set(map(first, viewport_overrides));
-    const kept5 = remove((function(p__601) {
-      const vec__69 = p__601;
+    const kept5 = remove((function(p__632) {
+      const vec__69 = p__632;
       const k10 = nth(vec__69, 0, null);
       const _11 = nth(vec__69, 1, null);
       return contains_QMARK_(override_keys4, k10);
     }), entries1);
-    return join(", ", map((function(p__602) {
-      const vec__1215 = p__602;
+    return join(", ", map((function(p__633) {
+      const vec__1215 = p__633;
       const k16 = nth(vec__1215, 0, null);
       const v17 = nth(vec__1215, 1, null);
       if (v17 == null) {
@@ -14729,49 +14729,66 @@
     }
     ;
   };
+  var native_levels = function(p) {
+    if (truth_(p.hls)) {
+      return null;
+    } else {
+      return p.nativeLevels;
+    }
+    ;
+  };
   var builtin_options = function(p, id) {
-    const G__6031 = id;
-    switch (G__6031) {
+    const G__6341 = id;
+    switch (G__6341) {
       case "quality":
-        const lv3 = levels(p);
-        const h4 = p.hls;
-        const cur5 = truth_(h4) ? lv3[h4.currentLevel] : null;
-        const auto_QMARK_6 = (() => {
-          const or__23426__auto__7 = not(h4);
-          if (or__23426__auto__7) {
-            return or__23426__auto__7;
-          } else {
-            return h4.autoLevelEnabled;
-          }
-          ;
-        })();
-        const rows8 = lv3.map((function(l, i) {
-          return { "value": i, "height": l.height };
-        })).sort((function(a, b) {
-          return b.height - a.height;
-        }));
-        return [{ "value": -1, "label": "Auto", "default": true, "hint": truth_((() => {
-          const and__23442__auto__9 = auto_QMARK_6;
-          if (truth_(and__23442__auto__9)) {
-            return cur5;
-          } else {
-            return and__23442__auto__9;
-          }
-          ;
-        })()) ? `${cur5.height ?? ""}p` : null }].concat(rows8.map((function(r) {
-          return { "value": r.value, "label": `${r.height ?? ""}p`, "hint": r.height >= 720 ? "HD" : null };
-        })));
+        const temp__23007__auto__3 = native_levels(p);
+        if (truth_(temp__23007__auto__3)) {
+          const hs4 = temp__23007__auto__3;
+          return [{ "value": -1, "label": "Auto", "default": true }].concat(hs4.map((function(h) {
+            return { "value": h, "label": `${h ?? ""}p`, "hint": h >= 720 ? "HD" : null };
+          })));
+        } else {
+          const lv5 = levels(p);
+          const h6 = p.hls;
+          const cur7 = truth_(h6) ? lv5[h6.currentLevel] : null;
+          const auto_QMARK_8 = (() => {
+            const or__23426__auto__9 = not(h6);
+            if (or__23426__auto__9) {
+              return or__23426__auto__9;
+            } else {
+              return h6.autoLevelEnabled;
+            }
+            ;
+          })();
+          const rows10 = lv5.map((function(l, i) {
+            return { "value": i, "height": l.height };
+          })).sort((function(a, b) {
+            return b.height - a.height;
+          }));
+          return [{ "value": -1, "label": "Auto", "default": true, "hint": truth_((() => {
+            const and__23442__auto__11 = auto_QMARK_8;
+            if (truth_(and__23442__auto__11)) {
+              return cur7;
+            } else {
+              return and__23442__auto__11;
+            }
+            ;
+          })()) ? `${cur7.height ?? ""}p` : null }].concat(rows10.map((function(r) {
+            return { "value": r.value, "label": `${r.height ?? ""}p`, "hint": r.height >= 720 ? "HD" : null };
+          })));
+        }
+        ;
         break;
       case "subtitles":
         return [{ "value": -1, "label": "Off", "default": true }].concat(text_tracks(p).map((function(t, i) {
           return { "value": i, "label": (() => {
-            const or__23426__auto__10 = not_empty(t.label);
-            if (truth_(or__23426__auto__10)) {
-              return or__23426__auto__10;
+            const or__23426__auto__12 = not_empty(t.label);
+            if (truth_(or__23426__auto__12)) {
+              return or__23426__auto__12;
             } else {
-              const or__23426__auto__11 = not_empty(t.language);
-              if (truth_(or__23426__auto__11)) {
-                return or__23426__auto__11;
+              const or__23426__auto__13 = not_empty(t.language);
+              if (truth_(or__23426__auto__13)) {
+                return or__23426__auto__13;
               } else {
                 return `${"Track "}${i + 1}`;
               }
@@ -14792,22 +14809,30 @@
     ;
   };
   var builtin_value = function(p, id) {
-    const G__6041 = id;
-    switch (G__6041) {
+    const G__6351 = id;
+    switch (G__6351) {
       case "quality":
         const h3 = p.hls;
-        if (truth_((() => {
-          const or__23426__auto__4 = not(h3);
-          if (or__23426__auto__4) {
-            return or__23426__auto__4;
-          } else {
-            return h3.autoLevelEnabled;
-          }
-          ;
-        })())) {
-          return -1;
+        if (truth_(native_levels(p))) {
+          return p.nativeLevel;
         } else {
-          return h3.currentLevel;
+          if (truth_((() => {
+            const or__23426__auto__4 = not(h3);
+            if (or__23426__auto__4) {
+              return or__23426__auto__4;
+            } else {
+              return h3.autoLevelEnabled;
+            }
+            ;
+          })())) {
+            return -1;
+          } else {
+            if ("else") {
+              return h3.currentLevel;
+            } else {
+              return null;
+            }
+          }
         }
         ;
         break;
@@ -14821,21 +14846,30 @@
     ;
   };
   var builtin_summary = function(p, id) {
-    const G__6051 = id;
-    switch (G__6051) {
+    const G__6361 = id;
+    switch (G__6361) {
       case "quality":
         const h3 = p.hls;
         const cur4 = truth_(h3) ? levels(p)[h3.currentLevel] : null;
-        if (not(cur4)) {
-          return "Auto";
-        } else {
-          if (truth_(h3.autoLevelEnabled)) {
-            return `${"Auto \xB7 "}${cur4.height ?? ""}p`;
+        const nl5 = p.nativeLevel;
+        if (truth_(native_levels(p))) {
+          if (nl5 < 0) {
+            return "Auto";
           } else {
-            if ("else") {
-              return `${cur4.height ?? ""}p`;
+            return `${nl5 ?? ""}p`;
+          }
+        } else {
+          if (not(cur4)) {
+            return "Auto";
+          } else {
+            if (truth_(h3.autoLevelEnabled)) {
+              return `${"Auto \xB7 "}${cur4.height ?? ""}p`;
             } else {
-              return null;
+              if ("else") {
+                return `${cur4.height ?? ""}p`;
+              } else {
+                return null;
+              }
             }
           }
         }
@@ -14861,14 +14895,20 @@
     ;
   };
   var builtin_select_BANG_ = function(p, id, v) {
-    const G__6061 = id;
-    switch (G__6061) {
+    const G__6371 = id;
+    switch (G__6371) {
       case "quality":
-        const temp__23062__auto__3 = p.hls;
-        if (truth_(temp__23062__auto__3)) {
-          const h4 = temp__23062__auto__3;
-          h4.currentLevel = v;
-          return toast_BANG_(p, v < 0 ? "Quality: Auto" : `${"Quality: "}${levels(p)[v].height ?? ""}p`);
+        if (truth_(native_levels(p))) {
+          p.nativeLevel = v;
+          return toast_BANG_(p, v < 0 ? "Quality: Auto" : `${"Quality: "}${v ?? ""}p`);
+        } else {
+          const temp__23062__auto__3 = p.hls;
+          if (truth_(temp__23062__auto__3)) {
+            const h4 = temp__23062__auto__3;
+            h4.currentLevel = v;
+            return toast_BANG_(p, v < 0 ? "Quality: Auto" : `${"Quality: "}${levels(p)[v].height ?? ""}p`);
+          }
+          ;
         }
         ;
         break;
@@ -15283,9 +15323,9 @@
       scrub5.setAttribute("aria-valuenow", Math.round(t4));
       scrub5.setAttribute("aria-valuetext", `${fmt(t4) ?? ""}${" of "}${fmt(d3) ?? ""}`);
       const b11 = v2.buffered;
-      const n60712 = b11.length;
+      const n63812 = b11.length;
       let i13 = 0;
-      for (; i13 < n60712; i13++) {
+      for (; i13 < n63812; i13++) {
         b11.start(i13) <= t4 + 0.5 ? scrub5.style.setProperty("--vp-buffered", b11.end(i13) / d3) : null;
       }
       ;
@@ -15442,8 +15482,8 @@
   };
   var act_BANG_ = function(p, a) {
     const v1 = p.video;
-    const G__6082 = a;
-    switch (G__6082) {
+    const G__6392 = a;
+    switch (G__6392) {
       case "play":
         toggle_play_BANG_(p);
         break;
@@ -15615,8 +15655,8 @@
     scrub.addEventListener("pointerup", end7);
     scrub.addEventListener("pointercancel", end7);
     return scrub.addEventListener("keydown", (function(e) {
-      const G__6099 = e.key;
-      switch (G__6099) {
+      const G__6409 = e.key;
+      switch (G__6409) {
         case "ArrowLeft":
           e.preventDefault();
           e.stopPropagation();
@@ -15978,15 +16018,23 @@
           const temp__23062__auto__20 = q2(root1, "[data-vp-builtin=quality]");
           if (truth_(temp__23062__auto__20)) {
             const b21 = temp__23062__auto__20;
-            b21.hidden = true;
+            b21.hidden = (() => {
+              const or__23426__auto__22 = p.nativeLevels;
+              if (truth_(or__23426__auto__22)) {
+                return or__23426__auto__22;
+              } else {
+                return [];
+              }
+              ;
+            })().length < 2;
           }
           ;
           if (truth_((() => {
-            const and__23442__auto__22 = hls_QMARK_8;
-            if (truth_(and__23442__auto__22)) {
+            const and__23442__auto__23 = hls_QMARK_8;
+            if (truth_(and__23442__auto__23)) {
               return _EQ_("", v2.canPlayType("application/vnd.apple.mpegurl"));
             } else {
-              return and__23442__auto__22;
+              return and__23442__auto__23;
             }
             ;
           })())) {
@@ -16202,6 +16250,51 @@
     sync_BANG_3(p2);
     return tick_BANG_(p2);
   };
+  var set_native_levels_BANG_ = function(p, heights, current2) {
+    p.nativeLevels = truth_((() => {
+      const and__23442__auto__1 = heights;
+      if (truth_(and__23442__auto__1)) {
+        return heights.length > 0;
+      } else {
+        return and__23442__auto__1;
+      }
+      ;
+    })()) ? Array.from(heights).sort((function(a, b) {
+      return b - a;
+    })) : null;
+    p.nativeLevel = truth_(number_QMARK_(current2)) ? current2 : -1;
+    const temp__23062__auto__2 = not(p.hls) && q2(p.root, "[data-vp-builtin=quality]");
+    if (truth_(temp__23062__auto__2)) {
+      const b3 = temp__23062__auto__2;
+      b3.hidden = (() => {
+        const or__23426__auto__4 = _EQ_("", (() => {
+          const or__23426__auto__5 = p.root.dataset.src;
+          if (truth_(or__23426__auto__5)) {
+            return or__23426__auto__5;
+          } else {
+            return "";
+          }
+          ;
+        })());
+        if (or__23426__auto__4) {
+          return or__23426__auto__4;
+        } else {
+          return (() => {
+            const or__23426__auto__6 = p.nativeLevels;
+            if (truth_(or__23426__auto__6)) {
+              return or__23426__auto__6;
+            } else {
+              return [];
+            }
+            ;
+          })().length < 2;
+        }
+        ;
+      })();
+    }
+    ;
+    return sync_BANG_3(p);
+  };
   var teardown_BANG_2 = function(root) {
     const temp__23062__auto__1 = players.get(root);
     if (truth_(temp__23062__auto__1)) {
@@ -16282,9 +16375,9 @@
     return obs2.observe(document.body, { "childList": true, "subtree": true, "attributes": true, "attributeFilter": ["data-src"] });
   };
   window["__uiVideoPlayer"] = (function(root) {
-    let temp__23062__auto__610 = players.get(root);
-    if (truth_(temp__23062__auto__610)) {
-      const p1 = temp__23062__auto__610;
+    let temp__23062__auto__641 = players.get(root);
+    if (truth_(temp__23062__auto__641)) {
+      const p1 = temp__23062__auto__641;
       return { "video": p1.video, "play": (function() {
         return autoplay_BANG_(p1);
       }), "pause": (function() {
@@ -16295,6 +16388,8 @@
         return toast_BANG_(p1, msg);
       }), "segments": (function(segs) {
         return set_segments_BANG_(p1, segs);
+      }), "levels": (function(heights, current2) {
+        return set_native_levels_BANG_(p1, heights, current2);
       }), "load": (function() {
         load_BANG_(p1);
         return sync_BANG_3(p1);

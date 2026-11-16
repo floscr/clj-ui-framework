@@ -32,8 +32,10 @@
    detail {kind: select|toggle|action|next, id, value, on}.
 
    window.__uiVideoPlayer(root) returns the controller
-   {play pause seek toast load segments video}; segments([{start end label
-   kind}]) replaces the marked stretches of the seek bar.")
+   {play pause seek toast load segments levels video}; segments([{start end
+   label kind}]) replaces the marked stretches of the seek bar;
+   levels(heights, current) fills the Quality menu where the browser plays
+   HLS itself (Safari on iOS), and the host loads the picked level.")
 
 (def ^:private players (js/Map.))
 (def ^:private idle-ms 2600)
@@ -97,11 +99,20 @@
 
 (defn- rate-label [r] (if (= r 1) "Normal" (str r "×")))
 
+(defn- native-levels
+  "The heights a host listed with the controller's levels, when the browser
+   plays the HLS itself (no hls.js), else nil."
+  [p]
+  (when-not (.-hls p) (.-nativeLevels p)))
+
 (defn- builtin-options
   "Array of {value label hint default} for a built-in menu."
   [p id]
   (case id
     "quality"
+    (if-let [hs (native-levels p)]
+      (.concat #js [#js {:value -1 :label "Auto" :default true}]
+               (.map hs (fn [h] #js {:value h :label (str h "p") :hint (when (>= h 720) "HD")})))
     (let [lv (levels p)
           h (.-hls p)
           cur (when h (aget lv (.-currentLevel h)))
@@ -111,7 +122,7 @@
       (.concat #js [#js {:value -1 :label "Auto" :default true
                          :hint (when (and auto? cur) (str (.-height cur) "p"))}]
                (.map rows (fn [r] #js {:value (.-value r) :label (str (.-height r) "p")
-                                       :hint (when (>= (.-height r) 720) "HD")}))))
+                                       :hint (when (>= (.-height r) 720) "HD")})))))
     "subtitles"
     (.concat #js [#js {:value -1 :label "Off" :default true}]
              (.map (text-tracks p) (fn [t i] #js {:value i :label (or (not-empty (.-label t))
@@ -123,15 +134,20 @@
 
 (defn- builtin-value [p id]
   (case id
-    "quality" (let [h (.-hls p)] (if (or (not h) (.-autoLevelEnabled h)) -1 (.-currentLevel h)))
+    "quality" (let [h (.-hls p)]
+                (cond (native-levels p) (.-nativeLevel p)
+                      (or (not h) (.-autoLevelEnabled h)) -1
+                      :else (.-currentLevel h)))
     "subtitles" (.-sub p)
     "speed" (.. p -video -playbackRate)
     nil))
 
 (defn- builtin-summary [p id]
   (case id
-    "quality" (let [h (.-hls p) cur (when h (aget (levels p) (.-currentLevel h)))]
-                (cond (not cur) "Auto"
+    "quality" (let [h (.-hls p) cur (when h (aget (levels p) (.-currentLevel h)))
+                    nl (.-nativeLevel p)]
+                (cond (native-levels p) (if (neg? nl) "Auto" (str nl "p"))
+                      (not cur) "Auto"
                       (.-autoLevelEnabled h) (str "Auto · " (.-height cur) "p")
                       :else (str (.-height cur) "p")))
     nil))
@@ -149,9 +165,13 @@
 
 (defn- builtin-select! [p id v]
   (case id
-    "quality" (when-let [h (.-hls p)]
-                (set! (.-currentLevel h) v)
-                (toast! p (if (< v 0) "Quality: Auto" (str "Quality: " (.-height (aget (levels p) v)) "p"))))
+    "quality" (if (native-levels p)
+                ;; The host loads the picked level (the change event).
+                (do (set! (.-nativeLevel p) v)
+                    (toast! p (if (< v 0) "Quality: Auto" (str "Quality: " v "p"))))
+                (when-let [h (.-hls p)]
+                  (set! (.-currentLevel h) v)
+                  (toast! p (if (< v 0) "Quality: Auto" (str "Quality: " (.-height (aget (levels p) v)) "p")))))
     "subtitles" (set-sub! p v true)
     "speed" (do (set! (.. p -video -playbackRate) v)
                 (toast! p (str "Speed: " (rate-label v))))
@@ -656,7 +676,9 @@
 
       :else
       (do
-        (when-let [b (q root "[data-vp-builtin=quality]")] (set! (.-hidden b) true))
+        ;; Native HLS: only the levels a host listed (controller's levels).
+        (when-let [b (q root "[data-vp-builtin=quality]")]
+          (set! (.-hidden b) (< (.-length (or (.-nativeLevels p) #js [])) 2)))
         (if (and hls? (= "" (.canPlayType v "application/vnd.apple.mpegurl")))
           (do (flag! root "data-error" true) (toast! p "This browser can't play HLS"))
           (do
@@ -741,6 +763,22 @@
     (sync! p)
     (tick! p)))
 
+(defn- set-native-levels!
+  "The levels of a stream the browser plays itself, which a page can't
+   read: heights (numbers) for the Quality menu, `current` the picked one
+   or -1 for Auto. Picking one only reports it (change event, kind select,
+   id quality, value the height); the host loads that level, e.g. a
+   playlist with only it, through data-src and load."
+  [p heights current]
+  (set! (.-nativeLevels p) (when (and heights (pos? (.-length heights)))
+                             (.sort (js/Array.from heights) (fn [a b] (- b a)))))
+  (set! (.-nativeLevel p) (if (number? current) current -1))
+  ;; Under hls.js its own levels decide (MANIFEST_PARSED).
+  (when-let [b (and (not (.-hls p)) (q (.-root p) "[data-vp-builtin=quality]"))]
+    (set! (.-hidden b) (or (= "" (or (.. p -root -dataset -src) ""))
+                           (< (.-length (or (.-nativeLevels p) #js [])) 2))))
+  (sync! p))
+
 (defn- teardown! [root]
   (when-let [p (.get players root)]
     (when (tiled? p) (flag! (.-documentElement js/document) "data-tiled-fullscreen" false))
@@ -785,6 +823,7 @@
                :seek (fn [t] (set! (.. p -video -currentTime) t))
                :toast (fn [msg] (toast! p msg))
                :segments (fn [segs] (set-segments! p segs))
+               :levels (fn [heights current] (set-native-levels! p heights current))
                :load (fn [] (load! p) (sync! p))})))
 
 (if (= "loading" (.-readyState js/document))

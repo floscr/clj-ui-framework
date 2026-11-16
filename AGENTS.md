@@ -1194,8 +1194,14 @@ countdown and the popovers.
   only standard event names like `change` work there). Hiccup pages listen
   themselves. Custom option values travel as strings; the component maps
   them back to the original value.
-- `window.__uiVideoPlayer(root)` → `{video play pause seek toast load}` for
-  host scripts (progress saving, resume).
+- `window.__uiVideoPlayer(root)` → `{video play pause seek toast load
+  segments levels}` for host scripts (progress saving, resume).
+- **Quality under native HLS** (Safari on iOS): the page can't read or set
+  the level, so the built-in Quality menu hides. A host that can serve a
+  single level calls `levels(heights, current)` (-1 = Auto); a pick emits
+  `change` `{kind select id quality value <height>}` and the host reloads
+  at that level (`data-src`, `data-start-at`, `load`). media-server's
+  YouTube watch page is the user.
 - Squint/Replicant SPAs without ui-runtime.js add
   `(:require [ui.js.video-player])` and load hls.js themselves.
 
