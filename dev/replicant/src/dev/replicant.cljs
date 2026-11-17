@@ -363,6 +363,7 @@
    (examples/section-for :settings)
    (examples/section-for :metric)
    (examples/section-for :list-row)
+   (examples/section-for :filters)
    (examples/section-for :comment)
    (examples/section-for :accordion)
    (examples/section-for :table)

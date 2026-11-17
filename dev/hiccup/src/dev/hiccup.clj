@@ -308,6 +308,7 @@
    (examples/section-for :notification)
    (examples/section-for :badge)
    (examples/section-for :card)
+   (examples/section-for :filters)
    (examples/section-for :accordion)
    (examples/section-for :table)
    (dialog-demo)
