@@ -36,6 +36,16 @@
       (is (= "filter-band filter-band-wide" (get-in result [1 :class])))
       (is (nil? (nth result 2))))))
 
+(deftest filter-split-test
+  (let [result (filters/filter-split {:class "x"}
+                 (filters/filter-column {} [:div "a"] nil [:div "b"])
+                 nil
+                 (filters/filter-column {:attrs {:id "cols"}} [:div "c"]))]
+    (is (= "filter-split x" (get-in result [1 :class])))
+    (is (= 4 (count result)) "nil columns are dropped")
+    (is (= [:div {:class "filter-column"} [:div "a"] [:div "b"]] (nth result 2)))
+    (is (= "cols" (get-in (nth result 3) [1 :id])))))
+
 (deftest filter-footer-test
   (let [result (filters/filter-footer {} "Own view" (filters/filter-action {:disabled true} "Update")
                                       (filters/filter-spacer))]

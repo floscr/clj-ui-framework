@@ -31,7 +31,7 @@
  :api
  [{:fn "filters"
    :doc "The surface: bands stacked with hairlines. A size container, so bands put their label on top when it is narrower than 520px."
-   :children "filter-band and filter-footer elements."
+   :children "filter-band, filter-split and filter-footer elements."
    :props [{:name :bare :type "boolean" :doc "No border and background, for a filter inside a column, a popover or a filter-disclosure."}
            {:name :dense :type "boolean" :doc "Packed bands: less padding, no hairlines, labels stay beside their controls on a narrow surface. For a few bands of toggles in a narrow column."}
            {:name :class :type "string"} {:name :attrs :type "map"}]}
@@ -40,6 +40,14 @@
    :children "The controls: a search field, chips, a rule-list, filter-toggles."
    :props [{:name :label :type "string" :doc "One or two words. Without it the controls take the full width on one line (the preset bar)."}
            {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "filter-split"
+   :doc "Bands in columns: each filter-column child is a column on a surface at least 640px wide, with a hairline between them; narrower, they stack."
+   :children "filter-column elements."
+   :props [{:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "filter-column"
+   :doc "One column of a filter-split. A size container of its own, so its bands put their label on top when the column is under 520px."
+   :children "filter-band elements."
+   :props [{:name :class :type "string"} {:name :attrs :type "map"}]}
   {:fn "filter-disclosure"
    :doc "A <details>: one line that says the filter in words and opens its children. No JS."
    :children "What opens, usually (filters {:bare true} ...)."
@@ -164,6 +172,7 @@
 
  :responsive
  ["The surface is a size container: under 520px of its own width the band labels move above their controls and the rule-add hint goes."
+  "A filter-split shows its columns side by side from 640px of surface width and stacks them below; each column is measured on its own."
   "The preset bar scrolls sideways instead of wrapping."
   "On touch the value pills and the save half of a changed preset grow to tap size."]
 
@@ -177,6 +186,7 @@
  :notes-for-ai
  ["One grammar for every filter view: bands in the order presets, Find, Rules, Columns, Show, then the footer. Leave out the bands a list does not need."
   "Sort, group, hide and keep are all rules in one rule-list; do not build a separate sort section."
+  "When one band is a long list (a table's columns), put it in the second filter-column of a filter-split so the panel does not grow twice as tall on desktop; the preset band and the footer stay outside the split, full width."
   "Saving belongs to the preset bar (the dirty preset's Save, preset-add). Do not add a row of save buttons under the panel."
   "Use filter-toggle for display options instead of a switch per row."
   "A table's columns are a rule-list of plain rules (name as :verb, no words): the switch shows or hides, the grip reorders top to bottom, a rule-add row opens the menu of columns to add. Do not lay columns out as chips that drag sideways."

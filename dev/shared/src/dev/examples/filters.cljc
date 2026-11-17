@@ -21,7 +21,7 @@
    {:value "all" :label "Everything"}])
 
 (def examples
-  [(example :table "A table's view: presets, rules, columns and display options"
+  [(example :table "A table's view: presets, then rules and display options beside the columns"
      (fn []
        (filters/filters {}
          (filters/filter-band {}
@@ -37,6 +37,8 @@
            (filters/filter-spacer)
            (button/button {:variant :ghost :size :sm :icon :trash
                            :attrs {:title "Delete preset" :aria-label "Delete preset"}}))
+         (filters/filter-split {}
+          (filters/filter-column {}
          (filters/filter-band {:label "Find"}
            (form/form-input {:type :search :icon-left :search :placeholder "Title, artist, album…"})
            (chip/chip {:active true} (icon/icon {:icon-name :heart :size :sm}) "Hearted")
@@ -58,16 +60,17 @@
                (filters/rule-value {} "contains")
                (filters/rule-text {:value "live" :placeholder "Text"}))
              (filters/rule-add {:hint "Sort, hide, keep only" :on-click (log-click "add rule")})))
+         (filters/filter-band {:label "Show"}
+           (filters/filter-toggle {:icon :music} "Icons")
+           (filters/filter-toggle {:icon :image :on true} "Covers")))
+          (filters/filter-column {}
          (filters/filter-band {:label "Columns"}
            (filters/rule-list {}
              (filters/rule {:verb "Title" :remove-attrs {} :menu row-menu})
              (filters/rule {:verb "Artist" :remove-attrs {}})
              (filters/rule {:verb "Added" :remove-attrs {}})
              (filters/rule {:verb "Plays" :off true :remove-attrs {}})
-             (filters/rule-add {:hint "Album, Duration, Genre"} "Add column")))
-         (filters/filter-band {:label "Show"}
-           (filters/filter-toggle {:icon :music} "Icons")
-           (filters/filter-toggle {:icon :image :on true} "Covers"))
+             (filters/rule-add {:hint "Album, Duration, Genre"} "Add column")))))
          (filters/filter-footer {}
            "Own view for “Recently added”"
            (filters/filter-action {:disabled true} "Update")

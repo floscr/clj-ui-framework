@@ -5,6 +5,7 @@
      filters            the surface, one band under the other
      filter-band        a labeled band: the key in a left gutter, the
                         controls wrapping next to it
+     filter-split       bands in two columns on a wide surface
      filter-disclosure  a line that says the filter in words and opens
                         the bands (for a filter that stays out of the way)
      preset-bar/preset  saved views in one boxed track; the changed one
@@ -99,6 +100,35 @@
   [:div (util/class-attrs (cond-> ["filter-band"] (not label) (conj "filter-band-wide")) class attrs)
    (when label [:span {:class "filter-band-label"} label])
    (into [:div {:class "filter-band-body"}] (remove nil? controls))])
+
+(defn filter-split
+  "Bands side by side: on a surface wide enough each filter-column child is
+   a column of its own, with a hairline between them; on a narrow one they
+   stack. For a view with a long list next to the rest (a table's columns
+   beside its rules).
+
+   Props:
+     :class - additional CSS classes
+     :attrs - additional HTML attributes map
+
+   Children are filter-column elements."
+  [{:keys [class attrs] :as _props} & columns]
+  (into [:div (util/class-attrs ["filter-split"] class attrs)]
+        (remove nil? columns)))
+
+(defn filter-column
+  "One column of a filter-split: bands stacked with hairlines. It is a size
+   container of its own, so its bands put their label on top when the
+   column is narrow.
+
+   Props:
+     :class - additional CSS classes
+     :attrs - additional HTML attributes map
+
+   Children are filter-band elements."
+  [{:keys [class attrs] :as _props} & bands]
+  (into [:div (util/class-attrs ["filter-column"] class attrs)]
+        (remove nil? bands)))
 
 (defn filter-footer
   "The last line of the surface: a status in muted text and its text

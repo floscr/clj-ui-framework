@@ -37,8 +37,26 @@
 }
 
 .filter-band + .filter-band,
-.filter-band + .filter-footer {
+.filter-band + .filter-footer,
+.filter-band + .filter-split,
+.filter-split + .filter-band,
+.filter-split + .filter-footer,
+.filter-column + .filter-column {
   border-top: var(--border-subtle);
+}
+
+/* Bands side by side on a wide surface (see the end of the file). Each
+   column is a size container, so its own bands go narrow when it is. */
+.filter-split {
+  display: grid;
+  min-width: 0;
+}
+
+.filter-column {
+  container-type: inline-size;
+  display: grid;
+  align-content: start;
+  min-width: 0;
 }
 
 .filter-band-wide {
@@ -675,6 +693,20 @@ button.rule-verb:hover {
   padding: 0 var(--size-2);
 }
 
+
+/* ── Wide surface: a filter-split's columns sit side by side ───── */
+
+@container (min-width: 640px) {
+  .filter-split {
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+  }
+
+  .filter-column + .filter-column {
+    border-top: 0;
+    border-left: var(--border-subtle);
+  }
+}
 
 /* ── Narrow surface ──────────────────────────────────────────────
    Last in the file so it wins over the rules above. */
