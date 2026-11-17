@@ -1,0 +1,185 @@
+{:id :filters
+ :title "Filters"
+ :summary "The parts of a filter view: a surface of labeled bands, a preset bar that saves where the change is, rules read as sentences, pressed toggles for columns and display options, and a one-line summary that opens it all."
+ :category :data
+ :group "Tables"
+ :keywords ["filter" "filter bar" "view settings" "preset" "saved view" "rules" "sort" "group" "columns" "display options" "query builder" "customize view"]
+
+ :when-to-use
+ ["A list or table whose view can be changed: sorted, grouped, narrowed, with columns or details switched on and off."
+  "Saved views (presets) of such a list, where the changed preset offers Save and Revert in place."
+  "A filter that should stay out of the way: filter-disclosure shows it as one line of words and opens the choices."]
+
+ :when-not-to-use
+ ["Use settings for app preferences that are not about one list."
+  "Use chip alone for a few independent facet filters with nothing to save."
+  "Use button-group with :variant :boxed to switch between whole views or modes."
+  "Use tabs when the choices lead to different content, not a different view of the same list."]
+
+ :usage "(require '[ui.filters :as filters])\n\n(filters/filters {}\n  (filters/filter-band {}\n    (filters/preset-bar {}\n      (filters/preset {:on-click #(pick! :newest)} \"Newest\")\n      (filters/preset {:active true :dirty true\n                       :on-click #(pick! :jq) :on-save save! :on-revert revert!}\n        \"JQ\")\n      (filters/preset-add {:on-click save-as-new!})))\n  (filters/filter-band {:label \"Rules\"}\n    (filters/rule-list {}\n      (filters/rule {:verb \"Sort by\" :icon :arrow-up-down :on-remove remove! :on-toggle toggle!}\n        (filters/rule-value {:on-click pick-field!} \"Played\")\n        (filters/rule-value {:icon :arrow-down :on-click flip!} \"Newest first\"))\n      (filters/rule {:verb \"Hide\" :icon :eye-off :on-verb hide-or-keep! :on-remove remove! :on-toggle toggle!}\n        \"where\"\n        (filters/rule-value {:on-click pick-field!} \"Title\")\n        (filters/rule-value {:on-click pick-match!} \"contains\")\n        (filters/rule-text {:value \"live\" :on-input set-text!}))\n      (filters/rule-add {:hint \"Sort, hide, keep only\" :on-click add-rule!})))\n  (filters/filter-band {:label \"Show\"}\n    (filters/filter-toggle {:icon :image :on covers? :on-click toggle-covers!} \"Covers\")))"
+
+ :examples
+ [{:title "Columns in table order: press to show or hide, drag to reorder, add the rest"
+   :code "(filters/filter-band {:label \"Columns\"}\n  (filters/filter-toggle {:reorder true :on true :on-click hide-title!} \"Title\")\n  (filters/filter-toggle {:reorder true :on-click show-plays!} \"Plays\")\n  (filters/filter-divider)\n  (filters/filter-add {:on-click add-album!} \"Album\"))"}
+  {:title "A server-rendered filter behind its summary, each choice an htmx request"
+   :code "(filters/filter-disclosure {:summary \"15+ comments · unseen only\" :summary-attrs {:id \"filter-sum\"}}\n  (filters/filters {:bare true :attrs {:id \"filter-opts\"}}\n    (filters/filter-band {:label \"Comments\"}\n      (filters/filter-toggle {:attrs {:hx-get \"/list?c=0\"}} \"Any\")\n      (filters/filter-toggle {:on true :attrs {:hx-get \"/list?c=15\"}} \"15+\"))))"}
+  {:title "An option that needs a value: the control sits inside the pressed toggle"
+   :code "(filters/filter-toggle {:icon :file-text :on true\n                        :value (select/select {:options lengths :value \"sentence\" :on-change set-length!})}\n  \"Body text\")"}
+  {:title "The footer: a status and text actions"
+   :code "(filters/filter-footer {}\n  \"Own view for “Recently added”\"\n  (filters/filter-action {:disabled (not dirty?) :on-click update!} \"Update\")\n  (filters/filter-spacer)\n  (filters/filter-action {:on-click clear!} \"Clear rules\"))"}]
+
+ :api
+ [{:fn "filters"
+   :doc "The surface: bands stacked with hairlines. A size container, so bands put their label on top when it is narrower than 520px."
+   :children "filter-band and filter-footer elements."
+   :props [{:name :bare :type "boolean" :doc "No border and background, for a filter inside a column, a popover or a filter-disclosure."}
+           {:name :dense :type "boolean" :doc "Packed bands: less padding, no hairlines, labels stay beside their controls on a narrow surface. For a few bands of toggles in a narrow column."}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "filter-band"
+   :doc "One band: a short label in the left gutter, the controls wrapping next to it."
+   :children "The controls: a search field, chips, a rule-list, filter-toggles."
+   :props [{:name :label :type "string" :doc "One or two words. Without it the controls take the full width on one line (the preset bar)."}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "filter-disclosure"
+   :doc "A <details>: one line that says the filter in words and opens its children. No JS."
+   :children "What opens, usually (filters {:bare true} ...)."
+   :props [{:name :summary :type "string or hiccup" :doc "The filter in words."}
+           {:name :icon :type "keyword" :default ":filter" :doc "Leading icon."}
+           {:name :open :type "boolean" :doc "Start opened."}
+           {:name :summary-attrs :type "map" :doc "Attributes of the element holding the words, e.g. an id to swap it out of band."}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "preset-bar"
+   :doc "Saved views in one boxed track that scrolls sideways when they do not fit."
+   :children "preset elements, then an optional preset-more and preset-add."
+   :props [{:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "preset"
+   :doc "One saved view. Active and :dirty it shows a dot plus Save and Revert inside its own pill."
+   :children "The label."
+   :props [{:name :active :type "boolean" :doc "The selected preset."}
+           {:name :dirty :type "boolean" :doc "The view on screen no longer matches the active preset."}
+           {:name :on-click :type "fn" :doc "Picks the preset (:cljs and :squint)."}
+           {:name :href :type "string" :doc "Renders the preset as a link."}
+           {:name :on-save :type "fn" :doc "Saves the changes into the preset."}
+           {:name :on-revert :type "fn" :doc "Drops the changes."}
+           {:name :save-label :type "string" :default "\"Save\""}
+           {:name :revert-label :type "string" :default "\"Revert changes\"" :doc "Accessible name of the revert button."}
+           {:name :button-attrs :type "map" :doc "Attributes of the preset's button or link (onclick, hx-get)."}
+           {:name :save-attrs :type "map" :doc "Attributes of the save button; it only renders with these or :on-save."}
+           {:name :revert-attrs :type "map" :doc "Attributes of the revert button; it only renders with these or :on-revert."}
+           {:name :class :type "string"} {:name :attrs :type "map" :doc "The wrapper: a key, a context menu."}]}
+  {:fn "preset-add"
+   :doc "Saves the view on screen as a new preset: a plus, or with children a labeled action."
+   :children "Optional label (\"Save as preset\")."
+   :props [{:name :on-click :type "fn"}
+           {:name :label :type "string" :default "\"Save as new preset\"" :doc "Accessible name and tooltip."}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "preset-more"
+   :doc "A chevron at the end of the bar that opens a menu of every preset, for a bar that only shows the few used last. The app opens the menu."
+   :props [{:name :on-click :type "fn"}
+           {:name :label :type "string" :default "\"All presets\"" :doc "Accessible name and tooltip."}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "rule-list"
+   :doc "Rules as sentences on one surface, in the order they apply."
+   :children "rule elements, then a rule-add; a rule-empty when there is none."
+   :props [{:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "rule"
+   :doc "One rule: grip, verb, words, then a remove button and the switch that pauses it."
+   :children "The words. A string is a connective (\"where\", \"is\"); values are rule-value, rule-text or a select."
+   :props [{:name :verb :type "string" :doc "\"Sort by\", \"Group by\", \"Hide\", \"Keep only\"."}
+           {:name :icon :type "keyword" :doc "Icon before the verb."}
+           {:name :off :type "boolean" :doc "The rule is paused: dimmed, switch off."}
+           {:name :grip :type "boolean" :default "true" :doc "false leaves the drag grip out."}
+           {:name :toggle :type "boolean" :default "true" :doc "false leaves the switch out."}
+           {:name :on-verb :type "fn" :doc "Makes the verb a button, e.g. to switch Hide and Keep only."}
+           {:name :on-toggle :type "fn" :doc "Change handler of the switch."}
+           {:name :on-remove :type "fn" :doc "Click handler of the remove button."}
+           {:name :grip-attrs :type "map" :doc "Attributes of the grip, e.g. a pointerdown that starts a drag."}
+           {:name :verb-attrs :type "map"} {:name :toggle-attrs :type "map"}
+           {:name :remove-attrs :type "map" :doc "The remove button only renders with these or :on-remove."}
+           {:name :class :type "string"} {:name :attrs :type "map" :doc "A key, drag and drop attributes."}]}
+  {:fn "rule-value"
+   :doc "A value pill you press to change it; the app opens its menu from the click."
+   :children "The label."
+   :props [{:name :icon :type "keyword" :doc "Icon before the label (an arrow for a direction)."}
+           {:name :on-click :type "fn"} {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "rule-text"
+   :doc "A free text value typed in place; it grows with its content."
+   :props [{:name :value :type "string"} {:name :placeholder :type "string"}
+           {:name :on-input :type "fn" :doc "Input handler (:cljs and :squint)."}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "rule-add"
+   :doc "The last row of a rule-list: adds a rule."
+   :children "The label, default \"Add rule\"."
+   :props [{:name :on-click :type "fn"}
+           {:name :hint :type "string" :doc "Muted text at the end naming the kinds."}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "rule-empty"
+   :doc "What a rule-list says when it has no rule."
+   :children "The sentence."
+   :props [{:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "filter-toggle"
+   :doc "A pressed toggle: a display option, one choice of a few, or with :reorder a column."
+   :children "The label."
+   :props [{:name :on :type "boolean" :doc "Pressed."}
+           {:name :icon :type "keyword" :doc "Leading icon."}
+           {:name :reorder :type "boolean" :doc "The column form: a grip while shown, a crossed eye while hidden. Drag handlers come in through :attrs."}
+           {:name :value :type "hiccup" :doc "A control shown inside the pressed toggle (a select, a rule-value). The toggle is then wrapped in a span."}
+           {:name :on-click :type "fn"} {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "filter-add"
+   :doc "A quiet plus with a label at the end of a band: adds what is not there yet."
+   :children "The label."
+   :props [{:name :on-click :type "fn"} {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "filter-footer"
+   :doc "The last line of the surface: a muted status and its text actions."
+   :children "Strings, filter-action and filter-spacer."
+   :props [{:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "filter-action"
+   :doc "A text action of the footer."
+   :children "The label."
+   :props [{:name :on-click :type "fn"} {:name :disabled :type "boolean"}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "filter-spacer" :doc "Takes the free space of a footer or band, so what follows sits at the end."}
+  {:fn "filter-divider" :doc "A short vertical hairline between two groups of a band."}
+  {:fn "filters-class-list" :doc "Class vector for {:bare :dense}."}
+  {:fn "filters-classes" :doc "String form."}
+  {:fn "preset-class-list" :doc "Class vector for {:active :dirty}."}
+  {:fn "preset-classes" :doc "String form."}
+  {:fn "rule-class-list" :doc "Class vector for {:off}."}
+  {:fn "rule-classes" :doc "String form."}
+  {:fn "filter-toggle-class-list" :doc "Class vector for {:on :reorder}."}
+  {:fn "filter-toggle-classes" :doc "String form."}]
+
+ :keyboard
+ [["Tab" "Moves through presets, verbs, values, switches and toggles in reading order."]
+  ["Enter / Space" "Picks a preset, opens a value's menu, presses a toggle."]
+  ["Space" "On a rule's switch, pauses or resumes the rule."]]
+
+ :accessibility
+ ["The active preset has aria-current, toggles have aria-pressed, the rule switch is a real checkbox."
+  "The remove button of a rule shows on hover and on keyboard focus inside the rule; on touch it is always there."
+  "Dragging is the app's: give the grip a keyboard alternative (arrow keys on a focused grip, or move actions in a menu)."
+  "Rule kinds are told apart by their verb and icon, never by color."]
+
+ :motion
+ ["Color and background change over --duration-fast; presets and toggles scale to 0.97 while pressed."
+  "The disclosure chevron turns over --duration-standard."]
+
+ :responsive
+ ["The surface is a size container: under 520px of its own width the band labels move above their controls and the rule-add hint goes."
+  "The preset bar scrolls sideways instead of wrapping."
+  "On touch the value pills and the save half of a changed preset grow to tap size."]
+
+ :targets
+ {:clj "No handlers: act through :attrs, :button-attrs, :save-attrs and the other *-attrs maps (onclick, hx-get, a form's button), or :href on a preset."
+  :cljs "Handlers become {:on {:click f}}. State lives in the app."
+  :squint "Flat handlers. Give rules and presets a :key through :attrs when the list changes."}
+
+ :notes-for-ai
+ ["One grammar for every filter view: bands in the order presets, Find, Rules, Columns, Show, then the footer. Leave out the bands a list does not need."
+  "Sort, group, hide and keep are all rules in one rule-list; do not build a separate sort section."
+  "Saving belongs to the preset bar (the dirty preset's Save, preset-add). Do not add a row of save buttons under the panel."
+  "Use filter-toggle for display options and columns instead of a switch per row."
+  "Band labels are sentence case, one or two words. No uppercase section headings."
+  "The components are stateless and open no menus: open the app's menu (context menu runtime, select) from rule-value's click, or put a ui.select among the words, which is styled as a value pill there."]
+
+ :related [:chip :settings :select :switch :button-group :table]}

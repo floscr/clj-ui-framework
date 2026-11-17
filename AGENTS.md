@@ -812,13 +812,16 @@ ugly first draft came from. The framework owns that layer:
 | Preferences: label + hint on the left, control on the right | `ui.settings`: `settings-group`, `settings-row` |
 | Headline numbers (KPI row, record stats) | `ui.metric`: `metric` (label, value, unit, delta, trend, hint, :flush), `metric-row` |
 | Records as rows (playlists, saved items, devices) | `ui.list-row`: `list-rows`, `list-row` (icon or thumb, title, description, meta, trailing controls, :href / :on-click / :active) |
+| What a list shows: presets, sort / group / hide rules, columns, display options | `ui.filters`: `filters` + `filter-band` (labeled bands), `preset-bar` / `preset` (the changed preset carries Save and Revert), `rule-list` / `rule` (every rule a sentence), `filter-toggle` (display options, columns with `:reorder`), `filter-disclosure` (the filter as one line that opens), `filter-footer` |
 | Three to five exclusive modes (Auto / Light / Dark) | `ui.button-group` with `:variant :boxed`, one `:active` item |
 | A view with nothing in it | `ui.empty-state` with `:fill true`, a `.empty-state-title` line and one action |
 
 Rhythm comes from these components (24px between regions, 16px inside a
 section, 32px between sections, 8px between buttons); children never add
 margins. One h1 per page (the page-header title), one `:primary` button
-per page, `:loud` only when that action must dominate. New cross-target
+per page, `:loud` only when that action must dominate. A filter view is
+always `ui.filters`: never a hand-rolled panel of section headings,
+switch rows and a footer of save buttons. New cross-target
 components build their attribute map with `util/class-attrs` instead of
 three reader-conditional branches (see `ui.page` for the pattern).
 

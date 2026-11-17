@@ -38,6 +38,22 @@
   transform: translateX(calc(2.5rem - 1.375rem));
 }
 
+/* Compact: dense rows (a rule, a table cell). Touch keeps the tap target
+   through the label around it. */
+.switch--sm .switch-track {
+  width: var(--size-7);
+  height: var(--size-4);
+}
+
+.switch--sm .switch-thumb {
+  width: calc(var(--size-4) - 4px);
+  height: calc(var(--size-4) - 4px);
+}
+
+.switch--sm .switch-track--checked .switch-thumb {
+  transform: translateX(calc(var(--size-7) - var(--size-4)));
+}
+
 .switch--disabled {
   opacity: 0.5;
   cursor: not-allowed;

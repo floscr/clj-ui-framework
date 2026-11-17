@@ -4,7 +4,7 @@
 > See `AGENTS.md` for conventions, per-target pitfalls, and how to
 > add new components and icons. Agents: start at `docs/llms.txt`.
 
-## Components (55)
+## Components (56)
 
 ### Actions
 
@@ -20,7 +20,7 @@
 
 | Component | Namespace | Description | Public API |
 |-----------|-----------|-------------|------------|
-| [Calendar](components/calendar.md) | `ui.calendar` | A compact month grid date picker with navigation, today and selection, plus pure date math that runs on every target. | `leap-year?`, `days-in-month`, `day-of-week`, `day-of-year`, `iso-week`, `first-day-of-week`, `pad2`, `date-str`, `month-name`, `short-month-name`, `prev-month`, `next-month`, `calendar-days`, `inc-date`, `dec-date`, `week-start`, `week-days`, `calendar-class-list`, `calendar-classes`, `day-cell-class-list`, `day-cell-classes`, `calendar-header`, `calendar-weekdays`, `calendar-day`, `calendar` |
+| [Calendar](components/calendar.md) | `ui.calendar` | A compact month grid date picker with navigation, today and selection, plus pure date math that runs on every target. | `leap-year?`, `days-in-month`, `day-of-week`, `day-of-year`, `iso-week`, `first-day-of-week`, `pad2`, `date-str`, `display-date`, `month-name`, `short-month-name`, `prev-month`, `next-month`, `calendar-days`, `inc-date`, `dec-date`, `week-start`, `week-days`, `calendar-class-list`, `calendar-classes`, `day-cell-class-list`, `day-cell-classes`, `calendar-header`, `calendar-weekdays`, `calendar-day`, `calendar` |
 | [Chip](components/chip.md) | `ui.chip` | A small selectable pill for filters, tags and presets, with an optional color dot. | `chip-class-list`, `chip-classes`, `chip` |
 | [Color picker](components/color-picker.md) | `ui.color-picker` | A saturation and brightness plane with hue and alpha tracks, a format switch (oklch, hex, rgb, hsl) and a CSS value field, driven by the runtime. | `normalize-formats`, `color-picker-class-list`, `color-picker-classes`, `color-picker` |
 | [Drop zone](components/drop-zone.md) | `ui.drop-zone` | A generous target for dropping or picking files, with a full-page overlay variant and a click-to-add label. | `drop-zone-class-list`, `drop-zone-classes`, `file-label`, `drop-zone`, `init-body-drop-zone!`, `drop-zone-overlay` |
@@ -67,6 +67,7 @@
 | [Comment](components/comment.md) | `ui.comment` | Comments as markers on one rail, each with its replies folded into a line that opens in place as a flat branch, so a deep discussion stays readable in a narrow pane. | `replies-label`, `person-tone`, `flat-replies`, `comment-class-list`, `comment-classes`, `comment-thread`, `comment-item`, `comment-reply`, `comment-replies` |
 | [Day grid](components/day-grid.md) | `ui.day-grid` | One square per day in rows of seven under a weekday header, colored by what happened: the record of a habit or a countdown under its streak numbers. | `day-grid-class-list`, `day-grid-classes`, `day-cell-class-list`, `day-cell-classes`, `day-grid` |
 | [File browser](components/file-browser.md) | `ui.file-browser` | Grid tiles and a sortable list or table of files and folders with type icons, selection and per-item context menus. | `file-type->icon`, `file-type-icon`, `file-view-toggle`, `file-item-grid`, `col-name`, `col-size`, `col-modified`, `col-type`, `file-table`, `file-list-header`, `file-item-list` |
+| [Filters](components/filters.md) | `ui.filters` | The parts of a filter view: a surface of labeled bands, a preset bar that saves where the change is, rules read as sentences, pressed toggles for columns and display options, and a one-line summary that opens it all. | `filters-class-list`, `filters-classes`, `filters`, `filter-band`, `filter-footer`, `filter-action`, `filter-spacer`, `filter-divider`, `filter-disclosure`, `preset-bar`, `preset-class-list`, `preset-classes`, `preset`, `preset-add`, `preset-more`, `rule-list`, `rule-class-list`, `rule-classes`, `rule`, `rule-value`, `rule-text`, `rule-add`, `rule-empty`, `filter-toggle-class-list`, `filter-toggle-classes`, `filter-toggle`, `filter-add` |
 | [Icon](components/icon.md) | `ui.icon` | Inline Lucide-style SVG icons in four sizes, outlined by default with filled variants for media controls. | `icon-class-list`, `icon-classes`, `icon` |
 | [List row](components/list-row.md) | `ui.list-row` | Records as rows on one surface: a leading icon or thumbnail, title and description, metadata and controls at the end, with hover for rows that lead somewhere. | `list-row-class-list`, `list-row-classes`, `list-rows`, `list-row` |
 | [Metric](components/metric.md) | `ui.metric` | A number with its label, unit, change and hint, as a bordered tile or a row of equal columns: the KPI row of a dashboard, the stats of a record. | `metric-class-list`, `metric-classes`, `metric`, `metric-row` |
@@ -101,12 +102,12 @@
 |-----------|-----------|-------------|------------|
 | [Markdown](components/markdown.md) | `ui.markdown` | A minimal markdown to hiccup renderer for docs and chat replies: headings, code blocks, tables, lists, inline code and bold. | `markdown->hiccup` |
 
-## Icons (92)
+## Icons (94)
 
 Lucide-compatible inline SVG icons — see `AGENTS.md` § Icons for
 usage and how to add new ones.
 
-`alert-circle`, `alert-triangle`, `arrow-down`, `arrow-left`, `arrow-right`, `arrow-up`, `bell`, `book-open`, `bookmark`, `calendar`, `camera`, `captions`, `check`, `chevron-down`, `chevron-left`, `chevron-right`, `chevron-up`, `circle-check`, `circle-x`, `clock`, `code`, `copy`, `database`, `download`, `edit`, `external-link`, `eye`, `eye-off`, `file`, `file-spreadsheet`, `file-text`, `film`, `filter`, `folder`, `gauge`, `globe`, `grid`, `grip-vertical`, `heart`, `home`, `image`, `inbox`, `info`, `layers`, `layout-dashboard`, `link`, `list`, `list-video`, `lock`, `log-in`, `log-out`, `mail`, `map-pin`, `maximize`, `menu`, `mic`, `minimize`, `minus`, `monitor`, `moon`, `music`, `package`, `palette`, `pause`, `picture-in-picture-2`, `play`, `plus`, `refresh`, `repeat`, `rotate-ccw`, `rotate-cw`, `scissors`, `search`, `settings`, `shield`, `shuffle`, `signpost`, `skip-back`, `skip-forward`, `sliders-horizontal`, `star`, `sun`, `terminal`, `trash`, `upload`, `user`, `users`, `volume-1`, `volume-2`, `volume-x`, `x`, `zap`
+`alert-circle`, `alert-triangle`, `arrow-down`, `arrow-left`, `arrow-right`, `arrow-up`, `arrow-up-down`, `bell`, `book-open`, `bookmark`, `calendar`, `camera`, `captions`, `check`, `chevron-down`, `chevron-left`, `chevron-right`, `chevron-up`, `circle-check`, `circle-x`, `clock`, `code`, `copy`, `database`, `download`, `edit`, `external-link`, `eye`, `eye-off`, `file`, `file-spreadsheet`, `file-text`, `film`, `filter`, `folder`, `gauge`, `globe`, `grid`, `grip-vertical`, `heart`, `home`, `image`, `inbox`, `info`, `layers`, `layout-dashboard`, `link`, `list`, `list-video`, `lock`, `log-in`, `log-out`, `mail`, `map-pin`, `maximize`, `menu`, `mic`, `minimize`, `minus`, `monitor`, `moon`, `music`, `package`, `palette`, `pause`, `picture-in-picture-2`, `play`, `plus`, `refresh`, `repeat`, `rotate-ccw`, `rotate-cw`, `scissors`, `search`, `settings`, `shield`, `shuffle`, `signpost`, `skip-back`, `skip-forward`, `sliders-horizontal`, `star`, `sun`, `terminal`, `trash`, `undo`, `upload`, `user`, `users`, `volume-1`, `volume-2`, `volume-x`, `x`, `zap`
 
 Icons with dedicated filled path data (`:filled true`):
 

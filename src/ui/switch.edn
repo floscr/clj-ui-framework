@@ -24,10 +24,11 @@
    :doc "A <label> wrapping a hidden checkbox, a track and a thumb, plus the label text."
    :props [{:name :checked :type "boolean" :doc "On or off."}
            {:name :disabled :type "boolean" :doc "Disables the input; the attribute is emitted only when true."}
+           {:name :size :type ":md | :sm" :default ":md" :doc ":sm is a 28 by 16px track for dense rows (a rule in ui.filters, a table cell)."}
            {:name :on-change :type "fn" :doc "Change handler on :cljs and :squint."}
            {:name :label :type "string" :doc "Visible label next to the track."}
            {:name :class :type "string"} {:name :attrs :type "map"}]}
-  {:fn "switch-classes" :doc "Class string for {:disabled}."}
+  {:fn "switch-classes" :doc "Class string for {:disabled :size}."}
   {:fn "switch-class-list" :doc "Vector form."}]
 
  :keyboard [["Space" "Toggles the switch."] ["Tab" "Moves focus to the hidden checkbox; the ring shows on the control."]]

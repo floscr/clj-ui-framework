@@ -1,10 +1,13 @@
 (ns ui.switch
-  (:require [clojure.string :as str]))
+  (:require [clojure.string :as str]
+            [ui.util :as util]))
 
 (defn switch-class-list
-  "Generate a vector of CSS class strings for a switch."
-  [{:keys [disabled]}]
+  "Generate a vector of CSS class strings for a switch. :size :sm is the
+   compact track for dense rows (a rule, a table cell)."
+  [{:keys [disabled size]}]
   (cond-> ["switch"]
+    (= "sm" (some-> size util/kw-name)) (conj "switch--sm")
     disabled (conj "switch--disabled")))
 
 (defn switch-classes
@@ -18,13 +21,14 @@
    Props:
      :checked   - boolean, whether the switch is on
      :disabled  - boolean
+     :size      - :md (default) | :sm, the compact track for dense rows
      :on-change - change handler (ignored in :clj target)
      :label     - label text
      :class     - additional CSS classes
      :attrs     - additional HTML attributes"
-  [{:keys [checked disabled on-change label class attrs] :as _props}]
+  [{:keys [checked disabled size on-change label class attrs] :as _props}]
   #?(:squint
-     (let [classes (cond-> (switch-classes {:disabled disabled})
+     (let [classes (cond-> (switch-classes {:disabled disabled :size size})
                      class (str " " class))
            track-cls (cond-> "switch-track"
                        checked (str " switch-track--checked"))]
@@ -38,7 +42,7 @@
         (when label [:span label])])
 
      :cljs
-     (let [cls (switch-class-list {:disabled disabled})
+     (let [cls (switch-class-list {:disabled disabled :size size})
            classes (cond-> cls class (conj class))
            track-cls (cond-> ["switch-track"]
                        checked (conj "switch-track--checked"))]
@@ -52,7 +56,7 @@
         (when label [:span label])])
 
      :clj
-     (let [classes (cond-> (switch-classes {:disabled disabled})
+     (let [classes (cond-> (switch-classes {:disabled disabled :size size})
                      class (str " " class))
            track-cls (cond-> "switch-track"
                        checked (str " switch-track--checked"))]

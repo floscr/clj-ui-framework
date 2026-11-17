@@ -1,0 +1,759 @@
+/* ── Filters ─────────────────────────────────────────────────────
+   The parts of a filter view (ui.filters): a surface of labeled bands,
+   a boxed preset bar, rules read as sentences, pressed toggles and a
+   quiet footer. One grammar for every list that can be sorted, grouped,
+   narrowed and remembered. */
+
+/* ── Surface and bands ───────────────────────────────────────────── */
+
+.filters {
+  container-type: inline-size;
+  display: grid;
+  min-width: 0;
+  background: var(--bg-1);
+  color: var(--fg-0);
+  border: var(--border-0);
+  border-radius: var(--radius-surface);
+  font-size: var(--font-sm);
+}
+
+.filters-bare {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+}
+
+/* Dense: a few bands of toggles in a narrow column. */
+.filters-dense {
+  padding: var(--size-1) 0 var(--size-2);
+}
+
+.filter-band {
+  display: grid;
+  grid-template-columns: var(--size-16) minmax(0, 1fr);
+  gap: var(--size-3);
+  align-items: start;
+  padding: var(--size-3) var(--size-4);
+}
+
+.filter-band + .filter-band,
+.filter-band + .filter-footer {
+  border-top: var(--border-subtle);
+}
+
+.filter-band-wide {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.filters-dense > .filter-band {
+  padding-top: var(--size-1);
+  padding-bottom: var(--size-1);
+  border-top: 0;
+}
+
+.filter-band-label {
+  color: var(--fg-2);
+  font-size: var(--font-xs);
+  line-height: var(--control-sm);
+}
+
+.filter-band-body {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--size-2);
+  min-width: 0;
+}
+
+.filter-band-wide > .filter-band-body {
+  flex-wrap: nowrap;
+}
+
+/* A search field in a band takes the free width and the compact height. */
+.filter-band-body > .form-input-wrap,
+.filter-band-body > .form-input {
+  flex: 1 1 calc(var(--size-16) * 3);
+  width: auto;
+  min-width: 0;
+}
+
+.filter-band-body .form-input {
+  min-height: var(--control-sm);
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.filter-band-body > .rule-list {
+  flex: 1 1 100%;
+}
+
+/* A context menu wrapped around a preset or a toggle doesn't break the row. */
+.preset-bar > .context-menu-trigger,
+.filter-band-body > .context-menu-trigger {
+  display: contents;
+}
+
+.filter-spacer {
+  flex: 1;
+  min-width: 0;
+}
+
+.filter-divider {
+  flex: none;
+  width: 1px;
+  height: var(--size-4);
+  margin: 0 var(--size-1);
+  background: var(--bg-2);
+}
+
+/* ── Footer ──────────────────────────────────────────────────────── */
+
+.filter-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 var(--size-3);
+  padding: var(--size-1) var(--size-4);
+  color: var(--fg-2);
+  font-size: var(--font-xs);
+}
+
+.filter-action {
+  min-height: var(--control-sm);
+  padding: 0 var(--size-1);
+  border: 0;
+  background: transparent;
+  color: var(--fg-1);
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color var(--duration-fast) var(--ease-standard);
+}
+
+.filter-action:hover:not(:disabled) {
+  color: var(--fg-0);
+}
+
+.filter-action:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* ── Disclosure: the filter in words, the bands behind it ────────── */
+
+.filter-disclosure-summary {
+  display: flex;
+  align-items: center;
+  gap: var(--size-2);
+  min-height: var(--control-md);
+  padding: 0 var(--size-4);
+  color: var(--fg-1);
+  font-size: var(--font-sm);
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+  transition: background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);
+}
+
+.filter-disclosure-summary::-webkit-details-marker {
+  display: none;
+}
+
+.filter-disclosure-summary:hover {
+  background: var(--bg-1);
+  color: var(--fg-0);
+}
+
+.filter-disclosure-summary > .icon {
+  flex: none;
+  color: var(--fg-2);
+}
+
+.filter-disclosure-text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.filter-disclosure-chevron {
+  transition: transform var(--duration-standard) var(--ease-standard);
+}
+
+.filter-disclosure[open] .filter-disclosure-chevron {
+  transform: rotate(180deg);
+}
+
+/* ── Preset bar ──────────────────────────────────────────────────── */
+
+/* Concentric: preset radius = track radius - track padding */
+.preset-bar {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  width: fit-content;
+  max-width: 100%;
+  min-width: 0;
+  padding: var(--size-1);
+  background: var(--bg-2);
+  border-radius: var(--radius-control);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.preset-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.preset {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  border-radius: calc(var(--radius-control) - var(--size-1));
+  transition: background-color var(--duration-fast) var(--ease-standard), box-shadow var(--duration-fast) var(--ease-standard);
+}
+
+.preset-main {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--size-2);
+  min-height: var(--control-sm);
+  padding: 0 var(--size-3);
+  border: 0;
+  border-radius: inherit;
+  background: transparent;
+  color: var(--fg-1);
+  font: inherit;
+  font-weight: 500;
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color var(--duration-fast) var(--ease-standard), transform var(--duration-fast) var(--ease-standard);
+}
+
+.preset-main:hover {
+  color: var(--fg-0);
+  text-decoration: none;
+}
+
+.preset-main:active {
+  transform: scale(0.97);
+}
+
+.preset-active {
+  background: var(--bg-1);
+  box-shadow: var(--shadow-0);
+}
+
+.preset-active > .preset-main {
+  color: var(--fg-0);
+}
+
+.preset-dirty {
+  padding-right: var(--size-1);
+  gap: 2px;
+}
+
+.preset-dirty > .preset-main {
+  padding-right: var(--size-2);
+}
+
+.preset-dot {
+  flex: none;
+  width: var(--size-2);
+  height: var(--size-2);
+  border-radius: var(--radius-pill);
+  background: var(--accent);
+  transform: scale(0.75);
+}
+
+.preset-save,
+.preset-revert {
+  display: inline-grid;
+  place-items: center;
+  min-height: var(--size-5);
+  border: 0;
+  border-radius: calc(var(--radius-control) - var(--size-2));
+  font: inherit;
+  font-size: var(--font-xs);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);
+}
+
+.preset-save {
+  padding: 0 var(--size-2);
+  background: var(--accent-subtle);
+  color: var(--accent);
+}
+
+.preset-save:hover {
+  background: color-mix(in oklch, var(--accent) 24%, transparent);
+}
+
+.preset-revert {
+  width: var(--size-5);
+  padding: 0;
+  background: transparent;
+  color: var(--fg-2);
+}
+
+.preset-revert:hover {
+  background: var(--bg-2);
+  color: var(--fg-0);
+}
+
+.preset-add {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--size-1);
+  flex: none;
+  min-width: var(--control-sm);
+  min-height: var(--control-sm);
+  padding: 0;
+  border: 0;
+  border-radius: calc(var(--radius-control) - var(--size-1));
+  background: transparent;
+  color: var(--fg-2);
+  font: inherit;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);
+}
+
+.preset-add-labeled {
+  padding: 0 var(--size-3) 0 var(--size-2);
+  color: var(--accent);
+}
+
+.preset-add:hover {
+  background: color-mix(in oklch, var(--bg-1) 50%, var(--bg-2));
+  color: var(--fg-0);
+}
+
+/* Touch: the save half of a changed preset is a full tap target. */
+.clj-ui-touch .preset-save,
+.clj-ui-touch .preset-revert {
+  min-height: var(--size-7);
+}
+
+.clj-ui-touch .preset-revert {
+  width: var(--size-7);
+}
+
+/* ── Rules ───────────────────────────────────────────────────────── */
+
+.rule-list {
+  display: grid;
+  min-width: 0;
+  background: var(--bg-0);
+  border: var(--border-0);
+  border-radius: var(--radius-control);
+  overflow: hidden;
+}
+
+.rule {
+  display: flex;
+  align-items: center;
+  gap: var(--size-1);
+  min-height: var(--control-md);
+  min-width: 0;
+  padding: var(--size-1) var(--size-2) var(--size-1) var(--size-1);
+}
+
+.rule + .rule,
+.rule + .rule-add,
+.rule-empty + .rule-add {
+  border-top: var(--border-subtle);
+}
+
+.rule-grip {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: var(--size-5);
+  height: var(--control-sm);
+  color: var(--fg-2);
+  opacity: 0.7;
+  cursor: grab;
+  touch-action: none;
+}
+
+.rule-verb {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--size-2);
+  flex: none;
+  min-height: var(--control-sm);
+  padding: 0 var(--size-1);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--fg-0);
+  font: inherit;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.rule-verb > .icon {
+  color: var(--fg-2);
+}
+
+/* A rule without a grip lines its verb up with the ones that have one. */
+.rule-list:has(.rule-grip) .rule > .rule-verb:first-child {
+  margin-left: calc(var(--size-5) + var(--size-1));
+}
+
+button.rule-verb {
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+button.rule-verb:hover {
+  background: var(--bg-2);
+}
+
+.rule-words {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--size-1) var(--size-2);
+  min-width: 0;
+}
+
+.rule-word {
+  color: var(--fg-2);
+}
+
+.rule-value {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--size-1);
+  min-height: var(--size-6);
+  padding: 0 var(--size-2);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: var(--bg-2);
+  color: var(--fg-0);
+  font: inherit;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+.rule-value:hover {
+  background: color-mix(in oklch, var(--fg-0) 14%, var(--bg-2));
+}
+
+.rule-value > .icon {
+  color: var(--fg-1);
+}
+
+.rule-text {
+  field-sizing: content;
+  min-width: var(--size-12);
+  max-width: 100%;
+  width: var(--size-16);
+  min-height: var(--size-6);
+  padding: 0 var(--size-2);
+  border: var(--border-1);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--fg-0);
+  font-family: var(--font-mono);
+  font-size: var(--font-xs);
+}
+
+.rule-text:focus-visible {
+  border-color: var(--accent);
+  outline: none;
+}
+
+.rule-text::placeholder {
+  color: var(--fg-2);
+}
+
+/* A select among the words reads as a value pill, not as a form field. */
+.rule-words .select {
+  display: inline-block;
+}
+
+.rule-words .select-trigger {
+  width: auto;
+  min-height: var(--size-6);
+  padding: 0 var(--size-6) 0 var(--size-2);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background-color: var(--bg-2);
+  background-position: right var(--size-1) center;
+}
+
+.rule-end {
+  display: flex;
+  align-items: center;
+  gap: var(--size-1);
+  flex: none;
+  margin-left: auto;
+}
+
+.rule-remove {
+  display: grid;
+  place-items: center;
+  width: var(--control-sm);
+  height: var(--control-sm);
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--fg-2);
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard), opacity var(--duration-fast) var(--ease-standard);
+}
+
+.rule-remove:hover {
+  background: var(--bg-2);
+  color: var(--fg-0);
+}
+
+/* Remove shows on hover or focus where there is a pointer, always on touch. */
+@media (hover: hover) {
+  .rule-remove {
+    opacity: 0;
+  }
+
+  .rule:hover .rule-remove,
+  .rule:focus-within .rule-remove {
+    opacity: 1;
+  }
+}
+
+.rule-off .rule-verb,
+.rule-off .rule-words {
+  opacity: 0.42;
+}
+
+.rule-add {
+  display: flex;
+  align-items: center;
+  gap: var(--size-2);
+  width: 100%;
+  min-height: var(--control-md);
+  padding: 0 var(--size-3);
+  border: 0;
+  background: transparent;
+  color: var(--fg-1);
+  font: inherit;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);
+}
+
+.rule-add > .icon {
+  color: var(--fg-2);
+}
+
+.rule-add:hover {
+  background: var(--bg-1);
+  color: var(--fg-0);
+}
+
+.rule-add-hint {
+  margin-left: auto;
+  color: var(--fg-2);
+  font-size: var(--font-xs);
+  font-weight: 400;
+}
+
+.rule-empty {
+  padding: var(--size-3);
+  color: var(--fg-2);
+  font-size: var(--font-xs);
+}
+
+/* Touch: values are tap targets. */
+.clj-ui-touch .rule-value,
+.clj-ui-touch .rule-text,
+.clj-ui-touch .rule-words .select-trigger {
+  min-height: var(--size-8);
+}
+
+/* ── Toggles ─────────────────────────────────────────────────────── */
+
+.filter-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--size-2);
+  min-height: var(--control-sm);
+  padding: 0 var(--size-3) 0 var(--size-2);
+  border: 0;
+  border-radius: calc(var(--radius-control) - 1px);
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--bg-2);
+  color: var(--fg-1);
+  font: inherit;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard), box-shadow var(--duration-fast) var(--ease-standard), transform var(--duration-fast) var(--ease-standard);
+}
+
+.filter-toggle > .icon {
+  color: var(--fg-2);
+}
+
+.filter-toggle:hover {
+  background: var(--bg-2);
+}
+
+.filter-toggle:active {
+  transform: scale(0.97);
+}
+
+.filter-toggle-on,
+.filter-toggle-on:hover {
+  background: var(--accent-subtle);
+  box-shadow: none;
+  color: var(--fg-0);
+}
+
+.filter-toggle-on > .icon {
+  color: var(--accent);
+}
+
+/* Without an icon the label sits centered in its pill. */
+.filter-toggle:not(:has(> .icon)) {
+  padding: 0 var(--size-3);
+}
+
+/* The column form: shown columns are filled, hidden ones an outline. */
+.filter-toggle-order {
+  padding-left: var(--size-1);
+  gap: var(--size-1);
+  cursor: grab;
+}
+
+.filter-toggle-order.filter-toggle-on,
+.filter-toggle-order.filter-toggle-on:hover {
+  background: var(--bg-2);
+  font-weight: 500;
+}
+
+.filter-toggle-order.filter-toggle-on > .icon {
+  color: var(--fg-2);
+}
+
+.filter-toggle-order:not(.filter-toggle-on) {
+  padding-left: var(--size-2);
+  color: var(--fg-2);
+}
+
+/* A toggle with a value: one pill, a hairline between the two halves. */
+.filter-toggle-split {
+  display: inline-flex;
+  align-items: stretch;
+  border-radius: calc(var(--radius-control) - 1px);
+  box-shadow: inset 0 0 0 1px var(--bg-2);
+}
+
+.filter-toggle-split > .filter-toggle {
+  box-shadow: none;
+}
+
+.filter-toggle-split:has(> .filter-toggle-on) {
+  background: var(--accent-subtle);
+  box-shadow: none;
+}
+
+.filter-toggle-split > .filter-toggle-on {
+  background: transparent;
+  padding-right: var(--size-2);
+}
+
+.filter-toggle-value {
+  display: none;
+  align-items: center;
+  padding: 0 var(--size-1) 0 0;
+}
+
+.filter-toggle-split:has(> .filter-toggle-on) > .filter-toggle-value {
+  display: inline-flex;
+}
+
+.filter-toggle-value .select-trigger,
+.filter-toggle-value .rule-value {
+  width: auto;
+  min-height: var(--size-5);
+  padding: 0 var(--size-6) 0 var(--size-2);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background-color: color-mix(in oklch, var(--accent) 12%, transparent);
+  background-position: right var(--size-1) center;
+  color: var(--fg-1);
+}
+
+.filter-toggle-value .rule-value {
+  padding: 0 var(--size-2);
+}
+
+.filter-add {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--size-1);
+  min-height: var(--control-sm);
+  padding: 0 var(--size-2);
+  border: 0;
+  border-radius: calc(var(--radius-control) - 1px);
+  background: transparent;
+  color: var(--fg-2);
+  font: inherit;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);
+}
+
+.filter-add:hover {
+  background: var(--bg-2);
+  color: var(--fg-0);
+}
+
+/* ── Narrow surface ──────────────────────────────────────────────
+   Last in the file so it wins over the rules above. */
+
+/* The label moves above its controls, a rule's words under its verb. */
+@container (max-width: 520px) {
+  .filter-band {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--size-1);
+  }
+
+  .filter-band-label {
+    line-height: var(--size-5);
+  }
+
+  .filters-dense > .filter-band:not(.filter-band-wide) {
+    grid-template-columns: var(--size-16) minmax(0, 1fr);
+    gap: var(--size-3);
+  }
+
+  .filters-dense .filter-band-label {
+    line-height: var(--control-sm);
+  }
+
+  .rule {
+    flex-wrap: wrap;
+  }
+
+  .rule-words {
+    order: 1;
+    flex: 1 0 100%;
+    padding: 0 0 var(--size-1) calc(var(--size-6) + var(--size-1));
+  }
+
+  .rule-add-hint {
+    display: none;
+  }
+}

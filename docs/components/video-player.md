@@ -141,7 +141,8 @@ Class string for the root.
 - Don't re-render the player on every timeupdate: the runtime owns time, play state and the open popover. Re-render only when :src, :next or a custom button's :value changes.
 - Custom option values travel through the DOM as strings; on-select maps them back to the original value.
 - A button with a built-in id (e.g. :quality) replaces the built-in.
-- window.__uiVideoPlayer(root) returns {video play pause seek toast load segments} for host scripts (progress saving, resume). segments([{start end label kind}]) replaces the marked stretches; use it or :segments, not both, on a re-rendering target.
+- window.__uiVideoPlayer(root) returns {video play pause seek toast load segments levels} for host scripts (progress saving, resume). segments([{start end label kind}]) replaces the marked stretches; use it or :segments, not both, on a re-rendering target.
+- Where the browser plays HLS itself (Safari on iOS: no hls.js, or the page unset window.Hls), a page can't read or pick the level, so the built-in Quality menu stays hidden. A host that can serve one level alone calls levels([1080 720 480], current) (heights; current -1 = Auto): the menu shows them, and a pick emits change {kind select id quality value height}. The host then loads that level itself (data-src + data-start-at at the current time, then load).
 
 ## Related
 

@@ -5,7 +5,7 @@
 - Type: Component (inputs, Dates)
 - Namespace: `ui.calendar`
 - Source: `src/ui/calendar.cljc`
-- Public fns: `leap-year?`, `days-in-month`, `day-of-week`, `day-of-year`, `iso-week`, `first-day-of-week`, `pad2`, `date-str`, `month-name`, `short-month-name`, `prev-month`, `next-month`, `calendar-days`, `inc-date`, `dec-date`, `week-start`, `week-days`, `calendar-class-list`, `calendar-classes`, `day-cell-class-list`, `day-cell-classes`, `calendar-header`, `calendar-weekdays`, `calendar-day`, `calendar`
+- Public fns: `leap-year?`, `days-in-month`, `day-of-week`, `day-of-year`, `iso-week`, `first-day-of-week`, `pad2`, `date-str`, `display-date`, `month-name`, `short-month-name`, `prev-month`, `next-month`, `calendar-days`, `inc-date`, `dec-date`, `week-start`, `week-days`, `calendar-class-list`, `calendar-classes`, `day-cell-class-list`, `day-cell-classes`, `calendar-header`, `calendar-weekdays`, `calendar-day`, `calendar`
 - Keywords: calendar, date picker, month grid, date math, iso week
 
 ## When to use

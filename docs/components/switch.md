@@ -46,6 +46,7 @@ A <label> wrapping a hidden checkbox, a track and a thumb, plus the label text.
 | --- | --- | --- | --- |
 | `:checked` | `boolean` | – | On or off. |
 | `:disabled` | `boolean` | – | Disables the input; the attribute is emitted only when true. |
+| `:size` | `:md \| :sm` | `:md` | :sm is a 28 by 16px track for dense rows (a rule in ui.filters, a table cell). |
 | `:on-change` | `fn` | – | Change handler on :cljs and :squint. |
 | `:label` | `string` | – | Visible label next to the track. |
 | `:class` | `string` | – |  |
@@ -53,7 +54,7 @@ A <label> wrapping a hidden checkbox, a track and a thumb, plus the label text.
 
 ### `switch-classes`
 
-Class string for {:disabled}.
+Class string for {:disabled :size}.
 
 ### `switch-class-list`
 

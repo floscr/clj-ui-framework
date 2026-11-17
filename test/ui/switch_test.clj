@@ -7,7 +7,12 @@
     (is (= ["switch"] (switch/switch-class-list {}))))
 
   (testing "disabled switch"
-    (is (= ["switch" "switch--disabled"] (switch/switch-class-list {:disabled true})))))
+    (is (= ["switch" "switch--disabled"] (switch/switch-class-list {:disabled true}))))
+
+  (testing "compact switch"
+    (is (= ["switch" "switch--sm"] (switch/switch-class-list {:size :sm})))
+    (is (= ["switch"] (switch/switch-class-list {:size :md})))
+    (is (= "switch switch--sm" (get-in (switch/switch-toggle {:size :sm}) [1 :class])))))
 
 (deftest switch-component-test
   (testing "renders a label"
