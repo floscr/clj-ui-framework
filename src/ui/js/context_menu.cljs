@@ -419,9 +419,28 @@
             (when (= idx focus-idx) (set! (.-focusEl page) el))))))
     page))
 
+(defn- contain-wheel!
+  "Keep the wheel inside `menu`: a wheel the menu can't take (it fits
+   without scrolling, or it already sits at that end) would scroll the page
+   instead, which moves the trigger and closes the menu. CSS
+   overscroll-behavior only covers a menu that scrolls; a short one chains
+   straight to the page. Ctrl+wheel stays the browser's zoom."
+  [menu]
+  (.addEventListener menu "wheel"
+    (fn [e]
+      (when (not (.-ctrlKey e))
+        (let [dy   (.-deltaY e)
+              top  (.-scrollTop menu)
+              room (- (.-scrollHeight menu) (.-clientHeight menu))]
+          (when (not (or (and (< dy 0) (> top 0))
+                         (and (> dy 0) (< top (- room 1)))))
+            (.preventDefault e)))))
+    #js {:passive false}))
+
 (defn- create-menu [items]
   (let [menu (make-el "div" "context-menu")]
     (.setAttribute menu "role" "menu")
+    (contain-wheel! menu)
     (show-page! menu (items-page menu items nil nil) nil)
     menu))
 

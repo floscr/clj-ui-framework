@@ -1419,8 +1419,8 @@
     const g3 = rgb1[1];
     const b4 = rgb1[2];
     const translucent_QMARK_5 = a < 0.999;
-    const G__5666 = fmt2;
-    switch (G__5666) {
+    const G__6616 = fmt2;
+    switch (G__6616) {
       case "oklch":
         const lch8 = rgb__GT_oklch(r2, g3, b4);
         const c9 = lch8[1];
@@ -2143,24 +2143,24 @@
     return dialog.querySelector(".command-item--active");
   };
   var set_active_BANG_ = (() => {
-    const f567 = (function(...args568) {
-      const G__5691 = args568.length;
-      switch (G__5691) {
+    const f662 = (function(...args663) {
+      const G__6641 = args663.length;
+      switch (G__6641) {
         case 2:
-          return f567.cljs$core$IFn$_invoke$arity$2(args568[0], args568[1]);
+          return f662.cljs$core$IFn$_invoke$arity$2(args663[0], args663[1]);
           break;
         case 3:
-          return f567.cljs$core$IFn$_invoke$arity$3(args568[0], args568[1], args568[2]);
+          return f662.cljs$core$IFn$_invoke$arity$3(args663[0], args663[1], args663[2]);
           break;
         default:
-          throw new Error(`${"Invalid arity: "}${args568.length ?? ""}`);
+          throw new Error(`${"Invalid arity: "}${args663.length ?? ""}`);
       }
       ;
     });
-    f567.cljs$core$IFn$_invoke$arity$2 = (function(dialog, el2) {
+    f662.cljs$core$IFn$_invoke$arity$2 = (function(dialog, el2) {
       return set_active_BANG_(dialog, el2, true);
     });
-    f567.cljs$core$IFn$_invoke$arity$3 = (function(dialog, el2, scroll_QMARK_) {
+    f662.cljs$core$IFn$_invoke$arity$3 = (function(dialog, el2, scroll_QMARK_) {
       const prev3 = active_item(dialog);
       if (truth_(prev3)) {
         prev3.classList.remove("command-item--active");
@@ -2183,8 +2183,8 @@
       }
       ;
     });
-    f567.cljs$lang$maxFixedArity = 3;
-    return f567;
+    f662.cljs$lang$maxFixedArity = 3;
+    return f662;
   })();
   var move_active_BANG_ = function(dialog, dir) {
     const vis1 = visible_items(dialog);
@@ -3289,9 +3289,32 @@
     }));
     return page1;
   };
+  var contain_wheel_BANG_ = function(menu) {
+    return menu.addEventListener("wheel", (function(e) {
+      if (not(e.ctrlKey)) {
+        const dy1 = e.deltaY;
+        const top2 = menu.scrollTop;
+        const room3 = menu.scrollHeight - menu.clientHeight;
+        if (not((() => {
+          const or__23426__auto__4 = dy1 < 0 && top2 > 0;
+          if (truth_(or__23426__auto__4)) {
+            return or__23426__auto__4;
+          } else {
+            return dy1 > 0 && top2 < room3 - 1;
+          }
+          ;
+        })())) {
+          return e.preventDefault();
+        }
+        ;
+      }
+      ;
+    }), { "passive": false });
+  };
   var create_menu = function(items2) {
     const menu1 = make_el("div", "context-menu");
     menu1.setAttribute("role", "menu");
+    contain_wheel_BANG_(menu1);
     show_page_BANG_(menu1, items_page(menu1, items2, null, null), null);
     return menu1;
   };
@@ -3340,25 +3363,25 @@
     ;
   };
   var open_context_menu = (() => {
-    const f570 = (function(var_args) {
-      const args5711 = [];
+    const f665 = (function(var_args) {
+      const args6661 = [];
       const len__23321__auto__2 = arguments.length;
-      let i5723 = 0;
+      let i6673 = 0;
       while (true) {
-        if (i5723 < len__23321__auto__2) {
-          args5711.push(arguments[i5723]);
-          let G__4 = i5723 + 1;
-          i5723 = G__4;
+        if (i6673 < len__23321__auto__2) {
+          args6661.push(arguments[i6673]);
+          let G__4 = i6673 + 1;
+          i6673 = G__4;
           continue;
         }
         ;
         break;
       }
       ;
-      const argseq__23513__auto__5 = 1 < args5711.length ? args5711.slice(1) : null;
-      return f570.cljs$core$IFn$_invoke$arity$variadic(arguments[0], argseq__23513__auto__5);
+      const argseq__23513__auto__5 = 1 < args6661.length ? args6661.slice(1) : null;
+      return f665.cljs$core$IFn$_invoke$arity$variadic(arguments[0], argseq__23513__auto__5);
     });
-    f570.cljs$core$IFn$_invoke$arity$variadic = (function(event, args) {
+    f665.cljs$core$IFn$_invoke$arity$variadic = (function(event, args) {
       dismiss_BANG_();
       const trigger6 = event.currentTarget;
       const items7 = (() => {
@@ -3451,8 +3474,8 @@
       window.addEventListener("resize", on_resize18);
       return state12.cleanup = cleanup19;
     });
-    f570.cljs$lang$maxFixedArity = 1;
-    return f570;
+    f665.cljs$lang$maxFixedArity = 1;
+    return f665;
   })();
   window["__uiContextMenu"] = open_context_menu;
 
@@ -3507,25 +3530,25 @@
     return e1;
   };
   var add_BANG_ = (() => {
-    const f574 = (function(var_args) {
-      const args5751 = [];
+    const f669 = (function(var_args) {
+      const args6701 = [];
       const len__23321__auto__2 = arguments.length;
-      let i5763 = 0;
+      let i6713 = 0;
       while (true) {
-        if (i5763 < len__23321__auto__2) {
-          args5751.push(arguments[i5763]);
-          let G__4 = i5763 + 1;
-          i5763 = G__4;
+        if (i6713 < len__23321__auto__2) {
+          args6701.push(arguments[i6713]);
+          let G__4 = i6713 + 1;
+          i6713 = G__4;
           continue;
         }
         ;
         break;
       }
       ;
-      const argseq__23513__auto__5 = 1 < args5751.length ? args5751.slice(1) : null;
-      return f574.cljs$core$IFn$_invoke$arity$variadic(arguments[0], argseq__23513__auto__5);
+      const argseq__23513__auto__5 = 1 < args6701.length ? args6701.slice(1) : null;
+      return f669.cljs$core$IFn$_invoke$arity$variadic(arguments[0], argseq__23513__auto__5);
     });
-    f574.cljs$core$IFn$_invoke$arity$variadic = (function(parent, children) {
+    f669.cljs$core$IFn$_invoke$arity$variadic = (function(parent, children) {
       for (let G__6 of iterable(children)) {
         const c7 = G__6;
         if (truth_(c7)) {
@@ -3535,8 +3558,8 @@
       ;
       return parent;
     });
-    f574.cljs$lang$maxFixedArity = 1;
-    return f574;
+    f669.cljs$lang$maxFixedArity = 1;
+    return f669;
   })();
   var txt_BANG_ = function(e, s) {
     e.textContent = `${s ?? ""}`;
@@ -4597,9 +4620,9 @@
       ctx13.beginPath();
       const v17 = cur9();
       const mode18 = get_mode10();
-      const n57819 = 61;
+      const n67319 = 61;
       let i20 = 0;
-      for (; i20 < n57819; i20++) {
+      for (; i20 < n67319; i20++) {
         (() => {
           const t21 = i20 / 60;
           const y22 = mode18 === "easing" ? (() => {
@@ -5689,24 +5712,24 @@
     return null;
   };
   var play = (() => {
-    const f579 = (function(...args580) {
-      const G__5811 = args580.length;
-      switch (G__5811) {
+    const f674 = (function(...args675) {
+      const G__6761 = args675.length;
+      switch (G__6761) {
         case 1:
-          return f579.cljs$core$IFn$_invoke$arity$1(args580[0]);
+          return f674.cljs$core$IFn$_invoke$arity$1(args675[0]);
           break;
         case 2:
-          return f579.cljs$core$IFn$_invoke$arity$2(args580[0], args580[1]);
+          return f674.cljs$core$IFn$_invoke$arity$2(args675[0], args675[1]);
           break;
         default:
-          throw new Error(`${"Invalid arity: "}${args580.length ?? ""}`);
+          throw new Error(`${"Invalid arity: "}${args675.length ?? ""}`);
       }
       ;
     });
-    f579.cljs$core$IFn$_invoke$arity$1 = (function(snap) {
+    f674.cljs$core$IFn$_invoke$arity$1 = (function(snap) {
       return play(snap, null);
     });
-    f579.cljs$core$IFn$_invoke$arity$2 = (function(snap, opts) {
+    f674.cljs$core$IFn$_invoke$arity$2 = (function(snap, opts) {
       if (truth_(reduced_motion_QMARK_2())) {
       } else {
         const opts3 = (() => {
@@ -5744,34 +5767,34 @@
       ;
       return null;
     });
-    f579.cljs$lang$maxFixedArity = 2;
-    return f579;
+    f674.cljs$lang$maxFixedArity = 2;
+    return f674;
   })();
   var wrap = (() => {
-    const f582 = (function(...args583) {
-      const G__5841 = args583.length;
-      switch (G__5841) {
+    const f677 = (function(...args678) {
+      const G__6791 = args678.length;
+      switch (G__6791) {
         case 2:
-          return f582.cljs$core$IFn$_invoke$arity$2(args583[0], args583[1]);
+          return f677.cljs$core$IFn$_invoke$arity$2(args678[0], args678[1]);
           break;
         case 3:
-          return f582.cljs$core$IFn$_invoke$arity$3(args583[0], args583[1], args583[2]);
+          return f677.cljs$core$IFn$_invoke$arity$3(args678[0], args678[1], args678[2]);
           break;
         default:
-          throw new Error(`${"Invalid arity: "}${args583.length ?? ""}`);
+          throw new Error(`${"Invalid arity: "}${args678.length ?? ""}`);
       }
       ;
     });
-    f582.cljs$core$IFn$_invoke$arity$2 = (function(target, mutate) {
+    f677.cljs$core$IFn$_invoke$arity$2 = (function(target, mutate) {
       return wrap(target, mutate, null);
     });
-    f582.cljs$core$IFn$_invoke$arity$3 = (function(target, mutate, opts) {
+    f677.cljs$core$IFn$_invoke$arity$3 = (function(target, mutate, opts) {
       const snap3 = capture(target);
       mutate();
       return play(snap3, opts);
     });
-    f582.cljs$lang$maxFixedArity = 3;
-    return f582;
+    f677.cljs$lang$maxFixedArity = 3;
+    return f677;
   })();
   window.__uiFlip = { "capture": capture, "play": play, "wrap": wrap };
 
@@ -5818,11 +5841,11 @@
     clear_held_BANG_();
     if (e.pointerType === "touch") {
       const temp__23062__auto__1 = (() => {
-        const G__5852 = e.target;
-        if (G__5852 == null) {
+        const G__6802 = e.target;
+        if (G__6802 == null) {
           return null;
         } else {
-          return G__5852.closest(selector);
+          return G__6802.closest(selector);
         }
         ;
       })();
@@ -5973,8 +5996,8 @@
   var px2 = function(v) {
     return `${v ?? ""}px`;
   };
-  var pose_css = function(p__586) {
-    const map__12 = p__586;
+  var pose_css = function(p__681) {
+    const map__12 = p__681;
     const s3 = get(map__12, "s");
     const tx4 = get(map__12, "tx");
     const ty5 = get(map__12, "ty");
@@ -6450,8 +6473,8 @@
     }
     ;
   };
-  var viewport_rect = function(p__587) {
-    const map__12 = p__587;
+  var viewport_rect = function(p__682) {
+    const map__12 = p__682;
     const legacy_QMARK_3 = get(map__12, "legacy?");
     const stage4 = get(map__12, "stage");
     if (truth_(legacy_QMARK_3)) {
@@ -6467,8 +6490,8 @@
     const z2 = zoom_of(m);
     return [r1.left + r1.width / 2 - get(z2, "tx"), r1.top + r1.height / 2 - get(z2, "ty")];
   };
-  var max_scale = function(p__588) {
-    const map__12 = p__588;
+  var max_scale = function(p__683) {
+    const map__12 = p__683;
     const legacy_QMARK_3 = get(map__12, "legacy?");
     const root4 = get(map__12, "root");
     const media5 = get(map__12, "media");
@@ -6529,8 +6552,8 @@
   var rubber = function(x, d) {
     return (1 - 1 / (1 + x * 0.55 / Math.max(1, d))) * d;
   };
-  var elastic_pan = function(t, p__589, d) {
-    const vec__14 = p__589;
+  var elastic_pan = function(t, p__684, d) {
+    const vec__14 = p__684;
     const lo5 = nth(vec__14, 0, null);
     const hi6 = nth(vec__14, 1, null);
     const fit_QMARK_7 = nth(vec__14, 2, null);
@@ -6912,11 +6935,11 @@
     ;
     root.setAttribute("data-active-type", (() => {
       const or__23426__auto__13 = (() => {
-        const G__59014 = slide4;
-        if (G__59014 == null) {
+        const G__68514 = slide4;
+        if (G__68514 == null) {
           return null;
         } else {
-          return G__59014.getAttribute("data-type");
+          return G__68514.getAttribute("data-type");
         }
         ;
       })();
@@ -7120,11 +7143,11 @@
   var source_el = function(root, i) {
     const slide2 = slide_at(root, i);
     const k3 = (() => {
-      const G__5914 = slide2;
-      if (G__5914 == null) {
+      const G__6864 = slide2;
+      if (G__6864 == null) {
         return null;
       } else {
-        return G__5914.getAttribute("data-key");
+        return G__6864.getAttribute("data-key");
       }
       ;
     })();
@@ -7460,16 +7483,16 @@
       st2.closed = true;
       clearTimeout(st2.scrollTimer);
       clearTimeout(st2.repaintTimer);
-      const G__5923 = st2.mo;
-      if (G__5923 == null) {
+      const G__6873 = st2.mo;
+      if (G__6873 == null) {
       } else {
-        G__5923.disconnect();
+        G__6873.disconnect();
       }
       ;
-      const G__5934 = st2.ro;
-      if (G__5934 == null) {
+      const G__6884 = st2.ro;
+      if (G__6884 == null) {
       } else {
-        G__5934.disconnect();
+        G__6884.disconnect();
       }
       ;
       const temp__23062__auto__5 = scroller(root);
@@ -7516,12 +7539,12 @@
       const and__23442__auto__6 = history_QMARK_3;
       if (truth_(and__23442__auto__6)) {
         return not(st1.poppedHistory) && (() => {
-          const G__5947 = history;
-          const G__5948 = G__5947 == null ? null : G__5947.state;
-          if (G__5948 == null) {
+          const G__6897 = history;
+          const G__6898 = G__6897 == null ? null : G__6897.state;
+          if (G__6898 == null) {
             return null;
           } else {
-            return G__5948["uiLightbox"];
+            return G__6898["uiLightbox"];
           }
           ;
         })();
@@ -7582,12 +7605,12 @@
       if (truth_((() => {
         const and__23442__auto__3 = st1.history;
         if (truth_(and__23442__auto__3)) {
-          const G__5954 = history;
-          const G__5955 = G__5954 == null ? null : G__5954.state;
-          if (G__5955 == null) {
+          const G__6904 = history;
+          const G__6905 = G__6904 == null ? null : G__6904.state;
+          if (G__6905 == null) {
             return null;
           } else {
-            return G__5955["uiLightbox"];
+            return G__6905["uiLightbox"];
           }
           ;
         } else {
@@ -7628,12 +7651,12 @@
             })())) {
               reset_BANG_(handoff, null);
               if (truth_(not(some(state2, Array.from(document.querySelectorAll(root_sel)))) && (() => {
-                const G__5966 = history;
-                const G__5967 = G__5966 == null ? null : G__5966.state;
-                if (G__5967 == null) {
+                const G__6916 = history;
+                const G__6917 = G__6916 == null ? null : G__6916.state;
+                if (G__6917 == null) {
                   return null;
                 } else {
-                  return G__5967["uiLightbox"];
+                  return G__6917["uiLightbox"];
                 }
                 ;
               })())) {
@@ -7842,8 +7865,8 @@
     ;
   };
   var on_animation_start = function(e) {
-    const G__5971 = e.animationName;
-    switch (G__5971) {
+    const G__6921 = e.animationName;
+    switch (G__6921) {
       case "ui-lightbox-mount":
         const t3 = e.target;
         if (truth_(t3.matches(root_sel))) {
@@ -7888,8 +7911,8 @@
   var distance = function(a, b) {
     return Math.hypot(get(a, "x") - get(b, "x"), get(a, "y") - get(b, "y"));
   };
-  var rel_to = function(p__598, x, y) {
-    const vec__14 = p__598;
+  var rel_to = function(p__693, x, y) {
+    const vec__14 = p__693;
     const cx5 = nth(vec__14, 0, null);
     const cy6 = nth(vec__14, 1, null);
     return [x - cx5, y - cy6];
@@ -8746,8 +8769,8 @@
         }
         ;
       })()) ? null : (() => {
-        const G__59917 = k3;
-        switch (G__59917) {
+        const G__69417 = k3;
+        switch (G__69417) {
           case "Escape":
             if (truth_(root2.querySelector(".video-player[data-panel-open]"))) {
               return null;
@@ -8956,8 +8979,8 @@
         if (truth_(action_el4)) {
           const a6 = action_el4.getAttribute("data-lightbox-action");
           e.stopPropagation();
-          const G__6007 = a6;
-          switch (G__6007) {
+          const G__6957 = a6;
+          switch (G__6957) {
             case "close":
               return request_close_BANG_(root2);
               break;
@@ -9086,16 +9109,16 @@
     }
     ;
     window["__uiLightbox"] = { "close": (function(el2) {
-      let temp__23062__auto__601 = closest2(el2, root_sel);
-      if (truth_(temp__23062__auto__601)) {
-        const r1 = temp__23062__auto__601;
+      let temp__23062__auto__696 = closest2(el2, root_sel);
+      if (truth_(temp__23062__auto__696)) {
+        const r1 = temp__23062__auto__696;
         return request_close_BANG_(r1);
       }
       ;
     }), "go": (function(el2, i) {
-      let temp__23062__auto__602 = closest2(el2, root_sel);
-      if (truth_(temp__23062__auto__602)) {
-        const r2 = temp__23062__auto__602;
+      let temp__23062__auto__697 = closest2(el2, root_sel);
+      if (truth_(temp__23062__auto__697)) {
+        const r2 = temp__23062__auto__697;
         return go_to_BANG_(r2, i);
       }
       ;
@@ -9214,31 +9237,31 @@
   };
   var class_attrs = function(class_list, class$, attrs) {
     return merge({ "class": (() => {
-      const G__10911 = join(" ", class_list);
+      const G__11871 = join(" ", class_list);
       if (truth_(class$)) {
-        return `${G__10911 ?? ""}${" "}${class$ ?? ""}`;
+        return `${G__11871 ?? ""}${" "}${class$ ?? ""}`;
       } else {
-        return G__10911;
+        return G__11871;
       }
       ;
     })() }, attrs);
   };
 
   // .compiled/ui/icon.mjs
-  var icon_paths = { "arrow-left": [["path", { "d": "m12 19-7-7 7-7" }], ["path", { "d": "M19 12H5" }]], "moon": [["path", { "d": "M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401" }]], "terminal": [["path", { "d": "m4 17 6-6-6-6" }], ["path", { "d": "M12 19h8" }]], "shuffle": [["path", { "d": "m18 14 4 4-4 4" }], ["path", { "d": "m18 2 4 4-4 4" }], ["path", { "d": "M2 18h1.973a4 4 0 0 0 3.3-1.7l5.454-8.6a4 4 0 0 1 3.3-1.7H22" }], ["path", { "d": "M2 6h1.972a4 4 0 0 1 3.6 2.2" }], ["path", { "d": "M22 18h-6.041a4 4 0 0 1-3.3-1.8l-.359-.45" }]], "skip-back": [["path", { "d": "M17.971 4.285A2 2 0 0 1 21 6v12a2 2 0 0 1-3.029 1.715l-9.997-5.998a2 2 0 0 1-.003-3.432z" }], ["path", { "d": "M3 20V4" }]], "file-text": [["path", { "d": "M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z" }], ["path", { "d": "M14 2v5a1 1 0 0 0 1 1h5" }], ["path", { "d": "M16 13H8" }], ["path", { "d": "M16 17H8" }], ["path", { "d": "M10 9H8" }]], "layout-dashboard": [["rect", { "width": "7", "height": "9", "x": "3", "y": "3", "rx": "1" }], ["rect", { "width": "7", "height": "5", "x": "14", "y": "3", "rx": "1" }], ["rect", { "width": "7", "height": "9", "x": "14", "y": "12", "rx": "1" }], ["rect", { "width": "7", "height": "5", "x": "3", "y": "16", "rx": "1" }]], "package": [["path", { "d": "M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z" }], ["path", { "d": "M12 22V12" }], ["polyline", { "points": "3.29 7 12 12 20.71 7" }], ["path", { "d": "m7.5 4.27 9 5.15" }]], "arrow-right": [["path", { "d": "M5 12h14" }], ["path", { "d": "m12 5 7 7-7 7" }]], "log-out": [["path", { "d": "m16 17 5-5-5-5" }], ["path", { "d": "M21 12H9" }], ["path", { "d": "M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" }]], "home": [["path", { "d": "M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" }], ["path", { "d": "M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" }]], "copy": [["rect", { "width": "14", "height": "14", "x": "8", "y": "8", "rx": "2", "ry": "2" }], ["path", { "d": "M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" }]], "heart": [["path", { "d": "M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5" }]], "chevron-left": [["path", { "d": "m15 18-6-6 6-6" }]], "book-open": [["path", { "d": "M12 7v14" }], ["path", { "d": "M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z" }]], "inbox": [["polyline", { "points": "22 12 16 12 14 15 10 15 8 12 2 12" }], ["path", { "d": "M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" }]], "circle-x": [["circle", { "cx": "12", "cy": "12", "r": "10" }], ["path", { "d": "m15 9-6 6" }], ["path", { "d": "m9 9 6 6" }]], "zap": [["path", { "d": "M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z" }]], "bookmark": [["path", { "d": "M17 3a2 2 0 0 1 2 2v15a1 1 0 0 1-1.496.868l-4.512-2.578a2 2 0 0 0-1.984 0l-4.512 2.578A1 1 0 0 1 5 20V5a2 2 0 0 1 2-2z" }]], "music": [["path", { "d": "M9 18V5l12-2v13" }], ["circle", { "cx": "6", "cy": "18", "r": "3", "fill": "currentColor" }], ["circle", { "cx": "18", "cy": "16", "r": "3", "fill": "currentColor" }]], "chevron-down": [["path", { "d": "m6 9 6 6 6-6" }]], "chevron-right": [["path", { "d": "m9 18 6-6-6-6" }]], "arrow-up": [["path", { "d": "m5 12 7-7 7 7" }], ["path", { "d": "M12 19V5" }]], "refresh": [["path", { "d": "M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" }], ["path", { "d": "M3 3v5h5" }], ["path", { "d": "M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" }], ["path", { "d": "M16 16h5v5" }]], "film": [["rect", { "width": "18", "height": "18", "x": "3", "y": "3", "rx": "2" }], ["path", { "d": "M7 3v18" }], ["path", { "d": "M3 7.5h4" }], ["path", { "d": "M3 12h18" }], ["path", { "d": "M3 16.5h4" }], ["path", { "d": "M17 3v18" }], ["path", { "d": "M17 7.5h4" }], ["path", { "d": "M17 16.5h4" }]], "gauge": [["path", { "d": "m12 14 4-4" }], ["path", { "d": "M3.34 19a10 10 0 1 1 17.32 0" }]], "alert-circle": [["circle", { "cx": "12", "cy": "12", "r": "10" }], ["line", { "x1": "12", "x2": "12", "y1": "8", "y2": "12" }], ["line", { "x1": "12", "x2": "12.01", "y1": "16", "y2": "16" }]], "rotate-ccw": [["path", { "d": "M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" }], ["path", { "d": "M3 3v5h5" }]], "alert-triangle": [["path", { "d": "m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3" }], ["path", { "d": "M12 9v4" }], ["path", { "d": "M12 17h.01" }]], "arrow-down": [["path", { "d": "M12 5v14" }], ["path", { "d": "m19 12-7 7-7-7" }]], "shield": [["path", { "d": "M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" }]], "folder": [["path", { "d": "M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z" }]], "check": [["path", { "d": "M20 6 9 17l-5-5" }]], "grid": [["rect", { "x": "3", "y": "3", "width": "18", "height": "18", "rx": "2" }], ["path", { "d": "M3 9h18" }], ["path", { "d": "M3 15h18" }], ["path", { "d": "M9 3v18" }], ["path", { "d": "M15 3v18" }]], "rotate-cw": [["path", { "d": "M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" }], ["path", { "d": "M21 3v5h-5" }]], "eye": [["path", { "d": "M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" }], ["circle", { "cx": "12", "cy": "12", "r": "3" }]], "palette": [["path", { "d": "M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.25a1.75 1.75 0 0 0-1.4 2.8l.3.4a1.75 1.75 0 0 1-1.4 2.8z" }], ["circle", { "cx": "13.5", "cy": "6.5", "r": ".5", "fill": "currentColor" }], ["circle", { "cx": "17.5", "cy": "10.5", "r": ".5", "fill": "currentColor" }], ["circle", { "cx": "6.5", "cy": "12.5", "r": ".5", "fill": "currentColor" }], ["circle", { "cx": "8.5", "cy": "7.5", "r": ".5", "fill": "currentColor" }]], "mail": [["rect", { "x": "2", "y": "4", "width": "20", "height": "16", "rx": "2" }], ["path", { "d": "m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7" }]], "file-spreadsheet": [["path", { "d": "M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z" }], ["path", { "d": "M14 2v5a1 1 0 0 0 1 1h5" }], ["path", { "d": "M8 13h2" }], ["path", { "d": "M14 13h2" }], ["path", { "d": "M8 17h2" }], ["path", { "d": "M14 17h2" }]], "edit": [["path", { "d": "M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" }]], "file": [["path", { "d": "M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z" }], ["path", { "d": "M14 2v5a1 1 0 0 0 1 1h5" }]], "external-link": [["path", { "d": "M15 3h6v6" }], ["path", { "d": "M10 14 21 3" }], ["path", { "d": "M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" }]], "settings": [["path", { "d": "M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915" }], ["circle", { "cx": "12", "cy": "12", "r": "3" }]], "minus": [["path", { "d": "M5 12h14" }]], "volume-2": [["path", { "d": "M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z" }], ["path", { "d": "M16 9a5 5 0 0 1 0 6" }], ["path", { "d": "M19.364 18.364a9 9 0 0 0 0-12.728" }]], "star": [["path", { "d": "M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z" }]], "grip-vertical": [["circle", { "cx": "9", "cy": "12", "r": "1" }], ["circle", { "cx": "9", "cy": "5", "r": "1" }], ["circle", { "cx": "9", "cy": "19", "r": "1" }], ["circle", { "cx": "15", "cy": "12", "r": "1" }], ["circle", { "cx": "15", "cy": "5", "r": "1" }], ["circle", { "cx": "15", "cy": "19", "r": "1" }]], "chevron-up": [["path", { "d": "m18 15-6-6-6 6" }]], "search": [["circle", { "cx": "11", "cy": "11", "r": "8" }], ["path", { "d": "m21 21-4.34-4.34" }]], "volume-1": [["path", { "d": "M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z" }], ["path", { "d": "M16 9a5 5 0 0 1 0 6" }]], "eye-off": [["path", { "d": "M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49" }], ["path", { "d": "M14.084 14.158a3 3 0 0 1-4.242-4.242" }], ["path", { "d": "M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143" }], ["path", { "d": "m2 2 20 20" }]], "filter": [["polygon", { "points": "22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" }]], "circle-check": [["circle", { "cx": "12", "cy": "12", "r": "10" }], ["path", { "d": "m9 12 2 2 4-4" }]], "maximize": [["path", { "d": "M8 3H5a2 2 0 0 0-2 2v3" }], ["path", { "d": "M21 8V5a2 2 0 0 0-2-2h-3" }], ["path", { "d": "M3 16v3a2 2 0 0 0 2 2h3" }], ["path", { "d": "M16 21h3a2 2 0 0 0 2-2v-3" }]], "calendar": [["rect", { "width": "18", "height": "18", "x": "3", "y": "4", "rx": "2" }], ["path", { "d": "M16 2v4" }], ["path", { "d": "M8 2v4" }], ["path", { "d": "M3 10h18" }]], "captions": [["rect", { "width": "18", "height": "14", "x": "3", "y": "5", "rx": "2", "ry": "2" }], ["path", { "d": "M7 15h4M15 15h2M7 11h2M13 11h4" }]], "list": [["path", { "d": "M3 5h.01" }], ["path", { "d": "M3 12h.01" }], ["path", { "d": "M3 19h.01" }], ["path", { "d": "M8 5h13" }], ["path", { "d": "M8 12h13" }], ["path", { "d": "M8 19h13" }]], "signpost": [["path", { "d": "M12 13v8" }], ["path", { "d": "M12 3v3" }], ["path", { "d": "M2.354 10.354a1.207 1.207 0 0 1 0-1.708l2.06-2.06A2 2 0 0 1 5.828 6h12.344a2 2 0 0 1 1.414.586l2.06 2.06a1.207 1.207 0 0 1 0 1.708l-2.06 2.06a2 2 0 0 1-1.414.586H5.828a2 2 0 0 1-1.414-.586z" }]], "link": [["path", { "d": "M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" }], ["path", { "d": "M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" }]], "mic": [["path", { "d": "M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" }], ["path", { "d": "M19 10v2a7 7 0 0 1-14 0v-2" }], ["path", { "d": "M12 19v3" }]], "monitor": [["rect", { "width": "20", "height": "14", "x": "2", "y": "3", "rx": "2" }], ["line", { "x1": "8", "x2": "16", "y1": "21", "y2": "21" }], ["line", { "x1": "12", "x2": "12", "y1": "17", "y2": "21" }]], "plus": [["path", { "d": "M5 12h14" }], ["path", { "d": "M12 5v14" }]], "list-video": [["path", { "d": "M12 12H3" }], ["path", { "d": "M16 6H3" }], ["path", { "d": "M12 18H3" }], ["path", { "d": "m16 12 5 3-5 3v-6Z" }]], "bell": [["path", { "d": "M10.268 21a2 2 0 0 0 3.464 0" }], ["path", { "d": "M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326" }]], "sun": [["circle", { "cx": "12", "cy": "12", "r": "4" }], ["path", { "d": "M12 2v2" }], ["path", { "d": "M12 20v2" }], ["path", { "d": "m4.93 4.93 1.41 1.41" }], ["path", { "d": "m17.66 17.66 1.41 1.41" }], ["path", { "d": "M2 12h2" }], ["path", { "d": "M20 12h2" }], ["path", { "d": "m6.34 17.66-1.41 1.41" }], ["path", { "d": "m19.07 4.93-1.41 1.41" }]], "minimize": [["path", { "d": "M8 3v3a2 2 0 0 1-2 2H3" }], ["path", { "d": "M21 8h-3a2 2 0 0 1-2-2V3" }], ["path", { "d": "M3 16h3a2 2 0 0 1 2 2v3" }], ["path", { "d": "M16 21v-3a2 2 0 0 1 2-2h3" }]], "info": [["circle", { "cx": "12", "cy": "12", "r": "10" }], ["path", { "d": "M12 16v-4" }], ["path", { "d": "M12 8h.01" }]], "code": [["path", { "d": "m16 18 6-6-6-6" }], ["path", { "d": "m8 6-6 6 6 6" }]], "scissors": [["circle", { "cx": "6", "cy": "6", "r": "3" }], ["path", { "d": "M8.12 8.12 12 12" }], ["path", { "d": "M20 4 8.12 15.88" }], ["circle", { "cx": "6", "cy": "18", "r": "3" }], ["path", { "d": "M14.8 14.8 20 20" }]], "camera": [["path", { "d": "M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" }], ["circle", { "cx": "12", "cy": "13", "r": "3" }]], "database": [["ellipse", { "cx": "12", "cy": "5", "rx": "9", "ry": "3" }], ["path", { "d": "M3 5V19A9 3 0 0 0 21 19V5" }], ["path", { "d": "M3 12A9 3 0 0 0 21 12" }]], "repeat": [["path", { "d": "m17 2 4 4-4 4" }], ["path", { "d": "M3 11v-1a4 4 0 0 1 4-4h14" }], ["path", { "d": "m7 22-4-4 4-4" }], ["path", { "d": "M21 13v1a4 4 0 0 1-4 4H3" }]], "layers": [["path", { "d": "M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z" }], ["path", { "d": "M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12" }], ["path", { "d": "M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17" }]], "image": [["rect", { "width": "18", "height": "18", "x": "3", "y": "3", "rx": "2", "ry": "2" }], ["circle", { "cx": "9", "cy": "9", "r": "2" }], ["path", { "d": "m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" }]], "picture-in-picture-2": [["path", { "d": "M21 9V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v10c0 1.1.9 2 2 2h4" }], ["rect", { "width": "10", "height": "7", "x": "12", "y": "13", "rx": "2" }]], "pause": [["rect", { "x": "14", "y": "4", "width": "4", "height": "16", "rx": "1" }], ["rect", { "x": "6", "y": "4", "width": "4", "height": "16", "rx": "1" }]], "clock": [["circle", { "cx": "12", "cy": "12", "r": "10" }], ["path", { "d": "M12 6v6l4 2" }]], "x": [["path", { "d": "M18 6 6 18" }], ["path", { "d": "m6 6 12 12" }]], "log-in": [["path", { "d": "m10 17 5-5-5-5" }], ["path", { "d": "M15 12H3" }], ["path", { "d": "M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" }]], "skip-forward": [["path", { "d": "M21 4v16" }], ["path", { "d": "M6.029 4.285A2 2 0 0 0 3 6v12a2 2 0 0 0 3.029 1.715l9.997-5.998a2 2 0 0 0 .003-3.432z" }]], "map-pin": [["path", { "d": "M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0" }], ["circle", { "cx": "12", "cy": "10", "r": "3" }]], "play": [["path", { "d": "M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z" }]], "download": [["path", { "d": "M12 15V3" }], ["path", { "d": "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" }], ["path", { "d": "m7 10 5 5 5-5" }]], "user": [["path", { "d": "M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" }], ["circle", { "cx": "12", "cy": "7", "r": "4" }]], "globe": [["circle", { "cx": "12", "cy": "12", "r": "10" }], ["path", { "d": "M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" }], ["path", { "d": "M2 12h20" }]], "sliders-horizontal": [["path", { "d": "M21 4h-7" }], ["path", { "d": "M10 4H3" }], ["path", { "d": "M21 12h-9" }], ["path", { "d": "M8 12H3" }], ["path", { "d": "M21 20h-5" }], ["path", { "d": "M12 20H3" }], ["path", { "d": "M14 2v4" }], ["path", { "d": "M8 10v4" }], ["path", { "d": "M16 18v4" }]], "trash": [["path", { "d": "M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" }], ["path", { "d": "M3 6h18" }], ["path", { "d": "M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" }]], "menu": [["path", { "d": "M4 5h16" }], ["path", { "d": "M4 12h16" }], ["path", { "d": "M4 19h16" }]], "upload": [["path", { "d": "M12 3v12" }], ["path", { "d": "m17 8-5-5-5 5" }], ["path", { "d": "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" }]], "lock": [["rect", { "width": "18", "height": "11", "x": "3", "y": "11", "rx": "2", "ry": "2" }], ["path", { "d": "M7 11V7a5 5 0 0 1 10 0v4" }]], "users": [["path", { "d": "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" }], ["circle", { "cx": "9", "cy": "7", "r": "4" }], ["path", { "d": "M16 3.128a4 4 0 0 1 0 7.744" }], ["path", { "d": "M22 21v-2a4 4 0 0 0-3-3.87" }]], "volume-x": [["path", { "d": "M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z" }], ["path", { "d": "M22 9l-6 6" }], ["path", { "d": "m16 9 6 6" }]] };
+  var icon_paths = { "arrow-left": [["path", { "d": "m12 19-7-7 7-7" }], ["path", { "d": "M19 12H5" }]], "moon": [["path", { "d": "M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401" }]], "terminal": [["path", { "d": "m4 17 6-6-6-6" }], ["path", { "d": "M12 19h8" }]], "shuffle": [["path", { "d": "m18 14 4 4-4 4" }], ["path", { "d": "m18 2 4 4-4 4" }], ["path", { "d": "M2 18h1.973a4 4 0 0 0 3.3-1.7l5.454-8.6a4 4 0 0 1 3.3-1.7H22" }], ["path", { "d": "M2 6h1.972a4 4 0 0 1 3.6 2.2" }], ["path", { "d": "M22 18h-6.041a4 4 0 0 1-3.3-1.8l-.359-.45" }]], "skip-back": [["path", { "d": "M17.971 4.285A2 2 0 0 1 21 6v12a2 2 0 0 1-3.029 1.715l-9.997-5.998a2 2 0 0 1-.003-3.432z" }], ["path", { "d": "M3 20V4" }]], "file-text": [["path", { "d": "M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z" }], ["path", { "d": "M14 2v5a1 1 0 0 0 1 1h5" }], ["path", { "d": "M16 13H8" }], ["path", { "d": "M16 17H8" }], ["path", { "d": "M10 9H8" }]], "layout-dashboard": [["rect", { "width": "7", "height": "9", "x": "3", "y": "3", "rx": "1" }], ["rect", { "width": "7", "height": "5", "x": "14", "y": "3", "rx": "1" }], ["rect", { "width": "7", "height": "9", "x": "14", "y": "12", "rx": "1" }], ["rect", { "width": "7", "height": "5", "x": "3", "y": "16", "rx": "1" }]], "package": [["path", { "d": "M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z" }], ["path", { "d": "M12 22V12" }], ["polyline", { "points": "3.29 7 12 12 20.71 7" }], ["path", { "d": "m7.5 4.27 9 5.15" }]], "arrow-right": [["path", { "d": "M5 12h14" }], ["path", { "d": "m12 5 7 7-7 7" }]], "log-out": [["path", { "d": "m16 17 5-5-5-5" }], ["path", { "d": "M21 12H9" }], ["path", { "d": "M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" }]], "home": [["path", { "d": "M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" }], ["path", { "d": "M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" }]], "copy": [["rect", { "width": "14", "height": "14", "x": "8", "y": "8", "rx": "2", "ry": "2" }], ["path", { "d": "M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" }]], "heart": [["path", { "d": "M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5" }]], "chevron-left": [["path", { "d": "m15 18-6-6 6-6" }]], "book-open": [["path", { "d": "M12 7v14" }], ["path", { "d": "M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z" }]], "inbox": [["polyline", { "points": "22 12 16 12 14 15 10 15 8 12 2 12" }], ["path", { "d": "M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" }]], "circle-x": [["circle", { "cx": "12", "cy": "12", "r": "10" }], ["path", { "d": "m15 9-6 6" }], ["path", { "d": "m9 9 6 6" }]], "zap": [["path", { "d": "M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z" }]], "bookmark": [["path", { "d": "M17 3a2 2 0 0 1 2 2v15a1 1 0 0 1-1.496.868l-4.512-2.578a2 2 0 0 0-1.984 0l-4.512 2.578A1 1 0 0 1 5 20V5a2 2 0 0 1 2-2z" }]], "music": [["path", { "d": "M9 18V5l12-2v13" }], ["circle", { "cx": "6", "cy": "18", "r": "3", "fill": "currentColor" }], ["circle", { "cx": "18", "cy": "16", "r": "3", "fill": "currentColor" }]], "chevron-down": [["path", { "d": "m6 9 6 6 6-6" }]], "chevron-right": [["path", { "d": "m9 18 6-6-6-6" }]], "arrow-up": [["path", { "d": "m5 12 7-7 7 7" }], ["path", { "d": "M12 19V5" }]], "refresh": [["path", { "d": "M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" }], ["path", { "d": "M3 3v5h5" }], ["path", { "d": "M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" }], ["path", { "d": "M16 16h5v5" }]], "film": [["rect", { "width": "18", "height": "18", "x": "3", "y": "3", "rx": "2" }], ["path", { "d": "M7 3v18" }], ["path", { "d": "M3 7.5h4" }], ["path", { "d": "M3 12h18" }], ["path", { "d": "M3 16.5h4" }], ["path", { "d": "M17 3v18" }], ["path", { "d": "M17 7.5h4" }], ["path", { "d": "M17 16.5h4" }]], "gauge": [["path", { "d": "m12 14 4-4" }], ["path", { "d": "M3.34 19a10 10 0 1 1 17.32 0" }]], "alert-circle": [["circle", { "cx": "12", "cy": "12", "r": "10" }], ["line", { "x1": "12", "x2": "12", "y1": "8", "y2": "12" }], ["line", { "x1": "12", "x2": "12.01", "y1": "16", "y2": "16" }]], "rotate-ccw": [["path", { "d": "M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" }], ["path", { "d": "M3 3v5h5" }]], "alert-triangle": [["path", { "d": "m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3" }], ["path", { "d": "M12 9v4" }], ["path", { "d": "M12 17h.01" }]], "arrow-down": [["path", { "d": "M12 5v14" }], ["path", { "d": "m19 12-7 7-7-7" }]], "shield": [["path", { "d": "M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" }]], "folder": [["path", { "d": "M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z" }]], "check": [["path", { "d": "M20 6 9 17l-5-5" }]], "grid": [["rect", { "x": "3", "y": "3", "width": "18", "height": "18", "rx": "2" }], ["path", { "d": "M3 9h18" }], ["path", { "d": "M3 15h18" }], ["path", { "d": "M9 3v18" }], ["path", { "d": "M15 3v18" }]], "rotate-cw": [["path", { "d": "M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" }], ["path", { "d": "M21 3v5h-5" }]], "eye": [["path", { "d": "M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" }], ["circle", { "cx": "12", "cy": "12", "r": "3" }]], "palette": [["path", { "d": "M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.25a1.75 1.75 0 0 0-1.4 2.8l.3.4a1.75 1.75 0 0 1-1.4 2.8z" }], ["circle", { "cx": "13.5", "cy": "6.5", "r": ".5", "fill": "currentColor" }], ["circle", { "cx": "17.5", "cy": "10.5", "r": ".5", "fill": "currentColor" }], ["circle", { "cx": "6.5", "cy": "12.5", "r": ".5", "fill": "currentColor" }], ["circle", { "cx": "8.5", "cy": "7.5", "r": ".5", "fill": "currentColor" }]], "mail": [["rect", { "x": "2", "y": "4", "width": "20", "height": "16", "rx": "2" }], ["path", { "d": "m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7" }]], "file-spreadsheet": [["path", { "d": "M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z" }], ["path", { "d": "M14 2v5a1 1 0 0 0 1 1h5" }], ["path", { "d": "M8 13h2" }], ["path", { "d": "M14 13h2" }], ["path", { "d": "M8 17h2" }], ["path", { "d": "M14 17h2" }]], "edit": [["path", { "d": "M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" }]], "file": [["path", { "d": "M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z" }], ["path", { "d": "M14 2v5a1 1 0 0 0 1 1h5" }]], "external-link": [["path", { "d": "M15 3h6v6" }], ["path", { "d": "M10 14 21 3" }], ["path", { "d": "M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" }]], "settings": [["path", { "d": "M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915" }], ["circle", { "cx": "12", "cy": "12", "r": "3" }]], "minus": [["path", { "d": "M5 12h14" }]], "volume-2": [["path", { "d": "M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z" }], ["path", { "d": "M16 9a5 5 0 0 1 0 6" }], ["path", { "d": "M19.364 18.364a9 9 0 0 0 0-12.728" }]], "star": [["path", { "d": "M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z" }]], "grip-vertical": [["circle", { "cx": "9", "cy": "12", "r": "1" }], ["circle", { "cx": "9", "cy": "5", "r": "1" }], ["circle", { "cx": "9", "cy": "19", "r": "1" }], ["circle", { "cx": "15", "cy": "12", "r": "1" }], ["circle", { "cx": "15", "cy": "5", "r": "1" }], ["circle", { "cx": "15", "cy": "19", "r": "1" }]], "chevron-up": [["path", { "d": "m18 15-6-6-6 6" }]], "search": [["circle", { "cx": "11", "cy": "11", "r": "8" }], ["path", { "d": "m21 21-4.34-4.34" }]], "volume-1": [["path", { "d": "M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z" }], ["path", { "d": "M16 9a5 5 0 0 1 0 6" }]], "eye-off": [["path", { "d": "M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49" }], ["path", { "d": "M14.084 14.158a3 3 0 0 1-4.242-4.242" }], ["path", { "d": "M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143" }], ["path", { "d": "m2 2 20 20" }]], "arrow-up-down": [["path", { "d": "m21 16-4 4-4-4" }], ["path", { "d": "M17 20V4" }], ["path", { "d": "m3 8 4-4 4 4" }], ["path", { "d": "M7 4v16" }]], "filter": [["polygon", { "points": "22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" }]], "circle-check": [["circle", { "cx": "12", "cy": "12", "r": "10" }], ["path", { "d": "m9 12 2 2 4-4" }]], "maximize": [["path", { "d": "M8 3H5a2 2 0 0 0-2 2v3" }], ["path", { "d": "M21 8V5a2 2 0 0 0-2-2h-3" }], ["path", { "d": "M3 16v3a2 2 0 0 0 2 2h3" }], ["path", { "d": "M16 21h3a2 2 0 0 0 2-2v-3" }]], "calendar": [["rect", { "width": "18", "height": "18", "x": "3", "y": "4", "rx": "2" }], ["path", { "d": "M16 2v4" }], ["path", { "d": "M8 2v4" }], ["path", { "d": "M3 10h18" }]], "undo": [["path", { "d": "M9 14 4 9l5-5" }], ["path", { "d": "M4 9h10.5a5.5 5.5 0 0 1 0 11H11" }]], "captions": [["rect", { "width": "18", "height": "14", "x": "3", "y": "5", "rx": "2", "ry": "2" }], ["path", { "d": "M7 15h4M15 15h2M7 11h2M13 11h4" }]], "list": [["path", { "d": "M3 5h.01" }], ["path", { "d": "M3 12h.01" }], ["path", { "d": "M3 19h.01" }], ["path", { "d": "M8 5h13" }], ["path", { "d": "M8 12h13" }], ["path", { "d": "M8 19h13" }]], "signpost": [["path", { "d": "M12 13v8" }], ["path", { "d": "M12 3v3" }], ["path", { "d": "M2.354 10.354a1.207 1.207 0 0 1 0-1.708l2.06-2.06A2 2 0 0 1 5.828 6h12.344a2 2 0 0 1 1.414.586l2.06 2.06a1.207 1.207 0 0 1 0 1.708l-2.06 2.06a2 2 0 0 1-1.414.586H5.828a2 2 0 0 1-1.414-.586z" }]], "link": [["path", { "d": "M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" }], ["path", { "d": "M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" }]], "mic": [["path", { "d": "M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" }], ["path", { "d": "M19 10v2a7 7 0 0 1-14 0v-2" }], ["path", { "d": "M12 19v3" }]], "monitor": [["rect", { "width": "20", "height": "14", "x": "2", "y": "3", "rx": "2" }], ["line", { "x1": "8", "x2": "16", "y1": "21", "y2": "21" }], ["line", { "x1": "12", "x2": "12", "y1": "17", "y2": "21" }]], "plus": [["path", { "d": "M5 12h14" }], ["path", { "d": "M12 5v14" }]], "list-video": [["path", { "d": "M12 12H3" }], ["path", { "d": "M16 6H3" }], ["path", { "d": "M12 18H3" }], ["path", { "d": "m16 12 5 3-5 3v-6Z" }]], "bell": [["path", { "d": "M10.268 21a2 2 0 0 0 3.464 0" }], ["path", { "d": "M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326" }]], "sun": [["circle", { "cx": "12", "cy": "12", "r": "4" }], ["path", { "d": "M12 2v2" }], ["path", { "d": "M12 20v2" }], ["path", { "d": "m4.93 4.93 1.41 1.41" }], ["path", { "d": "m17.66 17.66 1.41 1.41" }], ["path", { "d": "M2 12h2" }], ["path", { "d": "M20 12h2" }], ["path", { "d": "m6.34 17.66-1.41 1.41" }], ["path", { "d": "m19.07 4.93-1.41 1.41" }]], "minimize": [["path", { "d": "M8 3v3a2 2 0 0 1-2 2H3" }], ["path", { "d": "M21 8h-3a2 2 0 0 1-2-2V3" }], ["path", { "d": "M3 16h3a2 2 0 0 1 2 2v3" }], ["path", { "d": "M16 21v-3a2 2 0 0 1 2-2h3" }]], "info": [["circle", { "cx": "12", "cy": "12", "r": "10" }], ["path", { "d": "M12 16v-4" }], ["path", { "d": "M12 8h.01" }]], "code": [["path", { "d": "m16 18 6-6-6-6" }], ["path", { "d": "m8 6-6 6 6 6" }]], "scissors": [["circle", { "cx": "6", "cy": "6", "r": "3" }], ["path", { "d": "M8.12 8.12 12 12" }], ["path", { "d": "M20 4 8.12 15.88" }], ["circle", { "cx": "6", "cy": "18", "r": "3" }], ["path", { "d": "M14.8 14.8 20 20" }]], "camera": [["path", { "d": "M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" }], ["circle", { "cx": "12", "cy": "13", "r": "3" }]], "database": [["ellipse", { "cx": "12", "cy": "5", "rx": "9", "ry": "3" }], ["path", { "d": "M3 5V19A9 3 0 0 0 21 19V5" }], ["path", { "d": "M3 12A9 3 0 0 0 21 12" }]], "repeat": [["path", { "d": "m17 2 4 4-4 4" }], ["path", { "d": "M3 11v-1a4 4 0 0 1 4-4h14" }], ["path", { "d": "m7 22-4-4 4-4" }], ["path", { "d": "M21 13v1a4 4 0 0 1-4 4H3" }]], "layers": [["path", { "d": "M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z" }], ["path", { "d": "M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12" }], ["path", { "d": "M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17" }]], "image": [["rect", { "width": "18", "height": "18", "x": "3", "y": "3", "rx": "2", "ry": "2" }], ["circle", { "cx": "9", "cy": "9", "r": "2" }], ["path", { "d": "m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" }]], "picture-in-picture-2": [["path", { "d": "M21 9V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v10c0 1.1.9 2 2 2h4" }], ["rect", { "width": "10", "height": "7", "x": "12", "y": "13", "rx": "2" }]], "pause": [["rect", { "x": "14", "y": "4", "width": "4", "height": "16", "rx": "1" }], ["rect", { "x": "6", "y": "4", "width": "4", "height": "16", "rx": "1" }]], "clock": [["circle", { "cx": "12", "cy": "12", "r": "10" }], ["path", { "d": "M12 6v6l4 2" }]], "x": [["path", { "d": "M18 6 6 18" }], ["path", { "d": "m6 6 12 12" }]], "log-in": [["path", { "d": "m10 17 5-5-5-5" }], ["path", { "d": "M15 12H3" }], ["path", { "d": "M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" }]], "skip-forward": [["path", { "d": "M21 4v16" }], ["path", { "d": "M6.029 4.285A2 2 0 0 0 3 6v12a2 2 0 0 0 3.029 1.715l9.997-5.998a2 2 0 0 0 .003-3.432z" }]], "map-pin": [["path", { "d": "M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0" }], ["circle", { "cx": "12", "cy": "10", "r": "3" }]], "play": [["path", { "d": "M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z" }]], "download": [["path", { "d": "M12 15V3" }], ["path", { "d": "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" }], ["path", { "d": "m7 10 5 5 5-5" }]], "user": [["path", { "d": "M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" }], ["circle", { "cx": "12", "cy": "7", "r": "4" }]], "globe": [["circle", { "cx": "12", "cy": "12", "r": "10" }], ["path", { "d": "M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" }], ["path", { "d": "M2 12h20" }]], "sliders-horizontal": [["path", { "d": "M21 4h-7" }], ["path", { "d": "M10 4H3" }], ["path", { "d": "M21 12h-9" }], ["path", { "d": "M8 12H3" }], ["path", { "d": "M21 20h-5" }], ["path", { "d": "M12 20H3" }], ["path", { "d": "M14 2v4" }], ["path", { "d": "M8 10v4" }], ["path", { "d": "M16 18v4" }]], "trash": [["path", { "d": "M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" }], ["path", { "d": "M3 6h18" }], ["path", { "d": "M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" }]], "menu": [["path", { "d": "M4 5h16" }], ["path", { "d": "M4 12h16" }], ["path", { "d": "M4 19h16" }]], "upload": [["path", { "d": "M12 3v12" }], ["path", { "d": "m17 8-5-5-5 5" }], ["path", { "d": "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" }]], "lock": [["rect", { "width": "18", "height": "11", "x": "3", "y": "11", "rx": "2", "ry": "2" }], ["path", { "d": "M7 11V7a5 5 0 0 1 10 0v4" }]], "users": [["path", { "d": "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" }], ["circle", { "cx": "9", "cy": "7", "r": "4" }], ["path", { "d": "M16 3.128a4 4 0 0 1 0 7.744" }], ["path", { "d": "M22 21v-2a4 4 0 0 0-3-3.87" }]], "volume-x": [["path", { "d": "M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z" }], ["path", { "d": "M22 9l-6 6" }], ["path", { "d": "m16 9 6 6" }]] };
   var filled_icon_paths = { "play": [["path", { "d": "M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z" }]], "pause": [["rect", { "x": "14", "y": "4", "width": "4", "height": "16", "rx": "1" }], ["rect", { "x": "6", "y": "4", "width": "4", "height": "16", "rx": "1" }]], "skip-back": [["path", { "d": "M17.971 4.285A2 2 0 0 1 21 6v12a2 2 0 0 1-3.029 1.715l-9.997-5.998a2 2 0 0 1-.003-3.432z" }], ["rect", { "x": "2", "y": "4", "width": "2", "height": "16", "rx": "1" }]], "skip-forward": [["rect", { "x": "20", "y": "4", "width": "2", "height": "16", "rx": "1" }], ["path", { "d": "M6.029 4.285A2 2 0 0 0 3 6v12a2 2 0 0 0 3.029 1.715l9.997-5.998a2 2 0 0 0 .003-3.432z" }]], "repeat": [["path", { "d": "m17 2 4 4-4 4z" }], ["path", { "d": "M3 11v-1a4 4 0 0 1 4-4h14", "fill": "none", "stroke": "currentColor", "stroke-width": "2" }], ["path", { "d": "m7 22-4-4 4-4z" }], ["path", { "d": "M21 13v1a4 4 0 0 1-4 4H3", "fill": "none", "stroke": "currentColor", "stroke-width": "2" }]], "volume-2": [["path", { "d": "M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z" }], ["path", { "d": "M16 9a5 5 0 0 1 0 6", "fill": "none", "stroke": "currentColor", "stroke-width": "2" }], ["path", { "d": "M19.364 18.364a9 9 0 0 0 0-12.728", "fill": "none", "stroke": "currentColor", "stroke-width": "2" }]] };
   var icon_names = set(keys(icon_paths));
   var default_size = "md";
-  var icon_class_list = function(p__561) {
-    const map__12 = p__561;
+  var icon_class_list = function(p__656) {
+    const map__12 = p__656;
     const size3 = get(map__12, "size");
     const s4 = (() => {
       const or__23426__auto__5 = (() => {
-        const G__5626 = size3;
-        if (G__5626 == null) {
+        const G__6576 = size3;
+        if (G__6576 == null) {
           return null;
         } else {
-          return kw_name(G__5626);
+          return kw_name(G__6576);
         }
         ;
       })();
@@ -9249,19 +9272,19 @@
       }
       ;
     })();
-    const G__5637 = ["icon"];
+    const G__6587 = ["icon"];
     if (!(s4 === "md")) {
-      return conj(G__5637, `icon-${s4 ?? ""}`);
+      return conj(G__6587, `icon-${s4 ?? ""}`);
     } else {
-      return G__5637;
+      return G__6587;
     }
     ;
   };
   var icon_classes = function(opts) {
     return join(" ", icon_class_list(opts));
   };
-  var icon = function(p__564) {
-    const map__12 = p__564;
+  var icon = function(p__659) {
+    const map__12 = p__659;
     const _props3 = map__12;
     const icon_name4 = get(map__12, "icon-name");
     const size5 = get(map__12, "size");
@@ -9281,11 +9304,11 @@
     })() : get(icon_paths, kw10);
     if (truth_(paths11)) {
       const classes13 = (() => {
-        const G__56514 = icon_classes({ "size": size5 });
+        const G__66014 = icon_classes({ "size": size5 });
         if (truth_(class$6)) {
-          return `${G__56514 ?? ""}${" "}${class$6 ?? ""}`;
+          return `${G__66014 ?? ""}${" "}${class$6 ?? ""}`;
         } else {
-          return G__56514;
+          return G__66014;
         }
         ;
       })();
@@ -9297,16 +9320,16 @@
 
   // .compiled/ui/spinner.mjs
   var default_size2 = "md";
-  var spinner_class_list = function(p__972) {
-    const map__12 = p__972;
+  var spinner_class_list = function(p__1067) {
+    const map__12 = p__1067;
     const size3 = get(map__12, "size");
     const s4 = (() => {
       const or__23426__auto__5 = (() => {
-        const G__9736 = size3;
-        if (G__9736 == null) {
+        const G__10686 = size3;
+        if (G__10686 == null) {
           return null;
         } else {
-          return kw_name(G__9736);
+          return kw_name(G__10686);
         }
         ;
       })();
@@ -9317,31 +9340,31 @@
       }
       ;
     })();
-    const G__9747 = ["spinner"];
-    const G__9748 = s4 === "xs" ? conj(G__9747, "spinner-xs") : G__9747;
-    const G__9749 = s4 === "sm" ? conj(G__9748, "spinner-sm") : G__9748;
+    const G__10697 = ["spinner"];
+    const G__10698 = s4 === "xs" ? conj(G__10697, "spinner-xs") : G__10697;
+    const G__10699 = s4 === "sm" ? conj(G__10698, "spinner-sm") : G__10698;
     if (s4 === "lg") {
-      return conj(G__9749, "spinner-lg");
+      return conj(G__10699, "spinner-lg");
     } else {
-      return G__9749;
+      return G__10699;
     }
     ;
   };
   var spinner_classes = function(opts) {
     return join(" ", spinner_class_list(opts));
   };
-  var spinner = function(p__975) {
-    const map__12 = p__975;
+  var spinner = function(p__1070) {
+    const map__12 = p__1070;
     const _props3 = map__12;
     const size4 = get(map__12, "size");
     const class$5 = get(map__12, "class");
     const attrs6 = get(map__12, "attrs");
     const classes7 = (() => {
-      const G__9768 = spinner_classes({ "size": size4 });
+      const G__10718 = spinner_classes({ "size": size4 });
       if (truth_(class$5)) {
-        return `${G__9768 ?? ""}${" "}${class$5 ?? ""}`;
+        return `${G__10718 ?? ""}${" "}${class$5 ?? ""}`;
       } else {
-        return G__9768;
+        return G__10718;
       }
       ;
     })();
@@ -9561,11 +9584,11 @@
   var default_hotkey = ["altKey", "KeyT"];
   var infinity = Infinity;
   var kw = function(x) {
-    const G__6881 = x;
-    if (G__6881 == null) {
+    const G__7831 = x;
+    if (G__7831 == null) {
       return null;
     } else {
-      return kw_name(G__6881);
+      return kw_name(G__7831);
     }
     ;
   };
@@ -9581,37 +9604,37 @@
     return s;
   };
   var classes = (() => {
-    const f689 = (function(var_args) {
-      const args6901 = [];
+    const f784 = (function(var_args) {
+      const args7851 = [];
       const len__23321__auto__2 = arguments.length;
-      let i6913 = 0;
+      let i7863 = 0;
       while (true) {
-        if (i6913 < len__23321__auto__2) {
-          args6901.push(arguments[i6913]);
-          let G__4 = i6913 + 1;
-          i6913 = G__4;
+        if (i7863 < len__23321__auto__2) {
+          args7851.push(arguments[i7863]);
+          let G__4 = i7863 + 1;
+          i7863 = G__4;
           continue;
         }
         ;
         break;
       }
       ;
-      const argseq__23513__auto__5 = 0 < args6901.length ? args6901.slice(0) : null;
-      return f689.cljs$core$IFn$_invoke$arity$variadic(argseq__23513__auto__5);
+      const argseq__23513__auto__5 = 0 < args7851.length ? args7851.slice(0) : null;
+      return f784.cljs$core$IFn$_invoke$arity$variadic(argseq__23513__auto__5);
     });
-    f689.cljs$core$IFn$_invoke$arity$variadic = (function(tokens) {
+    f784.cljs$core$IFn$_invoke$arity$variadic = (function(tokens) {
       const ts6 = remove(nil_QMARK_, tokens);
       return join(" ", ts6);
     });
-    f689.cljs$lang$maxFixedArity = 0;
-    return f689;
+    f784.cljs$lang$maxFixedArity = 0;
+    return f784;
   })();
   var type_icons = { "success": "check", "info": "info", "warning": "alert-triangle", "error": "x" };
-  var notification_class_list = function(p__693) {
-    const map__12 = p__693;
+  var notification_class_list = function(p__788) {
+    const map__12 = p__788;
     const type3 = get(map__12, "type");
     const multiline4 = get(map__12, "multiline");
-    const G__6945 = ["notification", `notification-${(() => {
+    const G__7895 = ["notification", `notification-${(() => {
       const or__23426__auto__6 = kw(type3);
       if (truth_(or__23426__auto__6)) {
         return or__23426__auto__6;
@@ -9621,9 +9644,9 @@
       ;
     })() ?? ""}`];
     if (truth_(multiline4)) {
-      return conj(G__6945, "notification-multiline");
+      return conj(G__7895, "notification-multiline");
     } else {
-      return G__6945;
+      return G__7895;
     }
     ;
   };
@@ -9638,8 +9661,8 @@
     }
     ;
   };
-  var icon_el = function(p__695, icons, class_name) {
-    const map__12 = p__695;
+  var icon_el = function(p__790, icons, class_name) {
+    const map__12 = p__790;
     const type3 = get(map__12, "type");
     const icon4 = get(map__12, "icon");
     const promise5 = get(map__12, "promise");
@@ -9673,8 +9696,8 @@
         }
         ;
       })())) {
-        const G__69613 = ["span", { "class": classes("notification-icon", class_name), "data-icon": "" }];
-        const G__69614 = truth_((() => {
+        const G__79113 = ["span", { "class": classes("notification-icon", class_name), "data-icon": "" }];
+        const G__79114 = truth_((() => {
           const or__23426__auto__15 = loading_QMARK_8;
           if (or__23426__auto__15) {
             return or__23426__auto__15;
@@ -9682,7 +9705,7 @@
             return promise5;
           }
           ;
-        })()) ? conj(G__69613, loader(loading_QMARK_8)) : G__69613;
+        })()) ? conj(G__79113, loader(loading_QMARK_8)) : G__79113;
         if (truth_((() => {
           const and__23442__auto__16 = shown10;
           if (truth_(and__23442__auto__16)) {
@@ -9692,9 +9715,9 @@
           }
           ;
         })())) {
-          return conj(G__69614, ["span", { "class": "notification-glyph" }, shown10]);
+          return conj(G__79114, ["span", { "class": "notification-glyph" }, shown10]);
         } else {
-          return G__69614;
+          return G__79114;
         }
         ;
       }
@@ -9711,16 +9734,16 @@
       const on_click42 = get(map__12, "on-click");
       const attrs5 = get(map__12, "attrs");
       return button((() => {
-        const G__6976 = { "size": "sm", "variant": kind === "action" ? "secondary" : "ghost", "class": class_name, "attrs": merge((() => {
-          const G__6987 = {};
-          G__6987["data-button"] = "";
-          G__6987[__GT_kw(`data-${kind ?? ""}`)] = "";
-          return G__6987;
+        const G__7926 = { "size": "sm", "variant": kind === "action" ? "secondary" : "ghost", "class": class_name, "attrs": merge((() => {
+          const G__7937 = {};
+          G__7937["data-button"] = "";
+          G__7937[__GT_kw(`data-${kind ?? ""}`)] = "";
+          return G__7937;
         })(), attrs5) };
         if (truth_(on_click42)) {
-          return { ...G__6976, "on-click": on_click42 };
+          return { ...G__7926, "on-click": on_click42 };
         } else {
-          return G__6976;
+          return G__7926;
         }
         ;
       })(), label3);
@@ -9738,20 +9761,20 @@
       ;
     })(), "data-close-button": "", "data-disabled": flag(disabled_QMARK_3) }, icon({ "icon-name": "x", "size": "sm" })];
   };
-  var loading_locked_QMARK_ = function(p__699) {
-    const map__12 = p__699;
+  var loading_locked_QMARK_ = function(p__794) {
+    const map__12 = p__794;
     const type3 = get(map__12, "type");
     const dismissible4 = get(map__12, "dismissible");
     return "loading" === kw(type3) && not(true_QMARK_(dismissible4));
   };
-  var swipable_QMARK_ = function(p__700) {
-    const map__12 = p__700;
+  var swipable_QMARK_ = function(p__795) {
+    const map__12 = p__795;
     const item3 = map__12;
     const dismissible4 = get(map__12, "dismissible");
     return not(false_QMARK_(dismissible4)) && not(loading_locked_QMARK_(item3));
   };
-  var card_children = function(p__701, icons, class_names, extra) {
-    const map__12 = p__701;
+  var card_children = function(p__796, icons, class_names, extra) {
+    const map__12 = p__796;
     const item3 = map__12;
     const title4 = get(map__12, "title");
     const description5 = get(map__12, "description");
@@ -9770,8 +9793,8 @@
       }
       ;
     })();
-    const G__70214 = [];
-    const G__70215 = truth_((() => {
+    const G__79714 = [];
+    const G__79715 = truth_((() => {
       const and__23442__auto__16 = close_button9;
       if (truth_(and__23442__auto__16)) {
         return not(loading_locked_QMARK_(item3));
@@ -9779,18 +9802,18 @@
         return and__23442__auto__16;
       }
       ;
-    })()) ? conj(G__70214, close_el(close_label10, false_QMARK_(dismissible11), get(cn12, "close-button"))) : G__70214;
-    const G__70217 = true ? conj(G__70215, icon_el(item3, icons, get(cn12, "icon"))) : G__70215;
-    const G__70218 = true ? conj(G__70217, (() => {
-      const G__70319 = ["div", { "class": classes("notification-text", get(cn12, "content")), "data-content": "" }, ["p", { "class": classes("notification-title", get(cn12, "title")), "data-title": "" }, title4]];
-      const G__70320 = truth_(description5) ? conj(G__70319, ["div", { "class": classes("notification-description", get(cn12, "description")), "data-description": "" }, description5]) : G__70319;
+    })()) ? conj(G__79714, close_el(close_label10, false_QMARK_(dismissible11), get(cn12, "close-button"))) : G__79714;
+    const G__79717 = true ? conj(G__79715, icon_el(item3, icons, get(cn12, "icon"))) : G__79715;
+    const G__79718 = true ? conj(G__79717, (() => {
+      const G__79819 = ["div", { "class": classes("notification-text", get(cn12, "content")), "data-content": "" }, ["p", { "class": classes("notification-title", get(cn12, "title")), "data-title": "" }, title4]];
+      const G__79820 = truth_(description5) ? conj(G__79819, ["div", { "class": classes("notification-description", get(cn12, "description")), "data-description": "" }, description5]) : G__79819;
       if (truth_(meta6)) {
-        return conj(G__70320, ["div", { "class": "notification-meta" }, meta6]);
+        return conj(G__79820, ["div", { "class": "notification-meta" }, meta6]);
       } else {
-        return G__70320;
+        return G__79820;
       }
       ;
-    })()) : G__70217;
+    })()) : G__79717;
     if (truth_((() => {
       const or__23426__auto__21 = cancel8;
       if (truth_(or__23426__auto__21)) {
@@ -9806,43 +9829,43 @@
       }
       ;
     })())) {
-      return conj(G__70218, (() => {
-        const G__70423 = ["div", { "class": "notification-actions" }];
-        const G__70424 = truth_(cancel8) ? conj(G__70423, button_el("cancel", cancel8, get(cn12, "cancel-button"))) : G__70423;
-        const G__70425 = truth_(action7) ? conj(G__70424, button_el("action", action7, get(cn12, "action-button"))) : G__70424;
+      return conj(G__79718, (() => {
+        const G__79923 = ["div", { "class": "notification-actions" }];
+        const G__79924 = truth_(cancel8) ? conj(G__79923, button_el("cancel", cancel8, get(cn12, "cancel-button"))) : G__79923;
+        const G__79925 = truth_(action7) ? conj(G__79924, button_el("action", action7, get(cn12, "action-button"))) : G__79924;
         if (truth_(seq(extra))) {
-          return into(G__70425, extra);
+          return into(G__79925, extra);
         } else {
-          return G__70425;
+          return G__79925;
         }
         ;
       })());
     } else {
-      return G__70218;
+      return G__79718;
     }
     ;
   };
   var notification = (() => {
-    const f705 = (function(var_args) {
-      const args7061 = [];
+    const f800 = (function(var_args) {
+      const args8011 = [];
       const len__23321__auto__2 = arguments.length;
-      let i7073 = 0;
+      let i8023 = 0;
       while (true) {
-        if (i7073 < len__23321__auto__2) {
-          args7061.push(arguments[i7073]);
-          let G__4 = i7073 + 1;
-          i7073 = G__4;
+        if (i8023 < len__23321__auto__2) {
+          args8011.push(arguments[i8023]);
+          let G__4 = i8023 + 1;
+          i8023 = G__4;
           continue;
         }
         ;
         break;
       }
       ;
-      const argseq__23513__auto__5 = 1 < args7061.length ? args7061.slice(1) : null;
-      return f705.cljs$core$IFn$_invoke$arity$variadic(arguments[0], argseq__23513__auto__5);
+      const argseq__23513__auto__5 = 1 < args8011.length ? args8011.slice(1) : null;
+      return f800.cljs$core$IFn$_invoke$arity$variadic(arguments[0], argseq__23513__auto__5);
     });
-    f705.cljs$core$IFn$_invoke$arity$variadic = (function(p__709, children) {
-      const map__67 = p__709;
+    f800.cljs$core$IFn$_invoke$arity$variadic = (function(p__804, children) {
+      const map__67 = p__804;
       const item8 = map__67;
       const class_names9 = get(map__67, "class-names");
       const invert10 = get(map__67, "invert");
@@ -9878,8 +9901,8 @@
         ;
       })(), "data-styled": flag(not(unstyled13)), "data-rich-colors": flag(rich_colors19), "data-invert": flag(invert10) }, attrs22))], card_children(item8, null, class_names9, remove(nil_QMARK_, children)));
     });
-    f705.cljs$lang$maxFixedArity = 1;
-    return f705;
+    f800.cljs$lang$maxFixedArity = 1;
+    return f800;
   })();
   var position_parts = function(position) {
     return split((() => {
@@ -9896,11 +9919,11 @@
     const vec__14 = position_parts(position);
     const y5 = nth(vec__14, 0, null);
     const x6 = nth(vec__14, 1, null);
-    const G__7107 = [y5];
+    const G__8057 = [y5];
     if (!(x6 === "center")) {
-      return conj(G__7107, x6);
+      return conj(G__8057, x6);
     } else {
-      return G__7107;
+      return G__8057;
     }
     ;
   };
@@ -9959,8 +9982,8 @@
     }
     ;
   };
-  var toast_el = function(p__711, p__712) {
-    const map__13 = p__711;
+  var toast_el = function(p__806, p__807) {
+    const map__13 = p__806;
     const item4 = map__13;
     const class_names5 = get(map__13, "class-names");
     const invert6 = get(map__13, "invert");
@@ -9975,7 +9998,7 @@
     const class$15 = get(map__13, "class");
     const removed_at16 = get(map__13, "removed-at");
     const attrs17 = get(map__13, "attrs");
-    const map__218 = p__712;
+    const map__218 = p__807;
     const x19 = get(map__218, "x");
     const y20 = get(map__218, "y");
     const index21 = get(map__218, "index");
@@ -9995,11 +10018,11 @@
       ;
     })();
     const item30 = (() => {
-      const G__71331 = item4;
+      const G__80831 = item4;
       if (get(item4, "close-button") == null) {
-        return assoc(G__71331, "close-button", close_button22);
+        return assoc(G__80831, "close-button", close_button22);
       } else {
-        return G__71331;
+        return G__80831;
       }
       ;
     })();
@@ -10022,21 +10045,21 @@
     })()), "data-x-position": x19, "data-ui-notification": "", "data-promise": flag(promise10) }, {}, attrs17))], card_children(item30, icons24, class_names5, null));
   };
   var event_attrs = function(on_dismiss, on_pause) {
-    const G__7141 = {};
-    const G__7142 = truth_(on_dismiss) ? { ...G__7141, "on-notificationdismiss": (function(e) {
+    const G__8091 = {};
+    const G__8092 = truth_(on_dismiss) ? { ...G__8091, "on-notificationdismiss": (function(e) {
       return on_dismiss(e.detail.id, e.detail.reason);
-    }) } : G__7141;
+    }) } : G__8091;
     if (truth_(on_pause)) {
-      return assoc(G__7142, "on-notificationpause", (function(e) {
+      return assoc(G__8092, "on-notificationpause", (function(e) {
         return on_pause(e.detail.paused);
       }));
     } else {
-      return G__7142;
+      return G__8092;
     }
     ;
   };
-  var notification_toaster = function(p__715) {
-    const map__12 = p__715;
+  var notification_toaster = function(p__810) {
+    const map__12 = p__810;
     const items3 = get(map__12, "items");
     const on_dismiss4 = get(map__12, "on-dismiss");
     const on_pause5 = get(map__12, "on-pause");
@@ -10088,11 +10111,11 @@
       return kw(get(i, "position"));
     }), items3)));
     return into(["section", class_attrs((() => {
-      const G__71630 = ["notification-toaster"];
+      const G__81130 = ["notification-toaster"];
       if (truth_(contained15)) {
-        return conj(G__71630, "notification-toaster-contained");
+        return conj(G__81130, "notification-toaster-contained");
       } else {
-        return G__71630;
+        return G__81130;
       }
       ;
     })(), class$18, merge({ "data-ui-notification-toaster": "", "tabindex": "-1", "aria-label": `${(() => {
@@ -10149,25 +10172,25 @@
     return { "items": [], "muted": /* @__PURE__ */ new Set([]), "paused-at": null, "seq": 0 };
   };
   var lifetime = (() => {
-    const f717 = (function(...args718) {
-      const G__7191 = args718.length;
-      switch (G__7191) {
+    const f812 = (function(...args813) {
+      const G__8141 = args813.length;
+      switch (G__8141) {
         case 1:
-          return f717.cljs$core$IFn$_invoke$arity$1(args718[0]);
+          return f812.cljs$core$IFn$_invoke$arity$1(args813[0]);
           break;
         case 2:
-          return f717.cljs$core$IFn$_invoke$arity$2(args718[0], args718[1]);
+          return f812.cljs$core$IFn$_invoke$arity$2(args813[0], args813[1]);
           break;
         default:
-          throw new Error(`${"Invalid arity: "}${args718.length ?? ""}`);
+          throw new Error(`${"Invalid arity: "}${args813.length ?? ""}`);
       }
       ;
     });
-    f717.cljs$core$IFn$_invoke$arity$1 = (function(item) {
+    f812.cljs$core$IFn$_invoke$arity$1 = (function(item) {
       return lifetime(item, default_duration2);
     });
-    f717.cljs$core$IFn$_invoke$arity$2 = (function(p__720, default$) {
-      const map__34 = p__720;
+    f812.cljs$core$IFn$_invoke$arity$2 = (function(p__815, default$) {
+      const map__34 = p__815;
       const type5 = get(map__34, "type");
       const duration6 = get(map__34, "duration");
       if ("loading" === kw(type5)) {
@@ -10205,8 +10228,8 @@
       }
       ;
     });
-    f717.cljs$lang$maxFixedArity = 2;
-    return f717;
+    f812.cljs$lang$maxFixedArity = 2;
+    return f812;
   })();
   var stamp = function(item, now4, paused_at, default$) {
     const ms1 = lifetime(item, default$);
@@ -10229,25 +10252,25 @@
     ;
   };
   var post = (() => {
-    const f721 = (function(...args722) {
-      const G__7231 = args722.length;
-      switch (G__7231) {
+    const f816 = (function(...args817) {
+      const G__8181 = args817.length;
+      switch (G__8181) {
         case 3:
-          return f721.cljs$core$IFn$_invoke$arity$3(args722[0], args722[1], args722[2]);
+          return f816.cljs$core$IFn$_invoke$arity$3(args817[0], args817[1], args817[2]);
           break;
         case 4:
-          return f721.cljs$core$IFn$_invoke$arity$4(args722[0], args722[1], args722[2], args722[3]);
+          return f816.cljs$core$IFn$_invoke$arity$4(args817[0], args817[1], args817[2], args817[3]);
           break;
         default:
-          throw new Error(`${"Invalid arity: "}${args722.length ?? ""}`);
+          throw new Error(`${"Invalid arity: "}${args817.length ?? ""}`);
       }
       ;
     });
-    f721.cljs$core$IFn$_invoke$arity$3 = (function(state4, item, now4) {
+    f816.cljs$core$IFn$_invoke$arity$3 = (function(state4, item, now4) {
       return post(state4, item, now4, null);
     });
-    f721.cljs$core$IFn$_invoke$arity$4 = (function(state4, item, now4, p__724) {
-      const map__34 = p__724;
+    f816.cljs$core$IFn$_invoke$arity$4 = (function(state4, item, now4, p__819) {
+      const map__34 = p__819;
       const duration5 = get(map__34, "duration");
       const limit6 = get(map__34, "limit");
       const map__78 = state4;
@@ -10294,11 +10317,11 @@
           return assoc(state4, "items", mapv((function(i) {
             if (_EQ_(id13, get(i, "id"))) {
               return fresh15((() => {
-                const G__72517 = merge(i, item);
+                const G__82017 = merge(i, item);
                 if ("loading" === kw(get(i, "type"))) {
-                  return assoc(G__72517, "promise", true);
+                  return assoc(G__82017, "promise", true);
                 } else {
-                  return G__72517;
+                  return G__82017;
                 }
                 ;
               })());
@@ -10319,11 +10342,11 @@
               ;
             })() + 1;
             const item20 = fresh15((() => {
-              const G__72621 = item;
+              const G__82121 = item;
               if (id13 == null) {
-                return assoc(G__72621, "id", `notification-${n18 ?? ""}`);
+                return assoc(G__82121, "id", `notification-${n18 ?? ""}`);
               } else {
-                return G__72621;
+                return G__82121;
               }
               ;
             })());
@@ -10343,28 +10366,28 @@
       }
       ;
     });
-    f721.cljs$lang$maxFixedArity = 4;
-    return f721;
+    f816.cljs$lang$maxFixedArity = 4;
+    return f816;
   })();
   var dismiss = (() => {
-    const f727 = (function(...args728) {
-      const G__7291 = args728.length;
-      switch (G__7291) {
+    const f822 = (function(...args823) {
+      const G__8241 = args823.length;
+      switch (G__8241) {
         case 3:
-          return f727.cljs$core$IFn$_invoke$arity$3(args728[0], args728[1], args728[2]);
+          return f822.cljs$core$IFn$_invoke$arity$3(args823[0], args823[1], args823[2]);
           break;
         case 4:
-          return f727.cljs$core$IFn$_invoke$arity$4(args728[0], args728[1], args728[2], args728[3]);
+          return f822.cljs$core$IFn$_invoke$arity$4(args823[0], args823[1], args823[2], args823[3]);
           break;
         default:
-          throw new Error(`${"Invalid arity: "}${args728.length ?? ""}`);
+          throw new Error(`${"Invalid arity: "}${args823.length ?? ""}`);
       }
       ;
     });
-    f727.cljs$core$IFn$_invoke$arity$3 = (function(state4, id, now4) {
+    f822.cljs$core$IFn$_invoke$arity$3 = (function(state4, id, now4) {
       return dismiss(state4, id, now4, "dismiss");
     });
-    f727.cljs$core$IFn$_invoke$arity$4 = (function(state4, id, now4, reason) {
+    f822.cljs$core$IFn$_invoke$arity$4 = (function(state4, id, now4, reason) {
       return assoc(state4, "items", mapv((function(i) {
         if (_EQ_(id, get(i, "id"))) {
           return close2(i, now4, reason);
@@ -10374,8 +10397,8 @@
         ;
       }), get(state4, "items")));
     });
-    f727.cljs$lang$maxFixedArity = 4;
-    return f727;
+    f822.cljs$lang$maxFixedArity = 4;
+    return f822;
   })();
   var dismiss_all = function(state4, now4) {
     return assoc(state4, "items", mapv((function(i) {
@@ -10396,7 +10419,7 @@
       const paused_at2 = temp__23007__auto__1;
       const d3 = now4 - paused_at2;
       return assoc(state4, "paused-at", null, "items", mapv((function(i) {
-        const G__7304 = i;
+        const G__8254 = i;
         if (truth_((() => {
           const and__23442__auto__5 = get(i, "expires-at");
           if (truth_(and__23442__auto__5)) {
@@ -10406,9 +10429,9 @@
           }
           ;
         })())) {
-          return assoc(G__7304, "expires-at", get(i, "expires-at") + d3);
+          return assoc(G__8254, "expires-at", get(i, "expires-at") + d3);
         } else {
-          return G__7304;
+          return G__8254;
         }
         ;
       }), get(state4, "items")));
@@ -10851,11 +10874,11 @@
     const ol1 = li.closest("[data-ui-notification-list]");
     return (() => {
       const or__23426__auto__2 = (() => {
-        const G__6033 = ol1;
-        if (G__6033 == null) {
+        const G__6983 = ol1;
+        if (G__6983 == null) {
           return null;
         } else {
-          return attr(G__6033, "data-swipe-directions");
+          return attr(G__6983, "data-swipe-directions");
         }
         ;
       })();
@@ -10991,11 +11014,11 @@
     ;
   };
   var not_dismissible_target_QMARK_ = function(e) {
-    const G__6041 = e.target;
-    if (G__6041 == null) {
+    const G__6991 = e.target;
+    if (G__6991 == null) {
       return null;
     } else {
-      return G__6041.closest("[data-dismissible='false']");
+      return G__6991.closest("[data-dismissible='false']");
     }
     ;
   };
@@ -11124,11 +11147,11 @@
       return null;
     } else {
       const temp__23062__auto__1 = (() => {
-        const G__6052 = e.target;
-        if (G__6052 == null) {
+        const G__7002 = e.target;
+        if (G__7002 == null) {
           return null;
         } else {
-          return G__6052.closest("[data-ui-notification]");
+          return G__7002.closest("[data-ui-notification]");
         }
         ;
       })();
@@ -11171,10 +11194,10 @@
       })().split("+");
       if (truth_(hotkey_pressed_QMARK_(e, keys3))) {
         set_expanded_BANG_(t2, true);
-        const G__6065 = first(lists(t2));
-        if (G__6065 == null) {
+        const G__7015 = first(lists(t2));
+        if (G__7015 == null) {
         } else {
-          G__6065.focus();
+          G__7015.focus();
         }
       }
       ;
@@ -11254,24 +11277,24 @@
     return null;
   };
   var dom = (() => {
-    const f607 = (function(...args608) {
-      const G__6091 = args608.length;
-      switch (G__6091) {
+    const f702 = (function(...args703) {
+      const G__7041 = args703.length;
+      switch (G__7041) {
         case 1:
-          return f607.cljs$core$IFn$_invoke$arity$1(args608[0]);
+          return f702.cljs$core$IFn$_invoke$arity$1(args703[0]);
           break;
         case 2:
-          return f607.cljs$core$IFn$_invoke$arity$2(args608[0], args608[1]);
+          return f702.cljs$core$IFn$_invoke$arity$2(args703[0], args703[1]);
           break;
         default:
-          throw new Error(`${"Invalid arity: "}${args608.length ?? ""}`);
+          throw new Error(`${"Invalid arity: "}${args703.length ?? ""}`);
       }
       ;
     });
-    f607.cljs$core$IFn$_invoke$arity$1 = (function(h) {
+    f702.cljs$core$IFn$_invoke$arity$1 = (function(h) {
       return dom(h, false);
     });
-    f607.cljs$core$IFn$_invoke$arity$2 = (function(h, svg_QMARK_) {
+    f702.cljs$core$IFn$_invoke$arity$2 = (function(h, svg_QMARK_) {
       if (h == null) {
         return null;
       } else {
@@ -11350,8 +11373,8 @@
       }
       ;
     });
-    f607.cljs$lang$maxFixedArity = 2;
-    return f607;
+    f702.cljs$lang$maxFixedArity = 2;
+    return f702;
   })();
   var patch_attrs_BANG_ = function(el2, attrs) {
     const keep12 = /* @__PURE__ */ new Set();
@@ -11509,8 +11532,8 @@
     }));
   };
   var props = function(o) {
-    const m1 = Object.fromEntries(map((function(p__610) {
-      const vec__25 = p__610;
+    const m1 = Object.fromEntries(map((function(p__705) {
+      const vec__25 = p__705;
       const k6 = nth(vec__25, 0, null);
       const v7 = nth(vec__25, 1, null);
       return [kebab(k6), v7];
@@ -11556,33 +11579,33 @@
     return null;
   };
   var update_queue_BANG_ = (() => {
-    const f611 = (function(var_args) {
-      const args6121 = [];
+    const f706 = (function(var_args) {
+      const args7071 = [];
       const len__23321__auto__2 = arguments.length;
-      let i6133 = 0;
+      let i7083 = 0;
       while (true) {
-        if (i6133 < len__23321__auto__2) {
-          args6121.push(arguments[i6133]);
-          let G__4 = i6133 + 1;
-          i6133 = G__4;
+        if (i7083 < len__23321__auto__2) {
+          args7071.push(arguments[i7083]);
+          let G__4 = i7083 + 1;
+          i7083 = G__4;
           continue;
         }
         ;
         break;
       }
       ;
-      const argseq__23513__auto__5 = 1 < args6121.length ? args6121.slice(1) : null;
-      return f611.cljs$core$IFn$_invoke$arity$variadic(arguments[0], argseq__23513__auto__5);
+      const argseq__23513__auto__5 = 1 < args7071.length ? args7071.slice(1) : null;
+      return f706.cljs$core$IFn$_invoke$arity$variadic(arguments[0], argseq__23513__auto__5);
     });
-    f611.cljs$core$IFn$_invoke$arity$variadic = (function(f, args) {
+    f706.cljs$core$IFn$_invoke$arity$variadic = (function(f, args) {
       const before6 = api["queue"];
       const after7 = apply(f, before6, args);
       api["queue"] = after7;
       fire_closed_BANG_(before6, after7);
       return render_BANG_();
     });
-    f611.cljs$lang$maxFixedArity = 1;
-    return f611;
+    f706.cljs$lang$maxFixedArity = 1;
+    return f706;
   })();
   var schedule_expire_BANG_ = function() {
     const temp__23062__auto__1 = api["timer"];
@@ -11676,11 +11699,11 @@
           }
           ;
         })(), kind === "success" ? "success" : "error", (() => {
-          const G__61511 = assoc(base8, "id", id2);
+          const G__71011 = assoc(base8, "id", id2);
           if (!(desc9 == null)) {
-            return assoc(G__61511, "description", truth_(fn_QMARK_(desc9)) ? desc9(v) : desc9);
+            return assoc(G__71011, "description", truth_(fn_QMARK_(desc9)) ? desc9(v) : desc9);
           } else {
-            return G__61511;
+            return G__71011;
           }
           ;
         })());
@@ -11721,11 +11744,11 @@
       const ds3 = el2.dataset;
       el2.remove();
       create_BANG_(ds3["uiNotify"], ds3["type"], { "id": ds3["id"], "description": ds3["description"], "duration": (() => {
-        const G__6164 = ds3["duration"];
-        if (G__6164 == null) {
+        const G__7114 = ds3["duration"];
+        if (G__7114 == null) {
           return null;
         } else {
-          return parseFloat(G__6164);
+          return parseFloat(G__7114);
         }
         ;
       })() });
@@ -11765,11 +11788,11 @@
     const t1 = r.target;
     const el2 = 1 === t1.nodeType ? t1 : t1.parentElement;
     const or__23426__auto__3 = (() => {
-      const G__6174 = el2;
-      if (G__6174 == null) {
+      const G__7124 = el2;
+      if (G__7124 == null) {
         return null;
       } else {
-        return G__6174.closest("[data-ui-notification-toaster]");
+        return G__7124.closest("[data-ui-notification-toaster]");
       }
       ;
     })();
@@ -11869,12 +11892,12 @@
       const max_STAR_6 = !_EQ_("", input.max) ? num(input.max, null) : null;
       const next7 = round6(cur4 + dir * step3);
       const next8 = (() => {
-        const G__6189 = next7;
-        const G__61810 = !(min_STAR_5 == null) ? Math.max(G__6189, min_STAR_5) : G__6189;
+        const G__7139 = next7;
+        const G__71310 = !(min_STAR_5 == null) ? Math.max(G__7139, min_STAR_5) : G__7139;
         if (!(max_STAR_6 == null)) {
-          return Math.min(G__61810, max_STAR_6);
+          return Math.min(G__71310, max_STAR_6);
         } else {
-          return G__61810;
+          return G__71310;
         }
         ;
       })();
@@ -13149,11 +13172,11 @@
     if (truth_(temp__23062__auto__2)) {
       const root3 = temp__23062__auto__2;
       if (_EQ_(t1, (() => {
-        const G__6194 = root3.querySelector(".rating-stars");
-        if (G__6194 == null) {
+        const G__7144 = root3.querySelector(".rating-stars");
+        if (G__7144 == null) {
           return null;
         } else {
-          return G__6194.lastElementChild;
+          return G__7144.lastElementChild;
         }
         ;
       })())) {
@@ -13296,25 +13319,25 @@
     ;
   };
   var open_select = (() => {
-    const f620 = (function(var_args) {
-      const args6211 = [];
+    const f715 = (function(var_args) {
+      const args7161 = [];
       const len__23321__auto__2 = arguments.length;
-      let i6223 = 0;
+      let i7173 = 0;
       while (true) {
-        if (i6223 < len__23321__auto__2) {
-          args6211.push(arguments[i6223]);
-          let G__4 = i6223 + 1;
-          i6223 = G__4;
+        if (i7173 < len__23321__auto__2) {
+          args7161.push(arguments[i7173]);
+          let G__4 = i7173 + 1;
+          i7173 = G__4;
           continue;
         }
         ;
         break;
       }
       ;
-      const argseq__23513__auto__5 = 1 < args6211.length ? args6211.slice(1) : null;
-      return f620.cljs$core$IFn$_invoke$arity$variadic(arguments[0], argseq__23513__auto__5);
+      const argseq__23513__auto__5 = 1 < args7161.length ? args7161.slice(1) : null;
+      return f715.cljs$core$IFn$_invoke$arity$variadic(arguments[0], argseq__23513__auto__5);
     });
-    f620.cljs$core$IFn$_invoke$arity$variadic = (function(trigger, args) {
+    f715.cljs$core$IFn$_invoke$arity$variadic = (function(trigger, args) {
       dismiss_BANG_2();
       const options6 = (() => {
         const passed7 = first(args);
@@ -13409,8 +13432,8 @@
       }
       ;
     });
-    f620.cljs$lang$maxFixedArity = 1;
-    return f620;
+    f715.cljs$lang$maxFixedArity = 1;
+    return f715;
   })();
   window["__uiSelect"] = open_select;
 
@@ -13443,8 +13466,8 @@
     return window.matchMedia("(prefers-color-scheme: dark)").matches;
   };
   var resolve_effective = function(mode) {
-    const G__6241 = mode;
-    switch (G__6241) {
+    const G__7191 = mode;
+    switch (G__7191) {
       case "light":
         return "light";
         break;
@@ -13473,8 +13496,8 @@
   var apply_theme_BANG_ = function(mode) {
     const el1 = document.documentElement;
     suppress_transitions_BANG_();
-    const G__6252 = mode;
-    switch (G__6252) {
+    const G__7202 = mode;
+    switch (G__7202) {
       case "light":
         return el1.setAttribute("data-theme", "light");
         break;
@@ -13549,8 +13572,8 @@
   var toggle_BANG_ = function() {
     const current1 = get_mode();
     const next_mode2 = (() => {
-      const G__6263 = current1;
-      switch (G__6263) {
+      const G__7213 = current1;
+      switch (G__7213) {
         case "auto":
           return "light";
           break;
@@ -13871,8 +13894,8 @@
     ;
   };
   var opposite = function(side) {
-    const G__6271 = side;
-    switch (G__6271) {
+    const G__7221 = side;
+    switch (G__7221) {
       case "top":
         return "bottom";
         break;
@@ -13907,8 +13930,8 @@
     ;
   };
   var room = function(side, tr, vw, vh) {
-    const G__6281 = side;
-    switch (G__6281) {
+    const G__7231 = side;
+    switch (G__7231) {
       case "bottom":
         return vh - tr.bottom - gap2 - edge2;
         break;
@@ -13988,8 +14011,8 @@
     const cx8 = tr3.left + tr3.width / 2;
     const cy9 = tr3.top + tr3.height / 2;
     const left10 = clamp6((() => {
-      const G__62911 = side6;
-      switch (G__62911) {
+      const G__72411 = side6;
+      switch (G__72411) {
         case "left":
           return tr3.left - gap2 - w4;
           break;
@@ -14002,8 +14025,8 @@
       ;
     })(), edge2, vw1 - w4 - edge2);
     const top13 = clamp6((() => {
-      const G__63014 = side6;
-      switch (G__63014) {
+      const G__72514 = side6;
+      switch (G__72514) {
         case "top":
           return tr3.top - gap2 - h5;
           break;
@@ -14046,11 +14069,11 @@
     return s1.pending = null;
   };
   var unwatch_BANG_ = function() {
-    const G__6311 = get_state3().observer;
-    if (G__6311 == null) {
+    const G__7261 = get_state3().observer;
+    if (G__7261 == null) {
       return null;
     } else {
-      return G__6311.disconnect();
+      return G__7261.disconnect();
     }
     ;
   };
@@ -14573,14 +14596,14 @@
       ;
     })().split(","))));
     const override_keys4 = set(map(first, viewport_overrides));
-    const kept5 = remove((function(p__632) {
-      const vec__69 = p__632;
+    const kept5 = remove((function(p__727) {
+      const vec__69 = p__727;
       const k10 = nth(vec__69, 0, null);
       const _11 = nth(vec__69, 1, null);
       return contains_QMARK_(override_keys4, k10);
     }), entries1);
-    return join(", ", map((function(p__633) {
-      const vec__1215 = p__633;
+    return join(", ", map((function(p__728) {
+      const vec__1215 = p__728;
       const k16 = nth(vec__1215, 0, null);
       const v17 = nth(vec__1215, 1, null);
       if (v17 == null) {
@@ -14738,8 +14761,8 @@
     ;
   };
   var builtin_options = function(p, id) {
-    const G__6341 = id;
-    switch (G__6341) {
+    const G__7291 = id;
+    switch (G__7291) {
       case "quality":
         const temp__23007__auto__3 = native_levels(p);
         if (truth_(temp__23007__auto__3)) {
@@ -14809,8 +14832,8 @@
     ;
   };
   var builtin_value = function(p, id) {
-    const G__6351 = id;
-    switch (G__6351) {
+    const G__7301 = id;
+    switch (G__7301) {
       case "quality":
         const h3 = p.hls;
         if (truth_(native_levels(p))) {
@@ -14846,8 +14869,8 @@
     ;
   };
   var builtin_summary = function(p, id) {
-    const G__6361 = id;
-    switch (G__6361) {
+    const G__7311 = id;
+    switch (G__7311) {
       case "quality":
         const h3 = p.hls;
         const cur4 = truth_(h3) ? levels(p)[h3.currentLevel] : null;
@@ -14895,8 +14918,8 @@
     ;
   };
   var builtin_select_BANG_ = function(p, id, v) {
-    const G__6371 = id;
-    switch (G__6371) {
+    const G__7321 = id;
+    switch (G__7321) {
       case "quality":
         if (truth_(native_levels(p))) {
           p.nativeLevel = v;
@@ -15323,9 +15346,9 @@
       scrub5.setAttribute("aria-valuenow", Math.round(t4));
       scrub5.setAttribute("aria-valuetext", `${fmt(t4) ?? ""}${" of "}${fmt(d3) ?? ""}`);
       const b11 = v2.buffered;
-      const n63812 = b11.length;
+      const n73312 = b11.length;
       let i13 = 0;
-      for (; i13 < n63812; i13++) {
+      for (; i13 < n73312; i13++) {
         b11.start(i13) <= t4 + 0.5 ? scrub5.style.setProperty("--vp-buffered", b11.end(i13) / d3) : null;
       }
       ;
@@ -15482,8 +15505,8 @@
   };
   var act_BANG_ = function(p, a) {
     const v1 = p.video;
-    const G__6392 = a;
-    switch (G__6392) {
+    const G__7342 = a;
+    switch (G__7342) {
       case "play":
         toggle_play_BANG_(p);
         break;
@@ -15655,8 +15678,8 @@
     scrub.addEventListener("pointerup", end7);
     scrub.addEventListener("pointercancel", end7);
     return scrub.addEventListener("keydown", (function(e) {
-      const G__6409 = e.key;
-      switch (G__6409) {
+      const G__7359 = e.key;
+      switch (G__7359) {
         case "ArrowLeft":
           e.preventDefault();
           e.stopPropagation();
@@ -16375,9 +16398,9 @@
     return obs2.observe(document.body, { "childList": true, "subtree": true, "attributes": true, "attributeFilter": ["data-src"] });
   };
   window["__uiVideoPlayer"] = (function(root) {
-    let temp__23062__auto__641 = players.get(root);
-    if (truth_(temp__23062__auto__641)) {
-      const p1 = temp__23062__auto__641;
+    let temp__23062__auto__736 = players.get(root);
+    if (truth_(temp__23062__auto__736)) {
+      const p1 = temp__23062__auto__736;
       return { "video": p1.video, "play": (function() {
         return autoplay_BANG_(p1);
       }), "pause": (function() {
