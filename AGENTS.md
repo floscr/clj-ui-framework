@@ -812,7 +812,7 @@ ugly first draft came from. The framework owns that layer:
 | Preferences: label + hint on the left, control on the right | `ui.settings`: `settings-group`, `settings-row` |
 | Headline numbers (KPI row, record stats) | `ui.metric`: `metric` (label, value, unit, delta, trend, hint, :flush), `metric-row` |
 | Records as rows (playlists, saved items, devices) | `ui.list-row`: `list-rows`, `list-row` (icon or thumb, title, description, meta, trailing controls, :href / :on-click / :active) |
-| What a list shows: presets, sort / group / hide rules, columns, display options | `ui.filters`: `filters` + `filter-band` (labeled bands), `preset-bar` / `preset` (the changed preset carries Save and Revert), `rule-list` / `rule` (every rule a sentence), `filter-toggle` (display options, columns with `:reorder`), `filter-disclosure` (the filter as one line that opens), `filter-footer` |
+| What a list shows: presets, sort / group / hide rules, columns, display options | `ui.filters`: `filters` + `filter-band` (labeled bands), `preset-bar` / `preset` (the changed preset carries Save and Revert), `rule-list` / `rule` (every rule a sentence with its verb in the kind's `:tone`, a `:menu` on the row; without words a plain row, which is how a table's columns are listed), `filter-toggle` (display options), `filter-disclosure` (the filter as one line that opens), `filter-footer` |
 | Three to five exclusive modes (Auto / Light / Dark) | `ui.button-group` with `:variant :boxed`, one `:active` item |
 | A view with nothing in it | `ui.empty-state` with `:fill true`, a `.empty-state-title` line and one action |
 

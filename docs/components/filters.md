@@ -1,11 +1,12 @@
 # Filters
 
-> The parts of a filter view: a surface of labeled bands, a preset bar that saves where the change is, rules read as sentences, pressed toggles for columns and display options, and a one-line summary that opens it all.
+> The parts of a filter view: a surface of labeled bands, a preset bar that saves where the change is, rules read as sentences with a verb in the color of their kind, rows for a table's columns, pressed toggles for display options, and a one-line summary that opens it all.
 
 - Type: Component (data, Tables)
 - Namespace: `ui.filters`
 - Source: `src/ui/filters.cljc`
-- Public fns: `filters-class-list`, `filters-classes`, `filters`, `filter-band`, `filter-footer`, `filter-action`, `filter-spacer`, `filter-divider`, `filter-disclosure`, `preset-bar`, `preset-class-list`, `preset-classes`, `preset`, `preset-add`, `preset-more`, `rule-list`, `rule-class-list`, `rule-classes`, `rule`, `rule-value`, `rule-text`, `rule-add`, `rule-empty`, `filter-toggle-class-list`, `filter-toggle-classes`, `filter-toggle`, `filter-add`
+- Public fns: `filters-class-list`, `filters-classes`, `filters`, `filter-band`, `filter-footer`, `filter-action`, `filter-spacer`, `filter-disclosure`, `preset-bar`, `preset-class-list`, `preset-classes`, `preset`, `preset-add`, `preset-more`, `rule-list`, `rule-class-list`, `rule-classes`, `rule-verb-class-list`, `rule`, `rule-value`, `rule-text`, `rule-add`, `rule-empty`, `filter-toggle-class-list`, `filter-toggle-classes`, `filter-toggle`
+- JS runtime: `ui.js.context-menu`, `ui.js.gestures` (bundled in ui-runtime.js)
 - Keywords: filter, filter bar, view settings, preset, saved view, rules, sort, group, columns, display options, query builder, customize view
 
 ## When to use
@@ -36,10 +37,12 @@
       (filters/preset-add {:on-click save-as-new!})))
   (filters/filter-band {:label "Rules"}
     (filters/rule-list {}
-      (filters/rule {:verb "Sort by" :icon :arrow-up-down :on-remove remove! :on-toggle toggle!}
+      (filters/rule {:verb "Sort by" :icon :arrow-up-down :tone :warning :on-remove remove! :on-toggle toggle!}
         (filters/rule-value {:on-click pick-field!} "Played")
         (filters/rule-value {:icon :arrow-down :on-click flip!} "Newest first"))
-      (filters/rule {:verb "Hide" :icon :eye-off :on-verb hide-or-keep! :on-remove remove! :on-toggle toggle!}
+      (filters/rule {:verb "Hide" :icon :eye-off :tone :danger :on-verb hide-or-keep! :on-remove remove! :on-toggle toggle!
+                     :menu [{:label "Duplicate" :icon :copy :on-click duplicate!}
+                            {:label "Delete" :icon :trash :variant :danger :on-click remove!}]}
         "where"
         (filters/rule-value {:on-click pick-field!} "Title")
         (filters/rule-value {:on-click pick-match!} "contains")
@@ -51,14 +54,15 @@
 
 ## Examples
 
-### Columns in table order: press to show or hide, drag to reorder, add the rest
+### A table's columns: plain rows of the same list, the switch shows or hides one, the grip reorders
 
 ```clojure
 (filters/filter-band {:label "Columns"}
-  (filters/filter-toggle {:reorder true :on true :on-click hide-title!} "Title")
-  (filters/filter-toggle {:reorder true :on-click show-plays!} "Plays")
-  (filters/filter-divider)
-  (filters/filter-add {:on-click add-album!} "Album"))
+  (filters/rule-list {}
+    (filters/rule {:verb "Title" :on-toggle hide-title! :on-remove remove-title!
+                   :menu [{:label "Move down" :icon :arrow-down :on-click move-title-down!}]})
+    (filters/rule {:verb "Plays" :off true :on-toggle show-plays! :on-remove remove-plays!})
+    (filters/rule-add {:on-click add-column-menu!} "Add column")))
 ```
 
 ### A server-rendered filter behind its summary, each choice an htmx request
@@ -161,8 +165,9 @@ Children: The label.
 | `:button-attrs` | `map` | – | Attributes of the preset's button or link (onclick, hx-get). |
 | `:save-attrs` | `map` | – | Attributes of the save button; it only renders with these or :on-save. |
 | `:revert-attrs` | `map` | – | Attributes of the revert button; it only renders with these or :on-revert. |
+| `:menu` | `vector of item maps` | – | Context menu of the preset (right click, long press), items as in context-menu: Delete on a saved one. |
 | `:class` | `string` | – |  |
-| `:attrs` | `map` | – | The wrapper: a key, a context menu. |
+| `:attrs` | `map` | – | The wrapper: a key. |
 
 ### `preset-add`
 
@@ -201,14 +206,16 @@ Children: rule elements, then a rule-add; a rule-empty when there is none.
 
 ### `rule`
 
-One rule: grip, verb, words, then a remove button and the switch that pauses it.
+One rule: grip, verb, words, then the switch that pauses it and the remove button, always visible. Without words it is a plain row: a table's column.
 
 Children: The words. A string is a connective ("where", "is"); values are rule-value, rule-text or a select.
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `:verb` | `string` | – | "Sort by", "Group by", "Hide", "Keep only". |
+| `:verb` | `string` | – | "Sort by", "Group by", "Hide", "Keep only", or the row's name. |
 | `:icon` | `keyword` | – | Icon before the verb. |
+| `:tone` | `:accent \| :danger \| :success \| :warning` | – | The color of the rule's kind; the verb becomes a tinted label of one width. Convention: :warning sort, :accent group, :danger hide, :success keep. |
+| `:menu` | `vector of item maps` | – | Context menu of the row (right click, long press), items as in context-menu: Duplicate, Turn off, Move up, Move down, Delete. |
 | `:off` | `boolean` | – | The rule is paused: dimmed, switch off. |
 | `:grip` | `boolean` | `true` | false leaves the drag grip out. |
 | `:toggle` | `boolean` | `true` | false leaves the switch out. |
@@ -273,7 +280,7 @@ Children: The sentence.
 
 ### `filter-toggle`
 
-A pressed toggle: a display option, one choice of a few, or with :reorder a column.
+A pressed toggle: a display option or one choice of a few.
 
 Children: The label.
 
@@ -281,20 +288,7 @@ Children: The label.
 | --- | --- | --- | --- |
 | `:on` | `boolean` | – | Pressed. |
 | `:icon` | `keyword` | – | Leading icon. |
-| `:reorder` | `boolean` | – | The column form: a grip while shown, a crossed eye while hidden. Drag handlers come in through :attrs. |
 | `:value` | `hiccup` | – | A control shown inside the pressed toggle (a select, a rule-value). The toggle is then wrapped in a span. |
-| `:on-click` | `fn` | – |  |
-| `:class` | `string` | – |  |
-| `:attrs` | `map` | – |  |
-
-### `filter-add`
-
-A quiet plus with a label at the end of a band: adds what is not there yet.
-
-Children: The label.
-
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
 | `:on-click` | `fn` | – |  |
 | `:class` | `string` | – |  |
 | `:attrs` | `map` | – |  |
@@ -327,10 +321,6 @@ Children: The label.
 
 Takes the free space of a footer or band, so what follows sits at the end.
 
-### `filter-divider`
-
-A short vertical hairline between two groups of a band.
-
 ### `filters-class-list`
 
 Class vector for {:bare :dense}.
@@ -355,9 +345,13 @@ Class vector for {:off}.
 
 String form.
 
+### `rule-verb-class-list`
+
+Class vector of a rule's verb for {:tone}.
+
 ### `filter-toggle-class-list`
 
-Class vector for {:on :reorder}.
+Class vector for {:on}.
 
 ### `filter-toggle-classes`
 
@@ -374,9 +368,9 @@ String form.
 ## Accessibility
 
 - The active preset has aria-current, toggles have aria-pressed, the rule switch is a real checkbox.
-- The remove button of a rule shows on hover and on keyboard focus inside the rule; on touch it is always there.
 - Dragging is the app's: give the grip a keyboard alternative (arrow keys on a focused grip, or move actions in a menu).
-- Rule kinds are told apart by their verb and icon, never by color.
+- A rule's kind has a color, but its verb and icon say the same, so the color is never the only cue.
+- A row's menu (:menu) repeats what the row's own controls do and adds the rest (duplicate, move up and down), so reordering works without dragging.
 
 ## Motion
 
@@ -400,7 +394,10 @@ String form.
 - One grammar for every filter view: bands in the order presets, Find, Rules, Columns, Show, then the footer. Leave out the bands a list does not need.
 - Sort, group, hide and keep are all rules in one rule-list; do not build a separate sort section.
 - Saving belongs to the preset bar (the dirty preset's Save, preset-add). Do not add a row of save buttons under the panel.
-- Use filter-toggle for display options and columns instead of a switch per row.
+- Use filter-toggle for display options instead of a switch per row.
+- A table's columns are a rule-list of plain rules (name as :verb, no words): the switch shows or hides, the grip reorders top to bottom, a rule-add row opens the menu of columns to add. Do not lay columns out as chips that drag sideways.
+- Give every kind of rule its :tone (:warning sort, :accent group, :danger hide, :success keep) and every rule a :menu with at least Duplicate (where it makes sense), Turn off / on, Move up, Move down and Delete.
+- :menu on rule and preset needs the context menu runtime (ui.js.context-menu, plus ui.js.gestures for long press).
 - Band labels are sentence case, one or two words. No uppercase section headings.
 - The components are stateless and open no menus: open the app's menu (context menu runtime, select) from rule-value's click, or put a ui.select among the words, which is styled as a value pill there.
 
@@ -415,6 +412,6 @@ String form.
 
 ## Guidance for AI tools
 
-Filters: The parts of a filter view: a surface of labeled bands, a preset bar that saves where the change is, rules read as sentences, pressed toggles for columns and display options, and a one-line summary that opens it all. Use only the documented props; `:class` and `:attrs` are for layout and extra attributes, never for restyling internals. The same call renders on all three targets; see Targets for the per-target event and class conventions. Keep keyboard access and both themes intact.
+Filters: The parts of a filter view: a surface of labeled bands, a preset bar that saves where the change is, rules read as sentences with a verb in the color of their kind, rows for a table's columns, pressed toggles for display options, and a one-line summary that opens it all. Use only the documented props; `:class` and `:attrs` are for layout and extra attributes, never for restyling internals. The same call renders on all three targets; see Targets for the per-target event and class conventions. Keep keyboard access and both themes intact.
 
 Full library index: docs/llms.txt

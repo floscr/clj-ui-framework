@@ -103,6 +103,36 @@
        [items]
        (json-val (vec items)))))
 
+;; ── Menu attributes ─────────────────────────────────────────────────
+
+(defn menu-attrs
+  "The attributes that give any element a context menu of `items` (right
+   click, long press on touch), without a wrapper element: merge them into
+   the element's attributes. For a row whose markup can't take a wrapper (a
+   list item, a table row, a flex child). `items` as in
+   context-menu-trigger."
+  [items]
+  (let [normalized (mapv normalize-item items)]
+    #?(:squint
+       {:data-long-press "true"
+        :on-contextmenu (fn [e]
+                          (.preventDefault e)
+                          (let [f (aget js/window "__uiContextMenu")]
+                            (when f (f e normalized))))}
+
+       :cljs
+       (let [items-js (clj->js normalized)]
+         {:data-long-press "true"
+          :on {:contextmenu (fn [e]
+                              (.preventDefault e)
+                              (when-let [f (aget js/window "__uiContextMenu")]
+                                (f e items-js)))}})
+
+       :clj
+       {:data-long-press "true"
+        :data-context-menu (items->json normalized)
+        :oncontextmenu "event.preventDefault();window.__uiContextMenu(event)"})))
+
 ;; ── Context Menu Trigger ────────────────────────────────────────────
 
 (defn context-menu-trigger

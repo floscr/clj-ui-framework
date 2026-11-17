@@ -7,6 +7,14 @@
             [ui.select :as select]
             [ui.button :as button]))
 
+(def ^:private row-menu
+  [{:label "Duplicate" :icon :copy :on-click (log-click "duplicate")}
+   {:label "Turn off" :icon :eye-off :on-click (log-click "turn off")}
+   {:label "Move up" :icon :arrow-up :on-click (log-click "move up")}
+   {:label "Move down" :icon :arrow-down :on-click (log-click "move down")}
+   {:type :separator}
+   {:label "Delete" :icon :trash :variant :danger :on-click (log-click "delete")}])
+
 (def ^:private body-lengths
   [{:value "sentence" :label "1 sentence"}
    {:value "paragraph" :label "1 paragraph"}
@@ -36,28 +44,27 @@
            (chip/chip {} (icon/icon {:icon-name :download :size :sm}) "Downloaded"))
          (filters/filter-band {:label "Rules"}
            (filters/rule-list {}
-             (filters/rule {:verb "Sort by" :icon :arrow-up-down :toggle false :remove-attrs {}}
+             (filters/rule {:verb "Sort by" :icon :arrow-up-down :tone :warning :toggle false :remove-attrs {}
+                            :menu row-menu}
                (filters/rule-value {} "Played")
                (filters/rule-value {:icon :arrow-down} "Newest first"))
-             (filters/rule {:verb "Then by" :icon :arrow-up-down :toggle false :remove-attrs {}}
+             (filters/rule {:verb "Then by" :icon :arrow-up-down :tone :warning :toggle false :remove-attrs {}}
                (filters/rule-value {} "Artist")
                (filters/rule-value {:icon :arrow-up} "A to Z"))
-             (filters/rule {:verb "Hide" :icon :eye-off :on-verb (log-click "hide or keep") :verb-attrs {}
-                            :remove-attrs {}}
+             (filters/rule {:verb "Hide" :icon :eye-off :tone :danger :on-verb (log-click "hide or keep") :verb-attrs {}
+                            :remove-attrs {} :menu row-menu}
                "where"
                (filters/rule-value {} "Title")
                (filters/rule-value {} "contains")
                (filters/rule-text {:value "live" :placeholder "Text"}))
              (filters/rule-add {:hint "Sort, hide, keep only" :on-click (log-click "add rule")})))
          (filters/filter-band {:label "Columns"}
-           (filters/filter-toggle {:reorder true :on true} "Title")
-           (filters/filter-toggle {:reorder true :on true} "Artist")
-           (filters/filter-toggle {:reorder true :on true} "Added")
-           (filters/filter-toggle {:reorder true} "Plays")
-           (filters/filter-toggle {:reorder true :on true} "Playlist")
-           (filters/filter-divider)
-           (filters/filter-add {} "Album")
-           (filters/filter-add {} "Duration"))
+           (filters/rule-list {}
+             (filters/rule {:verb "Title" :remove-attrs {} :menu row-menu})
+             (filters/rule {:verb "Artist" :remove-attrs {}})
+             (filters/rule {:verb "Added" :remove-attrs {}})
+             (filters/rule {:verb "Plays" :off true :remove-attrs {}})
+             (filters/rule-add {:hint "Album, Duration, Genre"} "Add column")))
          (filters/filter-band {:label "Show"}
            (filters/filter-toggle {:icon :music} "Icons")
            (filters/filter-toggle {:icon :image :on true} "Covers"))
@@ -82,18 +89,18 @@
            (form/form-input {:type :search :icon-left :search :placeholder "Filter inbox or :tag…"}))
          (filters/filter-band {:label "Rules"}
            (filters/rule-list {}
-             (filters/rule {:verb "Sort by" :icon :arrow-up-down :remove-attrs {}}
+             (filters/rule {:verb "Sort by" :icon :arrow-up-down :tone :warning :remove-attrs {} :menu row-menu}
                (filters/rule-value {} "State")
                (filters/rule-value {:icon :arrow-up} "Ascending"))
-             (filters/rule {:verb "Group by" :icon :layers :remove-attrs {}}
+             (filters/rule {:verb "Group by" :icon :layers :tone :accent :remove-attrs {}}
                (filters/rule-value {} "Agenda")
                "ordered"
                (filters/rule-value {} "Default"))
-             (filters/rule {:verb "Hide" :icon :eye-off :off true :remove-attrs {}}
+             (filters/rule {:verb "Hide" :icon :eye-off :tone :danger :off true :remove-attrs {}}
                (filters/rule-value {} "Older")
                "than"
                (filters/rule-value {} "1 week"))
-             (filters/rule {:verb "Keep only" :icon :filter :remove-attrs {}}
+             (filters/rule {:verb "Keep only" :icon :filter :tone :success :remove-attrs {}}
                (filters/rule-value {} "Todo state")
                "is"
                (filters/rule-value {} "Open"))

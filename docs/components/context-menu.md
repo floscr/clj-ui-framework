@@ -5,7 +5,7 @@
 - Type: Component (actions, Menus)
 - Namespace: `ui.context-menu`
 - Source: `src/ui/context_menu.cljc`
-- Public fns: `icon-paths-for`, `normalize-item`, `items->json`, `context-menu-trigger`
+- Public fns: `icon-paths-for`, `normalize-item`, `items->json`, `menu-attrs`, `context-menu-trigger`
 - JS runtime: `ui.js.context-menu`, `ui.js.gestures` (bundled in ui-runtime.js)
 - Keywords: context menu, right click, long press, actions menu, row actions
 
@@ -69,6 +69,10 @@ Children: The element that owns the actions.
 | `:class` | `string` | – |  |
 | `:attrs` | `map` | – |  |
 
+### `menu-attrs`
+
+Attributes that give any element the context menu of the given items (right click, long press), without a wrapper: merge them into the element's attrs. For a row whose markup can't take a wrapper element.
+
 ### `normalize-item`
 
 Flattens an item map for the runtime (adds :icon-paths, stringifies keywords).
@@ -110,6 +114,7 @@ SVG child elements for an icon name, for the runtime to draw without the icon mo
 
 ## Notes for AI
 
+- When a wrapper div would break the layout (a list row, a flex or grid child), merge (context-menu/menu-attrs items) into the element's own attrs instead of wrapping it.
 - Add :data-long-press to any element with a custom contextmenu handler so touch users get the same menu.
 - Do not add your own selection or right-click guards while the menu is open; the runtime toggles .clj-ui-menu-open on html and swallows contextmenu events itself.
 - Destructive items: :variant :danger plus :confirm; label with verb and object (the armed row reads "Tap again to <label>").

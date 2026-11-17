@@ -1,6 +1,6 @@
 {:id :filters
  :title "Filters"
- :summary "The parts of a filter view: a surface of labeled bands, a preset bar that saves where the change is, rules read as sentences, pressed toggles for columns and display options, and a one-line summary that opens it all."
+ :summary "The parts of a filter view: a surface of labeled bands, a preset bar that saves where the change is, rules read as sentences with a verb in the color of their kind, rows for a table's columns, pressed toggles for display options, and a one-line summary that opens it all."
  :category :data
  :group "Tables"
  :keywords ["filter" "filter bar" "view settings" "preset" "saved view" "rules" "sort" "group" "columns" "display options" "query builder" "customize view"]
@@ -16,11 +16,11 @@
   "Use button-group with :variant :boxed to switch between whole views or modes."
   "Use tabs when the choices lead to different content, not a different view of the same list."]
 
- :usage "(require '[ui.filters :as filters])\n\n(filters/filters {}\n  (filters/filter-band {}\n    (filters/preset-bar {}\n      (filters/preset {:on-click #(pick! :newest)} \"Newest\")\n      (filters/preset {:active true :dirty true\n                       :on-click #(pick! :jq) :on-save save! :on-revert revert!}\n        \"JQ\")\n      (filters/preset-add {:on-click save-as-new!})))\n  (filters/filter-band {:label \"Rules\"}\n    (filters/rule-list {}\n      (filters/rule {:verb \"Sort by\" :icon :arrow-up-down :on-remove remove! :on-toggle toggle!}\n        (filters/rule-value {:on-click pick-field!} \"Played\")\n        (filters/rule-value {:icon :arrow-down :on-click flip!} \"Newest first\"))\n      (filters/rule {:verb \"Hide\" :icon :eye-off :on-verb hide-or-keep! :on-remove remove! :on-toggle toggle!}\n        \"where\"\n        (filters/rule-value {:on-click pick-field!} \"Title\")\n        (filters/rule-value {:on-click pick-match!} \"contains\")\n        (filters/rule-text {:value \"live\" :on-input set-text!}))\n      (filters/rule-add {:hint \"Sort, hide, keep only\" :on-click add-rule!})))\n  (filters/filter-band {:label \"Show\"}\n    (filters/filter-toggle {:icon :image :on covers? :on-click toggle-covers!} \"Covers\")))"
+ :usage "(require '[ui.filters :as filters])\n\n(filters/filters {}\n  (filters/filter-band {}\n    (filters/preset-bar {}\n      (filters/preset {:on-click #(pick! :newest)} \"Newest\")\n      (filters/preset {:active true :dirty true\n                       :on-click #(pick! :jq) :on-save save! :on-revert revert!}\n        \"JQ\")\n      (filters/preset-add {:on-click save-as-new!})))\n  (filters/filter-band {:label \"Rules\"}\n    (filters/rule-list {}\n      (filters/rule {:verb \"Sort by\" :icon :arrow-up-down :tone :warning :on-remove remove! :on-toggle toggle!}\n        (filters/rule-value {:on-click pick-field!} \"Played\")\n        (filters/rule-value {:icon :arrow-down :on-click flip!} \"Newest first\"))\n      (filters/rule {:verb \"Hide\" :icon :eye-off :tone :danger :on-verb hide-or-keep! :on-remove remove! :on-toggle toggle!\n                     :menu [{:label \"Duplicate\" :icon :copy :on-click duplicate!}\n                            {:label \"Delete\" :icon :trash :variant :danger :on-click remove!}]}\n        \"where\"\n        (filters/rule-value {:on-click pick-field!} \"Title\")\n        (filters/rule-value {:on-click pick-match!} \"contains\")\n        (filters/rule-text {:value \"live\" :on-input set-text!}))\n      (filters/rule-add {:hint \"Sort, hide, keep only\" :on-click add-rule!})))\n  (filters/filter-band {:label \"Show\"}\n    (filters/filter-toggle {:icon :image :on covers? :on-click toggle-covers!} \"Covers\")))"
 
  :examples
- [{:title "Columns in table order: press to show or hide, drag to reorder, add the rest"
-   :code "(filters/filter-band {:label \"Columns\"}\n  (filters/filter-toggle {:reorder true :on true :on-click hide-title!} \"Title\")\n  (filters/filter-toggle {:reorder true :on-click show-plays!} \"Plays\")\n  (filters/filter-divider)\n  (filters/filter-add {:on-click add-album!} \"Album\"))"}
+ [{:title "A table's columns: plain rows of the same list, the switch shows or hides one, the grip reorders"
+   :code "(filters/filter-band {:label \"Columns\"}\n  (filters/rule-list {}\n    (filters/rule {:verb \"Title\" :on-toggle hide-title! :on-remove remove-title!\n                   :menu [{:label \"Move down\" :icon :arrow-down :on-click move-title-down!}]})\n    (filters/rule {:verb \"Plays\" :off true :on-toggle show-plays! :on-remove remove-plays!})\n    (filters/rule-add {:on-click add-column-menu!} \"Add column\")))"}
   {:title "A server-rendered filter behind its summary, each choice an htmx request"
    :code "(filters/filter-disclosure {:summary \"15+ comments · unseen only\" :summary-attrs {:id \"filter-sum\"}}\n  (filters/filters {:bare true :attrs {:id \"filter-opts\"}}\n    (filters/filter-band {:label \"Comments\"}\n      (filters/filter-toggle {:attrs {:hx-get \"/list?c=0\"}} \"Any\")\n      (filters/filter-toggle {:on true :attrs {:hx-get \"/list?c=15\"}} \"15+\"))))"}
   {:title "An option that needs a value: the control sits inside the pressed toggle"
@@ -66,7 +66,8 @@
            {:name :button-attrs :type "map" :doc "Attributes of the preset's button or link (onclick, hx-get)."}
            {:name :save-attrs :type "map" :doc "Attributes of the save button; it only renders with these or :on-save."}
            {:name :revert-attrs :type "map" :doc "Attributes of the revert button; it only renders with these or :on-revert."}
-           {:name :class :type "string"} {:name :attrs :type "map" :doc "The wrapper: a key, a context menu."}]}
+           {:name :menu :type "vector of item maps" :doc "Context menu of the preset (right click, long press), items as in context-menu: Delete on a saved one."}
+           {:name :class :type "string"} {:name :attrs :type "map" :doc "The wrapper: a key."}]}
   {:fn "preset-add"
    :doc "Saves the view on screen as a new preset: a plus, or with children a labeled action."
    :children "Optional label (\"Save as preset\")."
@@ -83,10 +84,12 @@
    :children "rule elements, then a rule-add; a rule-empty when there is none."
    :props [{:name :class :type "string"} {:name :attrs :type "map"}]}
   {:fn "rule"
-   :doc "One rule: grip, verb, words, then a remove button and the switch that pauses it."
+   :doc "One rule: grip, verb, words, then the switch that pauses it and the remove button, always visible. Without words it is a plain row: a table's column."
    :children "The words. A string is a connective (\"where\", \"is\"); values are rule-value, rule-text or a select."
-   :props [{:name :verb :type "string" :doc "\"Sort by\", \"Group by\", \"Hide\", \"Keep only\"."}
+   :props [{:name :verb :type "string" :doc "\"Sort by\", \"Group by\", \"Hide\", \"Keep only\", or the row's name."}
            {:name :icon :type "keyword" :doc "Icon before the verb."}
+           {:name :tone :type ":accent | :danger | :success | :warning" :doc "The color of the rule's kind; the verb becomes a tinted label of one width. Convention: :warning sort, :accent group, :danger hide, :success keep."}
+           {:name :menu :type "vector of item maps" :doc "Context menu of the row (right click, long press), items as in context-menu: Duplicate, Turn off, Move up, Move down, Delete."}
            {:name :off :type "boolean" :doc "The rule is paused: dimmed, switch off."}
            {:name :grip :type "boolean" :default "true" :doc "false leaves the drag grip out."}
            {:name :toggle :type "boolean" :default "true" :doc "false leaves the switch out."}
@@ -118,17 +121,12 @@
    :children "The sentence."
    :props [{:name :class :type "string"} {:name :attrs :type "map"}]}
   {:fn "filter-toggle"
-   :doc "A pressed toggle: a display option, one choice of a few, or with :reorder a column."
+   :doc "A pressed toggle: a display option or one choice of a few."
    :children "The label."
    :props [{:name :on :type "boolean" :doc "Pressed."}
            {:name :icon :type "keyword" :doc "Leading icon."}
-           {:name :reorder :type "boolean" :doc "The column form: a grip while shown, a crossed eye while hidden. Drag handlers come in through :attrs."}
            {:name :value :type "hiccup" :doc "A control shown inside the pressed toggle (a select, a rule-value). The toggle is then wrapped in a span."}
            {:name :on-click :type "fn"} {:name :class :type "string"} {:name :attrs :type "map"}]}
-  {:fn "filter-add"
-   :doc "A quiet plus with a label at the end of a band: adds what is not there yet."
-   :children "The label."
-   :props [{:name :on-click :type "fn"} {:name :class :type "string"} {:name :attrs :type "map"}]}
   {:fn "filter-footer"
    :doc "The last line of the surface: a muted status and its text actions."
    :children "Strings, filter-action and filter-spacer."
@@ -139,14 +137,14 @@
    :props [{:name :on-click :type "fn"} {:name :disabled :type "boolean"}
            {:name :class :type "string"} {:name :attrs :type "map"}]}
   {:fn "filter-spacer" :doc "Takes the free space of a footer or band, so what follows sits at the end."}
-  {:fn "filter-divider" :doc "A short vertical hairline between two groups of a band."}
   {:fn "filters-class-list" :doc "Class vector for {:bare :dense}."}
   {:fn "filters-classes" :doc "String form."}
   {:fn "preset-class-list" :doc "Class vector for {:active :dirty}."}
   {:fn "preset-classes" :doc "String form."}
   {:fn "rule-class-list" :doc "Class vector for {:off}."}
   {:fn "rule-classes" :doc "String form."}
-  {:fn "filter-toggle-class-list" :doc "Class vector for {:on :reorder}."}
+  {:fn "rule-verb-class-list" :doc "Class vector of a rule's verb for {:tone}."}
+  {:fn "filter-toggle-class-list" :doc "Class vector for {:on}."}
   {:fn "filter-toggle-classes" :doc "String form."}]
 
  :keyboard
@@ -156,9 +154,9 @@
 
  :accessibility
  ["The active preset has aria-current, toggles have aria-pressed, the rule switch is a real checkbox."
-  "The remove button of a rule shows on hover and on keyboard focus inside the rule; on touch it is always there."
   "Dragging is the app's: give the grip a keyboard alternative (arrow keys on a focused grip, or move actions in a menu)."
-  "Rule kinds are told apart by their verb and icon, never by color."]
+  "A rule's kind has a color, but its verb and icon say the same, so the color is never the only cue."
+  "A row's menu (:menu) repeats what the row's own controls do and adds the rest (duplicate, move up and down), so reordering works without dragging."]
 
  :motion
  ["Color and background change over --duration-fast; presets and toggles scale to 0.97 while pressed."
@@ -169,6 +167,8 @@
   "The preset bar scrolls sideways instead of wrapping."
   "On touch the value pills and the save half of a changed preset grow to tap size."]
 
+ :runtime ["ui.js.context-menu" "ui.js.gestures"]
+
  :targets
  {:clj "No handlers: act through :attrs, :button-attrs, :save-attrs and the other *-attrs maps (onclick, hx-get, a form's button), or :href on a preset."
   :cljs "Handlers become {:on {:click f}}. State lives in the app."
@@ -178,7 +178,10 @@
  ["One grammar for every filter view: bands in the order presets, Find, Rules, Columns, Show, then the footer. Leave out the bands a list does not need."
   "Sort, group, hide and keep are all rules in one rule-list; do not build a separate sort section."
   "Saving belongs to the preset bar (the dirty preset's Save, preset-add). Do not add a row of save buttons under the panel."
-  "Use filter-toggle for display options and columns instead of a switch per row."
+  "Use filter-toggle for display options instead of a switch per row."
+  "A table's columns are a rule-list of plain rules (name as :verb, no words): the switch shows or hides, the grip reorders top to bottom, a rule-add row opens the menu of columns to add. Do not lay columns out as chips that drag sideways."
+  "Give every kind of rule its :tone (:warning sort, :accent group, :danger hide, :success keep) and every rule a :menu with at least Duplicate (where it makes sense), Turn off / on, Move up, Move down and Delete."
+  ":menu on rule and preset needs the context menu runtime (ui.js.context-menu, plus ui.js.gestures for long press)."
   "Band labels are sentence case, one or two words. No uppercase section headings."
   "The components are stateless and open no menus: open the app's menu (context menu runtime, select) from rule-value's click, or put a ui.select among the words, which is styled as a value pill there."]
 

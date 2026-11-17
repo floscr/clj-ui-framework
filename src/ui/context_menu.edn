@@ -28,6 +28,7 @@
    :children "The element that owns the actions."
    :props [{:name :items :type "vector of item maps" :doc "{:label :url :icon :variant :confirm :confirm-style :confirm-title :on-click :items} or {:type :separator}. :variant :danger tints the row. :items (a vector of item maps, nestable) makes the row a sub-menu: it shows a chevron and drills into a page of those items under a back header named by its :label. :confirm true (or a string) asks before running: by default the row arms in place (\"Tap again to delete\", 3s countdown) and the second activation runs it. :confirm-style :panel drills into a confirm page instead, showing :confirm-title, the :confirm string as the message, the action and Cancel."}
            {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "menu-attrs" :doc "Attributes that give any element the context menu of the given items (right click, long press), without a wrapper: merge them into the element's attrs. For a row whose markup can't take a wrapper element."}
   {:fn "normalize-item" :doc "Flattens an item map for the runtime (adds :icon-paths, stringifies keywords)."}
   {:fn "icon-paths-for" :doc "SVG child elements for an icon name, for the runtime to draw without the icon module."}]
 
@@ -54,7 +55,8 @@
   :squint "Same as Replicant."}
 
  :notes-for-ai
- ["Add :data-long-press to any element with a custom contextmenu handler so touch users get the same menu."
+ ["When a wrapper div would break the layout (a list row, a flex or grid child), merge (context-menu/menu-attrs items) into the element's own attrs instead of wrapping it."
+  "Add :data-long-press to any element with a custom contextmenu handler so touch users get the same menu."
   "Do not add your own selection or right-click guards while the menu is open; the runtime toggles .clj-ui-menu-open on html and swallows contextmenu events itself."
   "Destructive items: :variant :danger plus :confirm; label with verb and object (the armed row reads \"Tap again to <label>\")."
   "Use :confirm-style :panel when the user should see what is affected (pass :confirm-title and a :confirm message); keep the default for quick, low-stakes deletes."

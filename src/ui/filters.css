@@ -87,23 +87,9 @@
   flex: 1 1 100%;
 }
 
-/* A context menu wrapped around a preset or a toggle doesn't break the row. */
-.preset-bar > .context-menu-trigger,
-.filter-band-body > .context-menu-trigger {
-  display: contents;
-}
-
 .filter-spacer {
   flex: 1;
   min-width: 0;
-}
-
-.filter-divider {
-  flex: none;
-  width: 1px;
-  height: var(--size-4);
-  margin: 0 var(--size-1);
-  background: var(--bg-2);
 }
 
 /* ── Footer ──────────────────────────────────────────────────────── */
@@ -402,6 +388,30 @@
   color: var(--fg-2);
 }
 
+/* The verb in the color of its kind: sort, group, hide and keep are told
+   apart at a glance. The label and its icon still say which is which. One
+   width, so the values of the rules line up. */
+.rule-verb-toned {
+  min-width: calc(var(--size-16) + var(--size-12));
+  min-height: var(--size-6);
+  padding: 0 var(--size-2);
+  background: color-mix(in oklch, var(--rule-tone) 14%, transparent);
+  color: color-mix(in oklch, var(--rule-tone) 78%, var(--fg-0));
+}
+
+.rule-verb-toned > .icon {
+  color: inherit;
+}
+
+.rule-verb-accent { --rule-tone: var(--accent); }
+.rule-verb-danger { --rule-tone: var(--danger); }
+.rule-verb-success { --rule-tone: var(--success); }
+.rule-verb-warning { --rule-tone: var(--warning); }
+
+button.rule-verb-toned:hover {
+  background: color-mix(in oklch, var(--rule-tone) 24%, transparent);
+}
+
 /* A rule without a grip lines its verb up with the ones that have one. */
 .rule-list:has(.rule-grip) .rule > .rule-verb:first-child {
   margin-left: calc(var(--size-5) + var(--size-1));
@@ -511,24 +521,12 @@ button.rule-verb:hover {
   background: transparent;
   color: var(--fg-2);
   cursor: pointer;
-  transition: background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard), opacity var(--duration-fast) var(--ease-standard);
+  transition: background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);
 }
 
 .rule-remove:hover {
   background: var(--bg-2);
   color: var(--fg-0);
-}
-
-/* Remove shows on hover or focus where there is a pointer, always on touch. */
-@media (hover: hover) {
-  .rule-remove {
-    opacity: 0;
-  }
-
-  .rule:hover .rule-remove,
-  .rule:focus-within .rule-remove {
-    opacity: 1;
-  }
 }
 
 .rule-off .rule-verb,
@@ -629,28 +627,6 @@ button.rule-verb:hover {
   padding: 0 var(--size-3);
 }
 
-/* The column form: shown columns are filled, hidden ones an outline. */
-.filter-toggle-order {
-  padding-left: var(--size-1);
-  gap: var(--size-1);
-  cursor: grab;
-}
-
-.filter-toggle-order.filter-toggle-on,
-.filter-toggle-order.filter-toggle-on:hover {
-  background: var(--bg-2);
-  font-weight: 500;
-}
-
-.filter-toggle-order.filter-toggle-on > .icon {
-  color: var(--fg-2);
-}
-
-.filter-toggle-order:not(.filter-toggle-on) {
-  padding-left: var(--size-2);
-  color: var(--fg-2);
-}
-
 /* A toggle with a value: one pill, a hairline between the two halves. */
 .filter-toggle-split {
   display: inline-flex;
@@ -699,26 +675,6 @@ button.rule-verb:hover {
   padding: 0 var(--size-2);
 }
 
-.filter-add {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--size-1);
-  min-height: var(--control-sm);
-  padding: 0 var(--size-2);
-  border: 0;
-  border-radius: calc(var(--radius-control) - 1px);
-  background: transparent;
-  color: var(--fg-2);
-  font: inherit;
-  white-space: nowrap;
-  cursor: pointer;
-  transition: background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);
-}
-
-.filter-add:hover {
-  background: var(--bg-2);
-  color: var(--fg-0);
-}
 
 /* ── Narrow surface ──────────────────────────────────────────────
    Last in the file so it wins over the rules above. */

@@ -81,6 +81,11 @@
       (is (= [:button {:class "preset-save" :type "button" :hx-post "/save"} "Save view"]
              (find-el result "preset-save")))
       (is (= "Revert changes" (get-in (find-el result "preset-revert") [1 :aria-label])))))
+  (testing "a menu on the preset"
+    (let [result (filters/preset {:menu [{:label "Delete" :url "/del"}] :attrs {:data-id "a"}} "Mine")]
+      (is (= "true" (get-in result [1 :data-long-press])))
+      (is (string? (get-in result [1 :data-context-menu])))
+      (is (= "a" (get-in result [1 :data-id])))))
   (testing "no save without a way to act on it, none on a clean preset"
     (is (not (contains? (classes (filters/preset {:active true :dirty true} "JQ")) "preset-save")))
     (is (not (contains? (classes (filters/preset {:active true :save-attrs {}} "JQ")) "preset-save")))))
@@ -120,6 +125,27 @@
       (is (some? (find-el result "rule-remove")))
       (is (contains? (classes result) "switch switch--sm"))
       (is (contains? (classes result) "switch-track switch-track--checked"))))
+  (testing "the switch comes first, remove last"
+    (let [end (find-el (filters/rule {:verb "Hide" :remove-attrs {}}) "rule-end")]
+      (is (= :label (first (nth end 2))))
+      (is (= "rule-remove" (get-in (nth end 3) [1 :class])))))
+  (testing "the verb in the color of its kind"
+    (is (= ["rule-verb"] (filters/rule-verb-class-list {})))
+    (is (= ["rule-verb" "rule-verb-toned" "rule-verb-danger"] (filters/rule-verb-class-list {:tone :danger})))
+    (is (contains? (classes (filters/rule {:verb "Hide" :tone :danger}))
+                   "rule-verb rule-verb-toned rule-verb-danger"))
+    (is (= :button (first (find-el (filters/rule {:verb "Hide" :tone :danger :verb-attrs {:onclick "x()"}})
+                                   "rule-verb rule-verb-toned rule-verb-danger")))))
+  (testing "a menu on the row"
+    (let [result (filters/rule {:verb "Hide" :menu [{:label "Duplicate" :url "/dup"}] :attrs {:data-rule-id "r1"}})]
+      (is (= "true" (get-in result [1 :data-long-press])))
+      (is (re-find #"Duplicate" (get-in result [1 :data-context-menu])))
+      (is (= "r1" (get-in result [1 :data-rule-id])))
+      (is (nil? (get-in (filters/rule {:verb "Hide"}) [1 :data-long-press])))))
+  (testing "a plain row: a name, the switch, remove"
+    (let [result (filters/rule {:verb "Title" :remove-attrs {}})]
+      (is (= "Title" (last (find-el result "rule-verb"))))
+      (is (= [:span {:class "rule-words"}] (find-el result "rule-words")))))
   (testing "a paused rule"
     (let [result (filters/rule {:verb "Hide" :off true})]
       (is (= "rule rule-off" (get-in result [1 :class])))
@@ -153,8 +179,7 @@
 (deftest filter-toggle-test
   (testing "class list"
     (is (= ["filter-toggle"] (filters/filter-toggle-class-list {})))
-    (is (= "filter-toggle filter-toggle-order filter-toggle-on"
-           (filters/filter-toggle-classes {:on true :reorder true}))))
+    (is (= "filter-toggle filter-toggle-on" (filters/filter-toggle-classes {:on true}))))
   (testing "a toggle is a pressed button"
     (let [result (filters/filter-toggle {:on true :attrs {:hx-get "/f?c=15"}} "15+")]
       (is (= [:button {:class "filter-toggle filter-toggle-on" :type "button" :aria-pressed "true"
@@ -162,15 +187,8 @@
               "15+"]
              result)))
     (is (= "false" (get-in (filters/filter-toggle {} "Any") [1 :aria-pressed]))))
-  (testing "the column form shows a grip while shown, a crossed eye while hidden"
-    (is (= 4 (count (filters/filter-toggle {:reorder true :on true} "Title"))))
-    (is (= 4 (count (filters/filter-toggle {:reorder true} "Plays")))))
   (testing "a value splits the pill"
     (let [result (filters/filter-toggle {:on true :value [:b "v"]} "Body text")]
       (is (= "filter-toggle-split" (get-in result [1 :class])))
       (is (= :button (first (nth result 2))))
-      (is (= [:span {:class "filter-toggle-value"} [:b "v"]] (nth result 3)))))
-  (testing "filter-add"
-    (let [result (filters/filter-add {} "Album")]
-      (is (= "filter-add" (get-in result [1 :class])))
-      (is (= "Album" (last result))))))
+      (is (= [:span {:class "filter-toggle-value"} [:b "v"]] (nth result 3))))))

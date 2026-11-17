@@ -9,17 +9,20 @@
                         the bands (for a filter that stays out of the way)
      preset-bar/preset  saved views in one boxed track; the changed one
                         carries its own Save and Revert
-     rule-list/rule     sort, group, hide and keep as sentences: a verb,
-                        then value pills, a switch to pause, a remove
-     filter-toggle      a pressed toggle for a display option, a column
-                        or one choice of a few
+     rule-list/rule     sort, group, hide and keep as sentences: a verb
+                        in its kind's color, then value pills, a switch
+                        to pause, a remove, a menu on the row. Without
+                        words a rule is a plain row: a table's column
+     filter-toggle      a pressed toggle for a display option or one
+                        choice of a few
      filter-footer      the quiet status line with text actions
 
    Everything is stateless: the app owns the view's state and its menus."
   (:require [clojure.string :as str]
             [ui.util :as util]
             [ui.icon :as icon]
-            [ui.switch :as switch]))
+            [ui.switch :as switch]
+            [ui.context-menu :as ctx]))
 
 ;; ── Cross-target shims ───────────────────────────────────────────────
 
@@ -31,6 +34,17 @@
   #?(:squint (if f (assoc attrs flat f) attrs)
      :cljs   (if f (assoc-in attrs [:on nested] f) attrs)
      :clj    (do flat nested f attrs)))
+
+(defn- with-menu
+  "`attrs` plus what gives the element the context menu of `items` (right
+   click, long press); `attrs` win, handlers of both are kept."
+  [attrs items]
+  (if (seq items)
+    (let [m (ctx/menu-attrs items)]
+      #?(:squint (merge m attrs)
+         :cljs   (assoc (merge m attrs) :on (merge (:on m) (:on attrs)))
+         :clj    (merge m attrs)))
+    attrs))
 
 (defn- button-attrs [class-list class attrs]
   (util/class-attrs class-list class (merge {:type "button"} attrs)))
@@ -118,12 +132,6 @@
   []
   [:span {:class "filter-spacer"}])
 
-(defn filter-divider
-  "A short vertical hairline between two groups of a band (the shown
-   columns and the ones to add)."
-  []
-  [:span {:class "filter-divider" :aria-hidden "true"}])
-
 (defn filter-disclosure
   "A filter that stays out of the way: one line that says the filter in
    words and opens what is behind it. Native <details>, no JS.
@@ -191,13 +199,14 @@
                      hx-get)
      :save-attrs   - attributes for the save button
      :revert-attrs - attributes for the revert button
+     :menu         - context menu items (ui.context-menu) of the preset:
+                     right click or long press (Delete on a saved one)
      :class        - additional CSS classes
-     :attrs        - additional HTML attributes map (the wrapper: a key,
-                     a context menu)
+     :attrs        - additional HTML attributes map (the wrapper: a key)
 
    Children are the label."
   [{:keys [active dirty on-click href on-save on-revert save-label revert-label
-           button-attrs save-attrs revert-attrs class attrs] :as _props} & label]
+           button-attrs save-attrs revert-attrs menu class attrs] :as _props} & label]
   (let [dirty?  (boolean (and active dirty))
         revert  (or revert-label "Revert changes")
         main    (-> (merge (if href
@@ -208,7 +217,8 @@
                     (handle :on-click :click on-click))
         main-el (cond-> (into [(if href :a :button) main] label)
                   dirty? (conj [:span {:class "preset-dot" :title "Unsaved changes"}]))]
-    (cond-> [:span (util/class-attrs (preset-class-list {:active active :dirty dirty}) class attrs)
+    (cond-> [:span (util/class-attrs (preset-class-list {:active active :dirty dirty}) class
+                                     (with-menu attrs menu))
              main-el]
       (and dirty? (or on-save save-attrs))
       (conj [:button (-> (merge {:class "preset-save" :type "button"} save-attrs)
@@ -287,19 +297,38 @@
 (defn- word [w]
   (if (string? w) [:span {:class "rule-word"} w] w))
 
+(def rule-tones
+  "The colors a rule's verb can take, one per kind of rule."
+  ["accent" "danger" "success" "warning"])
+
+(defn rule-verb-class-list
+  "Classes for a rule's verb. :tone tints it in the color of the rule's
+   kind (:warning sort, :accent group, :danger hide, :success keep)."
+  [{:keys [tone]}]
+  (let [t (some-> tone util/kw-name)]
+    (cond-> ["rule-verb"]
+      t (conj "rule-verb-toned" (str "rule-verb-" t)))))
+
 (defn rule
-  "One rule, read as a sentence: a grip, the verb (\"Sort by\", \"Hide\"),
-   then its words. A string among the children is a connective (\"where\",
-   \"is\"), everything else a value: a rule-value, a rule-text, a select.
-   At the end a remove button and the switch that pauses the rule.
+  "One rule, read as a sentence: a grip, the verb (\"Sort by\", \"Hide\") in
+   the color of its kind, then its words. A string among the children is a
+   connective (\"where\", \"is\"), everything else a value: a rule-value, a
+   rule-text, a select. At the end the switch that pauses the rule, then
+   the remove button. Without words it is a plain row of a list that
+   reorders (a table's column: its name, shown or hidden, remove).
 
    Props:
      :verb         - what the rule does (\"Sort by\", \"Group by\", \"Hide\",
-                     \"Keep only\")
+                     \"Keep only\"), or the row's name
      :icon         - icon keyword before the verb
+     :tone         - :accent | :danger | :success | :warning, the color of
+                     the rule's kind; the verb becomes a tinted label
      :off          - boolean, the rule is paused
      :grip         - false leaves the drag grip out
      :toggle       - false leaves the switch out
+     :menu         - context menu items (ui.context-menu) of the row: right
+                     click or long press (Duplicate, Turn off, Move up,
+                     Delete)
      :on-verb      - makes the verb a button (switch Hide and Keep only)
      :on-toggle    - change handler of the switch
      :on-remove    - click handler of the remove button; without it and
@@ -313,28 +342,29 @@
      :attrs        - additional HTML attributes map (a key, drag and drop)
 
    Children are the words."
-  [{:keys [verb icon off grip toggle on-verb on-toggle on-remove
+  [{:keys [verb icon tone off grip toggle menu on-verb on-toggle on-remove
            grip-attrs verb-attrs toggle-attrs remove-attrs class attrs] :as _props} & words]
   (let [verb-body (cond-> []
                     icon (conj (icon/icon {:icon-name icon :size :sm}))
                     true (conj verb))
+        verb-cls  (rule-verb-class-list {:tone tone})
         verb-el   (if (or on-verb verb-attrs)
-                    (into [:button (-> (merge {:class "rule-verb" :type "button"} verb-attrs)
+                    (into [:button (-> (button-attrs verb-cls nil verb-attrs)
                                        (handle :on-click :click on-verb))]
                           verb-body)
-                    (into [:span {:class "rule-verb"}] verb-body))
+                    (into [:span (util/class-attrs verb-cls nil nil)] verb-body))
         end       (cond-> [:span {:class "rule-end"}]
-                    (or on-remove remove-attrs)
-                    (conj [:button (-> (merge {:class "rule-remove" :type "button"
-                                               :title "Remove rule" :aria-label "Remove rule"}
-                                              remove-attrs)
-                                       (handle :on-click :click on-remove))
-                           (icon/icon {:icon-name :x :size :sm})])
                     (not (false? toggle))
                     (conj (switch/switch-toggle
                            {:checked (not off) :size :sm :on-change on-toggle
-                            :attrs (merge {:title (if off "Turn on" "Turn off")} toggle-attrs)})))]
-    (cond-> [:div (util/class-attrs (rule-class-list {:off off}) class attrs)]
+                            :attrs (merge {:title (if off "Turn on" "Turn off")} toggle-attrs)}))
+                    (or on-remove remove-attrs)
+                    (conj [:button (-> (merge {:class "rule-remove" :type "button"
+                                               :title "Remove" :aria-label "Remove"}
+                                              remove-attrs)
+                                       (handle :on-click :click on-remove))
+                           (icon/icon {:icon-name :x :size :sm})]))]
+    (cond-> [:div (util/class-attrs (rule-class-list {:off off}) class (with-menu attrs menu))]
       (not (false? grip))
       (conj [:span (merge {:class "rule-grip" :aria-hidden "true"} grip-attrs)
              (icon/icon {:icon-name :grip-vertical :size :sm})])
@@ -409,12 +439,10 @@
 ;; ── Toggles ──────────────────────────────────────────────────────────
 
 (defn filter-toggle-class-list
-  "Classes for a toggle. :on is pressed; :reorder is the column form (a
-   grip, a neutral fill while shown, an outline while hidden)."
-  [{:keys [on reorder]}]
+  "Classes for a toggle. :on is pressed."
+  [{:keys [on]}]
   (cond-> ["filter-toggle"]
-    reorder (conj "filter-toggle-order")
-    on      (conj "filter-toggle-on")))
+    on (conj "filter-toggle-on")))
 
 (defn filter-toggle-classes
   "Space-joined form of filter-toggle-class-list."
@@ -422,15 +450,12 @@
   (str/join " " (filter-toggle-class-list opts)))
 
 (defn filter-toggle
-  "A pressed toggle: a display option (\"Covers\"), one choice of a few
-   (\"15+\"), or with :reorder a column that is shown or hidden and sits in
-   table order. A wrapping row of these replaces a switch per line.
+  "A pressed toggle: a display option (\"Covers\") or one choice of a few
+   (\"15+\"). A wrapping row of these replaces a switch per line.
 
    Props:
      :on       - boolean, pressed
      :icon     - leading icon keyword
-     :reorder  - boolean, the column form: a grip while shown, a crossed
-                 eye while hidden (drag handlers come in through :attrs)
      :value    - a control shown inside the pressed toggle after a
                  hairline, for an option that needs a value (a select,
                  a rule-value)
@@ -439,32 +464,13 @@
      :attrs    - additional HTML attributes map
 
    Children are the label."
-  [{:keys [on icon reorder value on-click class attrs] :as _props} & label]
-  (let [lead   (cond reorder (if on :grip-vertical :eye-off)
-                     icon    icon
-                     :else   nil)
-        button (into (cond-> [:button (-> (button-attrs (filter-toggle-class-list {:on on :reorder reorder})
+  [{:keys [on icon value on-click class attrs] :as _props} & label]
+  (let [button (into (cond-> [:button (-> (button-attrs (filter-toggle-class-list {:on on})
                                                          class
                                                          (merge {:aria-pressed (if on "true" "false")} attrs))
                                           (handle :on-click :click on-click))]
-                       lead (conj (icon/icon {:icon-name lead :size :sm})))
+                       icon (conj (icon/icon {:icon-name icon :size :sm})))
                      label)]
     (if value
       [:span {:class "filter-toggle-split"} button [:span {:class "filter-toggle-value"} value]]
       button)))
-
-(defn filter-add
-  "A quiet \"+ Album\" at the end of a band: adds what is not there yet (a
-   column).
-
-   Props:
-     :on-click - click handler (:cljs and :squint)
-     :class    - additional CSS classes
-     :attrs    - additional HTML attributes map
-
-   Children are the label."
-  [{:keys [on-click class attrs] :as _props} & label]
-  (into [:button (-> (button-attrs ["filter-add"] class attrs)
-                     (handle :on-click :click on-click))
-         (icon/icon {:icon-name :plus :size :sm})]
-        label))
