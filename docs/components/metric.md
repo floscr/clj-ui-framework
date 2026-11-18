@@ -33,6 +33,14 @@
 
 ## Examples
 
+### With the trend beside the number
+
+```clojure
+(metric/metric {:label "Visitors" :value "112" :delta "+19%" :trend :up :hint "vs the 30 days before"
+                :chart (chart/sparkline {:values [9 13 14 17 44 25 31 23 17 22 39 21 12]
+                                         :label "Visitors per week, last 13 weeks"})})
+```
+
 ### Record stats, flush inside a card
 
 ```clojure
@@ -57,6 +65,7 @@ One labeled number: label above, the value at 28px with an optional unit beside 
 | `:delta` | `string` | – | The change, for example +12%. |
 | `:trend` | `:up \| :down \| :flat` | – | Colors the delta: success for up, danger for down, muted otherwise. Only set it when the direction has a meaning. |
 | `:hint` | `string` | – | Short context beside the delta (vs last month, today). |
+| `:chart` | `hiccup` | – | A small chart at the end of the value's line, usually a chart/sparkline of the number's recent course. |
 | `:flush` | `boolean` | `false` | No border or padding, for a metric inside a card or list. |
 | `:class` | `string` | – |  |
 | `:attrs` | `map` | – |  |
@@ -108,6 +117,7 @@ Vector form of metric-classes.
 
 - [Page](page.md): The one page container with its title row, titled sections and action rows: column width, gutters and vertical rhythm set once for the whole app.
 - [Card](card.md): A bordered surface that groups related content and actions, plus a divided list variant.
+- [Chart](chart.md): Charts for a dashboard without a charting library: a time series as a line over a fading area with a comparison line and a crosshair, ranked rows with a rail under each label, a donut for shares and a sparkline for the trend beside a number.
 - [Badge](badge.md): A small pill for status, category or a count, with an optional leading icon.
 - [Progress](progress.md): Shows how much of a known task is complete as a filled track.
 - [Table](table.md): Records in columns from a headers vector and row vectors, with striped and bordered variants.

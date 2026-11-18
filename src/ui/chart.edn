@@ -1,0 +1,124 @@
+{:id :chart
+ :title "Chart"
+ :summary "Charts for a dashboard without a charting library: a time series as a line over a fading area with a comparison line and a crosshair, ranked rows with a rail under each label, a donut for shares and a sparkline for the trend beside a number."
+ :category :data
+ :group "Numbers"
+ :keywords ["chart" "graph" "area chart" "line chart" "time series" "crosshair" "bar list" "ranking" "donut" "pie" "sparkline" "trend" "analytics" "dashboard" "legend"]
+
+ :when-to-use
+ ["One measure over days, weeks or hours, optionally against the period before: area-chart."
+  "The top entries of a list by one number (pages, sources, countries): bar-list."
+  "How a total splits into two to six parts: donut."
+  "The recent course of a number, beside it in a metric: sparkline."]
+
+ :when-not-to-use
+ ["Use metric alone when the number matters and its course does not."
+  "Use progress for one value against a known total."
+  "Use day-grid for a yes or no record per day."
+  "Use table when rows carry several numbers; a bar-list shows one."
+  "For more than about 120 points, or several series with their own scales, bucket the data first (weeks instead of days) or use a charting library."]
+
+ :usage "(require '[ui.chart :as chart]\n         '[ui.card :as card])\n\n(card/card {}\n  (chart/chart {:title \"Visitors\"\n                :description \"112 in the last 30 days, +19% on the 30 before\"}\n    (chart/area-chart\n      {:label \"This period\"\n       :compare-label \"Period before\"\n       :points [{:label \"Mon 16 Nov\" :value 3 :compare 1}\n                {:label \"Tue 17 Nov\" :value 1 :compare 4}\n                {:label \"Wed 18 Nov\" :value 5 :compare 2}]})))"
+
+ :examples
+ [{:title "Ranked rows that link to their detail"
+   :code "(chart/bar-list\n  {:rows [{:label \"Blog\" :description \"/blog\" :value 48 :note \"12%\" :href \"/page?p=/blog\"}\n          {:label \"Notes\" :description \"/notes\" :value 27 :note \"7%\" :href \"/page?p=/notes\"}]})"}
+  {:title "Shares of a whole"
+   :code "(chart/donut\n  {:center-label \"visitors\"\n   :segments [{:label \"Direct\" :value 250}\n              {:label \"Search\" :value 27}\n              {:label \"Other sites\" :value 32}]})"}
+  {:title "A sparkline in a metric"
+   :code "(metric/metric {:label \"Visitors\" :value \"112\" :delta \"+19%\" :trend :up\n                :chart (chart/sparkline {:values [9 13 14 17 44 25 31 23 17 22 39 21 12]\n                                         :label \"Visitors per week, last 13 weeks\"})})"}]
+
+ :api
+ [{:fn "chart"
+   :doc "The frame of a chart: an h3 title with an optional description on the left, actions on the right, then the children. It has no surface; put it in a card."
+   :children "The chart and what belongs to it (a legend, a note)."
+   :props [{:name :title :type "string | hiccup" :doc "What is charted."}
+           {:name :description :type "string | hiccup" :doc "One line under the title: the total, the range, the change."}
+           {:name :actions :type "hiccup" :doc "Controls at the right of the title row, usually a boxed button-group as the range picker."}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "area-chart"
+   :doc "A time series as a line over an area that fades to the baseline. With :compare values a dashed line of the comparison series is drawn behind it and a legend under it. Each point has a column over the plot: hovering or tapping it shows a crosshair, a dot per series and a card with the values. The plot is 200px high (--chart-h) and as wide as its container."
+   :props [{:name :points :type "vector of point maps" :doc "Oldest first. Each map: :label (name in the value card, \"Thu 5 Nov\"), :value (number), :compare (optional number of the comparison series), :axis-label (optional, labels this point on the x axis; without any, about five evenly spaced points are labeled with :label)."}
+           {:name :label :type "string" :default "\"Value\"" :doc "Name of the series in the card and the legend."}
+           {:name :compare-label :type "string" :default "\"Before\"" :doc "Name of the comparison series."}
+           {:name :color :type ":accent | :blue | :teal | :orange | :pink | :success" :default "the first series token" :doc "Color of the line, the area and the dots."}
+           {:name :max :type "number" :default "nice-max of the data" :doc "Top of the value axis. Set it to give several charts the same scale."}
+           {:name :curve :type ":smooth | :linear" :default ":smooth" :doc "Bent through the points without leaving the plot, or straight segments."}
+           {:name :format :type "fn number -> string" :default "format-number" :doc "Text of a value on the axis and in the card."}
+           {:name :legend :type "boolean" :default "true with a comparison series" :doc "false hides the legend."}
+           {:name :loading :type "boolean" :default "false" :doc "A skeleton of the plot's size instead of the chart."}
+           {:name :empty-label :type "string" :default "\"No data for this range\"" :doc "Shown in an empty-state when :points is empty."}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "bar-list"
+   :doc "Ranked rows: the label with its value at the end of the line and a 4px rail under them, filled to the row's share of the largest value. A row with :href is a link with a hover surface."
+   :props [{:name :rows :type "vector of row maps" :doc "Largest first. Each map: :label, :description (muted, after the label), :value (number, sets the rail), :display (the value as shown), :note (muted, after the value, such as the share), :href, :active."}
+           {:name :max :type "number" :default "the largest :value" :doc "Value of a full rail."}
+           {:name :color :type ":accent | :blue | :teal | :orange | :pink | :success" :default "the first series token" :doc "Color of the rails."}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "donut"
+   :doc "Shares of a whole as a 144px ring with a number in the middle and a legend beside it (under it when there is no room): name, value and share per segment. Segments are colored in order: the four series tokens, then two neutrals."
+   :props [{:name :segments :type "vector of segment maps" :doc "Largest first, at most six. Each map: :label, :value (number), :display (the value as shown), :active (thicker segment, bolder legend row)."}
+           {:name :center-value :type "string | hiccup" :default "the total" :doc "The number in the middle."}
+           {:name :center-label :type "string" :doc "A line under it, such as the unit."}
+           {:name :format :type "fn number -> string" :default "format-number" :doc "Text of a value."}
+           {:name :legend :type "boolean" :default "true" :doc "false leaves the legend out."}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "sparkline"
+   :doc "A 104 by 36px trend line over a light tint, without axes. Scaled from 0 to its own largest value."
+   :props [{:name :values :type "vector of numbers" :doc "Oldest first."}
+           {:name :label :type "string" :doc "Accessible name. Without one the sparkline is hidden from screen readers, which is right when the number beside it says enough."}
+           {:name :color :type ":accent | :blue | :teal | :orange | :pink | :success" :default "the first series token"}
+           {:name :area :type "boolean" :default "true" :doc "false draws the line alone."}
+           {:name :zero :type "boolean" :default "true" :doc "false scales from the smallest value instead of 0, for values that move far from zero (a rate between 40 and 50). Use it with :area false: a tint down to a baseline that is not zero would mislead."}
+           {:name :curve :type ":smooth | :linear" :default ":smooth"}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "legend"
+   :doc "A wrapping row of series names, each after a dot in its color. area-chart adds its own; use this one for charts you compose."
+   :props [{:name :items :type "vector of {:label :color :compare}" :doc ":color is one of the chart colors, :compare true gives the muted dot of a comparison series."}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "nice-max" :doc "The axis top for a largest value: rounded up to a round number whose half is round too, at least 4."}
+  {:fn "format-number" :doc "A number as text: whole numbers without a decimal, others with one."}
+  {:fn "plot-points" :doc "Values as [x y] pairs in a {:w :h :top :low :pad :edges} box."}
+  {:fn "line-path" :doc "The SVG path through [x y] pairs, {:curve :smooth | :linear, :h box height}."}
+  {:fn "area-path" :doc "A line path closed down to the bottom of the box."}
+  {:fn "donut-arcs" :doc "Segments with :dash and :offset for a circle of radius 48."}
+  {:fn "pct" :doc "A share of a total in percent with one decimal."}
+  {:fn "round1" :doc "A number rounded to one decimal."}
+  {:fn "chart-classes" :doc "Class string for a base class and {:color}."}
+  {:fn "chart-class-list" :doc "Vector form of chart-classes."}]
+
+ :keyboard
+ [["Tab" "Moves through the linked rows of a bar-list. The points of an area-chart are not tab stops."]]
+
+ :accessibility
+ ["area-chart carries a visually hidden table of every point with both series, so screen readers get the numbers; the plot, axes and value cards are for sighted reading."
+  "The points are focusable by pointer and touch only (tabindex -1): thirty tab stops in a chart would be worse than the table."
+  "donut names every segment with its share in the ring's label, and the legend repeats them as text."
+  "Give a sparkline a :label when the trend is not said in text next to it."
+  "The series color is never the only signal: the comparison line is dashed and the legend names both."]
+
+ :motion
+ ["The line and area draw in from the left on first render, rails grow from the left, both over the considered duration."
+  "The crosshair, dots and value card fade in over the fast duration; a hovered donut segment thickens."
+  "All of it is skipped under reduced motion (the base styles collapse durations)."]
+
+ :responsive
+ ["Charts fill their container. The area chart keeps its 200px height; set --chart-h on it for another."
+  "On touch devices a tap on a point shows its crosshair and card, a tap elsewhere hides it."
+  "The donut's legend wraps under the ring when the container is narrower than about 330px."
+  "Axis labels do not thin out by width: pass fewer :axis-label points for a chart that is always narrow."]
+
+ :targets
+ {:clj "Static markup; the crosshair needs no script, so it works on server-rendered pages without the runtime."
+  :cljs ":class may be a vector. Inline styles are maps of custom properties."
+  :squint "Static markup. Inline styles are string-keyed maps of custom properties."}
+
+ :notes-for-ai
+ ["Build the point, row and segment maps in the app; the components do no date math and no sorting."
+  "Put a chart in a card: (card/card {} (chart/chart {:title ...} (chart/area-chart ...)))."
+  "The range picker is a boxed button-group in the chart's :actions (or the page-header's), not tabs."
+  "Give charts that are compared with each other the same :max."
+  "Spend color with intent: one series color per chart, the comparison stays muted. Do not use status colors for series unless the series is a status."
+  "Use :display and :format for units and separators; :value stays a number."]
+
+ :related [:metric :card :button-group :day-grid :progress :table :empty-state]}

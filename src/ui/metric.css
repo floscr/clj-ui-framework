@@ -43,6 +43,20 @@
   color: var(--fg-0);
 }
 
+/* The value with a small chart (a sparkline) at the end of its line. */
+.metric-main {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--size-3);
+  min-width: 0;
+}
+
+.metric-chart {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
 .metric-unit {
   font-size: var(--font-sm);
   color: var(--fg-1);

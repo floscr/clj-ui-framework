@@ -59,6 +59,7 @@
             [dev.examples.settings :as settings]
             [dev.examples.metric :as metric]
             [dev.examples.day-grid :as day-grid]
+            [dev.examples.chart :as chart]
             [dev.examples.list-row :as list-row]
             [dev.examples.filters :as filters]
             [dev.examples.comment :as comment]
@@ -118,6 +119,7 @@
    {:id :settings        :title "Settings rows"   :examples settings/examples}
    {:id :metric          :title "Metric"          :examples metric/examples}
    {:id :day-grid        :title "Day grid"        :examples day-grid/examples}
+   {:id :chart           :title "Chart"           :examples chart/examples}
    {:id :list-row        :title "List row"        :examples list-row/examples}
    {:id :filters         :title "Filters"         :examples filters/examples}
    {:id :comment         :title "Comment"         :examples comment/examples}

@@ -1,0 +1,542 @@
+/* ── Chart ──────────────────────────────────────────────────────
+   Charts drawn with markup and CSS alone. Every position comes in as a
+   custom property (--chart-v, --chart-c, --chart-at, --chart-n,
+   --chart-col, --chart-w), so the same markup works on all targets. The
+   series color is --chart-color: the first series token unless a
+   .chart-<color> or .chart-series-<n> class sets it. */
+
+.chart {
+  display: grid;
+  gap: var(--size-4);
+  margin: 0;
+  min-width: 0;
+}
+
+.chart-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--size-4);
+}
+
+.chart-head-text {
+  min-width: 0;
+}
+
+.chart-title {
+  margin: 0;
+  font-size: var(--font-md);
+  font-weight: var(--weight-medium);
+}
+
+.chart-description {
+  margin: var(--size-1) 0 0;
+  font-size: var(--font-sm);
+  color: var(--fg-1);
+}
+
+.chart-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--size-2);
+}
+
+/* ── Series colors ────────────────────────────────────────────── */
+
+.chart-accent  { --chart-color: var(--accent); }
+.chart-blue    { --chart-color: var(--blue); }
+.chart-teal    { --chart-color: var(--teal); }
+.chart-orange  { --chart-color: var(--orange); }
+.chart-pink    { --chart-color: var(--pink); }
+.chart-success { --chart-color: var(--success); }
+
+.chart-series-1 { --chart-color: var(--series-1); }
+.chart-series-2 { --chart-color: var(--series-2); }
+.chart-series-3 { --chart-color: var(--series-3); }
+.chart-series-4 { --chart-color: var(--series-4); }
+.chart-series-5 { --chart-color: var(--fg-1); }
+.chart-series-6 { --chart-color: var(--fg-2); }
+
+/* ── Legend ───────────────────────────────────────────────────── */
+
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--size-2) var(--size-4);
+  font-size: var(--font-xs);
+  color: var(--fg-1);
+}
+
+.chart-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--size-2);
+}
+
+.chart-legend-dot {
+  flex: none;
+  width: var(--size-2);
+  height: var(--size-2);
+  border-radius: var(--radius-pill);
+  background: var(--chart-color, var(--series-1));
+}
+
+.chart-legend-dot-compare {
+  background: var(--fg-2);
+}
+
+/* ── Area chart ───────────────────────────────────────────────── */
+
+.chart-area {
+  --chart-h: calc(var(--size-10) * 5);
+  container-type: inline-size;
+  display: grid;
+  gap: var(--size-3);
+  min-width: 0;
+}
+
+.chart-plot {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: var(--size-3);
+}
+
+.chart-y {
+  position: relative;
+  height: var(--chart-h);
+  min-width: var(--size-5);
+  font-size: var(--font-xs);
+  color: var(--fg-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.chart-tick {
+  position: absolute;
+  right: 0;
+  bottom: var(--chart-at);
+  transform: translateY(50%);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.chart-canvas {
+  position: relative;
+  height: var(--chart-h);
+}
+
+.chart-gridline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: var(--chart-at);
+  border-top: var(--border-subtle);
+}
+
+.chart-baseline {
+  border-top: 1px solid color-mix(in oklch, var(--fg-2) 55%, transparent);
+}
+
+.chart-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  animation: chart-reveal var(--duration-considered) var(--ease-enter) both;
+}
+
+/* The area fades out towards the baseline; a mask does it without a
+   gradient definition (and its id) per chart. */
+.chart-fill {
+  mask-image: linear-gradient(to bottom, color-mix(in srgb, black 28%, transparent), transparent);
+}
+
+.chart-fill path {
+  fill: var(--chart-color, var(--series-1));
+}
+
+.chart-line {
+  fill: none;
+  stroke: var(--chart-color, var(--series-1));
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.chart-line-compare {
+  stroke: var(--fg-2);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 4;
+}
+
+@keyframes chart-reveal {
+  from { clip-path: inset(-10% 100% -10% 0); }
+  to   { clip-path: inset(-10% 0 -10% 0); }
+}
+
+/* One column per point. Hovering or focusing it (a tap focuses) shows
+   the crosshair line, a dot on each line and the value card. */
+.chart-hits {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(var(--chart-n), minmax(0, 1fr));
+}
+
+.chart-hit {
+  position: relative;
+  outline: none;
+}
+
+.chart-hit::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(50% - 0.5px);
+  border-left: 1px solid var(--fg-2);
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease-standard);
+}
+
+.chart-dot {
+  position: absolute;
+  left: 50%;
+  bottom: var(--chart-v);
+  width: var(--size-2);
+  height: var(--size-2);
+  margin: 0 0 calc(var(--size-1) * -1) calc(var(--size-1) * -1);
+  border-radius: var(--radius-pill);
+  background: var(--chart-color, var(--series-1));
+  box-shadow: 0 0 0 2px var(--bg-1);
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease-standard);
+}
+
+.chart-dot-compare {
+  bottom: var(--chart-c);
+  background: var(--fg-2);
+}
+
+/* The value card sits beside the crosshair line, at the top of the
+   plot, so it never covers the dots it reads. */
+.chart-tip {
+  position: absolute;
+  z-index: 3;
+  top: var(--size-2);
+  left: calc(50% + var(--size-3));
+  transform: translateX(calc(var(--size-1) * -1));
+  display: grid;
+  gap: var(--size-1);
+  min-width: calc(var(--size-10) * 4);
+  padding: var(--size-2) var(--size-3);
+  background: var(--bg-1);
+  border: var(--border-0);
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow-floating);
+  font-size: var(--font-xs);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--duration-fast) var(--ease-standard),
+              transform var(--duration-fast) var(--ease-standard);
+}
+
+/* In the right half the card opens to the left of the line. */
+.chart-hit-end .chart-tip {
+  left: auto;
+  right: calc(50% + var(--size-3));
+  transform: translateX(var(--size-1));
+}
+
+.chart-tip-title {
+  font-size: var(--font-sm);
+  font-weight: var(--weight-medium);
+  color: var(--fg-0);
+}
+
+.chart-tip-row {
+  display: flex;
+  align-items: center;
+  gap: var(--size-2);
+  color: var(--fg-1);
+  white-space: nowrap;
+}
+
+.chart-tip-value {
+  margin-left: auto;
+  padding-left: var(--size-3);
+  color: var(--fg-0);
+  font-weight: var(--weight-medium);
+  font-variant-numeric: tabular-nums;
+}
+
+.chart-hit:hover::before,
+.chart-hit:focus::before,
+.chart-hit:hover .chart-dot,
+.chart-hit:focus .chart-dot {
+  opacity: 1;
+}
+
+.chart-hit:hover .chart-tip,
+.chart-hit:focus .chart-tip {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* A clicked point keeps focus; while the pointer reads another one the
+   focused point steps back, so there is one crosshair at a time. */
+.chart-hits:hover .chart-hit:not(:hover)::before,
+.chart-hits:hover .chart-hit:not(:hover) .chart-dot,
+.chart-hits:hover .chart-hit:not(:hover) .chart-tip {
+  opacity: 0;
+}
+
+.chart-x {
+  grid-column: 2;
+  display: grid;
+  grid-template-columns: repeat(var(--chart-n), minmax(0, 1fr));
+  margin-top: var(--size-2);
+  font-size: var(--font-xs);
+  color: var(--fg-2);
+}
+
+.chart-x-label {
+  grid-row: 1;
+  grid-column: var(--chart-col);
+  justify-self: center;
+  white-space: nowrap;
+}
+
+/* A narrow chart keeps every second axis label, the last one included. */
+@container (max-width: 520px) {
+  .chart-x-label-minor {
+    display: none;
+  }
+}
+
+.chart-skeleton {
+  border-radius: var(--radius-md);
+}
+
+.chart-canvas-empty {
+  display: grid;
+  place-items: center;
+  border-bottom: 1px dashed var(--fg-2);
+}
+
+/* ── Bar list ─────────────────────────────────────────────────── */
+
+.chart-bars {
+  display: grid;
+  min-width: 0;
+}
+
+.chart-bar {
+  display: grid;
+  gap: calc(var(--size-1) * 1.5);
+  padding: var(--size-2) 0;
+  font-size: var(--font-sm);
+  color: inherit;
+  text-decoration: none;
+}
+
+/* A row that leads somewhere gets a hover surface that reaches a little
+   past the text, so the labels stay on the card's edge. */
+.chart-bar-link {
+  margin: 0 calc(var(--size-2) * -1);
+  padding: var(--size-2);
+  border-radius: var(--radius-control);
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+.chart-bar-top {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--size-3);
+  min-width: 0;
+}
+
+.chart-bar-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chart-bar-description {
+  margin-left: var(--size-2);
+  color: var(--fg-2);
+}
+
+.chart-bar-value {
+  flex: none;
+  font-weight: var(--weight-medium);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.chart-bar-note {
+  margin-left: var(--size-2);
+  font-weight: var(--weight-regular);
+  color: var(--fg-2);
+}
+
+.chart-bar-rail {
+  display: block;
+  height: var(--size-1);
+  border-radius: var(--radius-pill);
+  background: var(--bg-2);
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+.chart-bar-fill {
+  display: block;
+  width: var(--chart-w);
+  height: 100%;
+  border-radius: inherit;
+  background: var(--chart-color, var(--series-1));
+  transform-origin: left;
+  animation: chart-grow var(--duration-considered) var(--ease-enter) both;
+}
+
+@keyframes chart-grow {
+  from { transform: scaleX(0); }
+}
+
+.chart-bar-link:hover,
+.chart-bar-active {
+  background: var(--bg-2);
+}
+
+.chart-bar-link:hover .chart-bar-rail,
+.chart-bar-active .chart-bar-rail {
+  background: color-mix(in oklch, var(--fg-2) 30%, transparent);
+}
+
+.chart-bar-active .chart-bar-label {
+  font-weight: var(--weight-medium);
+}
+
+/* ── Donut ────────────────────────────────────────────────────── */
+
+.chart-donut {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--size-4) var(--size-6);
+  min-width: 0;
+}
+
+.chart-donut-ring {
+  position: relative;
+  flex: none;
+  width: calc(var(--size-9) * 4);
+  aspect-ratio: 1;
+}
+
+.chart-donut-ring svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.chart-donut-segment {
+  fill: none;
+  stroke: var(--chart-color, var(--series-1));
+  stroke-width: 13;
+  transition: stroke-width var(--duration-fast) var(--ease-standard);
+}
+
+.chart-donut-segment:hover,
+.chart-donut-active {
+  stroke-width: 17;
+}
+
+.chart-donut-center {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  pointer-events: none;
+}
+
+.chart-donut-value {
+  font-size: var(--font-lg);
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-display);
+  line-height: var(--leading-display);
+  font-variant-numeric: tabular-nums;
+}
+
+.chart-donut-label {
+  font-size: var(--font-xs);
+  color: var(--fg-1);
+}
+
+.chart-donut-legend {
+  flex: 1 1 calc(var(--size-10) * 4);
+  display: grid;
+  gap: var(--size-2);
+  min-width: 0;
+  font-size: var(--font-sm);
+}
+
+.chart-donut-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: var(--size-3);
+}
+
+.chart-donut-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chart-donut-number {
+  font-variant-numeric: tabular-nums;
+}
+
+.chart-donut-share {
+  min-width: var(--size-10);
+  text-align: right;
+  color: var(--fg-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.chart-donut-row-active .chart-donut-name,
+.chart-donut-row-active .chart-donut-number {
+  font-weight: var(--weight-medium);
+}
+
+/* ── Sparkline ────────────────────────────────────────────────── */
+
+.chart-spark {
+  display: block;
+  flex: none;
+  width: calc(var(--size-13) * 2);
+  max-width: 100%;
+  height: var(--size-9);
+  overflow: visible;
+}
+
+.chart-spark-line {
+  fill: none;
+  stroke: var(--chart-color, var(--series-1));
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.chart-spark-fill {
+  fill: var(--chart-color, var(--series-1));
+  stroke: none;
+  opacity: 0.14;
+}

@@ -27,19 +27,24 @@
      :delta - optional change (string, e.g. \"+12%\"), under the value
      :trend - :up | :down | :flat; colors the delta success, danger or muted
      :hint  - optional short text beside the delta (vs last month)
+     :chart - optional small chart at the end of the value's line (a
+              ui.chart sparkline of the number's recent course)
      :flush - boolean; no border or padding, for use inside another surface
      :class - additional CSS classes
      :attrs - additional HTML attributes map"
-  [{:keys [label value unit delta trend hint flush class attrs] :as _props}]
+  [{:keys [label value unit delta trend hint chart flush class attrs] :as _props}]
   (let [t (some-> trend util/kw-name)
         delta-class (cond-> "metric-delta"
                       (= t "up")   (str " metric-delta-up")
-                      (= t "down") (str " metric-delta-down"))]
+                      (= t "down") (str " metric-delta-down"))
+        number (cond-> [:div {:class "metric-value"}
+                        [:span {:class "metric-number"} value]]
+                 unit (conj [:span {:class "metric-unit"} unit]))]
     (cond-> [:div (util/class-attrs (metric-class-list {:flush flush}) class attrs)
              [:span {:class "metric-label"} label]
-             (cond-> [:div {:class "metric-value"}
-                      [:span {:class "metric-number"} value]]
-               unit (conj [:span {:class "metric-unit"} unit]))]
+             (if chart
+               [:div {:class "metric-main"} number [:div {:class "metric-chart"} chart]]
+               number)]
       (or delta hint)
       (conj (cond-> [:div {:class "metric-foot"}]
               delta (conj [:span {:class delta-class} delta])

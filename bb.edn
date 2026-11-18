@@ -144,6 +144,7 @@
               [ui.settings-test]
               [ui.metric-test]
               [ui.day-grid-test]
+              [ui.chart-test]
               [ui.list-row-test]
               [ui.filters-test]
               [ui.comment-test]
@@ -204,6 +205,7 @@
                                       'ui.settings-test
                                       'ui.metric-test
                                       'ui.day-grid-test
+                                      'ui.chart-test
                                       'ui.list-row-test
                                       'ui.filters-test
                                       'ui.comment-test

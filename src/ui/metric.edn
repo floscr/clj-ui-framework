@@ -18,7 +18,9 @@
  :usage "(require '[ui.metric :as metric])\n\n(metric/metric-row {}\n  (metric/metric {:label \"Revenue\" :value \"48.2k\" :unit \"EUR\" :delta \"+12%\" :trend :up :hint \"vs last month\"})\n  (metric/metric {:label \"Orders\" :value \"1,204\" :delta \"-3%\" :trend :down :hint \"vs last month\"})\n  (metric/metric {:label \"Refunds\" :value \"18\"}))"
 
  :examples
- [{:title "Record stats, flush inside a card"
+ [{:title "With the trend beside the number"
+   :code "(metric/metric {:label \"Visitors\" :value \"112\" :delta \"+19%\" :trend :up :hint \"vs the 30 days before\"\n                :chart (chart/sparkline {:values [9 13 14 17 44 25 31 23 17 22 39 21 12]\n                                         :label \"Visitors per week, last 13 weeks\"})})"}
+  {:title "Record stats, flush inside a card"
    :code "(card/card {}\n  (card/card-header {} [:h3 \"Walk\"] [:p \"Mon to Fri\"])\n  (metric/metric-row {}\n    (metric/metric {:flush true :label \"Current streak\" :value \"0\" :unit \"days\"})\n    (metric/metric {:flush true :label \"Best streak\" :value \"4\" :unit \"days\"})))"}]
 
  :api
@@ -30,6 +32,7 @@
            {:name :delta :type "string" :doc "The change, for example +12%."}
            {:name :trend :type ":up | :down | :flat" :doc "Colors the delta: success for up, danger for down, muted otherwise. Only set it when the direction has a meaning."}
            {:name :hint :type "string" :doc "Short context beside the delta (vs last month, today)."}
+           {:name :chart :type "hiccup" :doc "A small chart at the end of the value's line, usually a chart/sparkline of the number's recent course."}
            {:name :flush :type "boolean" :default "false" :doc "No border or padding, for a metric inside a card or list."}
            {:name :class :type "string"} {:name :attrs :type "map"}]}
   {:fn "metric-row"
@@ -57,4 +60,4 @@
   "A metric-row belongs directly under the page-header of a dashboard, before the chart or table."
   "Do not color the value itself and do not make it larger than the h1; the 28px number is the emphasis."]
 
- :related [:page :card :badge :progress :table]}
+ :related [:page :card :chart :badge :progress :table]}
