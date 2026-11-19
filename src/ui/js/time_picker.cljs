@@ -13,6 +13,7 @@
      - picking a start keeps the length of an existing range; picking a
        start with no end in range mode moves on to the end
      - the clear button empties the time
+     - a touch opens the list without the on-screen keyboard
 
    A commit writes `HH:MM` / `HH:MM-HH:MM` (or empty) to the hidden
    [data-ui-time-value] input, repaints the segments and the length, and
@@ -297,12 +298,20 @@
       (when-let [hit (seg-target e)]
         (let [[el seg] hit] (open! el seg))))))
 
+(defn- on-pointerdown
+  "A finger opens only the slot list: no on-screen keyboard to cover it.
+   A mouse or pen gets the number keyboard back for typing."
+  [e]
+  (when-let [seg (closest (.-target e) "[data-ui-time-seg]")]
+    (set! (.-inputMode seg) (if (= (.-pointerType e) "touch") "none" "numeric"))))
+
 (defn- on-scroll [e]
   (let [list (.-list (state))]
     (when (and list (not (.contains list (.-target e))))
       (close!))))
 
 (defn init! []
+  (.addEventListener js/document "pointerdown" on-pointerdown true)
   (.addEventListener js/document "focusin" on-focusin)
   (.addEventListener js/document "focusout" on-focusout)
   (.addEventListener js/document "input" on-input)

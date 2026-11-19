@@ -131,6 +131,7 @@ Class string for {:range :empty :disabled}.
 ## Responsive behavior
 
 - Fills its container; the list is 11rem wide, fixed under the active segment and flipped above it near the bottom of the screen.
+- A touch opens the list without the on-screen keyboard, which would cover it; typing is for a mouse or a keyboard.
 
 ## Targets
 

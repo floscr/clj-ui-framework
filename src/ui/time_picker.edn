@@ -61,7 +61,8 @@
                  "Focus stays in the segment while the list is open, so typing and the arrow keys work throughout."]
  :motion ["The list rises in over --duration-standard with --ease-enter; none with reduced motion."
           "Slot hover and the active segment tint over --duration-fast."]
- :responsive ["Fills its container; the list is 11rem wide, fixed under the active segment and flipped above it near the bottom of the screen."]
+ :responsive ["Fills its container; the list is 11rem wide, fixed under the active segment and flipped above it near the bottom of the screen."
+              "A touch opens the list without the on-screen keyboard, which would cover it; typing is for a mouse or a keyboard."]
  :runtime ["ui.js.time-picker"]
 
  :targets

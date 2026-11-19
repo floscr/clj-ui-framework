@@ -14356,6 +14356,14 @@
     }
     ;
   };
+  var on_pointerdown5 = function(e) {
+    const temp__23062__auto__1 = closest4(e.target, "[data-ui-time-seg]");
+    if (truth_(temp__23062__auto__1)) {
+      const seg2 = temp__23062__auto__1;
+      return seg2.inputMode = e.pointerType === "touch" ? "none" : "numeric";
+    }
+    ;
+  };
   var on_scroll = function(e) {
     const list1 = state4().list;
     if (truth_((() => {
@@ -14372,6 +14380,7 @@
     ;
   };
   var init_BANG_10 = function() {
+    document.addEventListener("pointerdown", on_pointerdown5, true);
     document.addEventListener("focusin", on_focusin);
     document.addEventListener("focusout", on_focusout);
     document.addEventListener("input", on_input3);
