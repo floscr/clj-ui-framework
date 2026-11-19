@@ -116,6 +116,7 @@
               [ui.number-field-test]
               [ui.rating-test]
               [ui.color-picker-test]
+              [ui.time-picker-test]
               [ui.select-test]
               [ui.icon-test]
               [ui.sidebar-test]
@@ -177,6 +178,7 @@
                                       'ui.number-field-test
                                       'ui.rating-test
                                       'ui.color-picker-test
+                                      'ui.time-picker-test
                                       'ui.select-test
                                       'ui.icon-test
                                       'ui.sidebar-test

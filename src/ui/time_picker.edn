@@ -1,0 +1,75 @@
+{:id :time-picker
+ :title "Time picker"
+ :summary "A time of day, or a start and an end with the length between them, typed into a field or picked from a quarter-hour list."
+ :category :inputs
+ :group "Special inputs"
+ :keywords ["time picker" "time input" "time range" "start end" "duration" "schedule" "hour minute"]
+
+ :when-to-use
+ ["Setting when something happens: the time of an event, a reminder, a scheduled task."
+  "A start and an end where the length matters, like a meeting or a time block."
+  "Forms used with a keyboard and on a phone alike: typing 1430 is as quick as picking a slot."]
+
+ :when-not-to-use
+ ["Use calendar for the date; put a time picker next to it for the time."
+  "Use chip for a handful of preset times without a custom one."
+  "Use number-field for a length on its own, like 45 minutes."]
+
+ :usage "(require '[ui.time-picker :as time-picker])\n\n(time-picker/time-picker {:start \"14:30\" :end \"15:45\"\n                          :on-change #(set-time! (time-picker/parse-value (.. % -target -value)))})"
+
+ :examples
+ [{:title "One time"
+   :code "(time-picker/time-picker {:value \"09:00\" :name \"remind-at\"})"}
+  {:title "Start and end"
+   :code "(time-picker/time-picker {:start \"14:30\" :end \"15:45\"})"}
+  {:title "Empty, waiting for a start"
+   :code "(time-picker/time-picker {:range true :placeholder \"All day\"})"}]
+
+ :api
+ [{:fn "time-picker"
+   :doc "A field with a start segment, and in range mode an end segment and the length. The time-picker runtime opens the slot lists, reads typed times and keeps a hidden input in sync."
+   :props [{:name :value :type "string" :doc "`HH:MM`, `HH:MM-HH:MM` or empty."}
+           {:name :start :type "string" :doc "The start as `HH:MM`; overrides :value."}
+           {:name :end :type "string" :doc "The end as `HH:MM`; overrides :value and turns on :range. Dropped when it isn't after the start."}
+           {:name :range :type "boolean" :default "false" :doc "Shows the end segment and the length once there is a start."}
+           {:name :step :type "minutes" :default "15" :doc "Minutes between slots and per arrow key."}
+           {:name :placeholder :type "string" :default "\"Add time\"" :doc "Text of the empty field."}
+           {:name :clearable :type "boolean" :default "true" :doc "A clear button once there is a time."}
+           {:name :disabled :type "boolean"}
+           {:name :name :type "string" :doc "On the hidden value input (form submission)."}
+           {:name :id :type "string" :doc "On the hidden value input."}
+           {:name :on-change :type "fn [event]" :doc ":cljs and :squint; the value is event.target.value, split it with parse-value."}
+           {:name :class :type "string" :doc "On the field."}
+           {:name :attrs :type "map" :doc "On the field."}]}
+  {:fn "parse-value" :doc "{:start :end} in minutes from `HH:MM` or `HH:MM-HH:MM`."}
+  {:fn "value-str" :doc "The value string for start and end minutes."}
+  {:fn "parse-time" :doc "Minutes from typed text: 14:30, 1430, 9, 2:30pm, 2p."}
+  {:fn "format-time" :doc "`HH:MM` for minutes from midnight."}
+  {:fn "format-length" :doc "45m, 1h, 1h 15m."}
+  {:fn "start-slots" :doc "Every step of the day."}
+  {:fn "end-slots" :doc "From one step after a start up to 12 hours later, before midnight."}
+  {:fn "move-start" :doc "A new start that keeps the length of the range."}
+  {:fn "time-picker-classes" :doc "Class string for {:range :empty :disabled}."}]
+
+ :keyboard [["Typing" "Shows the slot it means; text that isn't a time turns red."]
+            ["ArrowUp / ArrowDown" "Steps to the previous or next slot."]
+            ["Enter" "Commits the typed or arrowed time; picking a start moves on to the end."]
+            ["Escape" "Closes the list and puts the committed time back."]
+            ["Tab" "Commits what is typed and moves on."]]
+
+ :accessibility ["Each segment is a labelled combobox (Start time, End time) with aria-expanded; the list is a listbox of options with aria-selected."
+                 "Focus stays in the segment while the list is open, so typing and the arrow keys work throughout."]
+ :motion ["The list rises in over --duration-standard with --ease-enter; none with reduced motion."
+          "Slot hover and the active segment tint over --duration-fast."]
+ :responsive ["Fills its container; the list is 11rem wide, fixed under the active segment and flipped above it near the bottom of the screen."]
+ :runtime ["ui.js.time-picker"]
+
+ :targets
+ {:clj "Uncontrolled: submit the hidden input with a form. Needs ui-runtime.js."
+  :cljs "Pass :start/:end or :value and :on-change; the runtime commits and fires change on the hidden input."
+  :squint "Same as Replicant; require ui.js.time-picker in the SPA."}
+
+ :notes-for-ai ["Store the value as `HH:MM-HH:MM`: it is org's time range and what parse-value reads."
+                "Put preset times as chips under an empty picker rather than replacing it."]
+
+ :related [:calendar :chip :number-field :select :form]}

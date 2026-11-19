@@ -15,6 +15,7 @@
             [rating]
             [select]
             [theme]
+            [time-picker]
             [toast]
             [tooltip]
             [touch]

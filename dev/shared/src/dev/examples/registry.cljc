@@ -37,6 +37,7 @@
             [dev.examples.number-field :as number-field]
             [dev.examples.rating :as rating]
             [dev.examples.color-picker :as color-picker]
+            [dev.examples.time-picker :as time-picker]
             [dev.examples.chat :as chat]
             [dev.examples.calendar :as calendar]
             [dev.examples.calendar-events :as calendar-events]
@@ -97,6 +98,7 @@
    {:id :number-field    :title "Number field"    :examples number-field/examples}
    {:id :rating          :title "Rating"          :examples rating/examples}
    {:id :color-picker    :title "Color picker"    :examples color-picker/examples}
+   {:id :time-picker     :title "Time picker"     :examples time-picker/examples}
    {:id :chat            :title "Chat"            :examples chat/examples}
    {:id :calendar        :title "Calendar"        :examples calendar/examples}
    {:id :calendar-events :title "Calendar events" :examples calendar-events/examples}

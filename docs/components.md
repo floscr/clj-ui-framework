@@ -4,7 +4,7 @@
 > See `AGENTS.md` for conventions, per-target pitfalls, and how to
 > add new components and icons. Agents: start at `docs/llms.txt`.
 
-## Components (57)
+## Components (58)
 
 ### Actions
 
@@ -30,6 +30,7 @@
 | [Select](components/select.md) | `ui.select` | A compact choice field with a framework-drawn listbox, keyboard navigation and form support. | `normalize-options`, `selected-label`, `select` |
 | [Switch](components/switch.md) | `ui.switch` | A toggle for a setting that takes effect immediately. | `switch-class-list`, `switch-classes`, `switch-toggle` |
 | [Tag input](components/tag-input.md) | `ui.tag-input` | Turns short text into removable tags with a filtered suggestion dropdown; fully controlled by the host. | `tag-input-class-list`, `tag-input-classes`, `tag-pill-class-list`, `tag-pill-classes`, `tag-pill`, `tag-dropdown-item`, `tag-dropdown`, `tag-input`, `filter-tags` |
+| [Time picker](components/time-picker.md) | `ui.time-picker` | A time of day, or a start and an end with the length between them, typed into a field or picked from a quarter-hour list. | `parse-time`, `format-time`, `format-length`, `parse-value`, `value-str`, `start-slots`, `end-slots`, `move-start`, `time-picker-class-list`, `time-picker-classes`, `time-picker` |
 
 ### Disclosure
 
