@@ -29,7 +29,8 @@
      when zoomed, +/−/0 keys and buttons. Measured against the slide, not
      the window, and capped at the image's own resolution.
    - pull to dismiss: drag down or up (touch, pen, mouse) or a vertical
-     trackpad flick at 1×; --lightbox-pull-progress on the root.
+     trackpad flick at 1× (not a mouse wheel); --lightbox-pull-progress
+     on the root.
    - keyboard: Escape, ←/→ (pan when zoomed), Home / End, + = − _ 0.
    - history: data-history pushes an entry on open; Back closes.
    - page: html[data-lightbox-open] locks the scroll behind.
@@ -1478,8 +1479,21 @@
                  (end-pull! root m (.-offset wp) 0))
                wheel-idle-ms))))))
 
+(defn- mouse-wheel?
+  "A notched mouse wheel rather than a trackpad. Reads deltaMode before
+  deltaY: Firefox reports lines only to a page that asks for the mode
+  first. A wheel notch is a whole multiple of 120 in wheelDeltaY; a
+  trackpad's wheelDeltaY is -3 × deltaY (Blink, WebKit)."
+  [e]
+  (let [mode (.-deltaMode e)
+        dy (.-deltaY e)
+        w (.-wheelDeltaY e)]
+    (or (not= 0 mode)
+        (and (number? w) (not= 0 w) (= 0 (mod w 120)) (not= w (* -3 dy))))))
+
 (defn- on-wheel [e]
-  (let [t (.-target e)
+  (let [mouse? (mouse-wheel? e)
+        t (.-target e)
         root (open-root-of t)
         legacy (when-not root (closest t legacy-sel))
         ctx (cond root (viewer-ctx root) legacy (ctx-at t))
@@ -1512,8 +1526,11 @@
         (do (prevent!)
             (when ctx (wheel-zoom! ctx e (js/Math.exp (* (- dy) 0.002)) false)))
 
-        ;; 1×, vertical: pull to dismiss (horizontal is the strip's own scroll)
+        ;; 1×, vertical trackpad flick: pull to dismiss (horizontal is the
+        ;; strip's own scroll). A mouse wheel never dismisses: its notches
+        ;; are big enough that scrolling would close the viewer.
         (and (> (js/Math.abs dy) (js/Math.abs dx))
+             (or (not mouse?) (.-wheelPull (state root)))
              (not (.hasAttribute root "data-contained"))
              (not (mid-swipe? root)))
         (do (prevent!) (wheel-pull! root e))

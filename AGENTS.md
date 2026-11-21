@@ -1150,8 +1150,9 @@ What the runtime does:
   lightbox gesture, and with focus inside it, arrows / Home / End / zoom
   keys are the player's; Escape closes an open player menu first.
 - **pull to dismiss:** vertical drag (touch, pen, mouse) or a vertical
-  trackpad / wheel flick at 1×; `--lightbox-pull-progress` (0 → 1) on the
-  root drives the backdrop; past 22% of the height or a flick closes.
+  trackpad flick at 1× (a notched mouse wheel never dismisses: a few
+  notches would pass the threshold); `--lightbox-pull-progress` (0 → 1) on
+  the root drives the backdrop; past 22% of the height or a flick closes.
 - **keys:** Escape, ←/→ (pan when zoomed), ↑/↓ (pan), Home/End, `+ = - _ 0`.
   Unmodified only: ctrl/cmd + plus stays the browser's page zoom.
 - **page:** `html[data-lightbox-open]` locks the page scroll (the scrollbar

@@ -8576,20 +8576,39 @@
     }
     ;
   };
+  var mouse_wheel_QMARK_ = function(e) {
+    const mode1 = e.deltaMode;
+    const dy2 = e.deltaY;
+    const w3 = e.wheelDeltaY;
+    const or__23426__auto__4 = !(0 === mode1);
+    if (or__23426__auto__4) {
+      return or__23426__auto__4;
+    } else {
+      const and__23442__auto__5 = number_QMARK_(w3);
+      if (truth_(and__23442__auto__5)) {
+        return !(0 === w3) && (0 === mod(w3, 120) && !_EQ_(w3, -3 * dy2));
+      } else {
+        return and__23442__auto__5;
+      }
+      ;
+    }
+    ;
+  };
   var on_wheel = function(e) {
-    const t1 = e.target;
-    const root2 = open_root_of(t1);
-    const legacy3 = truth_(root2) ? null : closest2(t1, legacy_sel);
-    const ctx4 = truth_(root2) ? viewer_ctx(root2) : truth_(legacy3) ? ctx_at(t1) : null;
-    const dy5 = e.deltaY * (1 === e.deltaMode ? 16 : 1);
-    const dx6 = e.deltaX * (1 === e.deltaMode ? 16 : 1);
-    const prevent_BANG_7 = (function() {
+    const mouse_QMARK_1 = mouse_wheel_QMARK_(e);
+    const t2 = e.target;
+    const root3 = open_root_of(t2);
+    const legacy4 = truth_(root3) ? null : closest2(t2, legacy_sel);
+    const ctx5 = truth_(root3) ? viewer_ctx(root3) : truth_(legacy4) ? ctx_at(t2) : null;
+    const dy6 = e.deltaY * (1 === e.deltaMode ? 16 : 1);
+    const dx7 = e.deltaX * (1 === e.deltaMode ? 16 : 1);
+    const prevent_BANG_8 = (function() {
       if (truth_((() => {
-        const and__23442__auto__8 = e.cancelable;
-        if (truth_(and__23442__auto__8)) {
+        const and__23442__auto__9 = e.cancelable;
+        if (truth_(and__23442__auto__9)) {
           return not(webkit_QMARK_);
         } else {
-          return and__23442__auto__8;
+          return and__23442__auto__9;
         }
         ;
       })())) {
@@ -8598,59 +8617,59 @@
       ;
     });
     if (truth_((() => {
-      const or__23426__auto__9 = root2;
-      if (truth_(or__23426__auto__9)) {
-        return or__23426__auto__9;
+      const or__23426__auto__10 = root3;
+      if (truth_(or__23426__auto__10)) {
+        return or__23426__auto__10;
       } else {
-        return legacy3;
+        return legacy4;
       }
       ;
     })())) {
       if (truth_((() => {
-        const and__23442__auto__10 = root2;
-        if (truth_(and__23442__auto__10)) {
-          const or__23426__auto__11 = state2(root2).closing;
-          if (truth_(or__23426__auto__11)) {
-            return or__23426__auto__11;
+        const and__23442__auto__11 = root3;
+        if (truth_(and__23442__auto__11)) {
+          const or__23426__auto__12 = state2(root3).closing;
+          if (truth_(or__23426__auto__12)) {
+            return or__23426__auto__12;
           } else {
-            return root2.hasAttribute("data-opening");
+            return root3.hasAttribute("data-opening");
           }
           ;
         } else {
-          return and__23442__auto__10;
+          return and__23442__auto__11;
         }
         ;
       })())) {
-        return prevent_BANG_7();
+        return prevent_BANG_8();
       } else {
-        if (truth_(closest2(t1, ".ui-lightbox-content, .ui-lightbox-thumbs"))) {
+        if (truth_(closest2(t2, ".ui-lightbox-content, .ui-lightbox-thumbs"))) {
           return null;
         } else {
           if (truth_((() => {
-            const or__23426__auto__12 = e.ctrlKey;
-            if (truth_(or__23426__auto__12)) {
-              return or__23426__auto__12;
+            const or__23426__auto__13 = e.ctrlKey;
+            if (truth_(or__23426__auto__13)) {
+              return or__23426__auto__13;
             } else {
               return e.metaKey;
             }
             ;
           })())) {
-            prevent_BANG_7();
+            prevent_BANG_8();
             if (truth_((() => {
-              const and__23442__auto__13 = ctx4;
-              if (truth_(and__23442__auto__13)) {
+              const and__23442__auto__14 = ctx5;
+              if (truth_(and__23442__auto__14)) {
                 return not(deref(safari_pinch));
               } else {
-                return and__23442__auto__13;
+                return and__23442__auto__14;
               }
               ;
             })())) {
-              return wheel_zoom_BANG_(ctx4, e, Math.exp(-dy5 * 0.01), (() => {
-                const and__23442__auto__14 = e.ctrlKey;
-                if (truth_(and__23442__auto__14)) {
+              return wheel_zoom_BANG_(ctx5, e, Math.exp(-dy6 * 0.01), (() => {
+                const and__23442__auto__15 = e.ctrlKey;
+                if (truth_(and__23442__auto__15)) {
                   return not(deref(ctrl_held_QMARK_));
                 } else {
-                  return and__23442__auto__14;
+                  return and__23442__auto__15;
                 }
                 ;
               })());
@@ -8658,41 +8677,57 @@
             ;
           } else {
             if (truth_((() => {
-              const and__23442__auto__15 = ctx4;
-              if (truth_(and__23442__auto__15)) {
-                return zoomed_QMARK_(get(ctx4, "media"));
+              const and__23442__auto__16 = ctx5;
+              if (truth_(and__23442__auto__16)) {
+                return zoomed_QMARK_(get(ctx5, "media"));
               } else {
-                return and__23442__auto__15;
+                return and__23442__auto__16;
               }
               ;
             })())) {
-              prevent_BANG_7();
-              if (truth_(get(ctx4, "legacy?"))) {
-                return wheel_zoom_BANG_(ctx4, e, Math.exp(-dy5 * 2e-3), false);
+              prevent_BANG_8();
+              if (truth_(get(ctx5, "legacy?"))) {
+                return wheel_zoom_BANG_(ctx5, e, Math.exp(-dy6 * 2e-3), false);
               } else {
-                const z16 = live_pose_BANG_(get(ctx4, "media"));
-                return apply_zoom_BANG_(ctx4, settle(ctx4, assoc(z16, "tx", get(z16, "tx") - dx6, "ty", get(z16, "ty") - dy5)), null);
+                const z17 = live_pose_BANG_(get(ctx5, "media"));
+                return apply_zoom_BANG_(ctx5, settle(ctx5, assoc(z17, "tx", get(z17, "tx") - dx7, "ty", get(z17, "ty") - dy6)), null);
               }
               ;
             } else {
               if (truth_((() => {
-                const or__23426__auto__17 = legacy3;
-                if (truth_(or__23426__auto__17)) {
-                  return or__23426__auto__17;
+                const or__23426__auto__18 = legacy4;
+                if (truth_(or__23426__auto__18)) {
+                  return or__23426__auto__18;
                 } else {
-                  return root2.hasAttribute("data-wheel-zoom");
+                  return root3.hasAttribute("data-wheel-zoom");
                 }
                 ;
               })())) {
-                prevent_BANG_7();
-                if (truth_(ctx4)) {
-                  return wheel_zoom_BANG_(ctx4, e, Math.exp(-dy5 * 2e-3), false);
+                prevent_BANG_8();
+                if (truth_(ctx5)) {
+                  return wheel_zoom_BANG_(ctx5, e, Math.exp(-dy6 * 2e-3), false);
                 }
                 ;
               } else {
-                if (truth_(Math.abs(dy5) > Math.abs(dx6) && (not(root2.hasAttribute("data-contained")) && not(mid_swipe_QMARK_(root2))))) {
-                  prevent_BANG_7();
-                  return wheel_pull_BANG_(root2, e);
+                if (truth_(Math.abs(dy6) > Math.abs(dx7) && (() => {
+                  const and__23442__auto__20 = (() => {
+                    const or__23426__auto__19 = not(mouse_QMARK_1);
+                    if (or__23426__auto__19) {
+                      return or__23426__auto__19;
+                    } else {
+                      return state2(root3).wheelPull;
+                    }
+                    ;
+                  })();
+                  if (truth_(and__23442__auto__20)) {
+                    return not(root3.hasAttribute("data-contained")) && not(mid_swipe_QMARK_(root3));
+                  } else {
+                    return and__23442__auto__20;
+                  }
+                  ;
+                })())) {
+                  prevent_BANG_8();
+                  return wheel_pull_BANG_(root3, e);
                 } else {
                   if ("else") {
                     return null;
