@@ -148,7 +148,7 @@ A round toolbar button for :actions: a link with :href (a download with :downloa
 
 - [Tile grid](grid.md): A responsive auto-fill grid of square or masonry tiles with size presets, plus a layout toggle and size stepper for toolbars.
 - [Dialog](dialog.md): A focused modal surface for decisions that need attention, as a native <dialog> or an overlay for reactive apps.
-- [Video player](video-player.md): A video player with glass controls over the picture, HLS through hls.js, built-in subtitles, quality and speed menus, autoplay next, and custom buttons with their own popovers.
+- [Video player](video-player.md): A video player with glass controls over the picture, HLS through hls.js, built-in subtitles, audio track, quality and speed menus, autoplay next, and custom buttons with their own popovers.
 - [Camera](camera.md): A viewfinder with capture and camera switch, falling back to the native file input capture on plain HTTP, plus stream helpers.
 
 ## Guidance for AI tools

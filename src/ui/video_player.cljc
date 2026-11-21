@@ -8,8 +8,9 @@
    hiding, fullscreen, the up-next countdown and the popovers.
 
    Controls are data. Built-ins: :subtitles :quality :speed (menus the
-   runtime fills from the stream), :autonext (toggle, needs :next), :pip and
-   :fullscreen. Custom ones come from :buttons:
+   runtime fills from the stream), :audio (a menu of the tracks a host
+   lists with the controller's audio), :autonext (toggle, needs :next),
+   :pip and :fullscreen. Custom ones come from :buttons:
 
      {:id :sleep :icon :moon :label \"Sleep timer\"
       :options [{:value 0 :label \"Off\"} {:value 30 :label \"30 minutes\"}]
@@ -36,10 +37,11 @@
 
 (def builtin-controls
   "Control ids the runtime implements itself."
-  #{"subtitles" "quality" "speed" "autonext" "pip" "fullscreen"})
+  #{"subtitles" "audio" "quality" "speed" "autonext" "pip" "fullscreen"})
 
 (def ^:private builtin-labels
   {"subtitles" ["Subtitles" :captions]
+   "audio" ["Audio" :audio-lines]
    "quality" ["Quality" :settings]
    "speed" ["Speed" :gauge]
    "autonext" ["Autoplay next" :list-video]
@@ -95,7 +97,7 @@
   "Built-in menus, the custom buttons, then autonext, pip, fullscreen. A
    custom button with a built-in id keeps the built-in's place."
   [buttons next]
-  (vec (distinct (concat ["subtitles" "quality" "speed"]
+  (vec (distinct (concat ["subtitles" "audio" "quality" "speed"]
                          (map (comp util/kw-name :id) buttons)
                          (when next ["autonext"])
                          ["pip" "fullscreen"]))))
@@ -104,7 +106,8 @@
 
 (defn- panel
   "A popover above its trigger. Built-in panels are empty: the runtime
-   fills them from the stream (levels, text tracks, rates)."
+   fills them from the stream (levels, text tracks, rates) or from what a
+   host handed the controller (audio tracks)."
   [id label & options]
   (into [:div {:class (cls "video-player-panel video-player-glass")
                :data-vp-panel id :role "menu" :aria-label label :hidden true}
@@ -154,11 +157,12 @@
       (menu-button b))
     (let [[label icn] (get builtin-labels id)]
       (case id
-        "subtitles" [[:button {:type "button" :class (cls "video-player-btn") :data-vp-open id :data-vp-builtin id
-                               :aria-haspopup "menu" :aria-expanded "false" :aria-pressed "false"
-                               :aria-label label :data-tooltip label :hidden true}
-                      (ic icn)]
-                     (panel id label)]
+        ("subtitles" "audio")
+        [[:button {:type "button" :class (cls "video-player-btn") :data-vp-open id :data-vp-builtin id
+                   :aria-haspopup "menu" :aria-expanded "false" :aria-pressed "false"
+                   :aria-label label :data-tooltip label :hidden true}
+          (ic icn)]
+         (panel id label)]
         "quality"   [[:button {:type "button" :class (cls "video-player-pill") :data-vp-open id :data-vp-builtin id
                                :aria-haspopup "menu" :aria-expanded "false" :aria-label label :data-tooltip label :hidden true}
                       [:span {:data-vp-summary id} "Auto"]]
@@ -268,7 +272,8 @@
                    data-vp-segment for per-kind colours. A host that only
                    learns them later calls the controller's segments.
      :controls   - ids in the right capsule, in order (default: subtitles
-                   quality speed, every :buttons id, autonext pip fullscreen)
+                   audio quality speed, every :buttons id, autonext pip
+                   fullscreen)
      :buttons    - custom controls, see the namespace doc
      :fit        - :contain (default, 16:9) or :fill (fill the parent)
      :variant    - :glass (default, blurred capsules) or :plain (controls on

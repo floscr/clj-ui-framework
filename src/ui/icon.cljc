@@ -360,6 +360,14 @@
    [[:rect {:width "18" :height "14" :x "3" :y "5" :rx "2" :ry "2"}]
     [:path {:d "M7 15h4M15 15h2M7 11h2M13 11h4"}]]
 
+   :audio-lines
+   [[:path {:d "M2 10v3"}]
+    [:path {:d "M6 6v11"}]
+    [:path {:d "M10 3v18"}]
+    [:path {:d "M14 8v7"}]
+    [:path {:d "M18 5v13"}]
+    [:path {:d "M22 10v3"}]]
+
    :gauge
    [[:path {:d "m12 14 4-4"}]
     [:path {:d "M3.34 19a10 10 0 1 1 17.32 0"}]]

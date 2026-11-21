@@ -51,9 +51,15 @@
 (deftest default-controls-test
   (let [tree (vp/video-player {:src "a.mp4"})]
     (testing "built-in menus have empty panels the runtime fills"
-      (doseq [id ["subtitles" "quality" "speed"]]
+      (doseq [id ["subtitles" "audio" "quality" "speed"]]
         (is (= 1 (count (find-attr tree :data-vp-open id))) id)
-        (is (= 1 (count (find-attr tree :data-vp-panel id))) id)))
+        (is (= 1 (count (find-attr tree :data-vp-panel id))) id))
+    (testing "audio waits hidden for the host's tracks, after subtitles"
+      (let [[btn] (find-attr tree :data-vp-open "audio")
+            order (map #(:data-vp-open (attrs %)) (find-attr tree :data-vp-builtin))]
+        (is (true? (:hidden (attrs btn))))
+        (is (= "audio" (:data-vp-builtin (attrs btn))))
+        (is (= ["subtitles" "audio" "quality" "speed"] order)))))
     (testing "no next: no next button, no autonext toggle, no up-next card"
       (is (empty? (find-attr tree :data-vp-act "next")))
       (is (empty? (find-attr tree :data-vp-toggle "autonext")))

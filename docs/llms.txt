@@ -120,7 +120,7 @@ Dark mode: `data-theme="dark"` on `<html>` (auto via prefers-color-scheme otherw
 - [Lightbox](components/lightbox.md): A fullscreen viewer for one image or a gallery: swipe, pinch and wheel zoom, pull to dismiss, and a morph out of and back into the thumbnail.
 - [Player bar](components/player-bar.md): A music player bar with artwork, track info, transport controls, a scrubbable progress track and volume.
 - [Editing timeline](components/timeline.md): A media editing timeline: a scrubbable ruler, labeled tracks with draggable and trimmable segments, a playhead and a floating transport.
-- [Video player](components/video-player.md): A video player with glass controls over the picture, HLS through hls.js, built-in subtitles, quality and speed menus, autoplay next, and custom buttons with their own popovers.
+- [Video player](components/video-player.md): A video player with glass controls over the picture, HLS through hls.js, built-in subtitles, audio track, quality and speed menus, autoplay next, and custom buttons with their own popovers.
 
 ### Text
 

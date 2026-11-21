@@ -36,10 +36,17 @@
    detail {kind: select|toggle|action|next, id, value, on}.
 
    window.__uiVideoPlayer(root) returns the controller
-   {play pause seek toast load segments levels video}; segments([{start end
-   label kind}]) replaces the marked stretches of the seek bar;
-   levels(heights, current) fills the Quality menu where the browser plays
-   HLS itself (Safari on iOS), and the host loads the picked level.")
+   {play pause seek toast load segments levels audio subtitles video};
+   segments([{start end label kind}]) replaces the marked stretches of the
+   seek bar; levels(heights, current) fills the Quality menu where the
+   browser plays HLS itself (Safari on iOS), and the host loads the picked
+   level; audio([{label hint default}], current) fills the Audio menu (a
+   pick only reports it: the host loads that track); subtitles([{src label
+   lang default}]) replaces the <track>s (the next episode's), turning on
+   the default one.
+
+   The subtitle pick is a track, not a source's: loading another source
+   (an audio switch) keeps it as long as its <track> stays.")
 
 (def ^:private players (js/Map.))
 (def ^:private idle-ms 2600)
@@ -109,6 +116,12 @@
   [p]
   (when-not (.-hls p) (.-nativeLevels p)))
 
+(defn- audio-default
+  "Index of the track a host marked default (the file's own), else 0."
+  [p]
+  (let [i (.findIndex (or (.-audios p) #js []) (fn [a] (.-default a)))]
+    (if (neg? i) 0 i)))
+
 (defn- builtin-options
   "Array of {value label hint default} for a built-in menu."
   [p id]
@@ -127,6 +140,11 @@
                          :hint (when (and auto? cur) (str (.-height cur) "p"))}]
                (.map rows (fn [r] #js {:value (.-value r) :label (str (.-height r) "p")
                                        :hint (when (>= (.-height r) 720) "HD")})))))
+    "audio"
+    (let [d (audio-default p)]
+      (.map (or (.-audios p) #js [])
+            (fn [a i] #js {:value i :label (or (not-empty (.-label a)) (str "Track " (inc i)))
+                           :hint (.-hint a) :default (= i d)})))
     "subtitles"
     (.concat #js [#js {:value -1 :label "Off" :default true}]
              (.map (text-tracks p) (fn [t i] #js {:value i :label (or (not-empty (.-label t))
@@ -143,6 +161,7 @@
                       (or (not h) (.-autoLevelEnabled h)) -1
                       :else (.-currentLevel h)))
     "subtitles" (.-sub p)
+    "audio" (.-audio p)
     "speed" (.. p -video -playbackRate)
     nil))
 
@@ -162,6 +181,7 @@
   (let [ts (text-tracks p)]
     (.forEach ts (fn [t j] (set! (.-mode t) (if (= j i) "hidden" "disabled"))))
     (set! (.-sub p) i)
+    (set! (.-subTrack p) (when (>= i 0) (aget ts i)))
     (when (>= i 0) (set! (.-lastSub p) i))
     (draw-cue! p)
     (when say?
@@ -177,6 +197,9 @@
                   (set! (.-currentLevel h) v)
                   (toast! p (if (< v 0) "Quality: Auto" (str "Quality: " (.-height (aget (levels p) v)) "p")))))
     "subtitles" (set-sub! p v true)
+    ;; The host loads the picked track (the change event).
+    "audio" (do (set! (.-audio p) v)
+                (toast! p (str "Audio: " (.-label (aget (builtin-options p "audio") v)))))
     "speed" (do (set! (.. p -video -playbackRate) v)
                 (toast! p (str "Speed: " (rate-label v))))
     nil))
@@ -305,17 +328,57 @@
     (.addEventListener t "cuechange" (fn [] (draw-cue! p)))))
 
 (defn- init-tracks!
-  "Take over the text tracks: draw cues ourselves, honour a default track."
+  "Take over the text tracks: draw cues ourselves, keep the picked track
+   while it is there, else honour a default one."
   [p]
-  (let [ts (text-tracks p)]
+  (let [ts (text-tracks p)
+        kept (if (.-subTrack p) (.indexOf ts (.-subTrack p)) -1)]
     (.forEach ts (fn [t] (wire-track! p t)))
-    (when (< (.-sub p) 0)
-      (let [i (.findIndex ts (fn [t] (= (.-mode t) "showing")))]
-        (if (>= i 0)
-          (set-sub! p i false)
-          (.forEach ts (fn [t] (set! (.-mode t) "disabled"))))))
+    (if (>= kept 0)
+      (set! (.-sub p) kept)
+      (do (set! (.-sub p) -1)
+          (set! (.-subTrack p) nil)
+          (let [i (.findIndex ts (fn [t] (= (.-mode t) "showing")))]
+            (if (>= i 0)
+              (set-sub! p i false)
+              (.forEach ts (fn [t] (set! (.-mode t) "disabled")))))))
+    (draw-cue! p)
     (when-let [b (q (.-root p) "[data-vp-builtin=subtitles]")]
       (set! (.-hidden b) (zero? (.-length ts))))))
+
+(defn- set-subtitles!
+  "Replace the video's <track>s with `tracks` ([{src label lang default}])
+   and turn on the default one (none: subtitles off)."
+  [p tracks]
+  (let [v (.-video p)
+        tracks (or tracks #js [])]
+    (.forEach (qa v "track") (fn [t] (.remove t)))
+    (set! (.-subTrack p) nil)
+    (set! (.-sub p) -1)
+    (set! (.-lastSub p) 0)
+    (.forEach tracks
+              (fn [t]
+                (let [el (.createElement js/document "track")]
+                  (set! (.-kind el) "subtitles")
+                  (set! (.-src el) (.-src t))
+                  (set! (.-label el) (or (.-label t) ""))
+                  (when (.-lang t) (set! (.-srclang el) (.-lang t)))
+                  (.appendChild v el)
+                  (set! (.. el -track -mode) "disabled"))))
+    (let [d (.findIndex tracks (fn [t] (.-default t)))]
+      (init-tracks! p)
+      (when (>= d 0) (set-sub! p d false)))
+    (sync! p)))
+
+(defn- set-audio!
+  "The tracks a host can play ([{label hint default}]) and the one playing.
+   The Audio menu shows with two or more."
+  [p tracks current]
+  (set! (.-audios p) (when (and tracks (pos? (.-length tracks))) (js/Array.from tracks)))
+  (set! (.-audio p) (if (number? current) current (audio-default p)))
+  (when-let [b (q (.-root p) "[data-vp-builtin=audio]")]
+    (set! (.-hidden b) (< (.-length (or (.-audios p) #js [])) 2)))
+  (sync! p))
 
 ;; ── Up next ─────────────────────────────────────────────────────────
 
@@ -640,7 +703,6 @@
         play! (fn [] (when autoplay? (autoplay! p)))]
     (set! (.-src p) src)
     (set! (.-dismissed p) false)
-    (set! (.-sub p) -1)
     (flag! root "data-error" false)
     (flag! root "data-reconnecting" false)
     ;; An autoplaying source shows the spinner from the start, not the big
@@ -699,7 +761,8 @@
 
 (defn- init! [root]
   (let [v (q root "video")
-        p #js {:root root :video v :hls nil :sub -1 :lastSub 0
+        p #js {:root root :video v :hls nil :sub -1 :subTrack nil :lastSub 0
+               :audios nil :audio 0
                :auto (= "true" (.. root -dataset -autonext))
                :dismissed false :open nil :dragging false :volDrag false}]
     (.set players root p)
@@ -769,6 +832,7 @@
     (.addEventListener v "playing" (fn [] (flag! root "data-reconnecting" false)))
     (.addEventListener v "loadedmetadata" (fn [] (init-tracks! p) (sync! p) (tick! p)))
     (.addEventListener (.-textTracks v) "addtrack" (fn [] (init-tracks! p) (sync! p)))
+    (.addEventListener (.-textTracks v) "removetrack" (fn [] (init-tracks! p) (sync! p)))
     (.addEventListener v "ended"
                        (fn [] (when (and (has-next? p) (.-auto p) (not (.-dismissed p)))
                                 (go-next! p))))
@@ -840,6 +904,8 @@
                :toast (fn [msg] (toast! p msg))
                :segments (fn [segs] (set-segments! p segs))
                :levels (fn [heights current] (set-native-levels! p heights current))
+               :audio (fn [tracks current] (set-audio! p tracks current))
+               :subtitles (fn [tracks] (set-subtitles! p tracks))
                :load (fn [] (load! p) (sync! p))})))
 
 (if (= "loading" (.-readyState js/document))

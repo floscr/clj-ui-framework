@@ -1,18 +1,18 @@
 # Video player
 
-> A video player with glass controls over the picture, HLS through hls.js, built-in subtitles, quality and speed menus, autoplay next, and custom buttons with their own popovers.
+> A video player with glass controls over the picture, HLS through hls.js, built-in subtitles, audio track, quality and speed menus, autoplay next, and custom buttons with their own popovers.
 
 - Type: Component (media, Media)
 - Namespace: `ui.video-player`
 - Source: `src/ui/video_player.cljc`
 - Public fns: `video-player-class-list`, `video-player-classes`, `video-player`
 - JS runtime: `ui.js.video-player` (bundled in ui-runtime.js)
-- Keywords: video, player, hls, hls.js, m3u8, subtitles, captions, quality, playback speed, autoplay next, up next, fullscreen, picture in picture
+- Keywords: video, player, hls, hls.js, m3u8, subtitles, captions, audio track, language, quality, playback speed, autoplay next, up next, fullscreen, picture in picture
 
 ## When to use
 
 - Playing a film, an episode or a clip, from a file or an HLS stream.
-- A player that needs app-specific controls next to the built-ins: a sleep timer, an audio switch, a share action.
+- A player that needs app-specific controls next to the built-ins: a sleep timer, a share action.
 - Series playback with an up-next countdown into the next episode.
 
 ## When not to use
@@ -81,11 +81,12 @@ The player. Render it once; the ui.js.video-player runtime owns playback state. 
 | `:back` | `{:href :label}` | – | A back link in the top chip. |
 | `:start-at` | `seconds` | – | Start position, e.g. a resume point. |
 | `:autoplay?` | `boolean` | – | Try to play at once; stays paused when the browser refuses. |
-| `:tracks` | `[{:src :label :lang :default?}]` | – | WebVTT subtitle tracks. HLS subtitle renditions appear on their own. |
+| `:click-to-pause?` | `boolean` | `false` | A click on the picture plays or pauses. By default it shows the controls when they are hidden and hides them when they show. |
+| `:tracks` | `[{:src :label :lang :default?}]` | – | WebVTT subtitle tracks. HLS subtitle renditions appear on their own. Tracks known only later (the next episode's) go through the controller's subtitles. |
 | `:next` | `{:title :thumb :href}` | – | The next item: a Next button, the up-next card, the autonext toggle. :href navigates; else only :on-next fires. |
 | `:autonext?` | `boolean` | `true` | Initial state of autoplay next. |
 | `:segments` | `[{:start :end :label :kind}]` | – | Stretches marked on the seek bar, in seconds (sponsor segments, intros). Drawn as fine sage hatching with a hairline edge; restyle with the --vp-segment-* custom properties on .video-player-scrub (color, stripe, gap, stripe-width, angle, edge, edge-width), per kind via [data-vp-segment=kind]; the seek tooltip names the one under the pointer. Segments known only after render go through the controller's segments. |
-| `:controls` | `vector of ids` | – | Right capsule in order. Built-ins: :subtitles :quality :speed :autonext :pip :fullscreen. |
+| `:controls` | `vector of ids` | – | Right capsule in order. Built-ins: :subtitles :audio :quality :speed :autonext :pip :fullscreen. |
 | `:buttons` | `vector of maps` | – | Custom controls: menus {:id :icon :label :options :value :show-value?}, {:type :toggle :pressed?} or {:type :action}. |
 | `:fit` | `:contain \| :fill` | `:contain` | :fill fills the parent (full-page players) instead of 16:9. |
 | `:variant` | `:glass \| :plain` | `:glass` | :glass floats the controls in blurred capsules; :plain sets them straight on a gradient with solid popovers and no blur (cheaper on TVs and old phones). |
@@ -105,6 +106,7 @@ Class string for the root.
 | Keys | Action |
 | --- | --- |
 | Space / k | Play or pause. |
+| Click / tap | On the picture: shows or hides the controls (plays or pauses with :click-to-pause?). Double-click: fullscreen. |
 | Left / Right | Seek 5 seconds. |
 | Up / Down | Volume. |
 | m | Mute. |
@@ -122,7 +124,7 @@ Class string for the root.
 
 ## Motion
 
-- Controls fade after 2.6 s without input while playing; popovers pop in over --duration-fast; the scrub track grows on hover with --ease-spring.
+- Controls fade after 2.6 s without input while playing, or at once on a click on the picture; on a touch screen the centre pause and skip buttons show with them while playing; popovers pop in over --duration-fast; the scrub track grows on hover with --ease-spring.
 - prefers-reduced-motion drops the transitions.
 
 ## Responsive behavior
@@ -141,8 +143,10 @@ Class string for the root.
 - Don't re-render the player on every timeupdate: the runtime owns time, play state and the open popover. Re-render only when :src, :next or a custom button's :value changes.
 - Custom option values travel through the DOM as strings; on-select maps them back to the original value.
 - A button with a built-in id (e.g. :quality) replaces the built-in.
-- window.__uiVideoPlayer(root) returns {video play pause seek toast load segments levels} for host scripts (progress saving, resume). segments([{start end label kind}]) replaces the marked stretches; use it or :segments, not both, on a re-rendering target.
+- window.__uiVideoPlayer(root) returns {video play pause seek toast load segments levels audio subtitles} for host scripts (progress saving, resume). segments([{start end label kind}]) replaces the marked stretches; use it or :segments, not both, on a re-rendering target.
 - Where the browser plays HLS itself (Safari on iOS: no hls.js, or the page unset window.Hls), a page can't read or pick the level, so the built-in Quality menu stays hidden. A host that can serve one level alone calls levels([1080 720 480], current) (heights; current -1 = Auto): the menu shows them, and a pick emits change {kind select id quality value height}. The host then loads that level itself (data-src + data-start-at at the current time, then load).
+- Audio tracks: the browser can't switch the audio of a file or an hls.js stream with one rendition, so the host lists the tracks it can serve with audio([{label hint default}], current): the built-in Audio menu shows with two or more, and a pick emits change {kind select id audio value index}. The host then loads a source with that track (data-src + data-start-at at the current time, then load).
+- subtitles([{src label lang default}]) replaces the video's <track>s and turns on the :default one (none: off). Use it when the tracks change without a re-render, e.g. the next episode played in the same player. A subtitle pick survives load as long as its <track> stays, so an audio switch keeps the subtitles.
 
 ## Related
 
@@ -152,6 +156,6 @@ Class string for the root.
 
 ## Guidance for AI tools
 
-Video player: A video player with glass controls over the picture, HLS through hls.js, built-in subtitles, quality and speed menus, autoplay next, and custom buttons with their own popovers. Use only the documented props; `:class` and `:attrs` are for layout and extra attributes, never for restyling internals. The same call renders on all three targets; see Targets for the per-target event and class conventions. Keep keyboard access and both themes intact.
+Video player: A video player with glass controls over the picture, HLS through hls.js, built-in subtitles, audio track, quality and speed menus, autoplay next, and custom buttons with their own popovers. Use only the documented props; `:class` and `:attrs` are for layout and extra attributes, never for restyling internals. The same call renders on all three targets; see Targets for the per-target event and class conventions. Keep keyboard access and both themes intact.
 
 Full library index: docs/llms.txt

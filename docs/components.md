@@ -96,7 +96,7 @@
 | [Lightbox](components/lightbox.md) | `ui.lightbox` | A fullscreen viewer for one image or a gallery: swipe, pinch and wheel zoom, pull to dismiss, and a morph out of and back into the thumbnail. | `item-type`, `item-key`, `action`, `lightbox`, `image-thumbnail` |
 | [Player bar](components/player-bar.md) | `ui.player-bar` | A music player bar with artwork, track info, transport controls, a scrubbable progress track and volume. | `player-bar-class-list`, `player-bar-classes`, `player-bar` |
 | [Editing timeline](components/timeline.md) | `ui.timeline` | A media editing timeline: a scrubbable ruler, labeled tracks with draggable and trimmable segments, a playhead and a floating transport. | `total-time`, `tick-step`, `ticks`, `time->pct`, `span->pct`, `format-time`, `format-readout`, `timeline-class-list`, `timeline-classes`, `dragging?`, `timeline` |
-| [Video player](components/video-player.md) | `ui.video-player` | A video player with glass controls over the picture, HLS through hls.js, built-in subtitles, quality and speed menus, autoplay next, and custom buttons with their own popovers. | `video-player-class-list`, `video-player-classes`, `video-player` |
+| [Video player](components/video-player.md) | `ui.video-player` | A video player with glass controls over the picture, HLS through hls.js, built-in subtitles, audio track, quality and speed menus, autoplay next, and custom buttons with their own popovers. | `video-player-class-list`, `video-player-classes`, `video-player` |
 
 ### Text
 
@@ -104,12 +104,12 @@
 |-----------|-----------|-------------|------------|
 | [Markdown](components/markdown.md) | `ui.markdown` | A minimal markdown to hiccup renderer for docs and chat replies: headings, code blocks, tables, lists, inline code and bold. | `markdown->hiccup` |
 
-## Icons (94)
+## Icons (95)
 
 Lucide-compatible inline SVG icons — see `AGENTS.md` § Icons for
 usage and how to add new ones.
 
-`alert-circle`, `alert-triangle`, `arrow-down`, `arrow-left`, `arrow-right`, `arrow-up`, `arrow-up-down`, `bell`, `book-open`, `bookmark`, `calendar`, `camera`, `captions`, `check`, `chevron-down`, `chevron-left`, `chevron-right`, `chevron-up`, `circle-check`, `circle-x`, `clock`, `code`, `copy`, `database`, `download`, `edit`, `external-link`, `eye`, `eye-off`, `file`, `file-spreadsheet`, `file-text`, `film`, `filter`, `folder`, `gauge`, `globe`, `grid`, `grip-vertical`, `heart`, `home`, `image`, `inbox`, `info`, `layers`, `layout-dashboard`, `link`, `list`, `list-video`, `lock`, `log-in`, `log-out`, `mail`, `map-pin`, `maximize`, `menu`, `mic`, `minimize`, `minus`, `monitor`, `moon`, `music`, `package`, `palette`, `pause`, `picture-in-picture-2`, `play`, `plus`, `refresh`, `repeat`, `rotate-ccw`, `rotate-cw`, `scissors`, `search`, `settings`, `shield`, `shuffle`, `signpost`, `skip-back`, `skip-forward`, `sliders-horizontal`, `star`, `sun`, `terminal`, `trash`, `undo`, `upload`, `user`, `users`, `volume-1`, `volume-2`, `volume-x`, `x`, `zap`
+`alert-circle`, `alert-triangle`, `arrow-down`, `arrow-left`, `arrow-right`, `arrow-up`, `arrow-up-down`, `audio-lines`, `bell`, `book-open`, `bookmark`, `calendar`, `camera`, `captions`, `check`, `chevron-down`, `chevron-left`, `chevron-right`, `chevron-up`, `circle-check`, `circle-x`, `clock`, `code`, `copy`, `database`, `download`, `edit`, `external-link`, `eye`, `eye-off`, `file`, `file-spreadsheet`, `file-text`, `film`, `filter`, `folder`, `gauge`, `globe`, `grid`, `grip-vertical`, `heart`, `home`, `image`, `inbox`, `info`, `layers`, `layout-dashboard`, `link`, `list`, `list-video`, `lock`, `log-in`, `log-out`, `mail`, `map-pin`, `maximize`, `menu`, `mic`, `minimize`, `minus`, `monitor`, `moon`, `music`, `package`, `palette`, `pause`, `picture-in-picture-2`, `play`, `plus`, `refresh`, `repeat`, `rotate-ccw`, `rotate-cw`, `scissors`, `search`, `settings`, `shield`, `shuffle`, `signpost`, `skip-back`, `skip-forward`, `sliders-horizontal`, `star`, `sun`, `terminal`, `trash`, `undo`, `upload`, `user`, `users`, `volume-1`, `volume-2`, `volume-x`, `x`, `zap`
 
 Icons with dedicated filled path data (`:filled true`):
 
