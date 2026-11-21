@@ -1187,6 +1187,13 @@ countdown and the popovers.
   of built-in options; CSS variables), so a Replicant/Squint re-render
   doesn't fight the runtime (vdom diffs only patch what the render
   changed). Don't re-render on timeupdate.
+- **A click or tap on the picture toggles the controls** (hidden → shown,
+  shown → hidden) instead of pausing; `:click-to-pause?`
+  (`data-click-pause`) brings pausing back. Whether they were hidden is
+  read in a capture-phase pointerdown, since the idle listener's own
+  pointerdown shows them before the click. On touch screens (`hover:
+  none`) the centre pause/skip buttons show with the controls while
+  playing, so pausing stays one tap away.
 - **Changing `:src`** (the root's `data-src`) loads the new source;
   removing the root destroys its hls.js instance.
 - **Controls are data**: built-ins `:subtitles :quality :speed :autonext

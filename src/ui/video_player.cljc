@@ -255,6 +255,8 @@
      :back       - {:href url :label \"Back\"} adds a back button to the chip
      :start-at   - seconds to start from (resume)
      :autoplay?  - try to start playing (stays paused when the browser refuses)
+     :click-to-pause? - a click on the picture plays or pauses (default: it
+                   shows or hides the controls)
      :tracks     - [{:src vtt :label \"English\" :lang \"en\" :default? true}]
      :next       - {:title :thumb :href} the next item: a Next button, the
                    up-next card and the :autonext toggle. With :href the
@@ -277,7 +279,7 @@
      :on-next    - (fn []) Next pressed or the up-next countdown ran out
      :class      - extra classes on the root
      :attrs      - extra attributes on the root"
-  [{:keys [src hls? poster title back start-at autoplay? tracks next autonext? segments
+  [{:keys [src hls? poster title back start-at autoplay? click-to-pause? tracks next autonext? segments
            controls buttons fit variant on-select on-toggle on-action on-next class attrs]}]
   (let [custom (into {} (map (fn [b] [(util/kw-name (:id b)) b]) buttons))
         ids (map util/kw-name (or controls (default-controls buttons next)))
@@ -292,6 +294,7 @@
                      hls? (assoc :data-hls "true")
                      start-at (assoc :data-start-at (str start-at))
                      autoplay? (assoc :data-autoplay "true")
+                     click-to-pause? (assoc :data-click-pause "true")
                      (:href next) (assoc :data-next-href (:href next))
                      handler #?(:squint (assoc :on-change handler)
                                 :cljs   (assoc :on {:change handler})

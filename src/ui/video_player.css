@@ -218,6 +218,15 @@ html:has(.video-player[data-tiled]) body { overflow: hidden; }
   pointer-events: none;
 }
 
+/* On a touch screen a tap brings the controls up instead of pausing, so
+   the centre buttons (pause, skip) come with them while playing too. */
+@media (hover: none) {
+  .video-player:not([data-paused]):not([data-idle]):not([data-loading]) .video-player-center {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
 .video-player .video-player-big { width: 76px; height: 76px; }
 .video-player-big .video-player-icon { width: 32px; height: 32px; }
 .video-player .video-player-skip { width: 52px; height: 52px; }

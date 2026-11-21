@@ -35,6 +35,7 @@
            {:name :back :type "{:href :label}" :doc "A back link in the top chip."}
            {:name :start-at :type "seconds" :doc "Start position, e.g. a resume point."}
            {:name :autoplay? :type "boolean" :doc "Try to play at once; stays paused when the browser refuses."}
+           {:name :click-to-pause? :type "boolean" :default "false" :doc "A click on the picture plays or pauses. By default it shows the controls when they are hidden and hides them when they show."}
            {:name :tracks :type "[{:src :label :lang :default?}]" :doc "WebVTT subtitle tracks. HLS subtitle renditions appear on their own."}
            {:name :next :type "{:title :thumb :href}" :doc "The next item: a Next button, the up-next card, the autonext toggle. :href navigates; else only :on-next fires."}
            {:name :autonext? :type "boolean" :default "true" :doc "Initial state of autoplay next."}
@@ -52,6 +53,7 @@
   {:fn "video-player-classes" :doc "Class string for the root."}]
 
  :keyboard [["Space / k" "Play or pause."]
+            ["Click / tap" "On the picture: shows or hides the controls (plays or pauses with :click-to-pause?). Double-click: fullscreen."]
             ["Left / Right" "Seek 5 seconds."]
             ["Up / Down" "Volume."]
             ["m" "Mute."]
@@ -65,7 +67,7 @@
                  "The seek bar and volume are sliders with values; options are menuitemradio with aria-checked; triggers carry aria-expanded and aria-pressed."
                  "Captions are drawn from the video's text tracks into the page, so they can sit above the controls."]
 
- :motion ["Controls fade after 2.6 s without input while playing; popovers pop in over --duration-fast; the scrub track grows on hover with --ease-spring."
+ :motion ["Controls fade after 2.6 s without input while playing, or at once on a click on the picture; on a touch screen the centre pause and skip buttons show with them while playing; popovers pop in over --duration-fast; the scrub track grows on hover with --ease-spring."
           "prefers-reduced-motion drops the transitions."]
 
  :responsive ["Below 600px the title, volume slider and pill labels hide and the controls shrink; below 420px the dock moves closer to the edges."

@@ -21,6 +21,10 @@
    browser's toolbars. Escape, f or the button leave it; so does switching
    to another tab.
 
+   A click or tap on the picture shows the controls when they are hidden
+   and hides them when they show; with data-click-pause it plays or
+   pauses instead.
+
    Autoplay (data-autoplay, or the controller's play) falls back to muted
    playback when the browser refuses sound, with a Tap to unmute pill.
 
@@ -217,6 +221,10 @@
 (defn- show-ui! [p]
   (flag! (.-root p) "data-idle" false)
   (arm-hide! p))
+
+(defn- hide-ui! [p]
+  (js/clearTimeout (.-hideT p))
+  (flag! (.-root p) "data-idle" true))
 
 (defn- close-panel! [p]
   (when-let [o (.-open p)]
@@ -699,7 +707,13 @@
            (let [x (js/parseFloat x)]
              (when-not (js/isNaN x) (set! (.-volume v) x) (set! (.-muted v) (zero? x)))))
          (catch :default _))
-    ;; Clicks: one delegated listener per player.
+    ;; Whether the controls were hidden when the press began: the
+    ;; pointerdown below shows them before the click arrives.
+    (.addEventListener root "pointerdown"
+                       (fn [] (set! (.-wasIdle p) (.hasAttribute root "data-idle")))
+                       #js {:capture true :passive true})
+    ;; Clicks: one delegated listener per player. A click on the picture
+    ;; shows or hides the controls; it pauses only with data-click-pause.
     (.addEventListener root "click"
                        (fn [e]
                          (let [t (.closest (.-target e) "[data-vp-open],[data-vp-toggle],[data-vp-action],[data-vp-act],.video-player-option")]
@@ -708,7 +722,9 @@
                              (cond (.-open p) (close-panel! p)
                                    (not (.closest (.-target e) "[data-vp=surface]")) nil
                                    (auto-muted? p) (unmute! p)
-                                   :else (toggle-play! p))
+                                   (= "true" (.. root -dataset -clickPause)) (toggle-play! p)
+                                   (.-wasIdle p) (show-ui! p)
+                                   :else (hide-ui! p))
 
                              (.hasAttribute t "data-vp-open")
                              (open-panel! p (.getAttribute t "data-vp-open") t)
