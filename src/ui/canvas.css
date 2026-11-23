@@ -1,0 +1,274 @@
+/* ── Canvas ───────────────────────────────────────────────────────── */
+/* A frame that pans and zooms one world layer (ui.js.canvas moves it).  */
+/* Everything inside the world is positioned in world units by inline    */
+/* left/top; the frame's own children (controls, tag) float over it.     */
+
+.canvas {
+  position: relative;
+  overflow: clip;
+  height: calc(var(--size-16) * 7);
+  border: var(--border-0);
+  border-radius: var(--radius-panel);
+  background-color: var(--bg-0);
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+  /* the canvas owns every gesture, as a map does */
+  touch-action: none;
+}
+
+/* Inside a scrolling page: vertical swipes stay the page's. */
+.canvas[data-gestures="page"] {
+  touch-action: pan-y;
+}
+
+.canvas[data-panning] {
+  cursor: grabbing;
+}
+
+.canvas-grid {
+  background-image: radial-gradient(
+    circle,
+    color-mix(in oklch, var(--fg-2) 26%, transparent) 1px,
+    transparent 1.2px
+  );
+  background-size: var(--size-5) var(--size-5);
+}
+
+.canvas-world {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
+/* A move from code eases; a gesture tracks the pointer. */
+.canvas-world[data-animate] {
+  transition: transform var(--duration-considered) var(--ease-standard);
+}
+
+.canvas-node {
+  position: absolute;
+}
+
+/* ── Edges ────────────────────────────────────────────────────────── */
+
+.canvas-edges {
+  position: absolute;
+  left: 0;
+  top: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.canvas-edge {
+  color: color-mix(in oklch, var(--fg-2) 60%, transparent);
+}
+
+.canvas-edge path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.25;
+}
+
+.canvas-edge .canvas-edge-tip {
+  fill: currentColor;
+  stroke: none;
+}
+
+.canvas-edge-taken {
+  color: var(--fg-1);
+}
+
+.canvas-edge-taken path {
+  stroke-width: 1.5;
+}
+
+/* The way into the step that runs: accent, and it moves. */
+.canvas-edge-live {
+  color: var(--accent);
+}
+
+.canvas-edge-live path:first-child {
+  stroke-dasharray: 5 7;
+  animation: canvas-edge-flow 0.9s linear infinite; /* lint-allow */
+}
+
+@keyframes canvas-edge-flow {
+  to {
+    stroke-dashoffset: -12;
+  }
+}
+
+/* ── Step card ────────────────────────────────────────────────────── */
+
+.canvas-step {
+  display: flex;
+  align-items: center;
+  gap: var(--size-3);
+  padding: 0 var(--size-3);
+  border: var(--border-0);
+  border-radius: var(--radius-surface);
+  background: var(--bg-1);
+  color: var(--fg-2);
+  cursor: pointer;
+  transition:
+    transform var(--duration-standard) var(--ease-spring),
+    box-shadow var(--duration-standard) var(--ease-standard),
+    border-color var(--duration-fast) var(--ease-standard);
+}
+
+.canvas-step:hover {
+  border-color: color-mix(in oklch, var(--fg-1) 60%, transparent);
+}
+
+.canvas-step-icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: var(--size-8);
+  height: var(--size-8);
+  border-radius: var(--radius-control);
+  background: var(--bg-2);
+  color: var(--fg-2);
+}
+
+.canvas-step-text {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+}
+
+.canvas-step-title {
+  font-size: var(--font-sm);
+  font-weight: var(--weight-medium);
+  color: var(--fg-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.canvas-step-description {
+  font-size: var(--font-xs);
+  color: var(--fg-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.canvas-step-status {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: var(--size-4);
+  height: var(--size-4);
+}
+
+.canvas-step-dot {
+  width: var(--size-2);
+  height: var(--size-2);
+  border-radius: var(--radius-pill);
+  border: 1.5px solid color-mix(in oklch, var(--fg-2) 70%, transparent);
+}
+
+.canvas-step-done .canvas-step-title,
+.canvas-step-done .canvas-step-icon {
+  color: var(--fg-0);
+}
+
+.canvas-step-done .canvas-step-status {
+  color: var(--success);
+}
+
+.canvas-step-current {
+  border-color: color-mix(in oklch, var(--fg-1) 70%, transparent);
+  box-shadow: var(--shadow-floating);
+  transform: scale(1.03);
+}
+
+.canvas-step-current .canvas-step-title {
+  color: var(--fg-0);
+}
+
+.canvas-step-current .canvas-step-icon {
+  background: var(--accent-subtle);
+  color: var(--accent);
+}
+
+.canvas-step-selected {
+  border-color: var(--fg-0);
+}
+
+/* ── What floats ──────────────────────────────────────────────────── */
+
+.canvas-note {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: var(--size-2);
+  height: var(--size-6);
+  padding: 0 var(--size-2);
+  border: var(--border-0);
+  border-radius: var(--radius-pill);
+  background: var(--bg-1);
+  font-size: var(--font-xs);
+  color: var(--fg-1);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.canvas-tag {
+  position: absolute;
+  left: var(--size-3);
+  top: var(--size-3);
+  display: flex;
+  align-items: center;
+  gap: var(--size-2);
+  font-family: var(--font-mono);
+  font-size: var(--font-xs);
+  color: var(--fg-1);
+  pointer-events: none;
+}
+
+.canvas-tag-dot {
+  width: var(--size-2);
+  height: var(--size-2);
+  border-radius: var(--radius-pill);
+  background: var(--success);
+}
+
+.canvas-controls {
+  position: absolute;
+  right: var(--size-3);
+  top: var(--size-3);
+  cursor: default;
+}
+
+.canvas-controls .toolbar {
+  box-shadow: var(--shadow-1);
+}
+
+.canvas-controls .btn[aria-pressed="true"] {
+  background: var(--fg-0);
+  color: var(--bg-1);
+}
+
+.canvas-zoom {
+  min-width: var(--size-12);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .canvas-world[data-animate] {
+    transition: none;
+  }
+
+  .canvas-edge-live path:first-child {
+    animation: none;
+  }
+
+  .canvas-step-current {
+    transform: none;
+  }
+}

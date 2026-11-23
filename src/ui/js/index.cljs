@@ -1,5 +1,6 @@
 (ns index
-  (:require [color-picker]
+  (:require [canvas]
+            [color-picker]
             [command]
             [context-menu]
             [dial]

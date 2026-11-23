@@ -152,6 +152,7 @@
               [ui.notification-test]
               [ui.video-player-test]
               [ui.lightbox-test]
+              [ui.canvas-test]
               [ui.registry-test]
               [dev.route-test])
    :task (let [{:keys [fail error]} (t/run-tests
@@ -214,6 +215,7 @@
                                       'ui.notification-test
                                       'ui.video-player-test
                                       'ui.lightbox-test
+                                      'ui.canvas-test
                                       'ui.registry-test
                                       'dev.route-test)]
            (when (pos? (+ fail error))

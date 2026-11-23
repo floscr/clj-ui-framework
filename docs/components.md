@@ -4,7 +4,7 @@
 > See `AGENTS.md` for conventions, per-target pitfalls, and how to
 > add new components and icons. Agents: start at `docs/llms.txt`.
 
-## Components (58)
+## Components (59)
 
 ### Actions
 
@@ -80,6 +80,7 @@
 
 | Component | Namespace | Description | Public API |
 |-----------|-----------|-------------|------------|
+| [Canvas](components/canvas.md) | `ui.canvas` | A frame that pans and zooms a world of nodes and edges and that code can steer: fit everything, reveal a node, follow the step that runs. With a ready drawing for runs: step cards on a rail. | `bounds`, `edge-path`, `canvas-attrs`, `canvas-class-list`, `canvas-classes`, `canvas`, `world`, `node`, `edge-class-list`, `edge`, `edges`, `step-class-list`, `step-classes`, `step`, `note`, `tag`, `controls`, `flow`, `fit!`, `reveal!`, `center!`, `follow!`, `zoom-by!`, `zoom-to!`, `pan-by!`, `viewport` |
 | [Tile grid](components/grid.md) | `ui.grid` | A responsive auto-fill grid of square or masonry tiles with size presets, plus a layout toggle and size stepper for toolbars. | `grid-class-list`, `grid-classes`, `grid`, `layout-toggle`, `step-size`, `size-stepper` |
 | [Page](components/page.md) | `ui.page` | The one page container with its title row, titled sections and action rows: column width, gutters and vertical rhythm set once for the whole app. | `page-class-list`, `page-classes`, `page`, `page-header`, `page-section`, `action-row-class-list`, `action-row` |
 | [Resizable panels](components/panels.md) | `ui.panels` | Panel groups whose panes trade space by dragging a separator, with collapse, keyboard resizing and persisted sizes. | `size-str`, `group-attrs`, `panel-attrs`, `group`, `separator`, `panel` |

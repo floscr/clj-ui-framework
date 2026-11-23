@@ -1,0 +1,110 @@
+{:id :canvas
+ :title "Canvas"
+ :summary "A frame that pans and zooms a world of nodes and edges and that code can steer: fit everything, reveal a node, follow the step that runs. With a ready drawing for runs: step cards on a rail."
+ :category :layout
+ :group "Layout"
+ :keywords ["canvas" "pan and zoom" "flow" "workflow" "node graph" "state machine" "pipeline" "viewport" "fit" "reveal" "follow"]
+
+ :when-to-use
+ ["A graph too big to draw at one size: a workflow, a state machine, a pipeline, a board of cards."
+  "A run you watch: use flow, and the camera stays on the step that runs."
+  "Content the app has to bring into view itself (fit!, reveal!, center!)."]
+
+ :when-not-to-use
+ ["Use timeline for clips on tracks along one time axis."
+  "Use chart for data series."
+  "Use panels when panes trade space and nothing needs to zoom."
+  "For five steps in a row that always fit, a plain list (list-row) reads better than a canvas."]
+
+ :usage "(require '[ui.canvas :as canvas])\n\n(canvas/flow {:id \"run\" :label \"Flow pr-1\" :tag \"ext.penpot/pr\"\n              :note \"check 4, next in 1:12\"\n              :nodes [{:id \"push\" :title \"push\" :description \"Both branches, or none\" :icon :terminal :status :done :x 0 :y 0}\n                      {:id \"ci\" :title \"ci\" :description \"Checks of both PRs\" :icon :clock :status :current :x 0 :y 92}\n                      {:id \"fix-ci\" :title \"fix-ci\" :description \"Failed twice: fix it\" :icon :zap :x 276 :y 184}]\n              :edges [{:from \"push\" :to \"ci\" :taken true}\n                      {:from \"ci\" :to \"fix-ci\"}\n                      {:from \"fix-ci\" :to \"push\" :rail :right}]})"
+
+ :examples
+ [{:title "Any content: a frame, a world, nodes"
+   :code "(canvas/canvas {:id \"board\" :label \"Board\"}\n  (canvas/world {}\n    (canvas/node {:id \"plan\" :x 24 :y 24} (card/card {} \"Plan the launch\"))\n    (canvas/node {:id \"ship\" :x 520 :y 320} (card/card {} \"Ship it\")))\n  (canvas/controls {:follow false}))"}
+  {:title "Steering from code (browser targets)"
+   :code "(canvas/fit! \"run\")\n(canvas/reveal! \"run\" \"fix-ci\" {:padding 16})\n(canvas/center! \"run\" \"ci\" 1)\n(canvas/zoom-by! \"run\" 1.25)\n(canvas/pan-by! \"run\" 80 0)\n(canvas/follow! \"run\" \"comments\")"}
+  {:title "Inside a scrolling page"
+   :code "(canvas/flow {:id \"run\" :gestures :page :height 360 :nodes nodes :edges edges})"}]
+
+ :api
+ [{:fn "flow" :doc "A run drawn from data: step cards on a rail, the camera on the step that runs."
+   :props [{:name :id :type "string" :doc "Element id; what the steering fns take."}
+           {:name :label :type "string" :doc "Accessible name."}
+           {:name :nodes :type "[{:id :title :description :icon :status :x :y}]" :doc "Steps with their positions in world units (pixels at zoom 1). A card is 228 by 56; leave 92 or more between rows."}
+           {:name :edges :type "[{:from :to :taken :rail}]" :doc ":rail :left or :right sends a way back up the side of the graph."}
+           {:name :follow :type "node id" :default "the :current node" :doc "The node the camera keeps centered."}
+           {:name :tag :type "string" :doc "Label in the top left corner."}
+           {:name :note :type "string" :doc "Pill beside the current step."}
+           {:name :controls :type "boolean | map" :default "true" :doc "false leaves the buttons out; a map is passed to controls."}
+           {:name :height :type "px number"}
+           {:name :gestures :type ":canvas | :page" :default ":canvas"}
+           {:name :min-zoom :type "number" :default "0.25"} {:name :max-zoom :type "number" :default "2.5"}
+           {:name :padding :type "px number" :default "24"} {:name :grid :type "boolean" :default "true"}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "canvas" :doc "The frame." :children "One world, then what floats over it (controls, tag)."
+   :props [{:name :id :type "string"} {:name :label :type "string" :doc "aria-label."}
+           {:name :follow :type "node id" :doc "The node the camera keeps centered. Render another one and the camera goes there."}
+           {:name :initial :type ":fit | :follow | :none" :default ":follow with :follow, else :fit" :doc "Where the viewport starts."}
+           {:name :min-zoom :type "number" :default "0.25"} {:name :max-zoom :type "number" :default "2.5"}
+           {:name :padding :type "px number" :default "24" :doc "Kept free around what fit and reveal show."}
+           {:name :gestures :type ":canvas | :page" :default ":canvas" :doc ":page inside a scrolling page: the page keeps the wheel and vertical swipes."}
+           {:name :height :type "px number" :doc "Without it the frame is 28rem tall; or size it with CSS."}
+           {:name :grid :type "boolean" :default "true" :doc "The dot grid."}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "world" :doc "The layer the viewport moves." :children "nodes, edges, notes."
+   :props [{:name :width :type "px number"} {:name :height :type "px number" :doc "Both are needed when it holds edges."}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "node" :doc "A positioned box in the world that fit, reveal and follow can find." :children "Any content."
+   :props [{:name :id :type "string"} {:name :x :type "number"} {:name :y :type "number"}
+           {:name :width :type "px number"} {:name :height :type "px number"}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "step" :doc "A node drawn as a step of a run: icon, title, one line, and its state at the end of the card."
+   :props [{:name :id :type "string"} {:name :x :type "number"} {:name :y :type "number"}
+           {:name :title :type "string"} {:name :description :type "string"} {:name :icon :type "ui.icon name"}
+           {:name :status :type ":done | :current | :idle" :default ":idle"} {:name :selected :type "boolean"}
+           {:name :class :type "string"} {:name :attrs :type "map" :doc "A click handler goes here."}]}
+  {:fn "edges" :doc "The SVG layer under the nodes." :children "edge elements."
+   :props [{:name :width :type "px number"} {:name :height :type "px number"} {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "edge" :doc "One edge between two rects."
+   :props [{:name :from :type "{:x :y :w :h}"} {:name :to :type "{:x :y :w :h}"}
+           {:name :rail :type ":left | :right" :doc "A way back along the side."} {:name :rail-x :type "number" :doc "Where that side line runs."}
+           {:name :taken :type "boolean" :doc "Drawn in full."} {:name :live :type "boolean" :doc "Accent, and it moves: the way into the step that runs."}
+           {:name :class :type "string"}]}
+  {:fn "controls" :doc "The camera's buttons: follow, zoom out, percent, zoom in, fit. The runtime binds them."
+   :props [{:name :follow :type "boolean" :default "true"} {:name :zoom :type "boolean" :default "true"} {:name :fit :type "boolean" :default "true"}
+           {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "tag" :doc "A quiet label in the top left corner." :children "Its text."
+   :props [{:name :live :type "boolean" :doc "A dot that says it is running."} {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "note" :doc "A small pill in the world, beside a node." :children "Its text."
+   :props [{:name :x :type "number"} {:name :y :type "number"} {:name :class :type "string"} {:name :attrs :type "map"}]}
+  {:fn "edge-path" :doc "The geometry of an edge: {:d path-data :tip [x y degrees]} from two rects, for custom drawings."}
+  {:fn "bounds" :doc "The rectangle around rects as {:left :top :right :bottom}."}
+  {:fn "canvas-attrs" :doc "Data attributes for the frame, for custom markup."}]
+
+ :keyboard [["+ and -" "Zoom in and out around the center."]
+            ["0" "Zoom to 100%."]
+            ["Arrow keys" "Pan."]
+            ["Tab" "Walks the steps; the focused one is brought into view."]]
+
+ :accessibility ["The frame has role=application and takes :label as its name; it is focusable so the keys work."
+                 "Steps are focusable, and focusing one by keyboard reveals it."
+                 "Every control is a button with an aria-label; the follow button reports its state with aria-pressed."
+                 "The picture is not the only source: say where a run stands in text beside the canvas as well."]
+ :motion ["A move from code (fit, reveal, follow, the buttons, the keys) eases over --duration-considered; a drag or pinch tracks the pointer."
+          "The edge into the running step moves, and that step is lifted a little. Both stop under reduced motion."]
+ :responsive ["The frame is as wide as its container; the camera centers the followed step again when it resizes."
+              "On a phone inside a scrolling page pass :gestures :page, or a swipe over the canvas never scrolls the page."
+              "In a narrow frame leave the zoom buttons out: (controls {:zoom false})."]
+ :runtime ["ui.js.canvas"]
+
+ :targets
+ {:clj "Markup plus ui-runtime.js. Steer it by rendering another :follow, or with the buttons; there is no steering fn on the server."
+  :cljs "fit! reveal! center! follow! zoom-by! zoom-to! pan-by! viewport call the runtime. Listen for ui-canvas-viewport (detail {x y zoom}) and ui-canvas-follow (detail {following}) via :attrs."
+  :squint "Same as Replicant; require ui.js.canvas in the SPA."}
+
+ :notes-for-ai ["Positions are yours: the component does not lay a graph out. For flow, put the main path in one column (same :x), rows 92 apart, side steps 276 to the left or right, and give every way back a :rail on the side its source is on."
+                "Give every canvas an :id and a :label."
+                "A drag pans from anywhere, also from over a step; a press that does not move is a click on the step."
+                "Do not put a canvas with :gestures :canvas in the middle of a long mobile page."]
+
+ :related [:timeline :toolbar :panels :card]}

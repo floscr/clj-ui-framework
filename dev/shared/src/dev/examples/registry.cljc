@@ -65,7 +65,8 @@
             [dev.examples.filters :as filters]
             [dev.examples.comment :as comment]
             [dev.examples.notification :as notification]
-            [dev.examples.video-player :as video-player]))
+            [dev.examples.video-player :as video-player]
+            [dev.examples.canvas :as canvas]))
 
 (def entries
   [{:id :button          :title "Button"          :examples button/examples}
@@ -126,7 +127,8 @@
    {:id :filters         :title "Filters"         :examples filters/examples}
    {:id :comment         :title "Comment"         :examples comment/examples}
    {:id :notification    :title "Notification"    :examples notification/examples}
-   {:id :video-player    :title "Video player"    :examples video-player/examples}])
+   {:id :video-player    :title "Video player"    :examples video-player/examples}
+   {:id :canvas          :title "Canvas"          :examples canvas/examples}])
 
 (defn entry
   "The registry entry for a component id (keyword or string)."
