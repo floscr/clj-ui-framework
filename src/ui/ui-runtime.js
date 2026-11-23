@@ -17585,8 +17585,9 @@
     } catch (_6) {
     }
     ;
-    root.addEventListener("pointerdown", (function() {
-      return p2.wasIdle = root.hasAttribute("data-idle");
+    root.addEventListener("pointerdown", (function(e) {
+      p2.wasIdle = root.hasAttribute("data-idle");
+      return p2.mousePress = "mouse" === e.pointerType;
     }), { "capture": true, "passive": true });
     root.addEventListener("click", (function(e) {
       const t7 = e.target.closest("[data-vp-open],[data-vp-toggle],[data-vp-action],[data-vp-act],.video-player-option");
@@ -17600,7 +17601,15 @@
             if (truth_(auto_muted_QMARK_(p2))) {
               return unmute_BANG_(p2);
             } else {
-              if ("true" === root.dataset.clickPause) {
+              if (truth_((() => {
+                const or__23426__auto__8 = p2.mousePress;
+                if (truth_(or__23426__auto__8)) {
+                  return or__23426__auto__8;
+                } else {
+                  return "true" === root.dataset.clickPause;
+                }
+                ;
+              })())) {
                 return toggle_play_BANG_(p2);
               } else {
                 if (truth_(p2.wasIdle)) {
@@ -17630,11 +17639,11 @@
                 return emit_BANG_5(p2, { "kind": "action", "id": t7.getAttribute("data-vp-action") });
               } else {
                 if (truth_((() => {
-                  const and__23442__auto__8 = e.altKey;
-                  if (truth_(and__23442__auto__8)) {
+                  const and__23442__auto__9 = e.altKey;
+                  if (truth_(and__23442__auto__9)) {
                     return "fullscreen" === t7.getAttribute("data-vp-act");
                   } else {
-                    return and__23442__auto__8;
+                    return and__23442__auto__9;
                   }
                   ;
                 })())) {
@@ -17665,15 +17674,15 @@
       ;
     }));
     document.addEventListener("pointerdown", (function(e) {
-      const temp__23062__auto__9 = p2.open;
-      if (truth_(temp__23062__auto__9)) {
-        const o10 = temp__23062__auto__9;
+      const temp__23062__auto__10 = p2.open;
+      if (truth_(temp__23062__auto__10)) {
+        const o11 = temp__23062__auto__10;
         if (truth_((() => {
-          const or__23426__auto__11 = o10.panel.contains(e.target);
-          if (truth_(or__23426__auto__11)) {
-            return or__23426__auto__11;
+          const or__23426__auto__12 = o11.panel.contains(e.target);
+          if (truth_(or__23426__auto__12)) {
+            return or__23426__auto__12;
           } else {
-            return o10.trigger.contains(e.target);
+            return o11.trigger.contains(e.target);
           }
           ;
         })())) {
@@ -17696,16 +17705,16 @@
       }
       ;
     }));
-    const temp__23062__auto__12 = q2(root, "[data-vp=scrub]");
-    if (truth_(temp__23062__auto__12)) {
-      const s13 = temp__23062__auto__12;
-      wire_scrub_BANG_(p2, s13);
+    const temp__23062__auto__13 = q2(root, "[data-vp=scrub]");
+    if (truth_(temp__23062__auto__13)) {
+      const s14 = temp__23062__auto__13;
+      wire_scrub_BANG_(p2, s14);
     }
     ;
-    const temp__23062__auto__14 = q2(root, "[data-vp=volume]");
-    if (truth_(temp__23062__auto__14)) {
-      const s15 = temp__23062__auto__14;
-      wire_volume_BANG_(p2, s15);
+    const temp__23062__auto__15 = q2(root, "[data-vp=volume]");
+    if (truth_(temp__23062__auto__15)) {
+      const s16 = temp__23062__auto__15;
+      wire_volume_BANG_(p2, s16);
     }
     ;
     ["play", "pause", "volumechange", "ratechange"].forEach((function(t) {
@@ -17745,17 +17754,17 @@
     }));
     v1.addEventListener("ended", (function() {
       if (truth_((() => {
-        const and__23442__auto__16 = has_next_QMARK_(p2);
-        if (truth_(and__23442__auto__16)) {
-          const and__23442__auto__17 = p2.auto;
-          if (truth_(and__23442__auto__17)) {
+        const and__23442__auto__17 = has_next_QMARK_(p2);
+        if (truth_(and__23442__auto__17)) {
+          const and__23442__auto__18 = p2.auto;
+          if (truth_(and__23442__auto__18)) {
             return not(p2.dismissed);
           } else {
-            return and__23442__auto__17;
+            return and__23442__auto__18;
           }
           ;
         } else {
-          return and__23442__auto__16;
+          return and__23442__auto__17;
         }
         ;
       })())) {
@@ -17763,10 +17772,10 @@
       }
       ;
     }));
-    const temp__23062__auto__18 = q2(root, "[data-vp-act=pip]");
-    if (truth_(temp__23062__auto__18)) {
-      const b19 = temp__23062__auto__18;
-      b19.hidden = not(document.pictureInPictureEnabled);
+    const temp__23062__auto__19 = q2(root, "[data-vp-act=pip]");
+    if (truth_(temp__23062__auto__19)) {
+      const b20 = temp__23062__auto__19;
+      b20.hidden = not(document.pictureInPictureEnabled);
     }
     ;
     init_tracks_BANG_(p2);

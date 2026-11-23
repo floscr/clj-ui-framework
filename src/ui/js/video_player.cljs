@@ -21,9 +21,9 @@
    browser's toolbars. Escape, f or the button leave it; so does switching
    to another tab.
 
-   A click or tap on the picture shows the controls when they are hidden
-   and hides them when they show; with data-click-pause it plays or
-   pauses instead.
+   A mouse click on the picture plays or pauses. A tap shows the controls
+   when they are hidden and hides them when they show; with
+   data-click-pause it plays or pauses too.
 
    Autoplay (data-autoplay, or the controller's play) falls back to muted
    playback when the browser refuses sound, with a Tap to unmute pill.
@@ -770,13 +770,17 @@
            (let [x (js/parseFloat x)]
              (when-not (js/isNaN x) (set! (.-volume v) x) (set! (.-muted v) (zero? x)))))
          (catch :default _))
-    ;; Whether the controls were hidden when the press began: the
-    ;; pointerdown below shows them before the click arrives.
+    ;; Whether the controls were hidden when the press began (the
+    ;; pointerdown below shows them before the click arrives), and whether
+    ;; it was a mouse.
     (.addEventListener root "pointerdown"
-                       (fn [] (set! (.-wasIdle p) (.hasAttribute root "data-idle")))
+                       (fn [e]
+                         (set! (.-wasIdle p) (.hasAttribute root "data-idle"))
+                         (set! (.-mousePress p) (= "mouse" (.-pointerType e))))
                        #js {:capture true :passive true})
-    ;; Clicks: one delegated listener per player. A click on the picture
-    ;; shows or hides the controls; it pauses only with data-click-pause.
+    ;; Clicks: one delegated listener per player. A mouse click on the
+    ;; picture plays or pauses; a tap shows or hides the controls (it
+    ;; pauses too with data-click-pause).
     (.addEventListener root "click"
                        (fn [e]
                          (let [t (.closest (.-target e) "[data-vp-open],[data-vp-toggle],[data-vp-action],[data-vp-act],.video-player-option")]
@@ -785,7 +789,7 @@
                              (cond (.-open p) (close-panel! p)
                                    (not (.closest (.-target e) "[data-vp=surface]")) nil
                                    (auto-muted? p) (unmute! p)
-                                   (= "true" (.. root -dataset -clickPause)) (toggle-play! p)
+                                   (or (.-mousePress p) (= "true" (.. root -dataset -clickPause))) (toggle-play! p)
                                    (.-wasIdle p) (show-ui! p)
                                    :else (hide-ui! p))
 

@@ -256,11 +256,11 @@
      :hls?       - force HLS handling for a source without .m3u8 in it
      :poster     - poster image URL
      :title      - shown in the top chip and next to the transport
-     :back       - {:href url :label \"Back\"} adds a back button to the chip
+     :back       - {:href url :label \"Back\"} makes the chip a back link
      :start-at   - seconds to start from (resume)
      :autoplay?  - try to start playing (stays paused when the browser refuses)
-     :click-to-pause? - a click on the picture plays or pauses (default: it
-                   shows or hides the controls)
+     :click-to-pause? - a tap on the picture plays or pauses too (default:
+                   a mouse click pauses, a tap shows or hides the controls)
      :tracks     - [{:src vtt :label \"English\" :lang \"en\" :default? true}]
      :next       - {:title :thumb :href} the next item: a Next button, the
                    up-next card and the :autonext toggle. With :href the
@@ -316,11 +316,13 @@
      [:div {:class (cls "video-player-shade video-player-ctrl")}]
      (when (or title back)
        [:div {:class (cls "video-player-top video-player-ctrl")}
-        [:div {:class (cls "video-player-chip video-player-glass")}
-         (when back
-           [:a {:class (cls "video-player-btn") :href (:href back) :aria-label (or (:label back) "Back")}
-            (ic :arrow-left)])
-         (when title [:span {:class (cls "video-player-chip-title")} title])]])
+        ;; With a back link the whole chip is the link, title included.
+        (into (if back
+                [:a {:class (cls "video-player-chip video-player-glass") :href (:href back)
+                     :aria-label (or (:label back) "Back")}
+                 [:span {:class (cls "video-player-btn")} (ic :arrow-left)]]
+                [:div {:class (cls "video-player-chip video-player-glass")}])
+              (when title [[:span {:class (cls "video-player-chip-title")} title]]))])
      [:div {:class (cls "video-player-center video-player-ctrl")}
       [:button {:type "button" :class (cls "video-player-btn video-player-glass video-player-skip")
                 :data-vp-act "back" :aria-label "Back 10 seconds" :data-tooltip "Back 10 seconds"}

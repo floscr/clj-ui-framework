@@ -32,10 +32,10 @@
            {:name :hls? :type "boolean" :doc "Treat :src as HLS even without .m3u8 in it."}
            {:name :poster :type "url"}
            {:name :title :type "string" :doc "Top chip and the label next to the transport."}
-           {:name :back :type "{:href :label}" :doc "A back link in the top chip."}
+           {:name :back :type "{:href :label}" :doc "A back link: the whole top chip (arrow and title) links there."}
            {:name :start-at :type "seconds" :doc "Start position, e.g. a resume point."}
            {:name :autoplay? :type "boolean" :doc "Try to play at once; stays paused when the browser refuses."}
-           {:name :click-to-pause? :type "boolean" :default "false" :doc "A click on the picture plays or pauses. By default it shows the controls when they are hidden and hides them when they show."}
+           {:name :click-to-pause? :type "boolean" :default "false" :doc "A tap on the picture plays or pauses too. By default a mouse click plays or pauses and a tap shows the controls when they are hidden and hides them when they show."}
            {:name :tracks :type "[{:src :label :lang :default?}]" :doc "WebVTT subtitle tracks. HLS subtitle renditions appear on their own. Tracks known only later (the next episode's) go through the controller's subtitles."}
            {:name :next :type "{:title :thumb :href}" :doc "The next item: a Next button, the up-next card, the autonext toggle. :href navigates; else only :on-next fires."}
            {:name :autonext? :type "boolean" :default "true" :doc "Initial state of autoplay next."}
@@ -53,7 +53,7 @@
   {:fn "video-player-classes" :doc "Class string for the root."}]
 
  :keyboard [["Space / k" "Play or pause."]
-            ["Click / tap" "On the picture: shows or hides the controls (plays or pauses with :click-to-pause?). Double-click: fullscreen."]
+            ["Click / tap" "On the picture: a click plays or pauses; a tap shows or hides the controls (plays or pauses with :click-to-pause?). Double-click: fullscreen."]
             ["Left / Right" "Seek 5 seconds."]
             ["Up / Down" "Volume."]
             ["m" "Mute."]

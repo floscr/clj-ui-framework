@@ -191,7 +191,20 @@ html:has(.video-player[data-tiled]) body { overflow: hidden; }
 }
 
 .video-player-chip:has(.video-player-btn) { padding-left: var(--size-1); }
-.video-player-chip .video-player-btn { width: 30px; height: 30px; }
+.video-player-chip .video-player-btn {
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* With a back link the whole chip is the link. */
+.video-player a.video-player-chip { color: inherit; text-decoration: none; cursor: pointer; }
+
+@media (hover: hover) {
+  .video-player a.video-player-chip:hover .video-player-btn { background: var(--vp-hover); }
+}
 
 .video-player-chip-title {
   overflow: hidden;
