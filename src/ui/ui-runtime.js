@@ -1392,8 +1392,13 @@
     return set_view_BANG_(c, px3 - (px3 - v1.x) * k3, py - (py - v1.y) * k3, z2, animate_QMARK_);
   };
   var frame_center = function(c) {
-    const r1 = c.frame.getBoundingClientRect();
-    return { "x": r1.width / 2, "y": r1.height / 2, "w": r1.width, "h": r1.height };
+    const frame1 = c.frame;
+    const r2 = frame1.getBoundingClientRect();
+    const l3 = num_attr(frame1, "data-inset-left", 0);
+    const t4 = num_attr(frame1, "data-inset-top", 0);
+    const w5 = Math.max(1, r2.width - l3 - num_attr(frame1, "data-inset-right", 0));
+    const h6 = Math.max(1, r2.height - t4 - num_attr(frame1, "data-inset-bottom", 0));
+    return { "x": l3 + w5 / 2, "y": t4 + h6 / 2, "w": w5, "h": h6, "left": l3, "top": t4 };
   };
   var rect_of = function(el2) {
     return { "left": el2.offsetLeft, "top": el2.offsetTop, "right": el2.offsetLeft + el2.offsetWidth, "bottom": el2.offsetTop + el2.offsetHeight };
@@ -1430,7 +1435,7 @@
       const w3 = Math.max(1, rect.right - rect.left);
       const h4 = Math.max(1, rect.bottom - rect.top);
       const z5 = clamp(Math.min((f1.w - 2 * pad23) / w3, (f1.h - 2 * pad23) / h4, opt(opts, "maxZoom", 1)), c.minZoom, c.maxZoom);
-      return set_view_BANG_(c, (f1.w - w3 * z5) / 2 - rect.left * z5, (f1.h - h4 * z5) / 2 - rect.top * z5, z5, opt(opts, "animate", true));
+      return set_view_BANG_(c, f1.left + (f1.w - w3 * z5) / 2 - rect.left * z5, f1.top + (f1.h - h4 * z5) / 2 - rect.top * z5, z5, opt(opts, "animate", true));
     }
     ;
   };
@@ -1444,9 +1449,13 @@
       const t6 = rect.top * z3 + v2.y;
       const r7 = rect.right * z3 + v2.x;
       const b8 = rect.bottom * z3 + v2.y;
-      const dx9 = l5 < pad4 ? pad4 - l5 : r7 > f1.w - pad4 ? f1.w - pad4 - r7 : "else" ? 0 : null;
-      const dy10 = t6 < pad4 ? pad4 - t6 : b8 > f1.h - pad4 ? f1.h - pad4 - b8 : "else" ? 0 : null;
-      return set_view_BANG_(c, v2.x + dx9, v2.y + dy10, z3, opt(opts, "animate", true));
+      const lo_x9 = f1.left + pad4;
+      const hi_x10 = f1.left + f1.w - pad4;
+      const lo_y11 = f1.top + pad4;
+      const hi_y12 = f1.top + f1.h - pad4;
+      const dx13 = l5 < lo_x9 ? lo_x9 - l5 : r7 > hi_x10 ? hi_x10 - r7 : "else" ? 0 : null;
+      const dy14 = t6 < lo_y11 ? lo_y11 - t6 : b8 > hi_y12 ? hi_y12 - b8 : "else" ? 0 : null;
+      return set_view_BANG_(c, v2.x + dx13, v2.y + dy14, z3, opt(opts, "animate", true));
     }
     ;
   };
@@ -1749,10 +1758,14 @@
           ;
         }));
         mo6.observe(frame, { "attributes": true, "attributeFilter": ["data-follow"] });
-        const ro7 = new ResizeObserver((function(_) {
+        const mo7 = new MutationObserver((function(_) {
+          return follow_now_BANG_(c3, true);
+        }));
+        mo7.observe(frame, { "attributes": true, "attributeFilter": ["data-inset-top", "data-inset-right", "data-inset-bottom", "data-inset-left"] });
+        const ro8 = new ResizeObserver((function(_) {
           return follow_now_BANG_(c3, false);
         }));
-        ro7.observe(frame);
+        ro8.observe(frame);
         return c3;
       }
       ;

@@ -25,7 +25,13 @@
             :id "run" :aria-label "Flow pr-1" :data-follow "ci" :data-initial "fit"
             :data-min-zoom "0.5" :data-max-zoom "2" :data-padding "16" :data-gestures "page"}
            (canvas/canvas-attrs {:id "run" :label "Flow pr-1" :follow :ci :initial :fit
-                                 :min-zoom 0.5 :max-zoom 2 :padding 16 :gestures :page})))))
+                                 :min-zoom 0.5 :max-zoom 2 :padding 16 :gestures :page}))))
+  (testing "insets: the part of the frame something covers"
+    (is (= {:data-inset-right "460" :data-inset-top "48"}
+           (select-keys (canvas/canvas-attrs {:insets {:right 460 :top 48}})
+                        [:data-inset-top :data-inset-right :data-inset-bottom :data-inset-left])))
+    (is (= "460" (:data-inset-right (second (canvas/flow {:id "run" :nodes [] :edges []
+                                                          :insets {:right 460}})))))))
 
 (deftest canvas-test
   (let [[tag attrs w] (canvas/canvas {:id "board" :label "Board" :height 320 :class "extra"}

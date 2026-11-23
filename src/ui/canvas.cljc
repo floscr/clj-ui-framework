@@ -118,7 +118,7 @@
 
 (defn canvas-attrs
   "Data attributes for the frame: what the runtime reads."
-  [{:keys [id label follow initial min-zoom max-zoom padding gestures]}]
+  [{:keys [id label follow initial min-zoom max-zoom padding gestures insets]}]
   (cond-> {:data-ui-canvas "true"
            :tabindex "0"
            :role "application"}
@@ -129,7 +129,11 @@
     min-zoom (assoc :data-min-zoom (str min-zoom))
     max-zoom (assoc :data-max-zoom (str max-zoom))
     padding  (assoc :data-padding (str padding))
-    gestures (assoc :data-gestures (util/kw-name gestures))))
+    gestures (assoc :data-gestures (util/kw-name gestures))
+    (:top insets)    (assoc :data-inset-top (str (:top insets)))
+    (:right insets)  (assoc :data-inset-right (str (:right insets)))
+    (:bottom insets) (assoc :data-inset-bottom (str (:bottom insets)))
+    (:left insets)   (assoc :data-inset-left (str (:left insets)))))
 
 (defn canvas-class-list
   "Vector of CSS classes for the frame. :grid false leaves the dots out."
@@ -155,6 +159,9 @@
      :min-zoom  - smallest scale (default 0.25)
      :max-zoom  - largest scale (default 2.5)
      :padding   - pixels kept free around what fit and reveal show (24)
+     :insets    - {:top :right :bottom :left} in pixels: how much of the
+                  frame something covers (a panel floating over it). The
+                  camera fits, reveals and follows in the part left free
      :gestures  - :canvas (default: it takes the wheel and every drag) or
                   :page (inside a scrolling page: the page keeps the wheel
                   and vertical swipes)
@@ -162,14 +169,15 @@
      :grid      - false leaves the dot grid out
      :class     - additional CSS classes
      :attrs     - additional HTML attributes"
-  [{:keys [id label follow initial min-zoom max-zoom padding gestures height grid class attrs]}
+  [{:keys [id label follow initial min-zoom max-zoom padding insets gestures height grid class attrs]}
    & children]
   (into [:div (util/class-attrs
                (canvas-class-list {:grid grid})
                class
                (merge (canvas-attrs {:id id :label label :follow follow :initial initial
                                      :min-zoom min-zoom :max-zoom max-zoom
-                                     :padding padding :gestures gestures})
+                                     :padding padding :insets insets
+                                     :gestures gestures})
                       (when height {:style (style [["height" (px height)]])})
                       attrs))]
         (remove nil? children)))
@@ -381,9 +389,10 @@
      :controls - false leaves the buttons out; a map is passed to `controls`
      :height   - frame height in pixels
      :gestures - :canvas (default) or :page
-     :min-zoom :max-zoom :padding :grid :class :attrs - as for `canvas`"
+     :min-zoom :max-zoom :padding :insets :grid :class :attrs - as for
+                `canvas`"
   [{:keys [id label nodes edges follow tag note controls height gestures
-           min-zoom max-zoom padding grid class attrs]}]
+           min-zoom max-zoom padding insets grid class attrs]}]
   (let [status   (fn [n] (some-> (:status n) util/kw-name))
         by-id    (reduce (fn [m n] (assoc m (util/kw-name (:id n)) n)) {} nodes)
         current  (first (filter (fn [n] (= "current" (status n))) nodes))
@@ -397,7 +406,7 @@
         taken?   (fn [e] (boolean (:taken e)))
         ordered  (concat (remove taken? edges) (filter taken? edges))]
     (canvas {:id id :label label :follow followed :height height :gestures gestures
-             :min-zoom min-zoom :max-zoom max-zoom :padding padding :grid grid
+             :min-zoom min-zoom :max-zoom max-zoom :padding padding :insets insets :grid grid
              :class (if class (str "canvas-flow " class) "canvas-flow")
              :attrs attrs}
             (into (world {:width w :height h}

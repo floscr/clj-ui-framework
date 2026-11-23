@@ -39,7 +39,8 @@
            {:name :height :type "px number"}
            {:name :gestures :type ":canvas | :page" :default ":canvas"}
            {:name :min-zoom :type "number" :default "0.25"} {:name :max-zoom :type "number" :default "2.5"}
-           {:name :padding :type "px number" :default "24"} {:name :grid :type "boolean" :default "true"}
+           {:name :padding :type "px number" :default "24"} {:name :insets :type "{:top :right :bottom :left}"}
+           {:name :grid :type "boolean" :default "true"}
            {:name :class :type "string"} {:name :attrs :type "map"}]}
   {:fn "canvas" :doc "The frame." :children "One world, then what floats over it (controls, tag)."
    :props [{:name :id :type "string"} {:name :label :type "string" :doc "aria-label."}
@@ -47,6 +48,7 @@
            {:name :initial :type ":fit | :follow | :none" :default ":follow with :follow, else :fit" :doc "Where the viewport starts."}
            {:name :min-zoom :type "number" :default "0.25"} {:name :max-zoom :type "number" :default "2.5"}
            {:name :padding :type "px number" :default "24" :doc "Kept free around what fit and reveal show."}
+           {:name :insets :type "{:top :right :bottom :left}" :doc "Pixels of the frame something covers, such as a panel floating over it: the camera fits, reveals and follows in the part left free, and re-centers the followed node when they change."}
            {:name :gestures :type ":canvas | :page" :default ":canvas" :doc ":page inside a scrolling page: the page keeps the wheel and vertical swipes."}
            {:name :height :type "px number" :doc "Without it the frame is 28rem tall; or size it with CSS."}
            {:name :grid :type "boolean" :default "true" :doc "The dot grid."}

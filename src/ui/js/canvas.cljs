@@ -9,7 +9,8 @@
 
    DOM contract (rendered by ui.canvas):
      [data-ui-canvas id data-min-zoom data-max-zoom data-padding
-      data-initial=fit|follow|none data-follow=<node id> data-gestures=page]
+      data-initial=fit|follow|none data-follow=<node id> data-gestures=page
+      data-inset-top|right|bottom|left=<px>]
        [data-ui-canvas-world]            one transform moves everything in it
          [data-ui-canvas-node=<id>] …    what fit, reveal and follow measure
        [data-ui-canvas-act=follow|fit|zoom-in|zoom-out|zoom-reset] buttons
@@ -30,6 +31,10 @@
    Follow: data-follow names the node the camera keeps centered. It is
    re-centered when the attribute changes or the frame resizes; a gesture
    lets go (data-following=false) until the follow button is pressed.
+
+   Insets: data-inset-* say how much of the frame something covers (a panel
+   floating over it). Fit, reveal, center and follow work in the part left
+   free, and the followed node is re-centered when an inset changes.
 
    Events (bubbling CustomEvents on the frame):
      ui-canvas-viewport  detail {x y zoom}
@@ -86,9 +91,17 @@
         k (/ z (.-zoom v))]
     (set-view! c (- px (* (- px (.-x v)) k)) (- py (* (- py (.-y v)) k)) z animate?)))
 
-(defn- frame-center [c]
-  (let [r (.getBoundingClientRect (.-frame c))]
-    #js {:x (/ (.-width r) 2) :y (/ (.-height r) 2) :w (.-width r) :h (.-height r)}))
+(defn- frame-center
+  "The part of the frame nothing covers (data-inset-*), in frame pixels: its
+   center {x y}, size {w h} and corner {left top}."
+  [c]
+  (let [frame (.-frame c)
+        r (.getBoundingClientRect frame)
+        l (num-attr frame "data-inset-left" 0)
+        t (num-attr frame "data-inset-top" 0)
+        w (js/Math.max 1 (- (- (.-width r) l) (num-attr frame "data-inset-right" 0)))
+        h (js/Math.max 1 (- (- (.-height r) t) (num-attr frame "data-inset-bottom" 0)))]
+    #js {:x (+ l (/ w 2)) :y (+ t (/ h 2)) :w w :h h :left l :top t}))
 
 ;; ── Rectangles in world units ───────────────────────────────────────
 
@@ -134,8 +147,8 @@
                                 (opt opts "maxZoom" 1))
                    (.-minZoom c) (.-maxZoom c))]
       (set-view! c
-                 (- (/ (- (.-w f) (* w z)) 2) (* (.-left rect) z))
-                 (- (/ (- (.-h f) (* h z)) 2) (* (.-top rect) z))
+                 (- (+ (.-left f) (/ (- (.-w f) (* w z)) 2)) (* (.-left rect) z))
+                 (- (+ (.-top f) (/ (- (.-h f) (* h z)) 2)) (* (.-top rect) z))
                  z
                  (opt opts "animate" true)))))
 
@@ -151,11 +164,15 @@
           t (+ (* (.-top rect) z) (.-y v))
           r (+ (* (.-right rect) z) (.-x v))
           b (+ (* (.-bottom rect) z) (.-y v))
-          dx (cond (< l pad) (- pad l)
-                   (> r (- (.-w f) pad)) (- (- (.-w f) pad) r)
+          lo-x (+ (.-left f) pad)
+          hi-x (- (+ (.-left f) (.-w f)) pad)
+          lo-y (+ (.-top f) pad)
+          hi-y (- (+ (.-top f) (.-h f)) pad)
+          dx (cond (< l lo-x) (- lo-x l)
+                   (> r hi-x) (- hi-x r)
                    :else 0)
-          dy (cond (< t pad) (- pad t)
-                   (> b (- (.-h f) pad)) (- (- (.-h f) pad) b)
+          dy (cond (< t lo-y) (- lo-y t)
+                   (> b hi-y) (- hi-y b)
                    :else 0)]
       (set-view! c (+ (.-x v) dx) (+ (.-y v) dy) z (opt opts "animate" true)))))
 
@@ -357,6 +374,11 @@
                       (sync-follow-button! c)
                       (follow-now! c true))))]
           (.observe mo frame #js {:attributes true :attributeFilter #js ["data-follow"]}))
+        ;; something covers more or less of the frame: back into the free part
+        (let [mo (js/MutationObserver. (fn [_] (follow-now! c true)))]
+          (.observe mo frame #js {:attributes true
+                                  :attributeFilter #js ["data-inset-top" "data-inset-right"
+                                                        "data-inset-bottom" "data-inset-left"]}))
         (let [ro (js/ResizeObserver. (fn [_] (follow-now! c false)))]
           (.observe ro frame))
         c))))
