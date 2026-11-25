@@ -78,10 +78,10 @@ The player. Render it once; the ui.js.video-player runtime owns playback state. 
 | `:hls?` | `boolean` | – | Treat :src as HLS even without .m3u8 in it. |
 | `:poster` | `url` | – |  |
 | `:title` | `string` | – | Top chip and the label next to the transport. |
-| `:back` | `{:href :label}` | – | A back link in the top chip. |
+| `:back` | `{:href :label}` | – | A back link: the whole top chip (arrow and title) links there. |
 | `:start-at` | `seconds` | – | Start position, e.g. a resume point. |
 | `:autoplay?` | `boolean` | – | Try to play at once; stays paused when the browser refuses. |
-| `:click-to-pause?` | `boolean` | `false` | A click on the picture plays or pauses. By default it shows the controls when they are hidden and hides them when they show. |
+| `:click-to-pause?` | `boolean` | `false` | A tap on the picture plays or pauses too. By default a mouse click plays or pauses and a tap shows the controls when they are hidden and hides them when they show. |
 | `:tracks` | `[{:src :label :lang :default?}]` | – | WebVTT subtitle tracks. HLS subtitle renditions appear on their own. Tracks known only later (the next episode's) go through the controller's subtitles. |
 | `:next` | `{:title :thumb :href}` | – | The next item: a Next button, the up-next card, the autonext toggle. :href navigates; else only :on-next fires. |
 | `:autonext?` | `boolean` | `true` | Initial state of autoplay next. |
@@ -106,7 +106,7 @@ Class string for the root.
 | Keys | Action |
 | --- | --- |
 | Space / k | Play or pause. |
-| Click / tap | On the picture: shows or hides the controls (plays or pauses with :click-to-pause?). Double-click: fullscreen. |
+| Click / tap | On the picture: a click plays or pauses; a tap shows or hides the controls (plays or pauses with :click-to-pause?). Double-click: fullscreen. |
 | Left / Right | Seek 5 seconds. |
 | Up / Down | Volume. |
 | m | Mute. |
