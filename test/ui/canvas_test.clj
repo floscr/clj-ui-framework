@@ -107,7 +107,13 @@
     (is (= :g tag))
     (is (= "canvas-edge canvas-edge-taken" (:class attrs)))
     (is (= "M100,50 C100,72 100,72 100,95" (:d (second line))))
-    (is (= "translate(100,100) rotate(90)" (:transform (second tip))))))
+    (is (= "translate(100,100) rotate(90)" (:transform (second tip))))
+    (is (nil? (:data-ui-canvas-from attrs)) "no ids, nothing to light up"))
+  (testing "the nodes it joins, for the hover"
+    (let [[_ attrs] (canvas/edge {:from {:x 0 :y 0 :w 200 :h 50} :to {:x 0 :y 100 :w 200 :h 50}
+                                  :from-id :review :to-id "decide"})]
+      (is (= {:data-ui-canvas-from "review" :data-ui-canvas-to "decide"}
+             (select-keys attrs [:data-ui-canvas-from :data-ui-canvas-to]))))))
 
 (deftest controls-test
   (let [acts (fn [el] (keep #(:data-ui-canvas-act (second %))

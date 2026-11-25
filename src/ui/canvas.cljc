@@ -223,11 +223,15 @@
 (defn edge
   "One edge between two rects, for inside `edges`.
    Props: :from and :to ({:x :y :w :h}), :rail (:left | :right) with
-   :rail-x for a way back, :taken, :live, :class."
-  [{:keys [from to rail rail-x taken live class]}]
+   :rail-x for a way back, :taken, :live, :class; :from-id and :to-id name
+   the nodes it joins, so hovering one of them lights it up."
+  [{:keys [from to rail rail-x taken live class from-id to-id]}]
   (let [{:keys [d tip]} (edge-path from to {:rail rail :rail-x rail-x})
         [tx ty deg] tip]
-    [:g (util/class-attrs (edge-class-list {:taken taken :live live}) class nil)
+    [:g (util/class-attrs (edge-class-list {:taken taken :live live}) class
+                          (cond-> nil
+                            from-id (assoc :data-ui-canvas-from (util/kw-name from-id))
+                            to-id   (assoc :data-ui-canvas-to (util/kw-name to-id))))
      [:path {:d d}]
      (el :path ["canvas-edge-tip"]
          {:transform (str "translate(" tx "," ty ") rotate(" deg ")")
@@ -417,6 +421,7 @@
                                              side (some-> rail util/kw-name)]
                                          (when (and a b)
                                            (edge {:from (step-rect a) :to (step-rect b)
+                                                  :from-id from :to-id to
                                                   :rail rail
                                                   :rail-x (when side (if (= side "left") rail-l rail-r))
                                                   :taken taken

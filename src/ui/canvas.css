@@ -101,6 +101,33 @@
   }
 }
 
+/* A hovered node (runtime: data-hover on the frame) lights up its edges
+   and the nodes at their other ends; the rest steps back. */
+.canvas-edge,
+.canvas-node {
+  transition: opacity var(--duration-fast) var(--ease-standard);
+}
+
+[data-hover] .canvas-edge:not([data-ui-canvas-related]) {
+  opacity: 0.2;
+}
+
+[data-hover] .canvas-node:not([data-ui-canvas-related]):not(:hover):not(:focus-visible) {
+  opacity: 0.55;
+}
+
+.canvas-edge[data-ui-canvas-related] path {
+  stroke-width: 2;
+}
+
+.canvas-edge[data-ui-canvas-related="out"] {
+  color: var(--accent);
+}
+
+.canvas-edge[data-ui-canvas-related="in"] {
+  color: var(--fg-0);
+}
+
 /* ── Step card ────────────────────────────────────────────────────── */
 
 .canvas-step {

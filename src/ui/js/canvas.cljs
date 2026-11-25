@@ -17,7 +17,8 @@
        [data-ui-canvas-zoom]             text: the zoom in percent
 
    Engine-managed attributes (styling hooks):
-     frame: data-panning, data-following=true|false
+     frame: data-panning, data-following=true|false, data-hover=<node id>
+     edges and nodes of the hovered node: data-ui-canvas-related=in|out|node
      world: data-animate (a move from code; CSS gives it its transition)
      follow button: aria-pressed
 
@@ -31,6 +32,10 @@
    Follow: data-follow names the node the camera keeps centered. It is
    re-centered when the attribute changes or the frame resizes; a gesture
    lets go (data-following=false) until the follow button is pressed.
+
+   Hover: a node under the pointer (or focused) lights up its edges, the
+   ones that carry data-ui-canvas-from / data-ui-canvas-to, and the nodes at
+   their other ends; the stylesheet dims the rest.
 
    Insets: data-inset-* say how much of the frame something covers (a panel
    floating over it). Fit, reveal, center and follow work in the part left
@@ -308,6 +313,43 @@
                          :else false)]
            (when handled (.preventDefault e))))))))
 
+;; ── Hover ───────────────────────────────────────────────────────────
+
+(defn- relate! [el kind]
+  (when (some? el) (.setAttribute el "data-ui-canvas-related" kind)))
+
+(defn- hover!
+  "Light up node `node-id`'s edges and neighbours (nil: none)."
+  [c node-id]
+  (let [frame (.-frame c)
+        world (.-world c)]
+    (when (not= node-id (.getAttribute frame "data-hover"))
+      (.forEach (js/Array.from (.querySelectorAll world "[data-ui-canvas-related]"))
+                (fn [el] (.removeAttribute el "data-ui-canvas-related")))
+      (if (some? node-id)
+        (do (.setAttribute frame "data-hover" node-id)
+            (.forEach (js/Array.from (.querySelectorAll world "[data-ui-canvas-from]"))
+                      (fn [g]
+                        (let [from (.getAttribute g "data-ui-canvas-from")
+                              to (.getAttribute g "data-ui-canvas-to")]
+                          (cond
+                            (= from node-id) (do (relate! g "out") (relate! (node-el c to) "node"))
+                            (= to node-id) (do (relate! g "in") (relate! (node-el c from) "node")))))))
+        (.removeAttribute frame "data-hover")))))
+
+(defn- hovered-id [target]
+  (when-let [el (.closest target "[data-ui-canvas-node]")]
+    (.getAttribute el "data-ui-canvas-node")))
+
+(defn- bind-hover! [c]
+  (let [frame (.-frame c)]
+    (.addEventListener frame "pointerover"
+                       (fn [e] (when (not= "true" (.getAttribute frame "data-panning"))
+                                 (hover! c (hovered-id (.-target e))))))
+    (.addEventListener frame "pointerleave" (fn [_] (hover! c nil)))
+    (.addEventListener frame "focusin" (fn [e] (when-let [id (hovered-id (.-target e))] (hover! c id))))
+    (.addEventListener frame "focusout" (fn [_] (hover! c nil)))))
+
 ;; ── Controls ────────────────────────────────────────────────────────
 
 (defn- act! [c action]
@@ -356,6 +398,7 @@
         (sync-follow-button! c)
         (bind-gestures! c)
         (bind-controls! c)
+        (bind-hover! c)
         ;; Tab walks the nodes: the one that takes the focus comes into view
         (.addEventListener
          world "focusin"

@@ -185,6 +185,8 @@ One edge between two rects.
 | `:rail-x` | `number` | – | Where that side line runs. |
 | `:taken` | `boolean` | – | Drawn in full. |
 | `:live` | `boolean` | – | Accent, and it moves: the way into the step that runs. |
+| `:from-id` | `node id` | – | The node it leaves; with :to-id, hovering either node lights it up. |
+| `:to-id` | `node id` | – | The node it enters. |
 | `:class` | `string` | – |  |
 
 ### `controls`
@@ -255,6 +257,7 @@ Data attributes for the frame, for custom markup.
 ## Motion
 
 - A move from code (fit, reveal, follow, the buttons, the keys) eases over --duration-considered; a drag or pinch tracks the pointer.
+- Hovering or focusing a node lights up its edges (out in the accent, in in the text color) and the nodes at their other ends, and dims the rest; flow does this for every step.
 - The edge into the running step moves, and that step is lifted a little. Both stop under reduced motion.
 
 ## Responsive behavior
