@@ -7,6 +7,17 @@
   display: inline-block;
 }
 
+/* Long-press opens the tooltip (ui.js.tooltip): not iOS's callout or a
+   text selection. */
+@media (pointer: coarse) {
+  [data-tooltip-long-press],
+  [data-tooltip-long-press] * {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+}
+
 .tooltip-layer {
   position: fixed;
   top: 0;

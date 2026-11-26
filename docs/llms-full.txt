@@ -8490,6 +8490,13 @@ Full library index: docs/llms.txt
  (toolbar/toolbar {} ...)]
 ```
 
+### Long-press on touch
+
+```clojure
+[:div {:data-tooltip-long-press true}
+ (toolbar/toolbar {} ...)]
+```
+
 ## API reference
 
 ### `tooltip`
@@ -8570,6 +8577,7 @@ The data attributes the runtime reads off the trigger wrapper.
 
 - Labels wrap at 15rem, cards are 18rem, both capped at the viewport width; the layer takes the first side with room and is clamped to the viewport.
 - On touch, a tap toggles the tooltip of a non-interactive trigger (text, badges); buttons and links keep their tap.
+- Inside data-tooltip-long-press (an icon toolbar), a touch long-press opens any trigger's tooltip, for 1.5s after the finger lifts, and the tap that ends it does nothing. Leave it off where a long-press already opens a context menu.
 
 ## Targets
 

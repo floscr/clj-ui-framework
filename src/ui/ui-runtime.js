@@ -15146,6 +15146,9 @@
   var skip_ms = 400;
   var close_ms = 80;
   var card_close_ms = 160;
+  var long_press_ms = 450;
+  var long_press_slop = 10;
+  var long_press_linger_ms = 1500;
   var gap2 = 6;
   var edge2 = 8;
   var focusable2 = "a[href],button,input,select,textarea,summary,[tabindex]";
@@ -15157,7 +15160,7 @@
     if (truth_(or__23426__auto__1)) {
       return or__23426__auto__1;
     } else {
-      const s2 = { "y": null, "open": null, "lastClose": -1e5, "pending": null, "bubble": null, "layer": null, "pointer": "mouse", "hideTimer": null, "showTimer": null, "typing": false, "suppressed": null, "x": null, "observer": null };
+      const s2 = { "y": null, "open": null, "lastClose": -1e5, "pending": null, "bubble": null, "pressX": null, "pressTimer": null, "layer": null, "pointer": "mouse", "hideTimer": null, "showTimer": null, "typing": false, "suppressed": null, "x": null, "pressed": null, "pressY": null, "observer": null };
       window["__uiTooltipState"] = s2;
       return s2;
     }
@@ -15785,8 +15788,117 @@
     }
     ;
   };
+  var cancel_press_BANG_ = function() {
+    const s1 = get_state3();
+    clearTimeout(s1.pressTimer);
+    return s1.pressTimer = null;
+  };
+  var start_press_BANG_ = function(trigger, e) {
+    const s1 = get_state3();
+    s1.pressX = e.clientX;
+    s1.pressY = e.clientY;
+    return s1.pressTimer = setTimeout((function() {
+      s1.pressTimer = null;
+      s1.pressed = trigger;
+      return show_BANG_2(trigger, false);
+    }), long_press_ms);
+  };
+  var long_press_trigger = function(e) {
+    if (e.pointerType === "touch") {
+      const temp__23062__auto__1 = trigger_of(e.target);
+      if (truth_(temp__23062__auto__1)) {
+        const t2 = temp__23062__auto__1;
+        if (truth_(t2.closest("[data-tooltip-long-press]"))) {
+          return t2;
+        }
+        ;
+      }
+      ;
+    }
+    ;
+  };
+  var on_touch_move = function(e) {
+    const s1 = get_state3();
+    if (truth_((() => {
+      const and__23442__auto__2 = s1.pressTimer;
+      if (truth_(and__23442__auto__2)) {
+        return Math.hypot(e.clientX - s1.pressX, e.clientY - s1.pressY) > long_press_slop;
+      } else {
+        return and__23442__auto__2;
+      }
+      ;
+    })())) {
+      return cancel_press_BANG_();
+    }
+    ;
+  };
+  var on_pointer_up = function(e) {
+    if (e.pointerType === "touch") {
+      cancel_press_BANG_();
+      const s1 = get_state3();
+      if (truth_((() => {
+        const and__23442__auto__2 = s1.pressed;
+        if (truth_(and__23442__auto__2)) {
+          return s1.pressed === s1.open;
+        } else {
+          return and__23442__auto__2;
+        }
+        ;
+      })())) {
+        clearTimeout(s1.hideTimer);
+        return s1.hideTimer = setTimeout(hide_BANG_, long_press_linger_ms);
+      }
+      ;
+    }
+    ;
+  };
+  var on_click_capture3 = function(e) {
+    const s1 = get_state3();
+    const p2 = s1.pressed;
+    if (truth_(p2)) {
+      s1.pressed = null;
+      if (truth_(p2.contains(e.target))) {
+        e.preventDefault();
+        return e.stopPropagation();
+      }
+      ;
+    }
+    ;
+  };
+  var on_context_menu = function(e) {
+    const s1 = get_state3();
+    const temp__23062__auto__2 = (() => {
+      const or__23426__auto__3 = s1.pressed;
+      if (truth_(or__23426__auto__3)) {
+        return or__23426__auto__3;
+      } else {
+        if (truth_(s1.pressTimer)) {
+          return trigger_of(e.target);
+        }
+      }
+      ;
+    })();
+    if (truth_(temp__23062__auto__2)) {
+      const t4 = temp__23062__auto__2;
+      if (truth_((() => {
+        const and__23442__auto__5 = t4.closest("[data-tooltip-long-press]");
+        if (truth_(and__23442__auto__5)) {
+          return t4.contains(e.target);
+        } else {
+          return and__23442__auto__5;
+        }
+        ;
+      })())) {
+        return e.preventDefault();
+      }
+      ;
+    }
+    ;
+  };
   var on_pointer_move = function(e) {
-    if (!(e.pointerType === "touch")) {
+    if (e.pointerType === "touch") {
+      return on_touch_move(e);
+    } else {
       const s1 = get_state3();
       const x2 = e.clientX;
       const y3 = e.clientY;
@@ -15835,20 +15947,28 @@
     const t2 = trigger_of(e.target);
     s1.pointer = e.pointerType;
     s1.typing = false;
+    s1.pressed = null;
+    cancel_press_BANG_();
+    const temp__23062__auto__3 = long_press_trigger(e);
+    if (truth_(temp__23062__auto__3)) {
+      const lt4 = temp__23062__auto__3;
+      start_press_BANG_(lt4, e);
+    }
+    ;
     if (truth_((() => {
-      const and__23442__auto__3 = t2;
-      if (truth_(and__23442__auto__3)) {
+      const and__23442__auto__5 = t2;
+      if (truth_(and__23442__auto__5)) {
         return !(e.pointerType === "touch") && (() => {
-          const or__23426__auto__4 = t2 === s1.open;
-          if (or__23426__auto__4) {
-            return or__23426__auto__4;
+          const or__23426__auto__6 = t2 === s1.open;
+          if (or__23426__auto__6) {
+            return or__23426__auto__6;
           } else {
             return t2 === s1.pending;
           }
           ;
         })();
       } else {
-        return and__23442__auto__3;
+        return and__23442__auto__5;
       }
       ;
     })())) {
@@ -15856,11 +15976,11 @@
       return s1.suppressed = t2;
     } else {
       if (truth_(e.pointerType === "touch" && (not(t2) && not((() => {
-        const and__23442__auto__5 = s1.layer;
-        if (truth_(and__23442__auto__5)) {
+        const and__23442__auto__7 = s1.layer;
+        if (truth_(and__23442__auto__7)) {
           return s1.layer.contains(e.target);
         } else {
-          return and__23442__auto__5;
+          return and__23442__auto__7;
         }
         ;
       })())))) {
@@ -15982,6 +16102,12 @@
       document.addEventListener("pointerout", on_pointer_out);
       document.addEventListener("pointermove", on_pointer_move, { "passive": true });
       document.addEventListener("pointerdown", on_pointer_down, true);
+      document.addEventListener("pointerup", on_pointer_up, true);
+      document.addEventListener("pointercancel", (function(_) {
+        return cancel_press_BANG_();
+      }), true);
+      document.addEventListener("contextmenu", on_context_menu, true);
+      document.addEventListener("click", on_click_capture3, true);
       document.addEventListener("click", on_click7);
       document.addEventListener("focusin", on_focus_in);
       document.addEventListener("focusout", on_focus_out);

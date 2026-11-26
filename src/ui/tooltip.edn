@@ -23,7 +23,9 @@
   {:title "Rich preview"
    :code "(tooltip/tooltip {:content (tooltip/tooltip-card {}\n                             (list-row/list-row {:icon :calendar :title \"Design review\"\n                                                 :description \"Wed, 14:00 to 14:45\"}))\n                  :delay 300\n                  :attrs {:tabindex 0}}\n  \"design review\")"}
   {:title "One delay for a group"
-   :code "[:div {:data-tooltip-delay \"250\"}\n (toolbar/toolbar {} ...)]"}]
+   :code "[:div {:data-tooltip-delay \"250\"}\n (toolbar/toolbar {} ...)]"}
+  {:title "Long-press on touch"
+   :code "[:div {:data-tooltip-long-press true}\n (toolbar/toolbar {} ...)]"}]
 
  :api
  [{:fn "tooltip"
@@ -69,7 +71,8 @@
 
  :responsive
  ["Labels wrap at 15rem, cards are 18rem, both capped at the viewport width; the layer takes the first side with room and is clamped to the viewport."
-  "On touch, a tap toggles the tooltip of a non-interactive trigger (text, badges); buttons and links keep their tap."]
+  "On touch, a tap toggles the tooltip of a non-interactive trigger (text, badges); buttons and links keep their tap."
+  "Inside data-tooltip-long-press (an icon toolbar), a touch long-press opens any trigger's tooltip, for 1.5s after the finger lifts, and the tap that ends it does nothing. Leave it off where a long-press already opens a context menu."]
 
  :targets
  {:clj "Static markup; needs ui-runtime.js on the page."

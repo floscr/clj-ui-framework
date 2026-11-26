@@ -17,13 +17,21 @@
 
    Typing in a text field closes the open tooltip and keeps new ones shut
    until the pointer really moves, so controls that shift under a resting
-   cursor while the text grows don't pop theirs.")
+   cursor while the text grows don't pop theirs.
+
+   On touch, a long-press on a trigger inside `data-tooltip-long-press`
+   (icon toolbars) opens its tooltip and swallows the tap that ends it.")
 
 (def ^:private default-delay 500)
 (def ^:private skip-ms 400)
 (def ^:private close-ms 80)
 ;; cards stay open long enough for the pointer to travel into them
 (def ^:private card-close-ms 160)
+(def ^:private long-press-ms 450)
+;; a press that travels further is a scroll
+(def ^:private long-press-slop 10)
+;; a long-pressed tooltip stays this long after the finger lifts
+(def ^:private long-press-linger-ms 1500)
 (def ^:private gap 6)
 (def ^:private edge 8)
 (def ^:private focusable "a[href],button,input,select,textarea,summary,[tabindex]")
@@ -41,7 +49,8 @@
       (let [s #js {:layer nil :bubble nil :open nil :pending nil
                    :showTimer nil :hideTimer nil :lastClose -100000
                    :suppressed nil :pointer "mouse" :observer nil
-                   :typing false :x nil :y nil}]
+                   :typing false :x nil :y nil
+                   :pressTimer nil :pressX nil :pressY nil :pressed nil}]
         (aset js/window "__uiTooltipState" s)
         s)))
 
@@ -358,11 +367,73 @@
   (when-let [t (trigger-of (.-target e))]
     (enter! t false)))
 
+;; ── Touch long-press ────────────────────────────────────────────────
+
+(defn- cancel-press! []
+  (let [s (get-state)]
+    (js/clearTimeout (.-pressTimer s))
+    (set! (.-pressTimer s) nil)))
+
+(defn- start-press! [trigger e]
+  (let [s (get-state)]
+    (set! (.-pressX s) (.-clientX e))
+    (set! (.-pressY s) (.-clientY e))
+    (set! (.-pressTimer s)
+          (js/setTimeout (fn []
+                           (set! (.-pressTimer s) nil)
+                           (set! (.-pressed s) trigger)
+                           (show! trigger false))
+                         long-press-ms))))
+
+(defn- long-press-trigger
+  "The trigger a touch `e` starts a long-press on, if any."
+  [e]
+  (when (= (.-pointerType e) "touch")
+    (when-let [t (trigger-of (.-target e))]
+      (when (.closest t "[data-tooltip-long-press]") t))))
+
+(defn- on-touch-move [e]
+  (let [s (get-state)]
+    (when (and (.-pressTimer s)
+               (> (.hypot js/Math (- (.-clientX e) (.-pressX s))
+                                  (- (.-clientY e) (.-pressY s)))
+                  long-press-slop))
+      (cancel-press!))))
+
+(defn- on-pointer-up [e]
+  (when (= (.-pointerType e) "touch")
+    (cancel-press!)
+    (let [s (get-state)]
+      (when (and (.-pressed s) (identical? (.-pressed s) (.-open s)))
+        (js/clearTimeout (.-hideTimer s))
+        (set! (.-hideTimer s) (js/setTimeout hide! long-press-linger-ms))))))
+
+(defn- on-click-capture
+  "The tap that ends a long-press only showed the tooltip: keep it from the
+   trigger's own click handlers."
+  [e]
+  (let [s (get-state)
+        p (.-pressed s)]
+    (when p
+      (set! (.-pressed s) nil)
+      (when (.contains p (.-target e))
+        (.preventDefault e)
+        (.stopPropagation e)))))
+
+(defn- on-context-menu
+  "Android opens the context menu on the same long-press."
+  [e]
+  (let [s (get-state)]
+    (when-let [t (or (.-pressed s) (when (.-pressTimer s) (trigger-of (.-target e))))]
+      (when (and (.closest t "[data-tooltip-long-press]") (.contains t (.-target e)))
+        (.preventDefault e)))))
+
 (defn- on-pointer-move
   "Ends typing mode on real movement only: browsers replay pointer events at
    the same coordinates when the layout shifts under a resting cursor."
   [e]
-  (when (not= (.-pointerType e) "touch")
+  (if (= (.-pointerType e) "touch")
+    (on-touch-move e)
     (let [s     (get-state)
           x     (.-clientX e)
           y     (.-clientY e)
@@ -382,6 +453,10 @@
         t (trigger-of (.-target e))]
     (set! (.-pointer s) (.-pointerType e))
     (set! (.-typing s) false)
+    (set! (.-pressed s) nil)
+    (cancel-press!)
+    (when-let [lt (long-press-trigger e)]
+      (start-press! lt e))
     (cond
       ;; pressing a control closes its tooltip until the pointer leaves
       (and t (not= (.-pointerType e) "touch")
@@ -436,6 +511,10 @@
     (.addEventListener js/document "pointerout" on-pointer-out)
     (.addEventListener js/document "pointermove" on-pointer-move #js {:passive true})
     (.addEventListener js/document "pointerdown" on-pointer-down true)
+    (.addEventListener js/document "pointerup" on-pointer-up true)
+    (.addEventListener js/document "pointercancel" (fn [_] (cancel-press!)) true)
+    (.addEventListener js/document "contextmenu" on-context-menu true)
+    (.addEventListener js/document "click" on-click-capture true)
     (.addEventListener js/document "click" on-click)
     (.addEventListener js/document "focusin" on-focus-in)
     (.addEventListener js/document "focusout" on-focus-out)
